@@ -3,7 +3,7 @@
  * Chaque situation : questions progressives → étapes expliquées, pièces, organismes et liens officiels.
  * Les règles sont versionnées et datées ; elles n'attribuent aucun droit et ne valident aucun dossier.
  */
-export const RULES_VERSION = "2026.10-h";
+export const RULES_VERSION = "2026.10-i";
 export const RULES_REVIEWED_AT = "2026-10-13";
 // 2026.10-c : parcours Santé, échéances officielles calculées dans les règles.
 // 2026.10-d : parcours Famille, Proche et Quotidien épaissis au même niveau.
@@ -199,9 +199,10 @@ export const SITUATIONS: Situation[] = [
       t.push({ kind: "action", label: "Choisir les alliances et les tenues", reason: "Délais d'essayage, de gravure et de retouches : mieux vaut ne pas s'y prendre au dernier mois.", due: repere(-90) });
       t.push({ kind: "action", label: "Prévoir fleurs et décoration (commande chez le fleuriste ou organisation entre proches)", detail: "Bouquet, boutonnières, décoration de salle et de voitures ; sur la carte, des voisins proposent aussi plantes et prêt de décoration.", reason: "Les fleuristes prennent les commandes de mariage plusieurs semaines à l'avance.", due: repere(-30) });
       t.push({ kind: "action", label: "Vérifier votre assurance et les autorisations du lieu (fin de soirée, musique, feu d'artifice éventuel)", detail: "Le règlement du lieu et, en extérieur, les règles locales sur le bruit s'imposent à la fête ; un feu d'artifice relève d'une déclaration en mairie.", reason: "C'est le point qui peut arrêter une soirée en cours de route.", organisms: ["mairie"], due: repere(-30), frameworkFlag: "cadre_a_verifier" });
-      t.push({ kind: "action", label: "Écrire le déroulé du jour J et le partager dans le projet", detail: "Horaires, enchaînement des moments, qui fait quoi, numéros utiles (prestataires, témoins, lieu) : une page que tout le monde peut ouvrir le matin même.", reason: "Le jour J, les mariés ne doivent coordonner personne : le papier le fait pour eux.", due: repere(-7) });
+      t.push({ kind: "action", label: "Écrire le déroulé du jour J et le partager dans le projet", detail: "Horaires, enchaînement des moments, qui fait quoi, numéros utiles (prestataires, témoins, lieu) : la page « jour J » du projet rassemble déroulé, plan de table et contacts sur une page à imprimer ou à ouvrir le matin même.", reason: "Le jour J, les mariés ne doivent coordonner personne : le papier le fait pour eux.", due: repere(-7) });
       // --- L'après ---
       t.push({ kind: "piece", label: "Livret de famille (remis par la mairie le jour du mariage)", reason: "Il vous sera demandé par presque tous les organismes ensuite : photographiez-le dès le retour." });
+      t.push({ kind: "action", label: "Remercier les invités et les proches qui ont aidé", detail: "La rubrique Remerciements du projet reprend les foyers confirmés, à cocher au fil de vos envois, avec des modèles de mots à copier : cartes, messages ou appels, ce sont vos remerciements, envoyés par vous.", reason: "Un remerciement parti dans les semaines qui suivent se remarque ; un an après, il s'excuse.", due: repere(21) });
       t.push({ kind: "action", label: "Après le mariage : enchaîner avec le parcours « Ma famille change »", detail: "Nom d'usage, impôts, organismes à prévenir : ce parcours prend le relais pour l'administratif d'après-mariage, sans tout ressaisir.", reason: "Le mariage change votre situation auprès de presque tous les organismes." });
       return t;
     },

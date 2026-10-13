@@ -267,3 +267,20 @@ export async function assignWeddingGuestTable(guestId: number, tableId: number |
     return fail(error, "Placement impossible.");
   }
 }
+
+/** Coche (ou décoche) le remerciement d'un foyer confirmé, après le mariage. Suivi personnel, aucun envoi. */
+export async function setWeddingGuestThanked(guestId: number, thanked: boolean): Promise<WeddingResult> {
+  try {
+    const user = await requireRole(["membre"]);
+    const [guest] = await db.select().from(weddingGuests).where(eq(weddingGuests.id, guestId)).limit(1);
+    if (!guest) return { ok: false, error: "Invité introuvable." };
+    const guard = await editableProject(guest.projectId, user.id);
+    if (!guard.ok) return { ok: false, error: guard.error };
+    await db.update(weddingGuests).set({ thanked, updatedAt: new Date() }).where(eq(weddingGuests.id, guestId));
+    await logAudit({ actorId: user.id, action: "mariage_remerciement", entityType: "project", entityId: String(guest.projectId), metadata: { op: thanked ? "coche" : "decoche" } });
+    refresh(guest.projectId);
+    return { ok: true, message: thanked ? "Remerciement noté. Plus que quelques-uns !" : "Remerciement décoché." };
+  } catch (error) {
+    return fail(error, "Mise à jour impossible.");
+  }
+}

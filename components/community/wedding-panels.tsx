@@ -14,6 +14,7 @@ import {
   setWeddingBudgetActual,
   setWeddingEnvelope,
   setWeddingGuestStatus,
+  setWeddingGuestThanked,
   updateWeddingGuest,
   updateWeddingTable,
   type WeddingResult,
@@ -23,9 +24,12 @@ import {
   GUEST_GROUPS,
   GUEST_STATUSES,
   MESSAGE_TEMPLATES,
+  THANK_YOU_TEMPLATES,
   budgetCategoryLabel,
   buildCatererSummary,
   buildMessage,
+  buildThankYouList,
+  buildThankYouMessage,
   formatEuro,
   guestGroupLabel,
   guestStatusLabel,
@@ -87,7 +91,7 @@ function CopyText({ text, filename }: { text: string; filename: string }) {
   );
 }
 
-type GuestView = { id: number; name: string; persons: number; groupe: string; status: string; note: string; tableId?: number | null };
+type GuestView = { id: number; name: string; persons: number; groupe: string; status: string; note: string; thanked?: boolean; tableId?: number | null };
 
 const STATUS_STYLE: Record<string, string> = {
   a_inviter: "bg-slate-100 text-slate-700",
@@ -97,13 +101,14 @@ const STATUS_STYLE: Record<string, string> = {
   decline: "bg-rose-50 text-rose-700",
 };
 
-export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, weddingDate, weddingLieu, isOrganizer, open }: {
+export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, weddingDate, weddingLieu, apresMariage, isOrganizer, open }: {
   projectId: number;
   guests: GuestView[];
   stats: GuestStats;
   invitesEstimes: number;
   weddingDate: string;
   weddingLieu: string;
+  apresMariage: boolean;
   isOrganizer: boolean;
   open: boolean;
 }) {
@@ -194,8 +199,12 @@ export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, w
         </div>
       )}
 
-      {isOrganizer && (
+      {isOrganizer && !apresMariage && (
         <RelanceBlock weddingDate={weddingDate} enAttenteFoyers={guests.filter((g) => g.status === "invite" || g.status === "peut_etre").length} />
+      )}
+
+      {apresMariage && stats.confirmees > 0 && (
+        <ThanksBlock confirmes={guests.filter((g) => g.status === "confirme")} weddingDate={weddingDate} isOrganizer={isOrganizer} pending={pending} run={run} />
       )}
       <div className="mt-3"><Note value={fb} /></div>
     </div>
@@ -217,6 +226,53 @@ function RelanceBlock({ weddingDate, enAttenteFoyers }: { weddingDate: string; e
       </div>
       <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200">{text}</pre>
       <div className="mt-2"><CopyText text={text} filename="relance-invites.txt" /></div>
+    </div>
+  );
+}
+
+/**
+ * Après le mariage : la liste des foyers confirmés à remercier, cochée au
+ * fil des envois des mariés, et des modèles à copier. Aucun envoi par AIME®.
+ */
+function ThanksBlock({ confirmes, weddingDate, isOrganizer, pending, run }: {
+  confirmes: GuestView[];
+  weddingDate: string;
+  isOrganizer: boolean;
+  pending: boolean;
+  run: ReturnType<typeof useRun>["run"];
+}) {
+  const [templateId, setTemplateId] = useState<string>(THANK_YOU_TEMPLATES[0].id);
+  const text = buildThankYouMessage(templateId, weddingDate);
+  const remerciés = confirmes.filter((g) => g.thanked).length;
+  return (
+    <div className="mt-5 rounded-xl border border-rose-100 bg-rose-50/50 p-4">
+      <h3 className="text-sm font-bold text-slate-900">Remerciements : {remerciés} foyer(s) remercié(s) sur {confirmes.length}</h3>
+      <p className="mt-1 text-xs text-slate-600">Le mariage est passé — félicitations ! Voici les foyers qui avaient confirmé : cochez chacun quand votre mot est parti (carte, message, appel). Les modèles ci-dessous se copient et partent par vos canaux, comme toujours.</p>
+      <ul className="mt-3 space-y-1.5">
+        {confirmes.map((g) => (
+          <li key={g.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 text-sm ring-1 ring-slate-200">
+            <span className={g.thanked ? "text-slate-400 line-through" : "text-slate-800"}>{g.name} <span className="text-xs text-slate-500">· {g.persons} personne(s)</span></span>
+            {isOrganizer ? (
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+                <input type="checkbox" checked={!!g.thanked} disabled={pending} onChange={(e) => run(() => setWeddingGuestThanked(g.id, e.target.checked))} className="h-4 w-4" />
+                Remercié
+              </label>
+            ) : (
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${g.thanked ? "bg-emerald-50 text-emerald-800" : "bg-slate-100 text-slate-600"}`}>{g.thanked ? "Remercié" : "À remercier"}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Choisir un modèle de remerciement">
+        {THANK_YOU_TEMPLATES.map((t) => (
+          <button key={t.id} type="button" onClick={() => setTemplateId(t.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${templateId === t.id ? "bg-rose-700 text-white" : "border border-slate-300 bg-white text-slate-700"}`}>{t.title}</button>
+        ))}
+      </div>
+      <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-white p-3 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200">{text}</pre>
+      <div className="mt-2 flex flex-wrap gap-4">
+        <CopyText text={text} filename="remerciement-mariage.txt" />
+        <CopyText text={buildThankYouList(confirmes.map((g) => ({ name: g.name, persons: g.persons, note: g.note })))} filename="a-remercier.txt" />
+      </div>
     </div>
   );
 }

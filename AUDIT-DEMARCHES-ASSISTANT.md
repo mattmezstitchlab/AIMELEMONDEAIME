@@ -470,3 +470,35 @@ soirées — toujours sans qu'AIME® parle à quiconque à la place des mariés.
 - **Restant pour la profondeur mariage** : page jour J imprimable
   (déroulé + plan + contacts), remerciements d'après-mariage assistés,
   puis le fonds éditorial public pourra raconter tout cela.
+
+## 6septies. Mariage, quatrième temps : page du jour J et remerciements — exécuté le 2026-08-10 (commit à suivre)
+
+Le cycle se referme : la journée elle-même, puis les semaines qui suivent.
+
+- **Page du jour J imprimable** (`/le-monde-aime/projets/[id]/jour-j`) :
+  déroulé écrit dans le projet, plan de table par table, prestataires
+  dont l'engagement est confirmé (devis accepté et au-delà), équipe
+  d'organisation, notes utiles des invités confirmés. Une page à
+  imprimer pour les témoins, avertissements « à compléter » visibles à
+  l'écran seulement. Réservée aux participants acceptés : non-membres et
+  anonymes reçoivent la page introuvable, sans un nom (vérifié).
+- **Remerciements assistés** : après la date du mariage (ou projet
+  terminé), la rubrique invités devient le suivi des remerciements —
+  foyers confirmés à cocher au fil des envois (colonne `thanked`,
+  migration `0004_wedding_thanked`), trois modèles à copier (tous les
+  invités, proches qui ont aidé, court) et la liste des foyers à
+  remercier en texte téléchargeable. Les relances, elles, disparaissent
+  une fois le jour passé. Tâche « Remercier les invités » à J+21 dans le
+  rétroplanning. Règles `2026.10-i`.
+- **Vérifié** : logique pure testée (bascule avant/après, modèles datés
+  sans jeton, liste exacte, échéance J+21 calculée au 10/07/2027, bans
+  toujours seule échéance officielle) ; migration 0004 appliquée ;
+  rendu réel de la page du jour J (déroulé en 5 moments, plan, compteurs)
+  et du bloc remerciements en basculant la date de la démonstration dans
+  le passé (puis restaurée). Écritures : mêmes gardes que les temps
+  précédents, audit sans noms.
+- La chaîne mariage est complète : orientation → dossier civil sourcé →
+  rétroplanning → prestataires engagés → invités suivis → budget tenu →
+  plan de table → jour J papier → remerciements → parcours Famille.
+  Suite au carnet : le fonds éditorial public, qui peut raconter ce
+  parcours ; parcours « je n'arrive pas à payer » (à reconfirmer).

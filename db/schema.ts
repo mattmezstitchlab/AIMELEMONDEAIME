@@ -597,6 +597,7 @@ export const weddingGuests = pgTable("wedding_guests", {
   groupe: varchar("groupe", { length: 16 }).notNull().default("famille"),
   status: varchar("status", { length: 16 }).notNull().$type<WeddingGuestStatus>().default("a_inviter"),
   note: varchar("note", { length: 200 }).notNull().default(""),
+  thanked: boolean("thanked").notNull().default(false),
   tableId: integer("table_id").references(() => weddingTables.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

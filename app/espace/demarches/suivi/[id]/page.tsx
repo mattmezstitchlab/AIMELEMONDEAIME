@@ -112,6 +112,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
                   <Link href={`/le-monde-aime/projets/${project.id}#invites`} className="mt-2 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir la liste des invités</Link>
                   <p className="mt-2 text-sm text-slate-700">Plan de table : <strong>{wedding.tableStats.placeesPersonnes} personne(s) placée(s)</strong>{wedding.tableStats.aPlacerPersonnes > 0 ? ` · ${wedding.tableStats.aPlacerPersonnes} confirmée(s) restent à placer` : ""}</p>
                   <Link href={`/le-monde-aime/projets/${project.id}#plan-de-table`} className="mt-1 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir le plan de table</Link>
+                  <Link href={`/le-monde-aime/projets/${project.id}/jour-j`} className="mt-1 block text-sm font-semibold text-emerald-800 underline">La page du jour J à imprimer</Link>
                 </div>
                 <div className="rounded-xl bg-[#fafaf9] p-4">
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Budget</p>

@@ -5,6 +5,7 @@ import { PublicPage } from "@/components/public-shell";
 import { getCurrentUser } from "@/lib/auth";
 import { getProjectDetail } from "@/lib/lma-queries";
 import { getWeddingWorkspace } from "@/lib/wedding-queries";
+import { weddingDayPassed } from "@/lib/wedding";
 import { UNIVERSE_LABEL } from "@/lib/lma";
 import { DocumentsPanel, JoinPanel, NeedsPanel, PendingMembers, ProgramEditor, ProjectChat, ReportContent, Section, StatusControl } from "@/components/community/project-panels";
 import { WeddingBudgetPanel, WeddingGuestsPanel, WeddingTablesPanel } from "@/components/community/wedding-panels";
@@ -56,9 +57,19 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <Section title="Programme"><ProgramEditor projectId={id} program={project.program} editable={viewer.isOrganizer} /></Section>
 
           {wedding && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4">
+              <div>
+                <p className="text-sm font-bold text-slate-900">La page du jour J est prête</p>
+                <p className="text-xs text-slate-600">Déroulé, plan de table, prestataires engagés et notes utiles, sur une page à imprimer pour les témoins.</p>
+              </div>
+              <Link href={`/le-monde-aime/projets/${id}/jour-j`} className="rounded-lg bg-rose-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-rose-800">Ouvrir la page du jour J</Link>
+            </div>
+          )}
+
+          {wedding && (
             <div id="invites" className="scroll-mt-24">
               <Section title="Invités du mariage" hint="La liste vit ici, partagée entre organisateurs : envois et réponses se notent au même endroit.">
-                <WeddingGuestsPanel projectId={id} guests={wedding.guests} stats={wedding.guestStats} invitesEstimes={wedding.invitesEstimes} weddingDate={wedding.weddingDate} weddingLieu={wedding.weddingLieu} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
+                <WeddingGuestsPanel projectId={id} guests={wedding.guests} stats={wedding.guestStats} invitesEstimes={wedding.invitesEstimes} weddingDate={wedding.weddingDate} weddingLieu={wedding.weddingLieu} apresMariage={project.status === "termine" || weddingDayPassed(wedding.weddingDate, new Date())} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
               </Section>
             </div>
           )}

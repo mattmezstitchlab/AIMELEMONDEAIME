@@ -237,3 +237,44 @@ export function buildMessage(templateId: string, dateIso: string): string {
     .replaceAll("{date}", formatWeddingDate(dateIso) || "[date du mariage]")
     .replaceAll("{dateLimite}", replyByLabel(dateIso) || "[date limite de réponse]");
 }
+
+/** Vrai si le jour du mariage est passé (comparaison à midi, sans effet de fuseau). */
+export function weddingDayPassed(dateIso: string, now: Date): boolean {
+  const d = new Date(`${String(dateIso ?? "").slice(0, 10)}T23:59:59`);
+  if (Number.isNaN(d.getTime())) return false;
+  return d.getTime() < now.getTime();
+}
+
+export const THANK_YOU_TEMPLATES = [
+  {
+    id: "remerciement-general",
+    title: "À tous les invités",
+    body: "Chères toutes, chers tous,\n\nMerci ! Le {date} restera pour nous une journée inoubliable, et c'est aussi grâce à vous : votre présence, vos sourires et vos attentions nous ont portés du matin au soir.\n\nNous espérons que vous avez passé un aussi beau moment que nous. Les photos arrivent bientôt, nous vous enverrons le lien dès qu'elles seront prêtes.\n\nAvec toute notre gratitude,\n[Vos prénoms]",
+  },
+  {
+    id: "remerciement-aide",
+    title: "Aux proches qui ont aidé",
+    body: "Bonjour,\n\nNous voulions te/vous remercier tout particulièrement : sans ton/votre aide — avant, pendant et après le {date} — la journée n'aurait pas été la même. Tu as/Vous avez donné du temps, de l'énergie et bien plus, et nous ne l'oublierons pas.\n\nMerci du fond du cœur. La prochaine étape chez nous est en préparation, et tu seras/vous serez des premiers invités !\n\nAvec toute notre reconnaissance,\n[Vos prénoms]",
+  },
+  {
+    id: "remerciement-court",
+    title: "Court, SMS ou carte",
+    body: "Merci pour le {date} ! Votre présence et vos attentions nous ont comblés. À très vite, [Vos prénoms]",
+  },
+] as const;
+
+export function buildThankYouMessage(templateId: string, dateIso: string): string {
+  const t = THANK_YOU_TEMPLATES.find((m) => m.id === templateId) ?? THANK_YOU_TEMPLATES[0];
+  return t.body.replaceAll("{date}", formatWeddingDate(dateIso) || "[date du mariage]");
+}
+
+/** La liste de remerciements : les foyers confirmés, à cocher au fil des envois — par les mariés eux-mêmes. */
+export function buildThankYouList(confirmes: CatererGuest[]): string {
+  const total = confirmes.reduce((n, g) => n + Math.max(0, Math.trunc(g.persons) || 0), 0);
+  return [
+    `Foyers à remercier : ${confirmes.length} (${total} personne(s) confirmées).`,
+    "Cochez chaque foyer dans votre projet au fur et à mesure de vos envois.",
+    "",
+    ...confirmes.map((g) => `- ${g.name} (${g.persons} personne(s))`),
+  ].join("\n");
+}
