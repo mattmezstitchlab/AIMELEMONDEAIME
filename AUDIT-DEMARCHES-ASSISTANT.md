@@ -432,3 +432,41 @@ et les dépenses réelles, suivis dans le projet partagé du mariage.
 - **Restant, troisième temps possible** : plan de table assisté (places
   par foyer confirmé), export de la liste pour le traiteur, modèles de
   messages de relance à copier (jamais d'envoi par AIME®).
+
+## 6sexies. Mariage, troisième temps : plan de table, export traiteur, relances à copier — exécuté le 2026-08-10 (commit à suivre)
+
+La préparation se termine là où les autres outils s'arrêtent souvent :
+placer les gens, transmettre le bon nombre, relancer sans y passer ses
+soirées — toujours sans qu'AIME® parle à quiconque à la place des mariés.
+
+- **Plan de table assisté** (table `wedding_tables`, colonne `table_id`) :
+  tables nommées avec capacité indicative, foyers **confirmés seulement**
+  placés un à un, compteurs placés / à placer par table et au global.
+  Règles d'intégrité côté serveur : un foyer qui n'est plus confirmé
+  quitte sa place, la suppression d'une table rend ses foyers « à
+  placer » (jamais perdus), un dépassement de capacité s'affiche sans
+  bloquer — c'est le plan des mariés, pas un règlement.
+- **Résumé pour le traiteur** : texte généré déterministiquement depuis
+  les confirmés et leurs notes (enfants, régimes, arrivées), avec la
+  marge encore en attente et l'estimation de départ. Affiché à relire,
+  copiable ou téléchargeable en .txt — l'envoi se fait par les moyens
+  des mariés, AIME® ne contacte aucun prestataire.
+- **Modèles de relance à copier** : trois tons (douce avant la date
+  limite, courte SMS, dernière relance quand le nombre se fige), dates
+  du mariage et limite de réponse (repère J-21 du rétroplanning)
+  remplies automatiquement, prénoms laissés en crochets à personnaliser.
+  AIME® n'envoie aucun message : le texte part par les canaux des mariés.
+- **Branchements** : section « Plan de table » dans le projet entre
+  invités et budget, blocs traiteur et relances dans la section invités
+  (organisateurs), avancement du plan dans la carte du suivi, jalon
+  « Dresser le plan de table » relié à l'outil. Règles `2026.10-h`.
+- **Vérifié** : logique pure testée (placement réservé aux confirmés,
+  dépassement signalé non bloquant, dates FR et J-21, résumé exact,
+  messages sans jeton restant) ; migration `0003_wedding_tables`
+  appliquée ; rendu réel contrôlé sur la démonstration (3 tables,
+  4 personnes placées, résumé traiteur au convive près, modèles datés) ;
+  confidentialité revérifiée en non-membre. Les écritures suivent les
+  mêmes gardes que le deuxième temps.
+- **Restant pour la profondeur mariage** : page jour J imprimable
+  (déroulé + plan + contacts), remerciements d'après-mariage assistés,
+  puis le fonds éditorial public pourra raconter tout cela.

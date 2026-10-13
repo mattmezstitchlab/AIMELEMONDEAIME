@@ -110,6 +110,8 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Invités</p>
                   <p className="mt-1 text-sm text-slate-700"><strong>{wedding.guestStats.confirmees} personne(s) confirmée(s)</strong> sur {wedding.guestStats.personnesListees} listées · {wedding.guestStats.enAttente} en attente de réponse{wedding.invitesEstimes > 0 ? ` · estimation de départ : ~${wedding.invitesEstimes}` : ""}</p>
                   <Link href={`/le-monde-aime/projets/${project.id}#invites`} className="mt-2 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir la liste des invités</Link>
+                  <p className="mt-2 text-sm text-slate-700">Plan de table : <strong>{wedding.tableStats.placeesPersonnes} personne(s) placée(s)</strong>{wedding.tableStats.aPlacerPersonnes > 0 ? ` · ${wedding.tableStats.aPlacerPersonnes} confirmée(s) restent à placer` : ""}</p>
+                  <Link href={`/le-monde-aime/projets/${project.id}#plan-de-table`} className="mt-1 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir le plan de table</Link>
                 </div>
                 <div className="rounded-xl bg-[#fafaf9] p-4">
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Budget</p>

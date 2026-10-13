@@ -597,6 +597,17 @@ export const weddingGuests = pgTable("wedding_guests", {
   groupe: varchar("groupe", { length: 16 }).notNull().default("famille"),
   status: varchar("status", { length: 16 }).notNull().$type<WeddingGuestStatus>().default("a_inviter"),
   note: varchar("note", { length: 200 }).notNull().default(""),
+  tableId: integer("table_id").references(() => weddingTables.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Tables du plan de table : seuls les foyers confirmés y prennent place. */
+export const weddingTables = pgTable("wedding_tables", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 60 }).notNull(),
+  capacity: integer("capacity"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

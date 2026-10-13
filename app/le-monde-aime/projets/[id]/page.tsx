@@ -7,7 +7,7 @@ import { getProjectDetail } from "@/lib/lma-queries";
 import { getWeddingWorkspace } from "@/lib/wedding-queries";
 import { UNIVERSE_LABEL } from "@/lib/lma";
 import { DocumentsPanel, JoinPanel, NeedsPanel, PendingMembers, ProgramEditor, ProjectChat, ReportContent, Section, StatusControl } from "@/components/community/project-panels";
-import { WeddingBudgetPanel, WeddingGuestsPanel } from "@/components/community/wedding-panels";
+import { WeddingBudgetPanel, WeddingGuestsPanel, WeddingTablesPanel } from "@/components/community/wedding-panels";
 
 export const metadata: Metadata = { title: "Projet — Le Monde Aime" };
 
@@ -58,7 +58,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           {wedding && (
             <div id="invites" className="scroll-mt-24">
               <Section title="Invités du mariage" hint="La liste vit ici, partagée entre organisateurs : envois et réponses se notent au même endroit.">
-                <WeddingGuestsPanel projectId={id} guests={wedding.guests} stats={wedding.guestStats} invitesEstimes={wedding.invitesEstimes} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
+                <WeddingGuestsPanel projectId={id} guests={wedding.guests} stats={wedding.guestStats} invitesEstimes={wedding.invitesEstimes} weddingDate={wedding.weddingDate} weddingLieu={wedding.weddingLieu} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
+              </Section>
+            </div>
+          )}
+
+          {wedding && (
+            <div id="plan-de-table" className="scroll-mt-24">
+              <Section title="Plan de table" hint="Il se dresse une fois le nombre de convives figé : les foyers confirmés, table par table, partageables avec les témoins qui accueilleront vos invités.">
+                <WeddingTablesPanel projectId={id} tables={wedding.tables} guests={wedding.guests} stats={wedding.tableStats} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
               </Section>
             </div>
           )}

@@ -3,7 +3,7 @@
  * Chaque situation : questions progressives → étapes expliquées, pièces, organismes et liens officiels.
  * Les règles sont versionnées et datées ; elles n'attribuent aucun droit et ne valident aucun dossier.
  */
-export const RULES_VERSION = "2026.10-g";
+export const RULES_VERSION = "2026.10-h";
 export const RULES_REVIEWED_AT = "2026-10-13";
 // 2026.10-c : parcours Santé, échéances officielles calculées dans les règles.
 // 2026.10-d : parcours Famille, Proche et Quotidien épaissis au même niveau.
@@ -192,7 +192,7 @@ export const SITUATIONS: Situation[] = [
         t.push({ kind: "action", label: "Envoyer les faire-part (avec date limite de réponse)", detail: "Indiquez la date de réponse souhaitée, les informations d'hébergement et de trajet ; le nombre définitif de convives se confirme au traiteur ensuite.", reason: "Huit à dix semaines laissent aux invités le temps de s'organiser.", due: repere(-60) });
         if (invites >= 50) t.push({ kind: "action", label: "Préparer l'information des invités : hébergements, trajets, covoiturage", detail: "Une page du projet ou un message groupé ; la carte AIME® aide pour les trajets partagés.", reason: "Au-delà de 50 invités, les questions logistiques deviennent un flux continu.", due: repere(-45) });
         t.push({ kind: "action", label: "Relancer les invités sans réponse et figer le nombre de convives", detail: "Le nombre figé part au traiteur ou au restaurant et sert au plan de table. La liste des invités du projet affiche en direct les confirmés, les en-attente et les déclinés : c'est ce compteur-là qui fait foi.", reason: "C'est le chiffre dont dépendent repas, salle et budget final.", due: repere(-21) });
-        t.push({ kind: "action", label: "Dresser le plan de table", detail: "À faire une fois le nombre de convives figé ; partagez-le dans le projet pour les témoins qui placeront les invités.", reason: "Le jour J, le plan de table évite dix minutes de flottement à l'entrée en salle.", due: repere(-7) });
+        t.push({ kind: "action", label: "Dresser le plan de table", detail: "À faire une fois le nombre de convives figé ; l'outil Plan de table du projet place les foyers confirmés, table par table — partagez-le avec les témoins qui accueilleront vos invités.", reason: "Le jour J, le plan de table évite dix minutes de flottement à l'entrée en salle.", due: repere(-7) });
       }
       if (a.ceremonie === "laique") t.push({ kind: "action", label: "Préparer la cérémonie Laïque : officiant, textes, rituels, musique", detail: "Désignez l'officiant et répétez le déroulement ; la cérémonie Laïque n'a pas de valeur légale, elle suit la cérémonie civile.", reason: "C'est souvent le moment le plus personnel de la journée : il se répète.", due: repere(-30) });
       if (a.ceremonie === "religieuse") t.push({ kind: "action", label: "Rencontrer le célébrant et préparer la cérémonie religieuse", detail: "La cérémonie religieuse a lieu après la cérémonie civile ; la préparation (rencontres, dossier) commence plusieurs mois avant.", reason: "Les paroisses et lieux de culte demandent une préparation anticipée.", due: repere(-60) });

@@ -3,16 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { journeys, projectMembers, projects, weddingBudgetItems, weddingGuests, weddingSettings } from "@/db/schema";
+import { journeys, projectMembers, projects, weddingBudgetItems, weddingGuests, weddingSettings, weddingTables } from "@/db/schema";
 import { AuthError, requireRole } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import {
   GUEST_STATUS_VALUES,
   MAX_BUDGET_ITEMS,
   MAX_GUESTS,
+  MAX_TABLES,
   parseEuroToCents,
   validateBudgetItemInput,
   validateGuestInput,
+  validateTableInput,
 } from "@/lib/wedding";
 
 export type WeddingResult = { ok: true; message: string } | { ok: false; error: string };
@@ -94,7 +96,9 @@ export async function setWeddingGuestStatus(guestId: number, status: string): Pr
     if (!guest) return { ok: false, error: "Invité introuvable." };
     const guard = await editableProject(guest.projectId, user.id);
     if (!guard.ok) return { ok: false, error: guard.error };
-    await db.update(weddingGuests).set({ status: status as typeof guest.status, updatedAt: new Date() }).where(eq(weddingGuests.id, guestId));
+    await db.update(weddingGuests)
+      .set({ status: status as typeof guest.status, ...(status === "confirme" ? {} : { tableId: null }), updatedAt: new Date() })
+      .where(eq(weddingGuests.id, guestId));
     await logAudit({ actorId: user.id, action: "mariage_invite_statut", entityType: "project", entityId: String(guest.projectId), metadata: { op: "statut" } });
     refresh(guest.projectId);
     return { ok: true, message: "Réponse notée. Le compteur des convives confirmés est à jour." };
@@ -188,5 +192,78 @@ export async function setWeddingEnvelope(projectId: number, raw: string): Promis
     return { ok: true, message: envelopeCents === null ? "Enveloppe retirée." : "Enveloppe enregistrée : l'écart se lit en direct sous le budget." };
   } catch (error) {
     return fail(error, "Enregistrement impossible.");
+  }
+}
+
+export async function createWeddingTable(projectId: number, name: string, capacityRaw: string): Promise<WeddingResult> {
+  try {
+    const user = await requireRole(["membre"]);
+    const guard = await editableProject(projectId, user.id);
+    if (!guard.ok) return { ok: false, error: guard.error };
+    const v = validateTableInput({ name, capacityRaw });
+    if (!v.ok) return v;
+    const existing = await db.select({ id: weddingTables.id }).from(weddingTables).where(eq(weddingTables.projectId, projectId));
+    if (existing.length >= MAX_TABLES) return { ok: false, error: `${MAX_TABLES} tables maximum dans le plan.` };
+    await db.insert(weddingTables).values({ projectId, name: v.name, capacity: v.capacity });
+    await logAudit({ actorId: user.id, action: "mariage_table_creation", entityType: "project", entityId: String(projectId), metadata: { op: "creation" } });
+    refresh(projectId);
+    return { ok: true, message: "Table créée : placez-y les foyers confirmés." };
+  } catch (error) {
+    return fail(error, "Création impossible.");
+  }
+}
+
+export async function updateWeddingTable(tableId: number, name: string, capacityRaw: string): Promise<WeddingResult> {
+  try {
+    const user = await requireRole(["membre"]);
+    const [table] = await db.select().from(weddingTables).where(eq(weddingTables.id, tableId)).limit(1);
+    if (!table) return { ok: false, error: "Table introuvable." };
+    const guard = await editableProject(table.projectId, user.id);
+    if (!guard.ok) return { ok: false, error: guard.error };
+    const v = validateTableInput({ name, capacityRaw });
+    if (!v.ok) return v;
+    await db.update(weddingTables).set({ name: v.name, capacity: v.capacity, updatedAt: new Date() }).where(eq(weddingTables.id, tableId));
+    refresh(table.projectId);
+    return { ok: true, message: "Table mise à jour." };
+  } catch (error) {
+    return fail(error, "Mise à jour impossible.");
+  }
+}
+
+export async function deleteWeddingTable(tableId: number): Promise<WeddingResult> {
+  try {
+    const user = await requireRole(["membre"]);
+    const [table] = await db.select().from(weddingTables).where(eq(weddingTables.id, tableId)).limit(1);
+    if (!table) return { ok: false, error: "Table introuvable." };
+    const guard = await editableProject(table.projectId, user.id);
+    if (!guard.ok) return { ok: false, error: guard.error };
+    await db.delete(weddingTables).where(eq(weddingTables.id, tableId));
+    await logAudit({ actorId: user.id, action: "mariage_table_suppression", entityType: "project", entityId: String(table.projectId), metadata: { op: "suppression" } });
+    refresh(table.projectId);
+    return { ok: true, message: "Table supprimée : ses foyers redeviennent « à placer », ils ne sont pas perdus." };
+  } catch (error) {
+    return fail(error, "Suppression impossible.");
+  }
+}
+
+/** Place (ou retire) un foyer confirmé à une table du même projet. */
+export async function assignWeddingGuestTable(guestId: number, tableId: number | null): Promise<WeddingResult> {
+  try {
+    const user = await requireRole(["membre"]);
+    const [guest] = await db.select().from(weddingGuests).where(eq(weddingGuests.id, guestId)).limit(1);
+    if (!guest) return { ok: false, error: "Invité introuvable." };
+    const guard = await editableProject(guest.projectId, user.id);
+    if (!guard.ok) return { ok: false, error: guard.error };
+    if (tableId !== null) {
+      if (guest.status !== "confirme") return { ok: false, error: "Seuls les foyers confirmés prennent place au plan de table." };
+      const [table] = await db.select().from(weddingTables).where(eq(weddingTables.id, tableId)).limit(1);
+      if (!table || table.projectId !== guest.projectId) return { ok: false, error: "Table introuvable dans ce projet." };
+    }
+    await db.update(weddingGuests).set({ tableId, updatedAt: new Date() }).where(eq(weddingGuests.id, guestId));
+    await logAudit({ actorId: user.id, action: "mariage_place_assignation", entityType: "project", entityId: String(guest.projectId), metadata: { op: tableId === null ? "retrait" : "placement" } });
+    refresh(guest.projectId);
+    return { ok: true, message: tableId === null ? "Foyer retiré de sa table." : "Foyer placé." };
+  } catch (error) {
+    return fail(error, "Placement impossible.");
   }
 }

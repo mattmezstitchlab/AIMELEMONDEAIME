@@ -6,24 +6,32 @@ import { PrimaryButton, SecondaryButton } from "@/components/ui";
 import {
   addWeddingBudgetItem,
   addWeddingGuest,
+  assignWeddingGuestTable,
+  createWeddingTable,
+  deleteWeddingTable,
   removeWeddingBudgetItem,
   removeWeddingGuest,
   setWeddingBudgetActual,
   setWeddingEnvelope,
   setWeddingGuestStatus,
   updateWeddingGuest,
+  updateWeddingTable,
   type WeddingResult,
 } from "@/lib/actions/wedding";
 import {
   BUDGET_CATEGORIES,
   GUEST_GROUPS,
   GUEST_STATUSES,
+  MESSAGE_TEMPLATES,
   budgetCategoryLabel,
+  buildCatererSummary,
+  buildMessage,
   formatEuro,
   guestGroupLabel,
   guestStatusLabel,
   type BudgetStats,
   type GuestStats,
+  type TableStats,
 } from "@/lib/wedding";
 
 const input = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
@@ -51,7 +59,35 @@ function useRun() {
   return { fb, pending, run };
 }
 
-type GuestView = { id: number; name: string; persons: number; groupe: string; status: string; note: string };
+/** Texte préparé à relire puis à copier ou télécharger : AIME® ne l'envoie jamais à la place des mariés. */
+function CopyText({ text, filename }: { text: string; filename: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setCopied(false);
+    }
+  };
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <span className="flex flex-wrap gap-2">
+      <button type="button" onClick={() => void copy()} className="rounded-lg bg-emerald-800 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-900">{copied ? "Copié ✓" : "Copier le texte"}</button>
+      <button type="button" onClick={download} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700">Télécharger (.txt)</button>
+    </span>
+  );
+}
+
+type GuestView = { id: number; name: string; persons: number; groupe: string; status: string; note: string; tableId?: number | null };
 
 const STATUS_STYLE: Record<string, string> = {
   a_inviter: "bg-slate-100 text-slate-700",
@@ -61,11 +97,13 @@ const STATUS_STYLE: Record<string, string> = {
   decline: "bg-rose-50 text-rose-700",
 };
 
-export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, isOrganizer, open }: {
+export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, weddingDate, weddingLieu, isOrganizer, open }: {
   projectId: number;
   guests: GuestView[];
   stats: GuestStats;
   invitesEstimes: number;
+  weddingDate: string;
+  weddingLieu: string;
   isOrganizer: boolean;
   open: boolean;
 }) {
@@ -147,7 +185,38 @@ export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, i
           <div className="sm:col-span-4"><label className={label} htmlFor="wg-note">Note (facultatif)</label><input id="wg-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ex. 2 enfants, arrive la veille, régime sans gluten" className={input} /></div>
         </form>
       )}
+      {isOrganizer && stats.confirmees > 0 && (
+        <div className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+          <h3 className="text-sm font-bold text-slate-900">Pour le traiteur : le résumé des convives</h3>
+          <p className="mt-1 text-xs text-slate-600">Préparé depuis vos confirmés et leurs notes (enfants, régimes, arrivées). Relisez-le, puis envoyez-le par vos propres moyens : AIME® ne contacte aucun prestataire à votre place.</p>
+          <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-white p-3 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200">{buildCatererSummary({ dateIso: weddingDate, lieu: weddingLieu, confirmes: guests.filter((g) => g.status === "confirme").map((g) => ({ name: g.name, persons: g.persons, note: g.note })), enAttentePersonnes: stats.enAttente, invitesEstimes })}</pre>
+          <div className="mt-2"><CopyText text={buildCatererSummary({ dateIso: weddingDate, lieu: weddingLieu, confirmes: guests.filter((g) => g.status === "confirme").map((g) => ({ name: g.name, persons: g.persons, note: g.note })), enAttentePersonnes: stats.enAttente, invitesEstimes })} filename="convives-mariage.txt" /></div>
+        </div>
+      )}
+
+      {isOrganizer && (
+        <RelanceBlock weddingDate={weddingDate} enAttenteFoyers={guests.filter((g) => g.status === "invite" || g.status === "peut_etre").length} />
+      )}
       <div className="mt-3"><Note value={fb} /></div>
+    </div>
+  );
+}
+
+/** Modèles de relance à copier : le message part par les canaux des mariés, jamais par AIME®. */
+function RelanceBlock({ weddingDate, enAttenteFoyers }: { weddingDate: string; enAttenteFoyers: number }) {
+  const [templateId, setTemplateId] = useState<string>(MESSAGE_TEMPLATES[0].id);
+  const text = buildMessage(templateId, weddingDate);
+  return (
+    <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4">
+      <h3 className="text-sm font-bold text-slate-900">Relancer les invités sans réponse</h3>
+      <p className="mt-1 text-xs text-slate-600">{enAttenteFoyers} foyer(s) encore sans réponse définitive. Choisissez un modèle, personnalisez les crochets, puis envoyez-le par vos canaux habituels (SMS, messagerie, courriel) : c&apos;est vous qui écrivez à vos invités.</p>
+      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Choisir un modèle de relance">
+        {MESSAGE_TEMPLATES.map((t) => (
+          <button key={t.id} type="button" onClick={() => setTemplateId(t.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${templateId === t.id ? "bg-emerald-800 text-white" : "border border-slate-300 bg-white text-slate-700"}`}>{t.title}</button>
+        ))}
+      </div>
+      <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200">{text}</pre>
+      <div className="mt-2"><CopyText text={text} filename="relance-invites.txt" /></div>
     </div>
   );
 }
@@ -243,6 +312,125 @@ export function WeddingBudgetPanel({ projectId, items, stats, isOrganizer, open 
           <div><label className={label} htmlFor="wb-est">Estimé (€)</label><input id="wb-est" value={estimated} onChange={(e) => setEstimated(e.target.value)} placeholder="Ex. 4 500" className={input} /></div>
           <PrimaryButton type="submit" disabled={pending || labelText.trim().length < 2 || estimated.trim() === ""}>Ajouter</PrimaryButton>
           <div className="sm:col-span-4"><label className={label} htmlFor="wb-note">Note (facultatif)</label><input id="wb-note" value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="Ex. devis demandé à deux traiteurs, réponse avant fin du mois" className={input} /></div>
+        </form>
+      )}
+      <div className="mt-3"><Note value={fb} /></div>
+    </div>
+  );
+}
+
+type TableView = { id: number; name: string; capacity: number | null };
+
+export function WeddingTablesPanel({ projectId, tables, guests, stats, isOrganizer, open }: {
+  projectId: number;
+  tables: TableView[];
+  guests: GuestView[];
+  stats: TableStats;
+  isOrganizer: boolean;
+  open: boolean;
+}) {
+  const { fb, pending, run } = useRun();
+  const [tableName, setTableName] = useState("");
+  const [tableCapacity, setTableCapacity] = useState("");
+  const [editingTableId, setEditingTableId] = useState<number | null>(null);
+  const [choice, setChoice] = useState<Record<number, number>>({});
+  const editable = isOrganizer && open;
+
+  const confirmes = guests.filter((g) => g.status === "confirme");
+  const aPlacer = confirmes.filter((g) => !tables.some((t) => t.id === g.tableId));
+  const parTable = new Map(stats.parTable.map((t) => [t.tableId, t]));
+
+  const startEditTable = (t: TableView) => {
+    setEditingTableId(t.id);
+    setTableName(t.name);
+    setTableCapacity(t.capacity !== null ? String(t.capacity) : "");
+  };
+  const resetTableForm = () => {
+    setEditingTableId(null);
+    setTableName("");
+    setTableCapacity("");
+  };
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-2 text-xs font-semibold">
+        <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-800">{stats.placeesPersonnes} personne(s) placée(s)</span>
+        <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-800">{stats.aPlacerPersonnes} confirmée(s) à placer · {stats.aPlacerFoyers} foyer(s)</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">{tables.length} table(s)</span>
+      </div>
+      <p className="mt-2 text-xs text-slate-500">Seuls les foyers <strong>confirmés</strong> prennent place. Si un foyer décline ensuite, il quitte automatiquement sa table. La capacité est un repère : un dépassement s&apos;affiche, rien ne bloque — c&apos;est votre plan, pas un règlement.</p>
+
+      {aPlacer.length > 0 && (
+        <div className="mt-4 rounded-xl border border-dashed border-amber-300 bg-amber-50/60 p-4">
+          <h3 className="text-sm font-bold text-slate-900">À placer</h3>
+          <ul className="mt-2 space-y-2">
+            {aPlacer.map((g) => (
+              <li key={g.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white p-2.5 text-sm ring-1 ring-slate-200">
+                <span><strong>{g.name}</strong> <span className="text-xs text-slate-500">· {g.persons} personne(s) · {guestGroupLabel(g.groupe)}</span></span>
+                {editable && tables.length > 0 && (
+                  <span className="flex items-center gap-2">
+                    <select aria-label={`Table pour ${g.name}`} value={choice[g.id] ?? tables[0].id} onChange={(e) => setChoice((c) => ({ ...c, [g.id]: Number(e.target.value) }))} className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs">
+                      {tables.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                    <button type="button" disabled={pending} onClick={() => run(() => assignWeddingGuestTable(g.id, choice[g.id] ?? tables[0].id))} className="text-xs font-bold text-emerald-800 underline">Placer</button>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+          {tables.length === 0 && <p className="mt-2 text-xs text-slate-600">Créez d&apos;abord vos tables ci-dessous (table d&apos;honneur, familles, amis…).</p>}
+        </div>
+      )}
+
+      <ul className="mt-4 space-y-3">
+        {tables.length === 0 && aPlacer.length === 0 && <li className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-600">Aucune table pour l&apos;instant. Le plan se dresse une fois le nombre de convives figé — il part des foyers confirmés de la liste ci-dessus.</li>}
+        {tables.map((t) => {
+          const st = parTable.get(t.id);
+          const placed = confirmes.filter((g) => g.tableId === t.id);
+          return (
+            <li key={t.id} className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-semibold text-slate-900">{t.name}</p>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${st?.depasse ? "bg-rose-50 text-rose-700" : "bg-slate-100 text-slate-700"}`}>
+                  {st?.personnes ?? 0}{t.capacity !== null ? ` / ${t.capacity}` : ""} personne(s){st?.depasse ? " — au-delà de la capacité prévue" : ""}
+                </span>
+              </div>
+              {placed.length === 0 ? <p className="mt-1 text-xs text-slate-500">Aucun foyer placé pour l&apos;instant.</p> : (
+                <ul className="mt-2 space-y-1.5">
+                  {placed.map((g) => (
+                    <li key={g.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-sm">
+                      <span>{g.name} <span className="text-xs text-slate-500">· {g.persons} personne(s)</span></span>
+                      {editable && <button type="button" disabled={pending} onClick={() => run(() => assignWeddingGuestTable(g.id, null))} className="text-xs font-semibold text-rose-700 underline">Retirer</button>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {editable && (
+                <div className="mt-2 flex gap-3">
+                  <button type="button" disabled={pending} onClick={() => startEditTable(t)} className="text-xs font-semibold text-emerald-800 underline">Renommer / capacité</button>
+                  <button type="button" disabled={pending} onClick={() => run(() => deleteWeddingTable(t.id))} className="text-xs font-semibold text-rose-700 underline">Supprimer la table</button>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      {editable && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (editingTableId) run(() => updateWeddingTable(editingTableId, tableName, tableCapacity), resetTableForm);
+            else run(() => createWeddingTable(projectId, tableName, tableCapacity), resetTableForm);
+          }}
+          className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-[1fr_150px_auto] sm:items-end"
+        >
+          <div><label className={label} htmlFor="wt-name">{editingTableId ? "Modifier la table" : "Nouvelle table"}</label><input id="wt-name" value={tableName} onChange={(e) => setTableName(e.target.value)} placeholder="Ex. Table d'honneur, Les cousins, Collègues" className={input} /></div>
+          <div><label className={label} htmlFor="wt-cap">Places (facultatif)</label><input id="wt-cap" value={tableCapacity} onChange={(e) => setTableCapacity(e.target.value)} placeholder="Ex. 8" className={input} /></div>
+          <div className="flex gap-2">
+            <PrimaryButton type="submit" disabled={pending || tableName.trim().length < 2}>{editingTableId ? "Enregistrer" : "Créer"}</PrimaryButton>
+            {editingTableId && <SecondaryButton type="button" disabled={pending} onClick={resetTableForm}>Annuler</SecondaryButton>}
+          </div>
         </form>
       )}
       <div className="mt-3"><Note value={fb} /></div>

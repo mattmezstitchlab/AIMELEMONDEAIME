@@ -140,3 +140,100 @@ export function validateBudgetItemInput(input: { label: string; category: string
   const note = String(input.note ?? "").trim().slice(0, 200);
   return { ok: true, label, category, estimatedCents, note };
 }
+
+export const MAX_TABLES = 40;
+
+/** « 2027-06-19 » → « samedi 19 juin 2027 » ; chaîne vide si la date est illisible. */
+export function formatWeddingDate(iso: string): string {
+  const d = new Date(`${String(iso ?? "").slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(d);
+}
+
+/** Date limite de réponse proposée par le rétroplanning : trois semaines avant (jalon J-21). */
+export function replyByLabel(iso: string): string {
+  const d = new Date(`${String(iso ?? "").slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() - 21);
+  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(d);
+}
+
+export type TableLike = { id: number; name: string; capacity: number | null };
+export type PlacedGuestLike = GuestLike & { id: number; tableId: number | null };
+export type TableStats = {
+  parTable: Array<{ tableId: number; foyers: number; personnes: number; capacite: number | null; depasse: boolean }>;
+  placeesPersonnes: number;
+  aPlacerFoyers: number;
+  aPlacerPersonnes: number;
+};
+
+/** Seuls les foyers confirmés prennent place ; les autres statuts ne comptent ni comme placés, ni comme à placer. */
+export function computeTableStats(tables: TableLike[], guests: PlacedGuestLike[]): TableStats {
+  const parTable = tables.map((t) => {
+    const placed = guests.filter((g) => g.status === "confirme" && g.tableId === t.id);
+    const personnes = placed.reduce((n, g) => n + Math.max(0, Math.trunc(g.persons) || 0), 0);
+    return { tableId: t.id, foyers: placed.length, personnes, capacite: t.capacity, depasse: t.capacity !== null && personnes > t.capacity };
+  });
+  const confirmesNonPlaces = guests.filter((g) => g.status === "confirme" && !tables.some((t) => t.id === g.tableId));
+  return {
+    parTable,
+    placeesPersonnes: parTable.reduce((n, t) => n + t.personnes, 0),
+    aPlacerFoyers: confirmesNonPlaces.length,
+    aPlacerPersonnes: confirmesNonPlaces.reduce((n, g) => n + Math.max(0, Math.trunc(g.persons) || 0), 0),
+  };
+}
+
+export function validateTableInput(input: { name: string; capacityRaw: string }): { ok: true; name: string; capacity: number | null } | { ok: false; error: string } {
+  const name = String(input.name ?? "").trim().replace(/\s+/g, " ");
+  if (name.length < 2 || name.length > 60) return { ok: false, error: "Nom de la table : 2 à 60 caractères (ex. Table d'honneur, Les cousins)." };
+  const raw = String(input.capacityRaw ?? "").trim();
+  if (raw === "") return { ok: true, name, capacity: null };
+  if (!/^\d{1,3}$/.test(raw)) return { ok: false, error: "Capacité : un nombre de places entier, ou rien si elle n'est pas fixée." };
+  const capacity = Number(raw);
+  if (capacity < 1 || capacity > 200) return { ok: false, error: "Capacité entre 1 et 200 places." };
+  return { ok: true, name, capacity };
+}
+
+export type CatererGuest = { name: string; persons: number; note: string };
+
+/** Résumé texte à transmettre au traiteur par ses propres moyens : AIME® le prépare, ne l'envoie jamais. */
+export function buildCatererSummary(input: { dateIso: string; lieu: string; confirmes: CatererGuest[]; enAttentePersonnes: number; invitesEstimes: number }): string {
+  const dateLabel = formatWeddingDate(input.dateIso) || "[date du mariage]";
+  const total = input.confirmes.reduce((n, g) => n + Math.max(0, Math.trunc(g.persons) || 0), 0);
+  const lines: string[] = [
+    `Mariage du ${dateLabel}${input.lieu ? ` — ${input.lieu}` : ""}`,
+    `Convives confirmés : ${total} personne(s), ${input.confirmes.length} foyer(s).`,
+    "",
+    "Détail des foyers confirmés :",
+    ...input.confirmes.map((g) => `- ${g.name} : ${g.persons} personne(s)${g.note ? ` (${g.note})` : ""}`),
+  ];
+  if (input.enAttentePersonnes > 0) lines.push("", `Encore en attente de réponse : ${input.enAttentePersonnes} personne(s). Le nombre définitif partira trois semaines avant le mariage.`);
+  if (input.invitesEstimes > 0) lines.push("", `Estimation de départ : environ ${input.invitesEstimes} invités.`);
+  lines.push("", "Résumé préparé avec AIME® — à relire avant de l'envoyer à votre prestataire.");
+  return lines.join("\n");
+}
+
+export const MESSAGE_TEMPLATES = [
+  {
+    id: "relance-douce",
+    title: "Relance douce, avant la date limite",
+    body: "Bonjour à toutes et à tous,\n\nPetit mot au sujet de notre mariage, le {date}. Si ce n'est pas déjà fait, pouvez-vous nous dire avant le {dateLimite} si vous serez des nôtres ? Cela nous aide à confirmer le nombre de convives auprès du traiteur et à préparer le plan de table.\n\nSi vous avez des questions (hébergement, trajet, menu), répondez simplement à ce message.\n\nMerci beaucoup, et à très vite !\n[Vos prénoms]",
+  },
+  {
+    id: "relance-courte",
+    title: "Relance courte, SMS ou messagerie",
+    body: "Bonjour ! Petit rappel pour notre mariage le {date} : pouvez-vous nous confirmer votre présence avant le {dateLimite} ? Merci beaucoup ! [Vos prénoms]",
+  },
+  {
+    id: "derniere-relance",
+    title: "Dernière relance, le nombre se fige",
+    body: "Bonjour,\n\nNous figeons le nombre de convives pour notre mariage du {date} dans quelques jours. Sans réponse de votre part avant le {dateLimite}, nous devrons malheureusement considérer que vous ne pourrez pas être là. Si vous hésitez encore, dites-le-nous : nous essaierons de garder une possibilité aussi longtemps que possible.\n\nMerci de votre compréhension,\n[Vos prénoms]",
+  },
+] as const;
+
+export function buildMessage(templateId: string, dateIso: string): string {
+  const t = MESSAGE_TEMPLATES.find((m) => m.id === templateId) ?? MESSAGE_TEMPLATES[0];
+  return t.body
+    .replaceAll("{date}", formatWeddingDate(dateIso) || "[date du mariage]")
+    .replaceAll("{dateLimite}", replyByLabel(dateIso) || "[date limite de réponse]");
+}
