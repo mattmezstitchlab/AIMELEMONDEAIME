@@ -6,25 +6,21 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FranceMap, type MapPin, type MapPinKind } from "@/components/carte/france-map";
 import { Icon } from "@/components/icon";
 import {
-  AgencyCard, LegacyPointCard, ListingCard, MyExchanges, TripCard, clusterPins, dateText, distanceKm, normalizeText, priceLabel,
+  AgencyCard, LegacyPointCard, ListingCard, TripCard, clusterPins, dateText, distanceKm, normalizeText, priceLabel,
   type Agency, type CommunityData, type Listing, type ServicePin, type Trip,
 } from "@/components/community/community-app";
 import { PublishListingForm, SavedSearchForm, TripForm } from "@/components/community/forms";
 import { ProjectForm, ReportContent } from "@/components/community/project-panels";
-import { CreateCircleForm, InviteResponses } from "@/components/community/circle-panels";
 import { UNIVERSES, UNIVERSE_LABEL, defaultUniverses } from "@/lib/lma";
 
 export type Person = { id: number; name: string; bio: string | null; activities: string[]; universes: string[]; offersText: string | null; needsText: string | null; transmitText: string | null; travelRadiusKm: number; availabilityNote: string | null; city: string | null; lat: number; lng: number; isDemo: boolean; hasPhoto: boolean };
 export type ProjectPin = { id: number; title: string; intention: string; city: string; lat: number; lng: number; startsAt: Date | string; endsAt: Date | string | null; universes: string[]; isDemo: boolean; organizerName: string; participants: number; needsTotal: number; needsConfirmed: number };
 export type Story = { id: number; title: string; body: string; kind: string; createdAt: Date | string; isDemo: boolean; hasPhoto: boolean; authorName: string };
-export type LinkProject = { id: number; title: string; city: string; startsAt: Date | string; status: string; role: string; memberStatus: string; isDemo: boolean; pendingRequests: number };
-export type LinkCircle = { id: number; name: string; kind: string; description: string; role: string; status: string; isDemo: boolean };
-export type Links = { projects: LinkProject[]; circles: LinkCircle[]; invites: LinkCircle[]; hasArtist: boolean };
 
 export type LmaData = {
   listings: Listing[]; trips: Trip[]; servicePins: ServicePin[]; agencies: Agency[];
   people: Person[]; projects: ProjectPin[]; stories: Story[];
-  mine: CommunityData["mine"]; links: Links | null; user: { id: number; role: string } | null;
+  mine: CommunityData["mine"]; user: { id: number; role: string } | null;
 };
 
 /* Légende Bauhaus, alignée sur les marqueurs de la carte. */
@@ -38,7 +34,7 @@ const LEGEND: Array<[string, string]> = [
   ["bg-slate-600", "Structures externes"],
 ];
 
-type Tab = "explorer" | "publier" | "liens";
+type Tab = "explorer" | "publier";
 type ItemType = "offre" | "besoin" | "projet" | "personne" | "trajet" | "service";
 type Item = {
   key: string; kind: MapPinKind; type: ItemType; universes: string[]; lat: number; lng: number; city: string; name: string; subtitle: string; badge?: string;
@@ -95,7 +91,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
   const router = useRouter();
   const params = useSearchParams();
   const onglet = params.get("onglet");
-  const tab: Tab = onglet === "publier" ? "publier" : onglet === "liens" ? "liens" : "explorer";
+  const tab: Tab = onglet === "publier" ? "publier" : "explorer";
   const user = data.user;
   const isMember = user?.role === "membre";
   const mine = data.mine;
@@ -129,7 +125,6 @@ export function CommunityApp({ data }: { data: LmaData }) {
   const [pubCoords, setPubCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [tripEnd, setTripEnd] = useState<{ lat: number; lng: number } | null>(null);
   const [pickEnd, setPickEnd] = useState(false);
-  const [lienTab, setLienTab] = useState<"echanges" | "projets" | "cercles">("echanges");
 
   const goTab = (key: Tab) => router.push(key === "explorer" ? "/le-monde-aime" : `/le-monde-aime?onglet=${key}`, { scroll: false });
   const requests = useMemo(() => mine?.requests ?? [], [mine]);
@@ -247,9 +242,11 @@ export function CommunityApp({ data }: { data: LmaData }) {
             <p className="mt-2 max-w-xl text-sm text-slate-600 sm:text-base">Personnes, productions locales, artistes, besoins, lieux et projets. Initiative indépendante : aucun paiement en ligne, aucune réservation sans accord explicite.</p>
           </div>
           <nav aria-label="Sections Le Monde Aime" className="inline-flex gap-1 rounded-xl bg-slate-100 p-1">
-            {([["explorer", "Explorer", "search"], ["publier", "Publier", "filePlus"], ["liens", "Mes liens", "heart"]] as const).map(([key, text, icon]) => (
+            {([["explorer", "Explorer", "search"], ["publier", "Publier", "filePlus"]] as const).map(([key, text, icon]) => (
               <button key={key} type="button" onClick={() => goTab(key)} aria-current={tab === key ? "page" : undefined} className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition ${tab === key ? "bg-white text-emerald-900 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}><Icon name={icon} className="h-4 w-4" />{text}</button>
             ))}
+            {/* Mes échanges & projets vivent désormais dans l'espace membre (une seule porte). */}
+            <Link href="/espace/echanges" className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-slate-600 transition hover:text-slate-900"><Icon name="heart" className="h-4 w-4" />Mes échanges &amp; projets</Link>
           </nav>
         </div>
       </div>
@@ -385,8 +382,8 @@ export function CommunityApp({ data }: { data: LmaData }) {
                   </div>
                   <div className="mt-6" data-assistant-id={pubType === "projet" ? "lma-project-form" : pubSub === "trajet" && pubType === "proposition" ? "lma-trip-form" : "lma-listing-form"}>
                     {pubType === "projet" ? <ProjectForm coords={pubCoords} />
-                      : pubType === "proposition" && pubSub === "trajet" ? <TripForm coords={pubCoords} destination={tripEnd} pickDestination={pickEnd} onPickDestination={setPickEnd} onCreated={() => setTimeout(() => goTab("liens"), 1200)} />
-                      : <PublishListingForm key={pubType} type={pubType} coords={pubCoords} onPublished={() => setTimeout(() => goTab("liens"), 1200)} />}
+                      : pubType === "proposition" && pubSub === "trajet" ? <TripForm coords={pubCoords} destination={tripEnd} pickDestination={pickEnd} onPickDestination={setPickEnd} onCreated={() => setTimeout(() => router.push("/espace/echanges"), 1200)} />
+                      : <PublishListingForm key={pubType} type={pubType} coords={pubCoords} onPublished={() => setTimeout(() => router.push("/espace/echanges"), 1200)} />}
                   </div>
                 </>
               )}
@@ -394,53 +391,6 @@ export function CommunityApp({ data }: { data: LmaData }) {
           </section>
         )}
 
-        {tab === "liens" && (
-          <section className="space-y-6">
-            <div><h1 className="text-3xl font-bold text-slate-900">Mes liens</h1><p className="mt-1 text-sm text-slate-600">Vos échanges, vos projets et vos cercles, au même endroit.</p></div>
-            {!user ? <div className="rounded-2xl bg-white p-8 text-center"><p className="text-slate-700">Connectez-vous pour retrouver vos liens.</p><Link href="/connexion" className="mt-3 inline-block font-bold text-emerald-800 underline">Se connecter</Link></div>
-            : !isMember ? <div className="rounded-2xl bg-white p-8 text-center text-slate-700">Cet espace est réservé aux comptes membres.</div> : (
-              <>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <Link href="/le-monde-aime/profil" className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm hover:border-emerald-400"><Icon name="user" className="h-6 w-6 text-emerald-700" /><strong className="mt-2 block text-slate-900">Mon profil</strong><span className="text-xs text-slate-600">Activités, ce que je propose, recherche ou transmets, zone et disponibilités.</span></Link>
-                  <Link href="/le-monde-aime/artiste" className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm hover:border-emerald-400"><Icon name="music" className="h-6 w-6 text-emerald-700" /><strong className="mt-2 block text-slate-900">Espace artiste</strong><span className="text-xs text-slate-600">{data.links?.hasArtist ? "Prestations, demandes reçues, fiche technique." : "Disciplines, prestations et fiche technique."}</span></Link>
-                  <Link href="/espace" className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm hover:border-emerald-400"><Icon name="building" className="h-6 w-6 text-emerald-700" /><strong className="mt-2 block text-slate-900">Services externes (démo)</strong><span className="text-xs text-slate-600">Simulation de démarches avec un organisme d&apos;accompagnement.</span></Link>
-                </div>
-                {data.links && data.links.invites.length > 0 && <InviteResponses invites={data.links.invites.map((i) => ({ id: i.id, name: i.name, kind: i.kind }))} />}
-                <div className="flex flex-wrap gap-2" role="tablist" aria-label="Mes liens">
-                  {([["echanges", `Échanges${requests.filter((r) => !["terminee", "annulee", "refusee"].includes(r.status)).length ? ` (${requests.filter((r) => !["terminee", "annulee", "refusee"].includes(r.status)).length})` : ""}`], ["projets", `Projets (${data.links?.projects.length ?? 0})`], ["cercles", `Cercles privés (${data.links?.circles.length ?? 0})`]] as const).map(([k, l]) => (
-                    <button key={k} type="button" role="tab" aria-selected={lienTab === k} onClick={() => setLienTab(k)} className={`rounded-full px-4 py-2 text-sm font-bold ${lienTab === k ? "bg-emerald-800 text-white" : "bg-white text-slate-700 shadow-sm"}`}>{l}</button>
-                  ))}
-                </div>
-                {lienTab === "echanges" && <div data-assistant-id="lma-private-exchanges"><MyExchanges mine={mine} userId={user.id} goPublish={() => goTab("publier")} /></div>}
-                {lienTab === "projets" && (
-                  <div className="space-y-3">
-                    <button type="button" onClick={() => { setPubType("projet"); goTab("publier"); }} className="rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-bold text-white">+ Créer un projet</button>
-                    {(data.links?.projects.length ?? 0) === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-600">Vous ne participez à aucun projet. Explorez la carte pour en rejoindre un, ou créez le vôtre.</div> : (
-                      <ul className="grid gap-3 md:grid-cols-2">{data.links!.projects.map((p) => (
-                        <li key={p.id} className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm">
-                          <div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-800">{p.role === "organisateur" ? "Organisateur" : "Participant"}</span>{p.memberStatus === "demande" && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">Demande en attente</span>}{p.isDemo && <span className="text-[10px] font-bold uppercase text-slate-500">Exemple fictif</span>}{p.pendingRequests > 0 && <span className="rounded-full bg-emerald-800 px-2.5 py-1 text-xs font-bold text-white">{p.pendingRequests} demande(s) à traiter</span>}</div>
-                          <h3 className="mt-2 text-lg font-bold text-slate-900">{p.title}</h3><p className="text-xs text-slate-500">{p.city} · {dateText(p.startsAt)}</p>
-                          <Link href={`/le-monde-aime/projets/${p.id}`} className="mt-3 inline-block text-sm font-bold text-emerald-800 underline">Ouvrir le projet</Link>
-                        </li>))}</ul>)}
-                  </div>
-                )}
-                {lienTab === "cercles" && (
-                  <div className="space-y-4">
-                    <div className="rounded-xl bg-white p-4 text-sm text-slate-600 shadow-sm">Un cercle privé réunit une famille, une association ou un groupe local, sur invitation acceptée. Les activités pour enfants passent par leurs responsables légaux ou une structure encadrante.</div>
-                    {(data.links?.circles.length ?? 0) === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-600">Aucun cercle pour l&apos;instant.</div> : (
-                      <ul className="grid gap-3 md:grid-cols-2">{data.links!.circles.map((c) => (
-                        <li key={c.id} className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm">
-                          <span className="rounded-full bg-slate-900 px-2.5 py-1 text-xs font-bold text-white"><Icon name="lock" className="mr-1 inline h-3 w-3" />Privé</span>{c.isDemo && <span className="ml-2 text-[10px] font-bold uppercase text-slate-500">Exemple fictif</span>}
-                          <h3 className="mt-2 text-lg font-bold text-slate-900">{c.name}</h3>{c.description && <p className="text-sm text-slate-600">{c.description}</p>}
-                          <Link href={`/le-monde-aime/cercles/${c.id}`} className="mt-3 inline-block text-sm font-bold text-emerald-800 underline">Ouvrir le cercle</Link>
-                        </li>))}</ul>)}
-                    <CreateCircleForm />
-                  </div>
-                )}
-              </>
-            )}
-          </section>
-        )}
       </div>
     </div>
   );

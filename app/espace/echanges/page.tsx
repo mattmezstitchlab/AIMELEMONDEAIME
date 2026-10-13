@@ -3,14 +3,18 @@ import type { Metadata } from "next";
 import { db } from "@/db";
 import { messages, appointments, offices } from "@/db/schema";
 import { or, eq, asc } from "drizzle-orm";
-import { Card, SectionTitle, EmptyState, formatDateTime } from "@/components/ui";
+import { Card, SectionTitle, EmptyState, formatDate, formatDateTime, LinkButton } from "@/components/ui";
 import { APPOINTMENT_STATUS_LABELS } from "@/lib/constants";
 import { OfficeMessageForm } from "./office-message-form";
 import { AppointmentForm } from "./appointment-form";
 import { getMyCommunityData } from "@/lib/community-queries";
+import { getMyLinks } from "@/lib/lma-queries";
+import Link from "next/link";
+import { Icon } from "@/components/icon";
+import { CreateCircleForm, InviteResponses } from "@/components/community/circle-panels";
 import { MyExchangesClient } from "./my-exchanges-client";
 
-export const metadata: Metadata = { title: "Mes échanges — AIME®" };
+export const metadata: Metadata = { title: "Mes échanges & projets — AIME®" };
 
 export const dynamic = "force-dynamic";
 
@@ -24,13 +28,46 @@ export default async function EchangesPage() {
 
   const myAppointments = await db.select().from(appointments).where(eq(appointments.memberId, user.id));
   const officeList = await db.select().from(offices);
-  const mine = await getMyCommunityData(user.id);
+  const [mine, links] = await Promise.all([getMyCommunityData(user.id), getMyLinks(user.id)]);
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-campagne.jpg" eyebrow="Mes échanges" title="Conversations, réservations, dons, prêts" description="Les demandes faites ou reçues sur la carte, et vos échanges avec l'équipe d'accompagnement." />
+      <SectionTitle image="/images/hero-campagne.jpg" eyebrow="Mes échanges & projets" title="Conversations, projets, cercles, dons et prêts" description="Tout ce que vous échangez, organisez et partagez — avec le voisinage, vos cercles et l'équipe d'accompagnement."
+        actions={<LinkButton href="/le-monde-aime?onglet=publier"><Icon name="filePlus" className="h-4 w-4" /> Créer un projet</LinkButton>} />
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Link href="/espace/profil" className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm hover:border-emerald-400"><Icon name="user" className="h-6 w-6 text-emerald-700" /><strong className="mt-2 block text-slate-900">Mon profil</strong><span className="text-xs text-slate-600">Activités, ce que je propose, recherche ou transmets, zone et disponibilités.</span></Link>
+        <Link href="/le-monde-aime/artiste" className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm hover:border-emerald-400"><Icon name="music" className="h-6 w-6 text-emerald-700" /><strong className="mt-2 block text-slate-900">Espace artiste</strong><span className="text-xs text-slate-600">{links.hasArtist ? "Prestations, demandes reçues, fiche technique." : "Disciplines, prestations et fiche technique."}</span></Link>
+        <Link href="/le-monde-aime" className="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm hover:border-emerald-400"><Icon name="pin" className="h-6 w-6 text-emerald-700" /><strong className="mt-2 block text-slate-900">Explorer la carte</strong><span className="text-xs text-slate-600">Personnes, offres, besoins et projets près de vous.</span></Link>
+      </div>
+
+      <InviteResponses invites={links.invites.map((i) => ({ id: i.id, name: i.name, kind: i.kind }))} />
 
       <section><h2 className="mb-3 text-lg font-bold text-slate-900">Réservations, dons, prêts et locations</h2><MyExchangesClient mine={mine} userId={user.id} /></section>
+
+      <section>
+        <h2 className="text-lg font-bold text-slate-900">Mes projets</h2>
+        <p className="text-sm text-slate-600">Événements, activités et projets partagés : un projet existe une seule fois, vous le retrouvez ici et sur la carte.</p>
+        {links.projects.length === 0 ? <EmptyState title="Aucun projet" description="Créez un projet ou rejoignez-en un depuis la carte." /> : (
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            {links.projects.map((p) => (
+              <Link key={p.id} href={`/le-monde-aime/projets/${p.id}`}>
+                <Card className="h-full hover:border-emerald-300">
+                  <div className="flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-rose-50 px-2.5 py-1 font-bold text-rose-800">{p.role === "organisateur" ? "Organisateur" : "Participant"}</span>{p.memberStatus === "demande" && <span className="rounded-full bg-amber-50 px-2.5 py-1 font-bold text-amber-800">Demande en attente</span>}{p.pendingRequests > 0 && <span className="rounded-full bg-emerald-800 px-2.5 py-1 font-bold text-white">{p.pendingRequests} à traiter</span>}{p.isDemo && <span className="font-bold uppercase text-slate-500">fictif</span>}</div>
+                  <p className="mt-2 text-lg font-bold text-slate-900">{p.title}</p><p className="text-sm text-slate-500">{p.city} · {formatDate(p.startsAt)}</p>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h2 className="text-lg font-bold text-slate-900">Mes cercles privés</h2>
+        <p className="text-sm text-slate-600">Famille, association ou groupe local, sur invitation acceptée. Être membre d&apos;un cercle ne donne aucun accès à vos démarches ni à vos documents.</p>
+        {links.circles.length > 0 && <div className="mt-3 grid gap-3 md:grid-cols-2">{links.circles.map((c) => <Link key={c.id} href={`/le-monde-aime/cercles/${c.id}`}><Card className="hover:border-emerald-300"><p className="text-xs font-bold text-slate-500"><Icon name="lock" className="mr-1 inline h-3 w-3" />Privé{c.isDemo ? " · fictif" : ""}</p><p className="mt-1 font-bold text-slate-900">{c.name}</p></Card></Link>)}</div>}
+        <div className="mt-4"><CreateCircleForm /></div>
+      </section>
       <h2 className="text-lg font-bold text-slate-900">Équipe d&apos;accompagnement (démonstration)</h2>
 
       <div className="grid gap-6 lg:grid-cols-2">

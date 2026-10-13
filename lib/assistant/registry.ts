@@ -38,11 +38,10 @@ export const ROUTES: RouteEntry[] = [
   { path: "/espace/demarches", label: "Mes démarches", roles: ["membre"], purpose: "Suivre ses dossiers, leurs statuts et leur historique." },
   { path: "/espace/demarches/nouvelle", label: "Nouvelle démarche", roles: ["membre"], purpose: "Choisir un moment de vie, répondre pas à pas et reprendre un brouillon sauvegardé." },
   { path: "/espace/demarches/suivi", label: "Suivi d'une démarche", roles: ["membre"], purpose: "Voir les actions et pièces à préparer, les sources officielles et les rappels personnels." },
-  { path: "/espace/projets", label: "Mes projets", roles: ["membre"], purpose: "Retrouver les projets partagés et les cercles privés de son compte." },
   { path: "/espace/profil", label: "Mon profil", roles: ["membre"], purpose: "Renseigner ses activités, ses disponibilités et la confidentialité de sa présence sur la carte." },
   { path: "/espace/documents", label: "Mes documents", roles: ["membre"], purpose: "Retrouver les documents privés et révoquer les partages explicites." },
   { path: "/espace/paiements", label: "Mes paiements", roles: ["membre"], purpose: "Consulter l'historique fictif des prestations, remboursements et cotisations." },
-  { path: "/espace/echanges", label: "Mes échanges", roles: ["membre"], purpose: "Contacter son bureau, consulter ses messages et demander un rendez-vous." },
+  { path: "/espace/echanges", label: "Mes échanges & projets", roles: ["membre"], purpose: "Retrouver ses échanges sur la carte (demandes, dons, prêts), ses projets, ses cercles privés, et contacter son bureau (messages, rendez-vous)." },
 
   { path: "/back-office", label: "Tableau de bord gestionnaire", roles: ["gestionnaire", "administrateur"], purpose: "Voir la charge de travail et les dossiers de son bureau." },
   { path: "/back-office/dossiers", label: "Dossiers à traiter", roles: ["gestionnaire", "administrateur"], purpose: "Filtrer, affecter et ouvrir les dossiers de son périmètre." },

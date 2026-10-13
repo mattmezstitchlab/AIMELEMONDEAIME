@@ -9,8 +9,7 @@ import { and, eq } from "drizzle-orm";
 const NAV: NavItem[] = [
   { href: "/espace", label: "Mon aperçu", icon: "home", exact: true },
   { href: "/espace/demarches", label: "Mes démarches", icon: "demarches" },
-  { href: "/espace/projets", label: "Mes projets", icon: "calendar" },
-  { href: "/espace/echanges", label: "Mes échanges", icon: "echanges" },
+  { href: "/espace/echanges", label: "Mes échanges & projets", icon: "echanges" },
   { href: "/espace/documents", label: "Mes documents", icon: "documents" },
   { href: "/espace/profil", label: "Mon profil", icon: "user" },
   { href: "/le-monde-aime", label: "La carte", icon: "pin" },
