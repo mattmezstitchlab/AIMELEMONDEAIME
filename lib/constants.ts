@@ -38,6 +38,7 @@ export const APPOINTMENT_STATUS_LABELS: Record<string, string> = {
 export const ARTICLE_CATEGORY_LABELS: Record<string, string> = {
   sante: "Santé",
   famille: "Famille",
+  mariage: "Mariage",
   logement: "Logement",
   retraite: "Retraite",
   cotisations: "Cotisations",
@@ -46,9 +47,10 @@ export const ARTICLE_CATEGORY_LABELS: Record<string, string> = {
 
 export const ARTICLE_CATEGORIES = Object.keys(ARTICLE_CATEGORY_LABELS);
 
-export const THEME_META: Record<string, { image: string; icon: "sante" | "famille" | "logement" | "retraite" | "cotisations" | "emploi"; desc: string; tagline: string }> = {
+export const THEME_META: Record<string, { image: string; icon: "sante" | "famille" | "logement" | "retraite" | "cotisations" | "emploi" | "heart"; desc: string; tagline: string }> = {
   sante: { image: "/images/hero-sante.jpg", icon: "sante", desc: "Remboursements, arrêts de travail, prévention.", tagline: "Votre santé et celle de vos proches, au cœur de nos territoires." },
   famille: { image: "/images/hero-famille.jpg", icon: "famille", desc: "Allocations, naissance, mariage, Pacs.", tagline: "Accompagner chaque étape de la vie de votre famille." },
+  mariage: { image: "/images/hero-mariage.jpg", icon: "heart", desc: "Dossier civil, rétroplanning, prestataires, invités, budget, jour J : le mariage de bout en bout.", tagline: "Préparer son mariage sereinement, de la mairie aux remerciements." },
   logement: { image: "/images/hero-logement.jpg", icon: "logement", desc: "Aides au logement et logement de fonction.", tagline: "Un toit adapté à votre vie à la campagne." },
   retraite: { image: "/images/hero-retraite.jpg", icon: "retraite", desc: "Relevé de carrière, demande de retraite.", tagline: "Préparer sereinement l'après, après une vie de travail de la terre." },
   cotisations: { image: "/images/hero-cotisations.jpg", icon: "cotisations", desc: "Calcul, échéances et régularisations.", tagline: "Comprendre et anticiper vos cotisations, simplement." },

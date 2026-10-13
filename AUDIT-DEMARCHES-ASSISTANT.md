@@ -502,3 +502,34 @@ Le cycle se referme : la journée elle-même, puis les semaines qui suivent.
   plan de table → jour J papier → remerciements → parcours Famille.
   Suite au carnet : le fonds éditorial public, qui peut raconter ce
   parcours ; parcours « je n'arrive pas à payer » (à reconfirmer).
+
+## 6octies. Fonds éditorial public : le mariage raconté — exécuté le 2026-08-10 (commit à suivre)
+
+Le fonds public (articles et guides des pages /informations et
+/guides/[slug], alimenté par le seed) ne racontait rien du produit le
+plus profond de l'application. Il compte désormais une thématique
+**Mariage** à part entière (constantes, visuel dédié) et **12 contenus**
+— 24 au total en base — qui racontent le parcours de bout en bout :
+
+- entrer : « Se marier : par où commencer ? », le dossier de mairie
+  (pièces, témoins, **bans affichés 10 jours, sourcés
+  service-public.fr** — le seul délai présenté comme officiel), le
+  rétroplanning présenté en repères assumés, jamais en obligations ;
+- décider : le contrat de mariage chez le notaire (sans conseil
+  personnalisé : le guide renvoie au notaire), le lieu de réception ;
+- tenir : le budget en trois chiffres (estimé, devis confirmé, réglé),
+  les invités et le bon nombre, l'engagement des musiciens et son cadre
+  à vérifier (L7121-3, Guso), le photographe, le plan de table ;
+- vivre et refermer : le déroulé du jour J, l'après-mariage
+  (remerciements, livret de famille, parcours Famille).
+
+Chaque contenu recoupe exactement ce que le produit fait — mêmes
+repères, mêmes lignes rouges (rien d'inventé, aucun délai présenté
+comme officiel hors bans sourcés, aucun envoi par AIME®) — et renvoie au
+parcours « Nous nous marions ». Surfaces : carte thématique du hub
+/informations, page /informations/mariage, et l'accueil, dont les
+« Derniers guides » ouvrent sur la trilogie d'entrée du mariage.
+Vérifié : 12 pages guides en 200, fond en base (24 contenus), tsc et
+build propres, démonstration mariage intacte après réensemencement.
+Restant au carnet : parcours « je n'arrive pas à payer » (à reconfirmer
+avant tout chantier).

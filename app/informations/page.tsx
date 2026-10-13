@@ -33,7 +33,7 @@ export default async function InformationsHub({ searchParams }: { searchParams: 
         title={guidesOnly ? "Guides pratiques" : "Tout ce qu'il faut savoir, au même endroit"}
         subtitle={guidesOnly
           ? "Les guides pas à pas, toutes thématiques confondues."
-          : "Santé, famille, logement, retraite, cotisations, emploi : articles et guides pratiques, regroupés par thématique."}
+          : "Santé, famille, mariage, logement, retraite, cotisations, emploi : articles et guides pratiques, regroupés par thématique."}
       />
       <div className="mx-auto grid max-w-6xl gap-5 px-6 pt-16 sm:grid-cols-2 lg:grid-cols-3">
         {Object.entries(THEME_META).map(([slug, meta]) => (
