@@ -57,7 +57,7 @@ export async function getExplorerExtras() {
 
   const storyRows = await db.select({
     id: circlePosts.id, title: circlePosts.title, body: circlePosts.body, kind: circlePosts.kind, createdAt: circlePosts.createdAt,
-    isDemo: circlePosts.isDemo, hasPhoto: circlePosts.photoData, displayName: users.displayName, fullName: users.fullName,
+    isDemo: circlePosts.isDemo, hasPhoto: circlePosts.photoMime, displayName: users.displayName, fullName: users.fullName,
   }).from(circlePosts).innerJoin(users, eq(circlePosts.authorId, users.id)).where(eq(circlePosts.visibility, "publie")).orderBy(desc(circlePosts.createdAt)).limit(20);
   const stories = storyRows.map(({ displayName, fullName, hasPhoto, body, ...s }) => ({ ...s, body: body.slice(0, 500), authorName: publicName(displayName, fullName), hasPhoto: hasPhoto !== null }));
 
@@ -213,7 +213,7 @@ export async function getCircleDetail(circleId: number, userId: number) {
   }).from(circleMembers).innerJoin(users, eq(circleMembers.userId, users.id)).where(eq(circleMembers.circleId, circleId));
   const posts = await db.select({
     id: circlePosts.id, authorId: circlePosts.authorId, kind: circlePosts.kind, title: circlePosts.title, body: circlePosts.body, visibility: circlePosts.visibility,
-    createdAt: circlePosts.createdAt, hasPhoto: circlePosts.photoData, displayName: users.displayName, fullName: users.fullName,
+    createdAt: circlePosts.createdAt, hasPhoto: circlePosts.photoMime, displayName: users.displayName, fullName: users.fullName,
   }).from(circlePosts).innerJoin(users, eq(circlePosts.authorId, users.id)).where(eq(circlePosts.circleId, circleId)).orderBy(desc(circlePosts.createdAt));
   const isLead = me.role === "responsable";
   return {

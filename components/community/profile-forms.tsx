@@ -38,7 +38,12 @@ export function ProfileForm({ data }: { data: ProfileData }) {
     <form onSubmit={(e) => submit(e, (f) => { if (coords) { f.set("profileLat", String(coords.lat)); f.set("profileLng", String(coords.lng)); } })} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-[96px_1fr]">
         <div className="flex flex-col items-center gap-2">
-          {data.hasPhoto ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/api/profil/${data.userId}/photo`} alt="Votre photo" className="h-24 w-24 rounded-full object-cover" /> : <span className="grid h-24 w-24 place-items-center rounded-full bg-emerald-50 text-3xl font-bold text-emerald-800" aria-hidden="true">{(data.displayName || "?").slice(0, 1).toUpperCase()}</span>}
+          {data.hasPhoto ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
+              <img src={`/api/profil/${data.userId}/photo`} alt="Votre photo" className="h-24 w-24 rounded-full object-cover" />
+            </>
+          ) : <span className="grid h-24 w-24 place-items-center rounded-full bg-emerald-50 text-3xl font-bold text-emerald-800" aria-hidden="true">{(data.displayName || "?").slice(0, 1).toUpperCase()}</span>}
         </div>
         <div className="grid gap-4">
           <div><label className={label} htmlFor="pf-name">Nom d&apos;affichage</label><input id="pf-name" name="displayName" defaultValue={data.displayName} maxLength={80} placeholder="Le nom que les autres verront" className={input} /></div>

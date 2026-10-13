@@ -1,8 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getMyProfile } from "@/lib/lma-queries";
 import { SectionTitle, Card } from "@/components/ui";
 import { ProfileForm } from "@/components/community/profile-forms";
+
+export const metadata: Metadata = { title: "Mon profil — AIME®" };
 
 export const dynamic = "force-dynamic";
 

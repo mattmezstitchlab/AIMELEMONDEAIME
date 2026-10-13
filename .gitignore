@@ -1,0 +1,18 @@
+# Dépendances et artefacts de build
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Environnement et secrets — NE JAMAIS committer
+.env
+.env.*
+!.env.example
+.auth-secret
+
+# Divers
+.DS_Store
+*.log
+*.tsbuildinfo
+next-env.d.ts

@@ -1,16 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, gte, inArray, isNull, lt, ne } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, isNull, lt, ne } from "drizzle-orm";
 import { db } from "@/db";
 import {
-  artistEngagements, artistProfiles, communityListings, documentShares, documents, journeyEvents, journeyTasks, journeys,
-  journeyTaskStatusEnum, offices, organisms, projectMembers, projects, users, type JourneyTaskStatus,
+  artistEngagements, artistProfiles, cases, caseEvents, communityListings, documentShares, documents, journeyEvents, journeyTasks, journeys,
+  journeyTaskStatusEnum, offices, organisms, procedureTypes, projectMembers, projects, users, type JourneyTaskStatus,
 } from "@/db/schema";
 import { AuthError, requireRole } from "@/lib/auth";
 import { createNotification } from "@/lib/queries";
 import { logAudit } from "@/lib/audit";
-import { RULES_VERSION, SITUATION_BY_KEY } from "@/lib/situations";
+import { RULES_VERSION, SITUATION_BY_KEY, computeDueAt } from "@/lib/situations";
+import { generateCaseReference } from "@/lib/reference";
+import { redirect } from "next/navigation";
 
 export type JResult = { ok: true; message: string; id?: number } | { ok: false; error: string };
 const fail = (e: unknown, msg: string): JResult => (e instanceof AuthError ? { ok: false, error: "Connectez-vous avec un compte membre." } : { ok: false, error: msg });
@@ -79,7 +81,7 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
     if (missing.length) return { ok: false, error: `Il manque une réponse : « ${missing[0].label} ».` };
 
     let projectId: number | null = null;
-    if (j.situation === "evenement") {
+    if (j.situation === "evenement" || j.situation === "mariage") {
       if (projectChoice && projectChoice !== "new") {
         const pid = Number(projectChoice);
         const [m] = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, pid), eq(projectMembers.userId, user.id), eq(projectMembers.role, "organisateur"), eq(projectMembers.status, "accepte"))).limit(1);
@@ -87,12 +89,14 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
         projectId = pid;
       } else {
         const date = new Date(`${j.answers.date}T12:00:00`);
-        if (Number.isNaN(date.getTime())) return { ok: false, error: "Date de l'événement invalide." };
+        if (Number.isNaN(date.getTime())) return { ok: false, error: j.situation === "mariage" ? "Date du mariage invalide." : "Date de l'événement invalide." };
         const coords = await approxCoords(j.answers.lieu, user.id);
-        const label = def.questions[0].options?.find(([v]) => v === j.answers.event_type)?.[1] ?? "Événement";
+        const label = j.situation === "mariage" ? "Mariage" : (def.questions[0].options?.find(([v]) => v === j.answers.event_type)?.[1] ?? "Événement");
         const [p] = await db.insert(projects).values({
           ownerId: user.id, title: `${label.split(",")[0]} — ${j.answers.lieu}`.slice(0, 140),
-          intention: `Événement préparé avec AIME®${j.answers.public ? ` pour environ ${j.answers.public} personnes` : ""}. Discipline recherchée : ${j.answers.discipline}.`,
+          intention: j.situation === "mariage"
+            ? `Mariage préparé avec AIME®${j.answers.invites ? ` pour environ ${j.answers.invites} invités` : ""}. Le projet rassemble les futurs mariés, les témoins et les proches qui organisent la fête.`
+            : `Événement préparé avec AIME®${j.answers.public ? ` pour environ ${j.answers.public} personnes` : ""}. Discipline recherchée : ${j.answers.discipline}.`,
           city: j.answers.lieu, lat: coords.lat, lng: coords.lng, startsAt: date, universes: ["arts", "terre"],
         }).returning({ id: projects.id });
         await db.insert(projectMembers).values({ projectId: p.id, userId: user.id, role: "organisateur", status: "accepte" });
@@ -102,14 +106,18 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
     const rules = def.build(j.answers);
     await db.transaction(async (tx) => {
       if (rules.length) {
-        await tx.insert(journeyTasks).values(rules.map((r, i) => ({
-          journeyId: j.id, kind: r.kind, label: r.label, detail: r.detail ?? "", reason: r.reason, organismSlugs: r.organisms ?? [],
-          officialUrl: r.officialUrl ?? null, frameworkFlag: r.frameworkFlag ?? null, sortOrder: i,
-          ...(r.kind === "action" && i === 0 && projectId ? { status: "pret" as const } : {}),
-        })));
+        await tx.insert(journeyTasks).values(rules.map((r, i) => {
+          const dueAt = computeDueAt(r, j.answers);
+          return {
+            journeyId: j.id, kind: r.kind, label: r.label, detail: r.detail ?? "", reason: r.reason, organismSlugs: r.organisms ?? [],
+            officialUrl: r.officialUrl ?? null, frameworkFlag: r.frameworkFlag ?? null, sortOrder: i,
+            dueAt, dueKind: dueAt ? (r.due?.official ? "officielle" : "personnel") : null, dueSource: dueAt && r.due?.official ? (r.due.source ?? null) : null,
+            ...(r.kind === "action" && i === 0 && projectId ? { status: "pret" as const } : {}),
+          };
+        }));
       }
       const summary = def.questions.filter((q) => j.answers[q.key]).map((q) => `${q.label} ${q.options?.find(([v]) => v === j.answers[q.key])?.[1] ?? j.answers[q.key]}`).join("\n");
-      await tx.update(journeys).set({ status: "en_cours", projectId, summary, rulesVersion: RULES_VERSION, title: j.situation === "evenement" ? `Événement à ${j.answers.lieu}` : def.short, updatedAt: new Date() }).where(eq(journeys.id, j.id));
+      await tx.update(journeys).set({ status: "en_cours", projectId, summary, rulesVersion: RULES_VERSION, title: j.situation === "evenement" ? `Événement à ${j.answers.lieu}` : j.situation === "mariage" ? `Mariage à ${j.answers.lieu}` : def.short, updatedAt: new Date() }).where(eq(journeys.id, j.id));
     });
     await log(j.id, user.id, `Plan préparé : ${rules.length} étapes et pièces (règles ${RULES_VERSION}).${projectId ? " Projet relié." : ""}`);
     await logAudit({ actorId: user.id, action: "plan_demarche", entityType: "journey", entityId: String(j.id) });
@@ -221,7 +229,7 @@ export async function sendEngagementRequest(journeyId: number, artistId: number,
   try {
     const user = await requireRole(["membre"]);
     const j = await ownJourney(journeyId, user.id);
-    if (!j || j.situation !== "evenement" || j.status !== "en_cours") return { ok: false, error: "Démarche d'événement introuvable." };
+    if (!j || !["evenement", "mariage"].includes(j.situation) || j.status !== "en_cours") return { ok: false, error: "Parcours introuvable pour engager un artiste." };
     if (artistId === user.id) return { ok: false, error: "Vous ne pouvez pas vous engager vous-même." };
     const [artist] = await db.select({ id: artistProfiles.userId }).from(artistProfiles).innerJoin(users, eq(artistProfiles.userId, users.id)).where(and(eq(artistProfiles.userId, artistId), eq(users.isActive, true))).limit(1);
     if (!artist) return { ok: false, error: "Artiste introuvable." };
@@ -382,4 +390,120 @@ export async function updateOrganism(form: FormData): Promise<JResult> {
     revalidatePath("/admin/organismes"); revalidatePath("/accompagnement");
     return { ok: true, message: verify ? "Fiche enregistrée et marquée vérifiée aujourd'hui." : "Fiche enregistrée." };
   } catch (e) { return e instanceof AuthError ? { ok: false, error: "Réservé à l'administration." } : { ok: false, error: "Enregistrement impossible." }; }
+}
+
+/**
+ * Situations qui correspondent à une procédure de bureau existante.
+ * Les autres parcours transmis tombent sur la procédure générique
+ * « parcours-transmis » : le dossier reprend alors le titre, le résumé,
+ * les étapes et les pièces du parcours (chantier 2, temps 2).
+ */
+const SITUATION_PROCEDURE_SLUG: Record<string, string> = {
+  famille: "changement-situation-familiale",
+  logement: "demande-aide-logement",
+  retraite: "demande-retraite-agricole",
+  sante: "declaration-arret-travail",
+  recruteur: "embauche-salarie-agricole",
+  mariage: "declarer-naissance-ou-mariage",
+  paiement: "difficultes-paiement",
+};
+
+export type TransmitJourneyResult =
+  | { ok: true; caseId: number; reference: string; already: boolean }
+  | { ok: false; error: string };
+
+/**
+ * Cœur de la transmission d'un parcours au bureau d'accompagnement (sans
+ * redirection) : utilisé par le formulaire de la page de suivi et par
+ * l'assistant niveau 2, qui ne l'appelle qu'après confirmation explicite.
+ * Le parcours « devient » un dossier instruit (un seul objet suit le membre,
+ * pas de doublon) et reste consultable ; ses pièces sont rattachées au
+ * dossier. Idempotent : un parcours déjà transmis renvoie son dossier.
+ */
+export async function transmitJourneyCore(journeyId: number, user: { id: number; officeId: number | null }): Promise<TransmitJourneyResult> {
+  const journey = await ownJourney(journeyId, user.id);
+  if (!journey) return { ok: false, error: "Parcours introuvable." };
+  if (journey.status === "questionnaire") {
+    return { ok: false, error: "Terminez d'abord le questionnaire : c'est lui qui préparera votre dossier." };
+  }
+
+  const [existing] = await db.select({ id: cases.id, reference: cases.reference }).from(cases).where(eq(cases.journeyId, journeyId)).limit(1);
+  if (existing) return { ok: true, caseId: existing.id, reference: existing.reference, already: true };
+
+  const slug = SITUATION_PROCEDURE_SLUG[journey.situation] ?? "parcours-transmis";
+  const [procedure] = await db.select().from(procedureTypes).where(eq(procedureTypes.slug, slug)).limit(1);
+  if (!procedure) return { ok: false, error: "La transmission n'est pas disponible pour le moment." };
+
+  const tasks = await db.select().from(journeyTasks).where(eq(journeyTasks.journeyId, journeyId)).orderBy(asc(journeyTasks.sortOrder), asc(journeyTasks.id));
+  const actions = tasks.filter((t) => t.kind === "action");
+  const done = actions.filter((t) => ["termine", "effectue_declare"].includes(t.status)).length;
+  const next = actions.find((t) => !["termine", "effectue_declare"].includes(t.status));
+  const pieceDocIds = Array.from(new Set(tasks.map((t) => t.documentId).filter((v): v is number => !!v)));
+
+  // Reprise des réponses dont le nom correspond à un champ du dossier ;
+  // le résumé du parcours nourrit la procédure générique.
+  const data: Record<string, string> = {};
+  for (const field of procedure.fields) {
+    if (journey.answers[field.name]) data[field.name] = journey.answers[field.name];
+  }
+  if (slug === "parcours-transmis" && journey.summary && !data.resume) data.resume = journey.summary;
+
+  const reference = generateCaseReference();
+  const [created] = await db.insert(cases).values({
+    reference,
+    memberId: user.id,
+    procedureTypeId: procedure.id,
+    journeyId,
+    officeId: user.officeId ?? null,
+    status: "envoyee",
+    title: journey.title,
+    data,
+    requestedDocuments: [],
+    submittedAt: new Date(),
+  }).returning();
+
+  await db.insert(caseEvents).values({
+    caseId: created.id,
+    actorId: user.id,
+    type: "creation",
+    message: `Dossier créé par transmission du parcours « ${journey.title} » : ${done}/${actions.length} étapes faites${next ? `, prochaine étape restée en attente : « ${next.label} »` : ""}${pieceDocIds.length ? `, ${pieceDocIds.length} pièce(s) reprise(s) du parcours` : ""}.`,
+  });
+  await db.insert(caseEvents).values({
+    caseId: created.id,
+    actorId: user.id,
+    type: "soumission",
+    message: "Transmis au bureau d'accompagnement depuis le parcours guidé. Le suivi continue ici ; le parcours reste consultable.",
+  });
+
+  // Les pièces préparées dans le parcours sont rattachées au dossier.
+  if (pieceDocIds.length) {
+    await db.update(documents).set({ caseId: created.id }).where(and(inArray(documents.id, pieceDocIds), eq(documents.ownerId, user.id)));
+  }
+
+  await log(journeyId, user.id, `Parcours transmis à votre bureau d'accompagnement — dossier ${reference}. Le suivi continue dans le dossier.`);
+  await logAudit({ actorId: user.id, action: "transmission_parcours", entityType: "journey", entityId: journeyId, metadata: { dossier: reference } });
+  revalidatePath("/espace/demarches");
+  return { ok: true, caseId: created.id, reference, already: false };
+}
+
+/** Formulaire de la page de suivi : délègue au cœur, puis redirige comme avant. */
+export async function transmitJourneyToBureau(formData: FormData) {
+  const journeyId = Number(formData.get("journeyId"));
+  if (!Number.isSafeInteger(journeyId)) redirect("/espace/demarches");
+
+  let user;
+  try {
+    user = await requireRole(["membre"]);
+  } catch {
+    redirect("/connexion");
+  }
+
+  const result = await transmitJourneyCore(journeyId, user!);
+  if (!result.ok) {
+    if (result.error.startsWith("Terminez d'abord")) {
+      redirect(`/espace/demarches/suivi/${journeyId}?erreur=${encodeURIComponent(result.error)}`);
+    }
+    redirect("/espace/demarches");
+  }
+  redirect(`/espace/demarches/${result.caseId}`);
 }

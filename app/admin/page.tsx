@@ -1,8 +1,11 @@
 import { db } from "@/db";
+import type { Metadata } from "next";
 import { auditLogs, cases, users, offices, articles } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Card, SectionTitle, formatDateTime } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icon";
+
+export const metadata: Metadata = { title: "Administration — AIME®" };
 
 export const dynamic = "force-dynamic";
 

@@ -53,8 +53,8 @@ export async function createStaffUser(formData: FormData): Promise<ActionResult>
     const role = String(formData.get("role") || "gestionnaire") as "gestionnaire" | "administrateur";
     const officeId = formData.get("officeId") ? Number(formData.get("officeId")) : null;
 
-    if (!fullName || !email || password.length < 8) {
-      return { ok: false, error: "Formulaire incomplet (mot de passe : 8 caractères minimum)." };
+    if (!fullName || !email || password.length < 12) {
+      return { ok: false, error: "Formulaire incomplet (mot de passe : 12 caractères minimum)." };
     }
     const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (existing) return { ok: false, error: "Un compte existe déjà avec cet e-mail." };
@@ -144,7 +144,7 @@ export async function upsertArticle(formData: FormData): Promise<ActionResult> {
     }
     await logAudit({ actorId: admin.id, action: id ? "maj_article" : "creation_article", entityType: "article", entityId: id });
     revalidatePath("/admin/contenus");
-    revalidatePath("/guides");
+    revalidatePath("/informations");
     revalidatePath("/informations");
     return { ok: true };
   } catch (e) {
@@ -158,7 +158,7 @@ export async function toggleArticlePublished(id: number, isPublished: boolean): 
     await db.update(articles).set({ isPublished }).where(eq(articles.id, id));
     await logAudit({ actorId: admin.id, action: isPublished ? "publication_article" : "depublication_article", entityType: "article", entityId: id });
     revalidatePath("/admin/contenus");
-    revalidatePath("/guides");
+    revalidatePath("/informations");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Erreur inattendue." };

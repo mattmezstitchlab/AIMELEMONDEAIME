@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getJourneyDetail, searchArtists } from "@/lib/journey-queries";
@@ -6,14 +7,20 @@ import { Card, SectionTitle, formatDate, formatDateTime } from "@/components/ui"
 import { ORGANISM_CATEGORY_LABEL, SITUATION_BY_KEY, TASK_STATUS_LABEL } from "@/lib/situations";
 import { AddTask, JourneyStatusButton, OrganizerEngagement, SendToArtist, SummaryEditor, TaskControls } from "@/components/espace/journey-ui";
 import { priceLabel } from "@/lib/lma";
+import { transmitJourneyToBureau } from "@/lib/actions/journeys";
+import { getWeddingWorkspace } from "@/lib/wedding-queries";
+import { formatEuro } from "@/lib/wedding";
+
+export const metadata: Metadata = { title: "Suivi de démarche — AIME®" };
 
 export const dynamic = "force-dynamic";
 
-export default async function SuiviDemarche({ params }: { params: Promise<{ id: string }> }) {
+export default async function SuiviDemarche({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ erreur?: string }> }) {
   const id = Number((await params).id);
   const user = (await getCurrentUser())!;
   if (!Number.isSafeInteger(id)) notFound();
   const d = await getJourneyDetail(id, user.id);
+  const erreur = (await searchParams).erreur;
   if (!d) notFound();
   const { journey: j, tasks, organisms, project } = d;
   const def = SITUATION_BY_KEY.get(j.situation)!;
@@ -21,8 +28,10 @@ export default async function SuiviDemarche({ params }: { params: Promise<{ id: 
   const pieces = tasks.filter((t) => t.kind === "piece");
   const next = actions.find((t) => !["termine", "effectue_declare"].includes(t.status));
   const orgBySlug = new Map(organisms.map((o) => [o.slug, o]));
-  const artists = j.situation === "evenement" && j.status === "en_cours" ? await searchArtists(j.answers.discipline ?? "", project ? { lat: Number(project.lat), lng: Number(project.lng) } : null, user.id) : [];
+  const showArtists = j.status === "en_cours" && (j.situation === "evenement" || (j.situation === "mariage" && ["groupe", "dj"].includes(j.answers.musique ?? "")));
+  const artists = showArtists ? await searchArtists(j.situation === "mariage" ? "Musique" : (j.answers.discipline ?? ""), project ? { lat: Number(project.lat), lng: Number(project.lng) } : null, user.id) : [];
   const engagedIds = new Set(d.engagements.filter((e) => !["refusee", "annulee"].includes(e.status)).map((e) => e.artistId));
+  const wedding = j.situation === "mariage" && project ? await getWeddingWorkspace(project.id) : null;
   const ser = (x: Date | null) => (x ? x.toISOString() : null);
 
   return (
@@ -58,14 +67,14 @@ export default async function SuiviDemarche({ params }: { params: Promise<{ id: 
             <AddTask journeyId={j.id} />
           </Card>
 
-          {j.situation === "evenement" && (
+          {(j.situation === "evenement" || j.situation === "mariage") && (
             <Card>
-              <h2 className="text-lg font-semibold text-slate-900">Engager un artiste</h2>
+              <h2 className="text-lg font-semibold text-slate-900">{j.situation === "mariage" ? "Engager les musiciens ou le DJ" : "Engager un artiste"}</h2>
               <p className="mt-1 text-xs text-slate-500">Demande envoyée → proposition reçue → devis accepté → contrat signé (déclaré) → embauche déclarée. Chaque étape est distincte ; AIME® n&apos;effectue ni signature, ni paiement, ni déclaration.</p>
               {d.engagements.length > 0 && <div className="mt-4 space-y-3">{d.engagements.map((e) => <OrganizerEngagement key={e.id} artistName={e.artistName} docs={d.myDocs} e={{ id: e.id, status: e.status, proposalMode: e.proposalMode, proposalAmount: e.proposalAmount, proposalFramework: e.proposalFramework, proposalNote: e.proposalNote, requestMessage: e.requestMessage, eventDate: e.eventDate.toISOString() }} />)}</div>}
-              {j.status === "en_cours" && (
+              {showArtists && (
                 <div className="mt-5">
-                  <h3 className="text-sm font-bold text-slate-800">Artistes visibles sur la carte {j.answers.discipline && j.answers.discipline !== "autre" ? `· ${j.answers.discipline}` : ""}</h3>
+                  <h3 className="text-sm font-bold text-slate-800">Artistes visibles sur la carte {j.answers.discipline && j.answers.discipline !== "autre" ? `· ${j.answers.discipline}` : j.situation === "mariage" ? "· Musique" : ""}</h3>
                   {artists.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucun artiste visible pour l&apos;instant. <Link href="/le-monde-aime?univers=arts" className="font-semibold text-emerald-800 underline">Explorer l&apos;univers Arts sur la carte</Link></p> : (
                     <ul className="mt-3 grid gap-3 sm:grid-cols-2">
                       {artists.slice(0, 8).map((a) => (
@@ -92,10 +101,55 @@ export default async function SuiviDemarche({ params }: { params: Promise<{ id: 
               <p className="mt-2 text-xs text-slate-500">Chaque réservation est acceptée explicitement par son propriétaire ; les quantités et dates sont vérifiées côté serveur.</p>
             </Card>
           )}
+
+          {wedding && project && (
+            <Card>
+              <h2 className="text-lg font-semibold text-slate-900">Invités et budget, en direct du projet</h2>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl bg-[#fafaf9] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Invités</p>
+                  <p className="mt-1 text-sm text-slate-700"><strong>{wedding.guestStats.confirmees} personne(s) confirmée(s)</strong> sur {wedding.guestStats.personnesListees} listées · {wedding.guestStats.enAttente} en attente de réponse{wedding.invitesEstimes > 0 ? ` · estimation de départ : ~${wedding.invitesEstimes}` : ""}</p>
+                  <Link href={`/le-monde-aime/projets/${project.id}#invites`} className="mt-2 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir la liste des invités</Link>
+                  <p className="mt-2 text-sm text-slate-700">Plan de table : <strong>{wedding.tableStats.placeesPersonnes} personne(s) placée(s)</strong>{wedding.tableStats.aPlacerPersonnes > 0 ? ` · ${wedding.tableStats.aPlacerPersonnes} confirmée(s) restent à placer` : ""}</p>
+                  <Link href={`/le-monde-aime/projets/${project.id}#plan-de-table`} className="mt-1 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir le plan de table</Link>
+                  <Link href={`/le-monde-aime/projets/${project.id}/jour-j`} className="mt-1 block text-sm font-semibold text-emerald-800 underline">La page du jour J à imprimer</Link>
+                </div>
+                <div className="rounded-xl bg-[#fafaf9] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Budget</p>
+                  <p className="mt-1 text-sm text-slate-700">Estimé <strong>{formatEuro(wedding.budgetStats.estimeCents)}</strong> · devis confirmés {formatEuro(wedding.budgetStats.confirmeCents)} · déjà réglé {formatEuro(wedding.budgetStats.regleCents)}{wedding.budgetStats.enveloppeCents !== null ? ` · enveloppe ${formatEuro(wedding.budgetStats.enveloppeCents)}` : ""}</p>
+                  {wedding.budgetStats.depasseEnveloppe && <p className="mt-1 text-xs font-semibold text-rose-700">L&apos;estimé dépasse l&apos;enveloppe : c&apos;est le moment d&apos;arbitrer, poste par poste.</p>}
+                  <Link href={`/le-monde-aime/projets/${project.id}#budget`} className="mt-2 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir le suivi de budget</Link>
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-slate-500">Ces compteurs vivent dans le projet partagé : votre conjoint·e et vos témoins organisateurs y notent les réponses et les devis au même endroit que vous.</p>
+            </Card>
+          )}
         </div>
 
         <div className="flex flex-col gap-6">
           <Card><h2 className="text-lg font-semibold text-slate-900">Ma situation</h2><div className="mt-3"><SummaryEditor journeyId={j.id} summary={j.summary} /></div></Card>
+          <Card>
+            <h2 className="text-lg font-semibold text-slate-900">Transmettre à mon bureau</h2>
+            {erreur && <p role="alert" className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{erreur}</p>}
+            {d.linkedCase ? (
+              <div className="mt-2 text-sm text-slate-700">
+                <p><span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800">Transmis à votre bureau</span></p>
+                <p className="mt-2">Ce parcours est devenu le dossier <strong>{d.linkedCase.reference}</strong>{d.linkedCase.submittedAt ? `, transmis le ${formatDate(d.linkedCase.submittedAt)}` : ""}. Votre bureau y reprend vos étapes et vos pièces, et vous y répond.</p>
+                <Link href={`/espace/demarches/${d.linkedCase.id}`} className="mt-3 inline-block rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white">Ouvrir le dossier</Link>
+                <p className="mt-2 text-xs text-slate-500">Ce parcours reste consultable ici, en lecture : le suivi se poursuit dans le dossier, sans rien ressaisir.</p>
+              </div>
+            ) : j.status === "questionnaire" ? (
+              <p className="mt-2 text-sm text-slate-600">Terminez le questionnaire pour pouvoir transmettre ce parcours à votre bureau d&apos;accompagnement.</p>
+            ) : (
+              <div className="mt-2 text-sm text-slate-700">
+                <p>Vous préférez être accompagné ? Transmettez ce parcours à votre bureau : il <strong>devient un dossier</strong> qui reprend vos étapes et vos pièces reliées. L&apos;équipe vous répond dans le dossier — inutile de recommencer votre histoire. Dans cette version, l&apos;équipe est simulée, aucun organisme réel n&apos;est destinataire.</p>
+                <form action={transmitJourneyToBureau} className="mt-3">
+                  <input type="hidden" name="journeyId" value={j.id} />
+                  <button type="submit" className="rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-900">Transmettre à mon bureau</button>
+                </form>
+              </div>
+            )}
+          </Card>
           <Card>
             <h2 className="text-lg font-semibold text-slate-900">Pièces à préparer</h2>
             {pieces.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucune pièce identifiée.</p> : <ul className="mt-3 space-y-3">{pieces.map((t) => <li key={t.id} className="rounded-lg bg-[#fafaf9] p-3 text-sm"><p className="font-semibold">{t.label}</p><p className="text-xs text-slate-500">{t.reason}</p><TaskControls task={{ id: t.id, status: t.status, dueAt: ser(t.dueAt), dueKind: t.dueKind, documentId: t.documentId, kind: t.kind }} docs={d.myDocs} /></li>)}</ul>}

@@ -1,5 +1,7 @@
 import { advanceCommunityRequest, decideCommunityRequest } from "@/lib/actions/community";
 
+import { communityErrorStatus } from "@/lib/api-status";
+
 export const runtime = "nodejs";
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -15,5 +17,5 @@ export async function PATCH(request: Request, context: RouteContext) {
     : ["remettre", "confirmer", "retourner", "annuler"].includes(body.step ?? "")
       ? await advanceCommunityRequest(id, body.step as "remettre" | "confirmer" | "retourner" | "annuler")
       : { ok: false as const, error: "Choisissez accepter, refuser ou une étape d'échange valide." };
-  return Response.json(result, { status: result.ok ? 200 : result.error.includes("Connexion") || result.error.includes("réservé") || result.error.includes("Seul") || result.error.includes("Seule") ? 403 : 409 });
+  return Response.json(result, { status: result.ok ? 200 : communityErrorStatus("decision", result.error) });
 }

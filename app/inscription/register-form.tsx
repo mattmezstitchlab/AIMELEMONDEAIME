@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { registerAction, type ActionResult } from "@/lib/actions/auth";
 import { PrimaryButton } from "@/components/ui";
-import { SITUATION_LABELS } from "@/lib/constants";
+import { REGISTRATION_SITUATION_KEYS, SITUATION_LABELS } from "@/lib/constants";
 
 const initialState: ActionResult | null = null;
 type Office = { id: number; name: string; city: string };
@@ -17,22 +17,24 @@ export function RegisterForm({ offices }: { offices: Office[] }) {
         <Field label="Adresse e-mail" name="email" type="email" required autoComplete="email" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Mot de passe" name="password" type="password" required autoComplete="new-password" hint="8 caractères minimum" />
+        <Field label="Mot de passe" name="password" type="password" required autoComplete="new-password" hint="12 caractères minimum" />
         <Field label="Téléphone" name="phone" autoComplete="tel" />
       </div>
       <div>
-        <label htmlFor="situation" className="block text-sm font-medium text-slate-700">Votre situation</label>
+        <label htmlFor="situation" className="block text-sm font-medium text-slate-700">Votre situation aujourd&apos;hui</label>
         <select id="situation" name="situation" defaultValue="" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm">
           <option value="">Choisissez votre situation</option>
-          {Object.entries(SITUATION_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          {REGISTRATION_SITUATION_KEYS.map((value) => <option key={value} value={value}>{SITUATION_LABELS[value]}</option>)}
         </select>
+        <p className="mt-1 text-xs text-slate-500">Elle personnalise votre accueil ; vous la préciserez ensuite par vos parcours, et elle pourra évoluer.</p>
       </div>
       <div>
-        <label htmlFor="officeId" className="block text-sm font-medium text-slate-700">Point d'accueil de rattachement (démonstration)</label>
+        <label htmlFor="officeId" className="block text-sm font-medium text-slate-700">Votre bureau d&apos;accompagnement</label>
         <select id="officeId" name="officeId" defaultValue="" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm">
-          <option value="">Choisissez un bureau</option>
+          <option value="">Choisissez le bureau le plus proche</option>
           {offices.map((office) => <option key={office.id} value={office.id}>{office.name} — {office.city}</option>)}
         </select>
+        <p className="mt-1 text-xs text-slate-500">C&apos;est l&apos;équipe qui pourra suivre les dossiers que vous choisirez de lui transmettre. Modifiable plus tard dans votre profil.</p>
       </div>
       <Field label="Adresse" name="address" autoComplete="street-address" />
       <div className="grid gap-4 sm:grid-cols-2">

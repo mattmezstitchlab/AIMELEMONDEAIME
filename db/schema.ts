@@ -123,6 +123,8 @@ export const cases = pgTable("cases", {
   procedureTypeId: integer("procedure_type_id")
     .notNull()
     .references(() => procedureTypes.id),
+  /** Parcours guidé dont ce dossier est issu (chantier 2, temps 2) : le parcours « devient » dossier. */
+  journeyId: integer("journey_id").references(() => journeys.id),
   officeId: integer("office_id").references(() => offices.id),
   assignedCaseworkerId: integer("assigned_caseworker_id").references(() => users.id),
   status: varchar("status", { length: 20 }).notNull().$type<CaseStatus>().default("brouillon"),
@@ -575,6 +577,53 @@ export const projectDocuments = pgTable("project_documents", {
   content: bytea("content").notNull(),
   access: varchar("access", { length: 16 }).notNull().default("membres"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Espace de travail du mariage, adossé au projet partagé créé par le parcours « Nous nous marions ». */
+export const weddingSettings = pgTable("wedding_settings", {
+  projectId: integer("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
+  envelopeCents: integer("envelope_cents"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const weddingGuestStatusEnum = ["a_inviter", "invite", "confirme", "peut_etre", "decline"] as const;
+export type WeddingGuestStatus = (typeof weddingGuestStatusEnum)[number];
+
+export const weddingGuests = pgTable("wedding_guests", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 120 }).notNull(),
+  persons: integer("persons").notNull().default(1),
+  groupe: varchar("groupe", { length: 16 }).notNull().default("famille"),
+  status: varchar("status", { length: 16 }).notNull().$type<WeddingGuestStatus>().default("a_inviter"),
+  note: varchar("note", { length: 200 }).notNull().default(""),
+  thanked: boolean("thanked").notNull().default(false),
+  tableId: integer("table_id").references(() => weddingTables.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Tables du plan de table : seuls les foyers confirmés y prennent place. */
+export const weddingTables = pgTable("wedding_tables", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 60 }).notNull(),
+  capacity: integer("capacity"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const weddingBudgetItems = pgTable("wedding_budget_items", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  label: varchar("label", { length: 120 }).notNull(),
+  category: varchar("category", { length: 24 }).notNull().default("divers"),
+  estimatedCents: integer("estimated_cents").notNull().default(0),
+  actualCents: integer("actual_cents"),
+  settled: boolean("settled").notNull().default(false),
+  note: varchar("note", { length: 200 }).notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const circles = pgTable("circles", {

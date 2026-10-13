@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
 import { Hero, Tag, EmptyState, LinkButton } from "@/components/ui";
 import { Icon } from "@/components/icon";
@@ -9,6 +10,14 @@ import { and, eq } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ theme: string }> }): Promise<Metadata> {
+  const { theme } = await params;
+  const label = ARTICLE_CATEGORY_LABELS[theme];
+  const meta = THEME_META[theme];
+  if (!label || !meta) return { title: "Thématique introuvable — AIME®" };
+  return { title: `${label} — Informations AIME®`, description: meta.tagline };
+}
 
 export default async function ThemePage({ params }: { params: Promise<{ theme: string }> }) {
   const { theme } = await params;

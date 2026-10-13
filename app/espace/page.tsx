@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getOverview } from "@/lib/journey-queries";
 import { getAllNotifications } from "@/lib/queries";
@@ -7,6 +8,8 @@ import { Icon } from "@/components/icon";
 import { SITUATIONS, TASK_STATUS_LABEL } from "@/lib/situations";
 import { NotificationList } from "./notification-list";
 import { OrientationEntry } from "@/components/orientation-entry";
+
+export const metadata: Metadata = { title: "Mon espace — AIME®" };
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +74,7 @@ export default async function Apercu() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <h2 className="text-lg font-semibold text-slate-900">Échéances proches</h2>
+          <p className="mt-3 text-sm"><Link href="/espace/annee" className="font-semibold text-emerald-800 underline">Voir mon année à préparer →</Link></p>
           {o.dueTasks.length === 0 ? <p className="mt-3 text-sm text-slate-600">Aucune échéance dans les 3 prochaines semaines.</p> : (
             <ul className="mt-3 space-y-2 text-sm">{o.dueTasks.slice(0, 6).map((t) => <li key={t.id} className="rounded-lg bg-[#fafaf9] px-3 py-2"><strong>{formatDate(t.dueAt!)}</strong> · {t.label}<span className="block text-xs text-slate-500">{t.dueKind === "officielle" ? `Échéance officielle — source : ${t.dueSource}` : "Rappel personnel"}</span></li>)}</ul>
           )}

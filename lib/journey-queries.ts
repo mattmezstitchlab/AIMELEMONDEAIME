@@ -2,10 +2,11 @@ import "server-only";
 import { and, asc, desc, eq, inArray, isNull, ne, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
-  artistEngagements, artistProfiles, cases, communityListings, communityRequests, documentShares, documents, journeyEvents, journeyTasks, journeys,
+  artistEngagements, artistProfiles, cases, communityListings, communityRequests, documentShares, documents, journeyEvents, journeyTasks, journeys, notifications,
   organisms, projectDocuments, projectMembers, projects, users,
 } from "@/db/schema";
 import { distanceKm } from "@/lib/lma";
+import type { AssistantSummary } from "@/lib/assistant/personal";
 
 const pub = (d: string | null, f: string) => d ?? f.split(" ")[0];
 
@@ -33,12 +34,13 @@ export async function getJourneyDetail(id: number, userId: number) {
   const slugs = Array.from(new Set(tasks.flatMap((t) => t.organismSlugs)));
   const orgs = slugs.length ? await db.select().from(organisms).where(inArray(organisms.slug, slugs)) : [];
   const myDocs = await db.select({ id: documents.id, filename: documents.filename, category: documents.category }).from(documents).where(eq(documents.ownerId, userId)).orderBy(desc(documents.createdAt));
+  const [linkedCase] = await db.select({ id: cases.id, reference: cases.reference, status: cases.status, submittedAt: cases.submittedAt }).from(cases).where(eq(cases.journeyId, id)).limit(1);
   const [project] = j.projectId ? await db.select().from(projects).where(eq(projects.id, j.projectId)).limit(1) : [];
   const myProjects = await db.select({ id: projects.id, title: projects.title, startsAt: projects.startsAt }).from(projectMembers).innerJoin(projects, eq(projectMembers.projectId, projects.id))
     .where(and(eq(projectMembers.userId, userId), eq(projectMembers.role, "organisateur"), eq(projectMembers.status, "accepte"), ne(projects.status, "suspendu")));
-  const engagementRows = j.situation === "evenement" ? await db.select({ e: artistEngagements, name: users.displayName, full: users.fullName }).from(artistEngagements).innerJoin(users, eq(artistEngagements.artistId, users.id)).where(eq(artistEngagements.journeyId, id)).orderBy(desc(artistEngagements.createdAt)) : [];
+  const engagementRows = ["evenement", "mariage"].includes(j.situation) ? await db.select({ e: artistEngagements, name: users.displayName, full: users.fullName }).from(artistEngagements).innerJoin(users, eq(artistEngagements.artistId, users.id)).where(eq(artistEngagements.journeyId, id)).orderBy(desc(artistEngagements.createdAt)) : [];
   return {
-    journey: j, tasks, events, organisms: orgs, myDocs, project: project ?? null, myProjects,
+    journey: j, tasks, events, organisms: orgs, myDocs, project: project ?? null, myProjects, linkedCase: linkedCase ?? null,
     engagements: engagementRows.map((r) => ({ ...r.e, artistName: pub(r.name, r.full) })),
   };
 }
@@ -114,4 +116,62 @@ export async function getDocumentsHub(userId: number) {
     sharedWithMe: uniqueShared.map((d) => ({ id: d.id, filename: d.filename, ownerName: pub(d.owner, d.ownerFull) })),
     projectDocs, projectsForShare,
   };
+}
+
+/**
+ * Résumé personnel pour l'assistant (niveau 1) : uniquement des lectures sur
+ * les données du membre, sous une forme sérialisable pour le widget client.
+ */
+export async function getAssistantSummary(userId: number): Promise<AssistantSummary> {
+  const o = await getOverview(userId);
+  const rows = await db
+    .select({ id: cases.id, reference: cases.reference, title: cases.title, status: cases.status, journeyId: cases.journeyId })
+    .from(cases)
+    .where(eq(cases.memberId, userId))
+    .orderBy(desc(cases.updatedAt));
+  const transmittedJourneyIds = new Set(rows.map((r) => r.journeyId).filter((v): v is number => v != null));
+  return {
+    journeys: o.active.map((j) => ({
+      id: j.id, title: j.title, done: j.done, total: j.total, next: j.next?.label ?? null,
+      situation: j.situation,
+      nextTask: j.next ? { id: j.next.id, label: j.next.label, dueKind: j.next.dueKind } : null,
+      transmitted: transmittedJourneyIds.has(j.id),
+    })),
+    drafts: o.drafts.map((j) => ({ id: j.id, title: j.title, situation: j.situation, answers: j.answers })),
+    cases: rows,
+    dueTasks: o.dueTasks.map((t) => ({ label: t.label, dueAt: t.dueAt!.toISOString(), official: t.dueKind === "officielle", journeyId: t.journeyId })),
+    incoming: o.incomingRequests.length,
+    engagements: o.engagementsToAnswer.length,
+  };
+}
+
+/**
+ * Notifications d'échéances de parcours : à la première visite de l'espace où
+ * une échéance (officielle ou rappel personnel) tombe dans les 7 prochains
+ * jours — ou est dépassée — le membre reçoit une notification. Anti-doublon
+ * sans migration : titre + corps (qui contient la date) + lien identiques ne
+ * sont créés qu'une fois ; si l'échéance change, la nouvelle date produit un
+ * nouveau corps, donc une nouvelle notification.
+ */
+export async function ensureDeadlineNotifications(userId: number): Promise<number> {
+  const soon = new Date(Date.now() + 7 * 86400000);
+  const rows = await db
+    .select({ t: journeyTasks, title: journeys.title })
+    .from(journeyTasks)
+    .innerJoin(journeys, eq(journeyTasks.journeyId, journeys.id))
+    .where(and(eq(journeys.userId, userId), eq(journeys.status, "en_cours")));
+  const due = rows.filter((r) => r.t.dueAt && r.t.dueAt <= soon && !["termine", "effectue_declare"].includes(r.t.status));
+  let created = 0;
+  for (const r of due) {
+    const date = r.t.dueAt!.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    const title = `Échéance : ${r.t.label}`;
+    const body = `${date} — parcours « ${r.title} »${r.t.dueKind === "officielle" ? ` (échéance officielle — source : ${r.t.dueSource ?? "site officiel"})` : " (rappel personnel)"}.`;
+    const link = `/espace/demarches/suivi/${r.t.journeyId}`;
+    const [existing] = await db.select({ id: notifications.id }).from(notifications)
+      .where(and(eq(notifications.userId, userId), eq(notifications.title, title), eq(notifications.body, body), eq(notifications.link, link))).limit(1);
+    if (existing) continue;
+    await db.insert(notifications).values({ userId, title, body, link });
+    created++;
+  }
+  return created;
 }

@@ -1,9 +1,12 @@
 import { getCurrentUser } from "@/lib/auth";
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { messages, users } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
 import { Card, SectionTitle, EmptyState, formatDateTime } from "@/components/ui";
 import { ReplyForm } from "./reply-form";
+
+export const metadata: Metadata = { title: "Messages — Back-office AIME®" };
 
 export const dynamic = "force-dynamic";
 

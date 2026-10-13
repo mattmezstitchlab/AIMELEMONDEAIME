@@ -1,7 +1,10 @@
 import { getOrganisms } from "@/lib/journey-queries";
+import type { Metadata } from "next";
 import { SectionTitle, Card, formatDate } from "@/components/ui";
 import { ORGANISM_CATEGORY_LABEL } from "@/lib/situations";
 import { OrganismEditor } from "./organism-editor";
+
+export const metadata: Metadata = { title: "Organismes — Administration AIME®" };
 
 export const dynamic = "force-dynamic";
 

@@ -52,11 +52,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     entityId: doc.id,
   });
 
+  // Affichage intégré uniquement pour les formats sûrs (images, PDF) ;
+  // tout le reste est téléchargé, avec nosniff systématique.
+  const INLINE_SAFE = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+  const disposition = INLINE_SAFE.includes(doc.mimeType) ? "inline" : "attachment";
   return new Response(new Uint8Array(doc.content), {
     headers: {
       "Content-Type": doc.mimeType,
-      "Content-Disposition": `inline; filename="${encodeURIComponent(doc.filename)}"`,
+      "Content-Disposition": `${disposition}; filename="${encodeURIComponent(doc.filename)}"`,
       "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }

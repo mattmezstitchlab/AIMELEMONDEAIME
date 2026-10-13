@@ -1,8 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicPage } from "@/components/public-shell";
 import { getPersonProfile } from "@/lib/lma-queries";
 import { ACTION_LABELS } from "@/lib/lma";
+
+export const metadata: Metadata = { title: "Profil — Le Monde Aime" };
 
 export const dynamic = "force-dynamic";
 
@@ -12,12 +15,17 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   const p = await getPersonProfile(id);
   if (!p) notFound();
   return (
-    <PublicPage solidHeader lma>
+    <PublicPage solidHeader>
       <div className="bg-[#fafaf9]">
         <div className="mx-auto max-w-3xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/le-monde-aime" className="text-sm font-semibold text-emerald-800 underline">← Retour à la carte</Link>
           <header className="flex flex-wrap items-center gap-5 rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-            {p.hasPhoto ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/api/profil/${p.id}/photo`} alt="" className="h-24 w-24 rounded-full object-cover" /> : <span className="grid h-24 w-24 place-items-center rounded-full bg-emerald-50 text-3xl font-bold text-emerald-800" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>}
+            {p.hasPhoto ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
+                <img src={`/api/profil/${p.id}/photo`} alt="" className="h-24 w-24 rounded-full object-cover" />
+              </>
+            ) : <span className="grid h-24 w-24 place-items-center rounded-full bg-emerald-50 text-3xl font-bold text-emerald-800" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>}
             <div>
               {p.isDemo && <span className="mb-1 inline-block rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase text-slate-600">Profil fictif</span>}
               <h1 className="text-3xl font-bold text-slate-900">{p.name}</h1>

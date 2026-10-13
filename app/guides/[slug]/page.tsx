@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicPage } from "@/components/public-shell";
 import { Hero, LinkButton } from "@/components/ui";
@@ -9,6 +10,13 @@ import { eq } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const [article] = await db.select({ title: articles.title, summary: articles.summary }).from(articles).where(eq(articles.slug, slug)).limit(1);
+  if (!article) return { title: "Guide introuvable — AIME®" };
+  return { title: `${article.title} — AIME®`, description: article.summary };
+}
 
 export default async function GuideDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -25,7 +33,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
         subtitle={article.summary}
       />
       <article className="mx-auto max-w-3xl px-6 py-20">
-        <Link href="/guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
+        <Link href="/informations?vue=guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
           <Icon name="arrow" className="h-4 w-4 rotate-180" /> Retour aux guides
         </Link>
         <p className="mt-6 text-sm font-medium text-slate-500">Public concerné : {article.audience}</p>

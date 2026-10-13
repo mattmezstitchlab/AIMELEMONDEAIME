@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCaseDetail } from "@/lib/queries";
@@ -8,6 +9,8 @@ import { CaseForm } from "./case-form";
 import { DocumentUploader } from "@/components/document-uploader";
 import { CaseMessageForm } from "@/components/case-message-form";
 import { respondToMissingDocument } from "@/lib/actions/cases";
+
+export const metadata: Metadata = { title: "Ma démarche — AIME®" };
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +24,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   if (!detail) notFound();
   if (detail.item.memberId !== user.id) redirect("/espace/demarches");
 
-  const { item, procedureType, events, actorMap, caseDocuments } = detail;
+  const { item, procedureType, events, actorMap, caseDocuments, journey } = detail;
   const editable = item.status === "brouillon" || item.status === "piece_manquante";
 
   return (
@@ -29,11 +32,17 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       <Link href="/espace/demarches" className="text-sm font-medium text-emerald-800 hover:underline">← Mes démarches</Link>
       <SectionTitle
         image={THEME_META[procedureType?.category ?? ""]?.image ?? "/images/hero-campagne.jpg"}
-        eyebrow={`Dossier ${item.reference}`}
+        eyebrow={`Mes démarches · Dossier ${item.reference}`}
         title={item.title}
         description={procedureType?.description}
         actions={<StatusBadge status={item.status} onDark />}
       />
+      {journey && (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          Ce dossier fait suite à votre parcours guidé <strong>« {journey.title} »</strong> : vos étapes et vos pièces y ont été reprises, sans rien ressaisir.{" "}
+          <Link href={`/espace/demarches/suivi/${journey.id}`} className="font-bold underline">Revoir le parcours</Link>
+        </p>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">

@@ -36,7 +36,7 @@ export async function getCommunityExplorerData() {
     availableFrom: communityListings.availableFrom,
     availableUntil: communityListings.availableUntil,
     pickupDetails: communityListings.pickupDetails,
-    hasPhoto: communityListings.photoData,
+    hasPhoto: communityListings.photoMime,
     isDemo: communityListings.isDemo,
     createdAt: communityListings.createdAt,
     universes: communityListings.universes,

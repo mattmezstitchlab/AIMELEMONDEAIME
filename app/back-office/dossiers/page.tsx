@@ -1,8 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getOfficeCases } from "@/lib/queries";
-import { Card, SectionTitle, StatusBadge, EmptyState, formatDate } from "@/components/ui";
+import { Card, SectionTitle, StatusBadge, EmptyState, formatDate, daysSince } from "@/components/ui";
 import { CASE_STATUS_LABELS } from "@/lib/constants";
+import { RemindButton } from "./remind-button";
+
+export const metadata: Metadata = { title: "Dossiers — Back-office AIME®" };
 
 export const dynamic = "force-dynamic";
 
@@ -75,7 +79,9 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
                 <th scope="col" className="px-4 py-3">Adhérent</th>
                 <th scope="col" className="px-4 py-3">Démarche</th>
                 <th scope="col" className="px-4 py-3">Mis à jour</th>
+                <th scope="col" className="px-4 py-3">Attente</th>
                 <th scope="col" className="px-4 py-3">Statut</th>
+                <th scope="col" className="px-4 py-3">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -87,7 +93,17 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
                   <td className="px-4 py-3 text-slate-700">{c.memberName}</td>
                   <td className="px-4 py-3 text-slate-700">{c.title}</td>
                   <td className="px-4 py-3 text-slate-500">{formatDate(c.updatedAt)}</td>
+                  <td className="px-4 py-3">
+                    {c.status === "terminee" || c.status === "brouillon" ? (
+                      <span className="text-slate-400">—</span>
+                    ) : (
+                      <span className={`text-xs font-semibold ${daysSince(c.updatedAt) >= 14 ? "text-red-700" : daysSince(c.updatedAt) >= 7 ? "text-amber-700" : "text-slate-500"}`}>
+                        {daysSince(c.updatedAt)} j sans mouvement
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
+                  <td className="px-4 py-3">{c.status === "piece_manquante" ? <RemindButton caseId={c.id} compact /> : <span className="text-slate-400">—</span>}</td>
                 </tr>
               ))}
             </tbody>

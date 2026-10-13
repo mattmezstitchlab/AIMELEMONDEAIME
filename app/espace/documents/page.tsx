@@ -1,10 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getDocumentsHub } from "@/lib/journey-queries";
 import { Card, SectionTitle, Tag, EmptyState, formatDate } from "@/components/ui";
 import { DocumentUploader } from "@/components/document-uploader";
 import { ShareControls } from "@/components/espace/journey-ui";
 import { DeleteDocumentButton } from "./delete-button";
+
+export const metadata: Metadata = { title: "Mes documents — AIME®" };
 
 export const dynamic = "force-dynamic";
 

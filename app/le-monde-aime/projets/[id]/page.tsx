@@ -1,10 +1,16 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicPage } from "@/components/public-shell";
 import { getCurrentUser } from "@/lib/auth";
 import { getProjectDetail } from "@/lib/lma-queries";
+import { getWeddingWorkspace } from "@/lib/wedding-queries";
+import { weddingDayPassed } from "@/lib/wedding";
 import { UNIVERSE_LABEL } from "@/lib/lma";
 import { DocumentsPanel, JoinPanel, NeedsPanel, PendingMembers, ProgramEditor, ProjectChat, ReportContent, Section, StatusControl } from "@/components/community/project-panels";
+import { WeddingBudgetPanel, WeddingGuestsPanel, WeddingTablesPanel } from "@/components/community/wedding-panels";
+
+export const metadata: Metadata = { title: "Projet — Le Monde Aime" };
 
 export const dynamic = "force-dynamic";
 const fmt = (d: Date | null) => (d ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(d) : "");
@@ -17,8 +23,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const detail = await getProjectDetail(id, user?.id ?? null);
   if (!detail) notFound();
   const { project, viewer } = detail;
+  // Espace mariage (invités, budget) : réservé aux participants acceptés,
+  // noms et montants ne sont jamais exposés aux visiteurs du projet.
+  const wedding = viewer.isMember ? await getWeddingWorkspace(id) : null;
   return (
-    <PublicPage solidHeader lma>
+    <PublicPage solidHeader>
       <div className="bg-[#fafaf9]">
         <div className="mx-auto max-w-5xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/espace" className="text-sm font-semibold text-emerald-800 underline">← Mes liens</Link>
@@ -46,6 +55,40 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </Section>
 
           <Section title="Programme"><ProgramEditor projectId={id} program={project.program} editable={viewer.isOrganizer} /></Section>
+
+          {wedding && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4">
+              <div>
+                <p className="text-sm font-bold text-slate-900">La page du jour J est prête</p>
+                <p className="text-xs text-slate-600">Déroulé, plan de table, prestataires engagés et notes utiles, sur une page à imprimer pour les témoins.</p>
+              </div>
+              <Link href={`/le-monde-aime/projets/${id}/jour-j`} className="rounded-lg bg-rose-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-rose-800">Ouvrir la page du jour J</Link>
+            </div>
+          )}
+
+          {wedding && (
+            <div id="invites" className="scroll-mt-24">
+              <Section title="Invités du mariage" hint="La liste vit ici, partagée entre organisateurs : envois et réponses se notent au même endroit.">
+                <WeddingGuestsPanel projectId={id} guests={wedding.guests} stats={wedding.guestStats} invitesEstimes={wedding.invitesEstimes} weddingDate={wedding.weddingDate} weddingLieu={wedding.weddingLieu} apresMariage={project.status === "termine" || weddingDayPassed(wedding.weddingDate, new Date())} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
+              </Section>
+            </div>
+          )}
+
+          {wedding && (
+            <div id="plan-de-table" className="scroll-mt-24">
+              <Section title="Plan de table" hint="Il se dresse une fois le nombre de convives figé : les foyers confirmés, table par table, partageables avec les témoins qui accueilleront vos invités.">
+                <WeddingTablesPanel projectId={id} tables={wedding.tables} guests={wedding.guests} stats={wedding.tableStats} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
+              </Section>
+            </div>
+          )}
+
+          {wedding && (
+            <div id="budget" className="scroll-mt-24">
+              <Section title="Budget du mariage" hint={wedding.envelopeFromJourney ? "L'enveloppe vient de la réponse donnée dans votre parcours ; elle s'ajuste ici à tout moment." : "Prévu, devis confirmés et déjà réglé, poste par poste. Aucun paiement ne transite par AIME®."}>
+                <WeddingBudgetPanel projectId={id} items={wedding.budgetItems} stats={wedding.budgetStats} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
+              </Section>
+            </div>
+          )}
 
           <Section title="Participants">
             {viewer.isMember ? <ul className="flex flex-wrap gap-2">{detail.members.map((m) => <li key={m.userId} className="rounded-full bg-slate-100 px-3 py-1 text-sm">{m.name}{m.role === "organisateur" ? " · organisateur" : ""}</li>)}</ul> : <p className="text-sm text-slate-600">La liste des participants est réservée aux participants du projet.</p>}

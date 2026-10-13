@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
-import { Logo, PrototypeBanner } from "@/components/ui";
+import { Logo } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { getCurrentUser } from "@/lib/auth";
 import { BottomTabs } from "@/components/bottom-tabs";
@@ -12,13 +12,15 @@ const PRIMARY = [
 ];
 // Une seule page « S'informer » qui réunit toutes les thématiques et les guides.
 const INFORMER = [
-  { href: "/s-informer", label: "Tout voir" },
-  { href: "/s-informer#theme-sante", label: "Santé" },
-  { href: "/s-informer#theme-famille", label: "Famille" },
-  { href: "/s-informer#theme-logement", label: "Logement" },
-  { href: "/s-informer#theme-retraite", label: "Retraite" },
-  { href: "/s-informer#theme-emploi", label: "Emploi" },
-  { href: "/s-informer#theme-cotisations", label: "Activité et cotisations" },
+  { href: "/informations", label: "Tout voir" },
+  { href: "/informations/famille", label: "Famille" },
+  { href: "/informations/mariage", label: "Mariage" },
+  { href: "/informations/sante", label: "Santé" },
+  { href: "/informations/argent", label: "Argent et difficultés" },
+  { href: "/informations/logement", label: "Logement" },
+  { href: "/informations/retraite", label: "Retraite" },
+  { href: "/informations/emploi", label: "Emploi agricole" },
+  { href: "/informations/cotisations", label: "Activité et cotisations" },
 ];
 
 export async function PublicHeader({ solid = false }: { solid?: boolean }) {
@@ -27,7 +29,6 @@ export async function PublicHeader({ solid = false }: { solid?: boolean }) {
   const text = solid ? "text-slate-700 hover:text-emerald-800" : "text-white/85 hover:text-white";
   return (
     <header className={solid ? "relative z-30 border-b border-black/[0.06] bg-white" : "absolute inset-x-0 top-0 z-30"}>
-      <PrototypeBanner dark={!solid} />
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-8">
         <Link href="/" aria-label="AIME® — accueil">
           <Logo light={!solid} />
@@ -90,14 +91,18 @@ export function PublicFooter() {
           <Logo />
         </div>
         <nav aria-label="Liens de pied de page" className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-slate-600">
-          <Link href="/s-informer" className="font-semibold text-emerald-700 hover:underline">S&apos;informer</Link>
-          <Link href="/s-informer#theme-sante" className="hover:text-emerald-700">Santé</Link>
-          <Link href="/s-informer#theme-famille" className="hover:text-emerald-700">Famille</Link>
-          <Link href="/s-informer#theme-retraite" className="hover:text-emerald-700">Retraite</Link>
-          <Link href="/s-informer#theme-emploi" className="hover:text-emerald-700">Emploi agricole</Link>
+          <Link href="/informations" className="font-semibold text-emerald-700 hover:underline">S&apos;informer</Link>
+          <Link href="/informations/famille" className="hover:text-emerald-700">Famille</Link>
+          <Link href="/informations/mariage" className="hover:text-emerald-700">Mariage</Link>
+          <Link href="/informations/sante" className="hover:text-emerald-700">Santé</Link>
+          <Link href="/informations/argent" className="hover:text-emerald-700">Argent et difficultés</Link>
+          <Link href="/informations/logement" className="hover:text-emerald-700">Logement</Link>
+          <Link href="/informations/retraite" className="hover:text-emerald-700">Retraite</Link>
+          <Link href="/informations/emploi" className="hover:text-emerald-700">Emploi agricole</Link>
+          <Link href="/informations/cotisations" className="hover:text-emerald-700">Activité et cotisations</Link>
           <Link href="/accompagnement" className="hover:text-emerald-700">Accompagnement des démarches</Link>
           <Link href="/annuaire" className="hover:text-emerald-700">Points d&apos;accueil</Link>
-          <Link href="/decouvrir" className="hover:text-emerald-700">Découvrir l'espace (démo)</Link>
+          <Link href="/decouvrir" className="hover:text-emerald-700">Découvrir l&apos;espace (démo)</Link>
           <Link href="/vision" className="hover:text-emerald-700">Notre méthode et nos limites</Link>
           <Link href="/le-monde-aime" className="font-semibold text-emerald-700 hover:underline">Explorer la carte</Link>
           <Link href="/connexion" className="hover:text-emerald-700">Connexion</Link>
@@ -120,19 +125,47 @@ export function PublicFooter() {
   );
 }
 
-export function PublicPage({ children, solidHeader = false, lma = false }: { children: ReactNode; solidHeader?: boolean; lma?: boolean }) {
+export function PublicPage({ children, solidHeader = false }: { children: ReactNode; solidHeader?: boolean }) {
   return (
-    <div className={`flex min-h-screen flex-col bg-white ${lma ? "pb-16 md:pb-0" : ""}`}>
+    <div className="flex min-h-screen flex-col bg-white pb-16 md:pb-0">
       <PublicHeader solid={solidHeader} />
       <main id="contenu-principal" className="flex-1">
         {children}
       </main>
       <PublicFooter />
-      {lma && (
-        <Suspense fallback={null}>
-          <BottomTabs />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        <BottomTabs />
+      </Suspense>
+    </div>
+  );
+}
+
+/**
+ * Variante « authentification » de la coquille publique (chantier 5) :
+ * panneau visuel + formulaire, sans en-tête ni pied de page. Elle remplace
+ * l'ancienne troisième coquille (auth-split) — il n'en reste que deux :
+ * celle-ci (publique et ses variantes) et app-shell (espaces connectés).
+ */
+export function AuthSplit({ image, title, subtitle, children }: { image: string; title: string; subtitle: string; children: ReactNode }) {
+  return (
+    <div className="flex min-h-screen flex-col bg-white">
+      <div className="grid flex-1 lg:grid-cols-2">
+        <div className="relative isolate flex min-h-[320px] flex-col justify-between overflow-hidden p-8 lg:min-h-0 lg:p-12">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/65 via-black/25 to-black/15" />
+          <Link href="/" aria-label="Retour à l'accueil" className="relative z-20 self-start">
+            <Logo light />
+          </Link>
+          <div className="animate-fade-up relative z-20 max-w-md">
+            <h1 className="text-4xl font-bold leading-tight text-white lg:text-5xl">{title}</h1>
+            <p className="mt-4 text-lg text-white/85">{subtitle}</p>
+          </div>
+        </div>
+        <main id="contenu-principal" className="flex items-center justify-center px-6 py-14 sm:px-12">
+          <div className="w-full max-w-md">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }

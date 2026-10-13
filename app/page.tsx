@@ -4,32 +4,54 @@ import { Hero, LinkButton, FeatureIcon, Tag } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icon";
 import { db } from "@/db";
 import { articles, offices } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
-import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
+import { and, desc, eq, inArray, notInArray } from "drizzle-orm";
+import { ARTICLE_CATEGORY_LABELS, FEATURED_GUIDE_SLUGS, THEME_META } from "@/lib/constants";
 import { SITUATIONS } from "@/lib/situations";
 import { OrientationEntry } from "@/components/orientation-entry";
 
-const MOSAIC_TINT = "from-slate-950/85 via-slate-900/25 to-transparent";
+const MOSAIC_TINT = "from-slate-950/70 via-slate-900/20 to-transparent";
 
 const MOSAIC: Array<{ label: string; desc: string; href: string; image: string; icon: IconName }> = [
   { label: "Santé", desc: "Remboursements, arrêts de travail, prévention.", href: "/informations/sante", image: "/images/hero-sante.jpg", icon: "sante" },
   { label: "Famille", desc: "Naissance, union, séparation, prestations.", href: "/informations/famille", image: "/images/hero-famille.jpg", icon: "famille" },
+  { label: "Mariage", desc: "Le mariage de bout en bout : dossier, invités, budget, jour J.", href: "/informations/mariage", image: "/images/hero-mariage.jpg", icon: "heart" },
   { label: "Logement", desc: "Louer, être aidé, connaître ses droits.", href: "/informations/logement", image: "/images/hero-logement.jpg", icon: "logement" },
+  { label: "Argent et difficultés", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", href: "/informations/argent", image: "/images/hero-difficultes.jpg", icon: "paiements" },
   { label: "Retraite", desc: "Carrière, estimation, demande en ligne.", href: "/informations/retraite", image: "/images/hero-retraite.jpg", icon: "retraite" },
   { label: "Activité et cotisations", desc: "Créer, déclarer, cotiser.", href: "/informations/cotisations", image: "/images/hero-cotisations.jpg", icon: "cotisations" },
   { label: "Emploi", desc: "Embauche, recherche d'emploi, formation.", href: "/informations/emploi", image: "/images/hero-emploi.jpg", icon: "emploi" },
-  { label: "Terre & quotidien", desc: "Produits locaux, dons, prêts, trajets, jardins.", href: "/univers/terre", image: "/images/univers-terre.jpg", icon: "sprout" },
-  { label: "Arts & rencontres", desc: "Artistes, concerts, ateliers, lieux, matériel.", href: "/univers/arts", image: "/images/univers-arts.jpg", icon: "music" },
-  { label: "Savoirs & générations", desc: "Transmission, cuisine, couture, mémoire locale.", href: "/univers/savoirs", image: "/images/univers-savoirs.jpg", icon: "graduation" },
-  { label: "Événements et artistes", desc: "Organiser, engager un artiste, préparer.", href: "/univers/evenements", image: "/images/hero-accueil.jpg", icon: "calendar" },
-  { label: "Accompagner un proche", desc: "Autonomie, handicap, soutien aux aidants.", href: "/univers/aidants", image: "/images/hero-conseiller.jpg", icon: "heart" },
-  { label: "Vie administrative", desc: "Orientation et organismes de référence.", href: "/univers/administratif", image: "/images/hero-espace.jpg", icon: "shield" },
+  { label: "Terre & quotidien", desc: "Produits locaux, dons, prêts, trajets, jardins.", href: "/le-monde-aime?univers=terre", image: "/images/univers-terre.jpg", icon: "sprout" },
+  { label: "Arts & rencontres", desc: "Artistes, concerts, ateliers, lieux, matériel.", href: "/le-monde-aime?univers=arts", image: "/images/univers-arts.jpg", icon: "music" },
+  { label: "Savoirs & générations", desc: "Transmission, cuisine, couture, mémoire locale.", href: "/le-monde-aime?univers=savoirs", image: "/images/univers-savoirs.jpg", icon: "graduation" },
+  { label: "Événements et artistes", desc: "Organiser, engager un artiste, préparer.", href: "/le-monde-aime?univers=arts", image: "/images/hero-accueil.jpg", icon: "calendar" },
+  { label: "Accompagner un proche", desc: "Autonomie, handicap, soutien aux aidants.", href: "/accompagnement", image: "/images/hero-conseiller.jpg", icon: "heart" },
+  { label: "Vie administrative", desc: "Orientation et organismes de référence.", href: "/informations", image: "/images/hero-espace.jpg", icon: "shield" },
 ];
 
 export const dynamic = "force-dynamic";
 
+type ArticleRow = typeof articles.$inferSelect;
+
+function ArticleCard({ article }: { article: ArticleRow }) {
+  return (
+    <Link href={`/guides/${article.slug}`} className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.04] transition hover:-translate-y-1 hover:shadow-lg">
+      <div className="h-48 overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={THEME_META[article.category]?.image ?? "/images/hero-accueil.jpg"} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+      </div>
+      <div className="p-7">
+        <Tag>{ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}</Tag>
+        <h3 className="mt-4 text-lg font-semibold leading-snug text-[#1d1d1f]">{article.title}</h3>
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{article.summary}</p>
+      </div>
+    </Link>
+  );
+}
+
 export default async function HomePage() {
-  const latestArticles = await db.select().from(articles).where(eq(articles.isPublished, true)).orderBy(desc(articles.publishedAt)).limit(3);
+  const featuredRows = await db.select().from(articles).where(and(eq(articles.isPublished, true), inArray(articles.slug, [...FEATURED_GUIDE_SLUGS])));
+  const featuredArticles = FEATURED_GUIDE_SLUGS.map((slug) => featuredRows.find((a) => a.slug === slug)).filter((a): a is ArticleRow => Boolean(a));
+  const latestArticles = await db.select().from(articles).where(and(eq(articles.isPublished, true), notInArray(articles.slug, [...FEATURED_GUIDE_SLUGS]))).orderBy(desc(articles.publishedAt)).limit(3);
   const officeList = await db.select().from(offices);
 
   return (
@@ -39,18 +61,16 @@ export default async function HomePage() {
         image="/images/hero-accueil.jpg"
         eyebrow="AIME® · Le Monde Aime"
         title={<>La terre, les arts<br />et les générations.</>}
-        subtitle="Trouvez près de vous de quoi vivre, créer et transmettre. Vous expliquez votre situation : AIME® vous aide à trouver les personnes, les ressources et les démarches pour avancer."
-        actions={
-          <>
-            <LinkButton href="/inscription">
-              Créer mon espace
-              <Icon name="arrow" className="h-4 w-4" />
-            </LinkButton>
-            <LinkButton href="/le-monde-aime" variant="ghost">Explorer la carte</LinkButton>
-          </>
-        }
+        subtitle="Trouvez près de vous de quoi vivre, créer et transmettre. Dites votre situation : AIME® vous oriente vers les personnes, les ressources et les démarches pour avancer."
       >
         <div className="mt-8 max-w-xl"><OrientationEntry variant="hero" /></div>
+        <p className="mt-5 text-sm text-white/75">
+          <Link href="/inscription" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Créer mon espace</Link>
+          <span aria-hidden="true" className="mx-2 text-white/40">·</span>
+          <Link href="/decouvrir" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Découvrir la démo</Link>
+          <span aria-hidden="true" className="mx-2 text-white/40">·</span>
+          <Link href="/le-monde-aime" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Explorer la carte</Link>
+        </p>
       </Hero>
 
       <section className="bg-white">
@@ -74,11 +94,11 @@ export default async function HomePage() {
           {MOSAIC.map((t) => (
             <Link key={t.label} href={t.href} className="group relative isolate flex aspect-square flex-col justify-end overflow-hidden p-6 focus-visible:z-10 sm:p-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={t.image} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-              <div className={`absolute inset-0 -z-10 bg-gradient-to-t ${MOSAIC_TINT}`} />
-              <span className="mb-auto grid h-11 w-11 place-items-center rounded-xl bg-white/15 text-white backdrop-blur"><Icon name={t.icon} className="h-5 w-5" /></span>
-              <h3 className="text-xl font-bold leading-tight text-white sm:text-3xl">{t.label}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/85 sm:text-base">{t.desc}</p>
+              <img src={t.image} alt="" className="absolute inset-0 z-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+              <div className={`absolute inset-0 z-10 bg-gradient-to-t ${MOSAIC_TINT}`} />
+              <span className="relative z-20 mb-auto grid h-11 w-11 place-items-center rounded-xl bg-white/15 text-white backdrop-blur"><Icon name={t.icon} className="h-5 w-5" /></span>
+              <h3 className="relative z-20 text-xl font-bold leading-tight text-white sm:text-3xl">{t.label}</h3>
+              <p className="relative z-20 mt-2 text-sm leading-relaxed text-white/85 sm:text-base">{t.desc}</p>
             </Link>
           ))}
         </div>
@@ -115,27 +135,34 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {featuredArticles.length > 0 ? (
+        <section className="bg-white">
+          <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-700">Les guides essentiels</p>
+              <h2 className="mt-4 text-4xl font-bold leading-[1.1] text-[#1d1d1f] sm:text-5xl">Guides à la une.</h2>
+              <p className="mt-6 text-lg leading-relaxed text-slate-600">Un guide d&apos;entrée par grande thématique, choisi durablement : mariage, famille, santé, argent, logement, retraite.</p>
+            </div>
+            <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {featuredArticles.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section className="bg-[#fafaf9]">
         <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <h2 className="text-4xl font-bold text-[#1d1d1f] sm:text-5xl">Derniers guides.</h2>
-            <Link href="/guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
+            <Link href="/informations?vue=guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
               Tous les guides <Icon name="arrow" className="h-4 w-4" />
             </Link>
           </div>
           <div className="mt-14 grid gap-8 md:grid-cols-3">
             {latestArticles.map((article) => (
-              <Link key={article.id} href={`/guides/${article.slug}`} className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.04] transition hover:-translate-y-1 hover:shadow-lg">
-                <div className="h-48 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={THEME_META[article.category]?.image ?? "/images/hero-accueil.jpg"} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-                </div>
-                <div className="p-7">
-                  <Tag>{ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}</Tag>
-                  <h3 className="mt-4 text-lg font-semibold leading-snug text-[#1d1d1f]">{article.title}</h3>
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{article.summary}</p>
-                </div>
-              </Link>
+              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
         </div>

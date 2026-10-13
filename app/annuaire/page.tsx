@@ -1,9 +1,12 @@
 import { PublicPage } from "@/components/public-shell";
+import type { Metadata } from "next";
 import { Hero, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { db } from "@/db";
 import { offices } from "@/db/schema";
 import { ilike, or } from "drizzle-orm";
+
+export const metadata: Metadata = { title: "Annuaire des points d'accueil — AIME®", description: "Trouvez un point d'accueil près de chez vous." };
 
 export const dynamic = "force-dynamic";
 

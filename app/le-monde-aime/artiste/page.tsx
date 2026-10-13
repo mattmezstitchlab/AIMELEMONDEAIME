@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { PublicPage } from "@/components/public-shell";
 import { getCurrentUser } from "@/lib/auth";
@@ -9,6 +10,8 @@ import { ArtistForm, ArtistRequestActions } from "@/components/community/profile
 import { Section } from "@/components/community/project-panels";
 import { STATUS_LABEL, priceLabel } from "@/lib/lma";
 
+export const metadata: Metadata = { title: "Espace artiste — Le Monde Aime", description: "Artistes : présentez votre pratique et recevez des demandes d'engagement." };
+
 export const dynamic = "force-dynamic";
 
 export default async function ArtistePage() {
@@ -18,7 +21,7 @@ export default async function ArtistePage() {
   const engagements = await getArtistEngagements(user.id);
   const a = space.artist;
   return (
-    <PublicPage solidHeader lma>
+    <PublicPage solidHeader>
       <div className="bg-[#fafaf9]">
         <div className="mx-auto max-w-4xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/espace" className="text-sm font-semibold text-emerald-800 underline">← Mon espace</Link>
