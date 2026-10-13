@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { requireUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
-import { linkDocumentEvent } from "@/lib/actions/cases";
+import { linkDocumentEvent } from "@/lib/case-events";
 
 export type ActionResult = { ok: true; id?: number } | { ok: false; error: string };
 

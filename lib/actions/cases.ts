@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { cases, caseEvents, procedureTypes, users, notifications, documents } from "@/db/schema";
+import { cases, caseEvents, procedureTypes, users, notifications } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { requireUser, requireRole } from "@/lib/auth";
 import { generateCaseReference } from "@/lib/reference";
@@ -283,15 +283,6 @@ export async function caseworkerReply(caseId: number, message: string): Promise<
   }
 }
 
-export async function linkDocumentEvent(caseId: number, documentName: string, actorId: number) {
-  await db.insert(caseEvents).values({
-    caseId,
-    actorId,
-    type: "document_ajoute",
-    message: `Document ajouté : ${documentName}`,
-  });
-}
-
-export async function listOfficeDocumentsForCase(caseId: number) {
-  return db.select().from(documents).where(eq(documents.caseId, caseId));
-}
+// linkDocumentEvent vit dans "@/lib/case-events" (module serveur interne) :
+// ne jamais exporter d'helper sans contrôle d'accès depuis un fichier "use server",
+// chaque export devient un endpoint Server Action publiquement invocable.
