@@ -5,7 +5,7 @@ export const INTENT_KEYWORDS: Record<string, string[]> = {
   evenement: ["organiser une fete", "engager un artiste", "trouver musicien", "concert", "reception", "fete du village", "sono pour un evenement"],
   activite: ["creer mon activite", "monter mon entreprise", "micro entreprise", "devenir independant", "developper ma ferme", "statut professionnel", "devenir artisan"],
   emploi: ["chercher un emploi", "recherche de travail", "formation", "apprentissage", "reconversion", "chercher un stage", "retrouver du travail"],
-  mariage: ["organiser mon mariage", "organiser notre mariage", "preparer mon mariage", "je me marie", "nous nous marions", "je vais me marier", "futurs maries", "notre mariage", "mon mariage"],
+  mariage: ["organiser mon mariage", "organiser notre mariage", "preparer mon mariage", "je me marie", "nous nous marions", "je vais me marier", "futurs maries", "notre mariage", "mon mariage", "pour mon mariage", "pour notre mariage"],
   transmission: ["transmettre mon exploitation", "cesser mon activite", "arreter mon activite", "vendre ma ferme", "je pars et je transmets", "cessation d'activite", "transmettre mon entreprise"],
   recruteur: ["je recrute", "j'embauche", "embaucher un salarie", "je cherche un salarie", "recruter un saisonnier", "premiere embauche", "j'ai besoin d'un employe"],
   invalidite: ["je ne peux plus travailler", "invalidite", "pension d'invalidite", "handicap au travail", "rqth", "je suis inapte", "je ne peux plus exercer mon metier", "reconversion sante"],

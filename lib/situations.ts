@@ -134,7 +134,7 @@ export const SITUATIONS: Situation[] = [
     short: "Mariage complet",
     description: "Le mariage de bout en bout : dossier civil en mairie et ses délais, rétroplanning de la fête calculé depuis la date, prestataires et coordination dans un projet partagé — puis l'après-mariage enchaîné.",
     icon: "heart",
-    image: "/images/hero-famille.jpg",
+    image: "/images/hero-mariage.jpg",
     pilot: true,
     questions: [
       { key: "date", label: "Date du mariage", type: "date", required: true, why: "Tout le rétroplanning — réservations, dossier de mairie, bans — se calcule à rebours depuis cette date." },

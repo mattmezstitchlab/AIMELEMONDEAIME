@@ -374,3 +374,18 @@ les revues périodiques des règles et des liens d'organismes (section 3).
    sa confirmation et son test.
 5. **Fonds éditorial** en continu (guides des procédures), qui nourrit à la fois
    la recherche, les parcours et l'assistant.
+
+### Addendum de fusion (2026-08-10)
+
+L'arbre de travail restauré d'une session précédente portait une seconde
+rédaction du chantier ; la version distante a été retenue comme base et
+trois apports y ont été fusionnés : un **visuel dédié**
+`public/images/hero-mariage.jpg` (la tuile « Nous nous marions » l'utilise
+au lieu du visuel famille), les phrases de recherche de prestataires
+« pour mon/notre mariage » dans le lexique d'orientation (une demande de
+photographe « pour mon mariage » mène au parcours Mariage), et la
+**vérification indépendante** de ce tour : 23 tâches pour un mariage de
+120 invités (salle communale, traiteur, groupe, photographe), bans
+officiels au 09/06/2027 pour un mariage le 19/06/2027, mariage simple
+(domicile, fait maison, playlist) sans aucune tâche Guso, aucune
+régression de routage (« je suis en arrêt de travail » reste santé).
