@@ -1422,6 +1422,55 @@ export async function seedDatabase(db: NodePgDatabase) {
     },
   ]);
 
+  console.log("Création du fonds logement : 5 guides et articles publics…");
+  await db.insert(articles).values([
+    {
+      slug: "aide-au-logement-estimer-sans-se-tromper",
+      title: "Aide au logement : estimer, demander, signaler les changements",
+      category: "logement",
+      audience: "Locataires et futurs locataires",
+      summary: "Une estimation sur le simulateur, une décision par la CAF ou la MSA, et des changements à signaler sans tarder.",
+      content: "Les aides personnelles au logement sont versées par la CAF ou, pour le régime agricole, par la MSA. Leur montant dépend de votre loyer, de vos ressources et de la composition de votre foyer — c'est dire qu'aucun barème lu sur un forum ne peut vous donner « votre » montant.\n\nLe bon point de départ est le simulateur officiel de votre caisse : il donne une estimation à partir de votre situation du moment. Gardez en tête ce qu'elle est — une estimation. La décision vient ensuite, après instruction de votre demande et de vos justificatifs, et elle appartient à la caisse.\n\nUne fois l'aide en place, le travail n'est pas fini : signalez les changements sans tarder. Revenus qui baissent ou qui montent, entrée ou départ d'une personne du foyer, séparation, déménagement : la composition du foyer et les ressources conditionnent l'aide, et un changement signalé tôt évite les trop-perçus — ces sommes versées en trop qu'il faut ensuite rembourser, souvent au pire moment.\n\nEt si le loyer devient difficile à payer malgré l'aide, ne laissez pas l'impayé s'installer : notre guide « Loyer en retard : parler à son bailleur avant que ça s'aggrave » (thématique Argent et difficultés) décrit l'ordre des gestes, et le parcours « Je n'arrive pas à payer » de votre espace les prépare avec vous.\n\nDans votre espace AIME®, le parcours « Je cherche un logement » commence par l'estimation de l'aide et le conseil gratuit de l'ADIL, avant toute signature.",
+      kind: "guide",
+    },
+    {
+      slug: "dossier-de-location-solide-sans-trop-en-donner",
+      title: "Dossier de location : solide, sans trop en donner",
+      category: "logement",
+      audience: "Personnes qui cherchent un logement",
+      summary: "Les pièces qu'un bailleur peut demander sont listées par la loi — et celles qu'il ne peut pas exiger aussi.",
+      content: "Chercher un logement met vos papiers entre beaucoup de mains. Deux protections existent, et elles sont écrites dans la loi : la liste des pièces qu'un bailleur peut demander est fermée, et certaines pièces ne peuvent jamais être exigées.\n\nCôté pièces demandables, attendez-vous à : une pièce d'identité, un justificatif de domicile, des justificatifs d'activité (contrat de travail, attestation d'études…) et de ressources (avis d'imposition, fiches de paie…). Un dossier complet, propre et dans l'ordre se traite plus vite — préparez-le une fois, en copies.\n\nCôté pièces interdites : un bailleur ne peut pas vous demander de photo d'identité (hors celle de la pièce d'identité), de carte d'assuré social, de relevé de compte bancaire, de dossier médical, d'extrait de casier judiciaire ou d'attestation de « bonne tenue » de vos comptes. Si on vous les réclame, vous pouvez refuser poliment — l'ADIL de votre département confirme gratuitement ce qui est exigible dans votre cas.\n\nNe diffusez pas votre dossier partout : transmettez-le pour des logements réellement visités, et préférez les copies aux originaux. Un dossier « prêt à partir » n'a pas à devenir un dossier « parti partout ».\n\nEt si le bailleur demande un garant, sachez qu'une alternative existe : la garantie Visale, portée par Action Logement, gratuite pour le locataire comme pour le bailleur, sous conditions (salariés, jeunes, étudiants…). Notre article « Pas de garant ? La piste Visale et Action Logement » la présente.\n\nDans votre espace AIME®, le parcours « Je cherche un logement » prépare vos justificatifs de ressources et vous oriente vers l'ADIL avant la signature.",
+      kind: "guide",
+    },
+    {
+      slug: "bail-et-etat-des-lieux-ce-quil-faut-lire",
+      title: "Bail et état des lieux : ce qu'il faut lire avant de signer",
+      category: "logement",
+      audience: "Nouveaux locataires",
+      summary: "Deux documents qui vous engagent pour des années : dix minutes de lecture maintenant valent des mois de litige évités.",
+      content: "Le bail et l'état des lieux sont les deux documents qui raconteront votre location du premier au dernier jour. Ils se lisent avant de signer, pas le jour du départ.\n\nLe bail fixe l'essentiel : le loyer et les charges (et ce qu'elles couvrent), la durée, les conditions de révision, le dépôt de garantie — qui est encadré par la loi : en principe un mois de loyer hors charges pour un logement vide. Si une clause vous semble étrange, ou si le bailleur refuse le bail écrit, faites relire le document gratuitement par l'ADIL de votre département avant de vous engager : c'est exactement son rôle.\n\nL'état des lieux d'entrée se fait à l'amiable, gratuitement, en présence des deux parties (ou de leurs représentants). C'est une photographie écrite du logement : sols, murs, équipements, compteurs. Prenez le temps de tout noter, y compris les petits défauts, et de compléter par des photos datées. Ce qui n'est pas écrit à l'entrée pourra vous être reproché à la sortie ; ce qui l'est vous protège.\n\nL'état des lieux de sortie, des mois ou des années plus tard, sera comparé au premier, usure normale déduite. Les retenues sur le dépôt de garantie doivent correspondre à des dégradations constatées et justifiées — là encore, en cas de désaccord, l'ADIL informe gratuitement, et des voies de conciliation existent avant tout procès.\n\nDans votre espace AIME®, le parcours « Je cherche un logement » vous dirige vers ce conseil gratuit dès le départ : un bail relu avant signature est le litige le moins cher qui soit.",
+      kind: "guide",
+    },
+    {
+      slug: "logement-urgence-qui-appeler",
+      title: "Sans logement ou sur le point de le perdre : qui appeler, dans quel ordre",
+      category: "logement",
+      audience: "Personnes sans solution de logement",
+      summary: "Le CCAS de votre commune d'abord, le 115 en urgence immédiate : des portes réelles, sans promesse de place immédiate.",
+      content: "Si vous êtes sans logement ce soir, ou sur le point de perdre le vôtre, cet article ne vous promettra pas une place : il vous donne les portes qui existent, dans l'ordre où elles s'ouvrent le plus vite.\n\nEn urgence immédiate, le 115 est le numéro national gratuit de l'hébergement d'urgence, joignable tous les jours. L'appel ne crée pas une place par magie — les capacités sont limitées — mais il vous met en relation avec l'accueil et l'orientation de votre département, qui connaissent les places du soir même.\n\nDès que l'urgence immédiate est passée (ou en parallèle), le CCAS de votre commune est la porte d'entrée durable : il instruit les aides locales, connaît les associations du secteur, et peut appuyer vos demandes d'hébergement ou de logement. Les espaces France Services aident aussi à identifier les démarches et à constituer les dossiers.\n\nSi c'est un impayé de loyer qui menace votre logement, le plus tôt est le mieux : bailleur prévenu avant que le retard ne s'installe, aide au logement vérifiée auprès de la CAF ou de la MSA, conseil gratuit de l'ADIL sur vos droits et les démarches amiables. Notre guide « Loyer en retard : parler à son bailleur avant que ça s'aggrave » (thématique Argent et difficultés) détaille cet ordre des gestes.\n\nAucune de ces portes ne décide d'un logement à votre place, et les délais d'attente pour un logement durable peuvent être longs — c'est précisément pour cela qu'il faut ouvrir toutes les portes tôt, plutôt qu'une seule tard.\n\nDans votre espace AIME®, le parcours « Je cherche un logement » signale le CCAS comme premier contact en situation d'urgence, et transmet votre situation à votre bureau si vous le souhaitez.",
+      kind: "guide",
+    },
+    {
+      slug: "pas-de-garant-piste-visale-action-logement",
+      title: "Pas de garant ? La piste Visale et Action Logement",
+      category: "logement",
+      audience: "Locataires sans garant",
+      summary: "Une garantie gratuite portée par Action Logement peut remplacer le garant familial — sous conditions, à vérifier chez eux.",
+      content: "« Vous avez un garant ? » est souvent la première question d'un bailleur — et le premier obstacle quand la famille ne peut pas jouer ce rôle. Une alternative existe, encore trop peu connue : la garantie Visale.\n\nPortée par Action Logement, Visale est une garantie gratuite — pour le locataire comme pour le bailleur — qui couvre les loyers impayés pendant une partie du bail si vous ne pouvez plus payer. Pour le bailleur, elle vaut engagement d'un organisme solide ; pour vous, elle remplace le garant personne physique. Elle se demande en ligne, avant la signature du bail, et le bailleur doit l'accepter : vérifiez donc son accord avant de monter le dossier.\n\nQui peut en bénéficier ? Principalement les salariés (notamment en début d'emploi ou en mobilité), les jeunes et les étudiants, sous conditions détaillées sur le site d'Action Logement — c'est là, et seulement là, que votre éligibilité se vérifie. Aucune application tierce ne peut la décider pour vous.\n\nPlus largement, si vous êtes salarié d'une entreprise du secteur privé, Action Logement propose d'autres accompagnements liés au logement — aides, garanties, solutions de mobilité. Cela vaut un détour avant de conclure que « rien n'existe » pour votre situation.\n\nEt le garant « classique » reste possible : un proche qui s'engage par écrit, en connaissance de ce que cela signifie pour lui — un engagement réel, à ne demander ni à accepter à la légère.\n\nDans votre espace AIME®, le parcours « Je cherche un logement » vous oriente vers Action Logement lorsque vous êtes salarié du secteur privé, et vers l'ADIL pour relire les clauses du bail.",
+      kind: "article",
+    },
+  ]);
+
   console.log("Création de la carte : production locale et disponibilités…");
 
   // Points de production / présence déposés par des adhérents (données fictives).

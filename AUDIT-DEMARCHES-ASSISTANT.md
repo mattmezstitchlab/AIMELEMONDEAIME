@@ -838,3 +838,38 @@ d'origine (étapes agricoles, cumul emploi-retraite) ne sont pas dupliqués.
 **Vérifié** : insertion ciblée sans raz (42 contenus, 6 retraite), page
 thématique et 4 guides en 200 avec renvois au parcours, accueil ouvert sur
 le fonds ; typecheck et ESLint verts.
+
+## 6septdecies. Fonds éditorial « Se loger sans se faire piéger » (2026-10-13)
+
+**Demande** : le récit public du parcours logement, pour boucler la symétrie
+parcours ↔ éditorial des grands thèmes. Le parcours `logement` est un
+parcours d'orientation (socle mince : ADIL, estimation d'aide CAF/MSA, CCAS
+pour l'urgence, Action Logement pour les salariés) — le fonds reste dans ce
+socle, complété uniquement de protections locatives stables et écrites
+dans la loi. Catégorie `logement` existante : insert dédié (47 contenus en
+base, accueil ouvert sur ce fonds), aucun code modifié.
+
+**Les 5 contenus** : `aide-au-logement-estimer-sans-se-tromper` (estimation
+sur simulateur officiel ≠ décision de la caisse, changements à signaler
+pour éviter les trop-perçus, pont explicite vers le guide « loyer en
+retard » du fonds argent) ; `dossier-de-location-solide-sans-trop-en-donner`
+(la liste fermée des pièces demandables et celle des pièces interdites —
+photo, carte d'assuré social, relevé de compte, dossier médical, casier —
+le dossier qui se prépare une fois et ne se diffuse pas partout) ;
+`bail-et-etat-des-lieux-ce-quil-faut-lire` (dépôt de garantie encadré — un
+mois hors charges en logement vide, dit comme un plafond légal et non comme
+un montant d'aide — relecture gratuite par l'ADIL, état des lieux gratuit à
+l'amiable et photos datées) ; `logement-urgence-qui-appeler` (le 115 en
+urgence immédiate, le CCAS comme porte durable, « aucune promesse de
+place », les délais d'attente dits longs et donc les portes à ouvrir tôt) ;
+`pas-de-garant-piste-visale-action-logement` (Visale gratuite sous
+conditions, éligibilité vérifiable uniquement chez Action Logement, accord
+du bailleur à obtenir avant le dossier).
+
+**Discipline** : aucun montant d'aide, aucun délai d'attente chiffré, aucune
+éligibilité affirmée ; les deux articles logement du seed d'origine
+(aide exploitants, logement de fonction) ne sont pas dupliqués.
+
+**Vérifié** : insertion ciblée sans raz (47 contenus, 7 logement), page
+thématique et 5 guides en 200 avec renvois aux parcours et entre fonds,
+accueil ouvert sur le fonds ; typecheck et ESLint verts.
