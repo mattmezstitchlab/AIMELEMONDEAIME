@@ -65,6 +65,13 @@ L'accueil passerait de 12 tuiles mosaïque à 6 thématiques + 3 univers carte, 
 > Vérifié sur le build de production avec les deux familles de données réelles.
 > **Reste le temps 2 (fusion des données)** : faire « devenir » dossier un parcours transmis à un
 > bureau (lien `journeys → cases`, reprise des tâches et des pièces), au lieu de deux objets parallèles.
+> ⚠️ Constat à l'implémentation : ce temps 2 suppose une décision produit qui n'existe pas encore dans
+> l'app — aucune correspondance situation → procédure de bureau n'est définie (45 situations, dont
+> l'essentiel n'a pas d'équivalent « dossier »), et les parcours sont par conception **non transmis**
+> (promesse affichée au membre). Le coder aujourd'hui reviendrait à inventer une fonctionnalité, pas à
+> simplifier : il est donc **en attente d'une décision produit** (« veut-on pouvoir transmettre un
+> parcours à son bureau, et vers quelle procédure ? »). La façade unique du temps 1 rend ce branchement
+> possible le jour venu, sans rien changer pour le membre.
 
 C'est le doublon le plus coûteux. Deux modèles cohabitent et s'affichent **mélangés dans la même liste** `/espace/demarches` :
 les `cases` (dossiers formels instruits par le back-office : statuts, pièces, affectation) et les `journeys`
@@ -82,6 +89,17 @@ Trois endroits racontent la même vie relationnelle : `/espace/echanges` (mes de
 (projets, cercles, invitations), et `/espace/projets`. **Je garderais un seul « Mes échanges & projets »** dans l'espace,
 la carte ne conservant que « Explorer » et « Publier ». La navigation de l'espace passerait de 7 entrées à 5 :
 Aperçu · Démarches · Échanges & projets · Documents · Profil (la carte sort de la navigation membre, elle est dans l'en-tête public).
+
+### 4. Ne garder qu'un seul système d'aide (gain : moyen · effort : faible)
+
+> **Exécuté le 2026-08-10 (commit à suivre).** Le champ d'orientation de l'accueil (et ses deux autres
+> emplacements : `/accompagnement` et l'aperçu membre) ne cherche plus lui-même : c'est un simple
+> déclencheur qui ouvre l'assistant de navigation avec la question pré-remplie (événement
+> `aime:assistant:open`, déjà en place). La surface de recherche par mots-clés dupliquée — résultats en
+> ligne sous le champ — a disparu ; il ne reste qu'un seul moteur d'orientation, désormais rangé chez
+> son unique consommateur (`lib/assistant/orientation.ts`, utilisé par l'assistant). Le registre de
+> l'assistant (cible de surbrillance `orientation-entry`) suit la nouvelle description. Aucune réponse
+> ne change : l'assistant propose les mêmes parcours, avec les mêmes règles explicables.
 
 ### 4. Ne garder qu'un seul système d'aide (gain : moyen · effort : faible)
 Trois couches se recouvrent : le champ d'orientation de l'accueil (`OrientationEntry` + moteur `orientation.ts`),

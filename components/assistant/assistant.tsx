@@ -12,7 +12,7 @@ import {
   type Suggestion,
 } from "@/lib/assistant/registry";
 import { findScenario } from "@/lib/assistant/engine";
-import { matchSituation } from "@/lib/orientation";
+import { matchSituation } from "@/lib/assistant/orientation";
 import { Icon } from "@/components/icon";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 

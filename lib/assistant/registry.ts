@@ -58,7 +58,7 @@ export const ROUTES: RouteEntry[] = [
 export type TargetEntry = { id: string; label: string; description: string; roles?: AssistantRole[] };
 
 export const TARGETS: TargetEntry[] = [
-  { id: "orientation-entry", label: "Recherche par situation", description: "Décrivez votre besoin en quelques mots. Les résultats sont des parcours préparés, pas un diagnostic.", roles: ALL_ROLES },
+  { id: "orientation-entry", label: "Recherche par situation", description: "Décrivez votre besoin en quelques mots : l'assistant de navigation s'ouvre avec votre question et propose un parcours préparé, pas un diagnostic.", roles: ALL_ROLES },
   { id: "espace-quick-actions", label: "Accès rapides", description: "Les quatre raccourcis pour démarrer une démarche, déposer un document ou prendre rendez-vous.", roles: ["membre"] },
   { id: "espace-cases", label: "Liste des dossiers à traiter", description: "Chaque ligne renvoie vers le dossier concerné.", roles: ["membre"] },
   { id: "espace-activity", label: "Activité récente", description: "Les derniers événements de vos dossiers, du plus récent au plus ancien.", roles: ["membre"] },
