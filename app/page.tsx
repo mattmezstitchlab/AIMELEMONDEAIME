@@ -4,8 +4,8 @@ import { Hero, LinkButton, FeatureIcon, Tag } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icon";
 import { db } from "@/db";
 import { articles, offices } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
-import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
+import { and, desc, eq, inArray, notInArray } from "drizzle-orm";
+import { ARTICLE_CATEGORY_LABELS, FEATURED_GUIDE_SLUGS, THEME_META } from "@/lib/constants";
 import { SITUATIONS } from "@/lib/situations";
 import { OrientationEntry } from "@/components/orientation-entry";
 
@@ -14,7 +14,9 @@ const MOSAIC_TINT = "from-slate-950/70 via-slate-900/20 to-transparent";
 const MOSAIC: Array<{ label: string; desc: string; href: string; image: string; icon: IconName }> = [
   { label: "Santé", desc: "Remboursements, arrêts de travail, prévention.", href: "/informations/sante", image: "/images/hero-sante.jpg", icon: "sante" },
   { label: "Famille", desc: "Naissance, union, séparation, prestations.", href: "/informations/famille", image: "/images/hero-famille.jpg", icon: "famille" },
+  { label: "Mariage", desc: "Le mariage de bout en bout : dossier, invités, budget, jour J.", href: "/informations/mariage", image: "/images/hero-mariage.jpg", icon: "heart" },
   { label: "Logement", desc: "Louer, être aidé, connaître ses droits.", href: "/informations/logement", image: "/images/hero-logement.jpg", icon: "logement" },
+  { label: "Argent et difficultés", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", href: "/informations/argent", image: "/images/hero-difficultes.jpg", icon: "paiements" },
   { label: "Retraite", desc: "Carrière, estimation, demande en ligne.", href: "/informations/retraite", image: "/images/hero-retraite.jpg", icon: "retraite" },
   { label: "Activité et cotisations", desc: "Créer, déclarer, cotiser.", href: "/informations/cotisations", image: "/images/hero-cotisations.jpg", icon: "cotisations" },
   { label: "Emploi", desc: "Embauche, recherche d'emploi, formation.", href: "/informations/emploi", image: "/images/hero-emploi.jpg", icon: "emploi" },
@@ -28,8 +30,28 @@ const MOSAIC: Array<{ label: string; desc: string; href: string; image: string; 
 
 export const dynamic = "force-dynamic";
 
+type ArticleRow = typeof articles.$inferSelect;
+
+function ArticleCard({ article }: { article: ArticleRow }) {
+  return (
+    <Link href={`/guides/${article.slug}`} className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.04] transition hover:-translate-y-1 hover:shadow-lg">
+      <div className="h-48 overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={THEME_META[article.category]?.image ?? "/images/hero-accueil.jpg"} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+      </div>
+      <div className="p-7">
+        <Tag>{ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}</Tag>
+        <h3 className="mt-4 text-lg font-semibold leading-snug text-[#1d1d1f]">{article.title}</h3>
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{article.summary}</p>
+      </div>
+    </Link>
+  );
+}
+
 export default async function HomePage() {
-  const latestArticles = await db.select().from(articles).where(eq(articles.isPublished, true)).orderBy(desc(articles.publishedAt)).limit(3);
+  const featuredRows = await db.select().from(articles).where(and(eq(articles.isPublished, true), inArray(articles.slug, [...FEATURED_GUIDE_SLUGS])));
+  const featuredArticles = FEATURED_GUIDE_SLUGS.map((slug) => featuredRows.find((a) => a.slug === slug)).filter((a): a is ArticleRow => Boolean(a));
+  const latestArticles = await db.select().from(articles).where(and(eq(articles.isPublished, true), notInArray(articles.slug, [...FEATURED_GUIDE_SLUGS]))).orderBy(desc(articles.publishedAt)).limit(3);
   const officeList = await db.select().from(offices);
 
   return (
@@ -115,6 +137,23 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {featuredArticles.length > 0 ? (
+        <section className="bg-white">
+          <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-700">Les guides essentiels</p>
+              <h2 className="mt-4 text-4xl font-bold leading-[1.1] text-[#1d1d1f] sm:text-5xl">Guides à la une.</h2>
+              <p className="mt-6 text-lg leading-relaxed text-slate-600">Un guide d&apos;entrée par grande thématique, choisi durablement : mariage, famille, santé, argent, logement, retraite.</p>
+            </div>
+            <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {featuredArticles.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section className="bg-[#fafaf9]">
         <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
           <div className="flex flex-wrap items-end justify-between gap-6">
@@ -125,17 +164,7 @@ export default async function HomePage() {
           </div>
           <div className="mt-14 grid gap-8 md:grid-cols-3">
             {latestArticles.map((article) => (
-              <Link key={article.id} href={`/guides/${article.slug}`} className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.04] transition hover:-translate-y-1 hover:shadow-lg">
-                <div className="h-48 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={THEME_META[article.category]?.image ?? "/images/hero-accueil.jpg"} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-                </div>
-                <div className="p-7">
-                  <Tag>{ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}</Tag>
-                  <h3 className="mt-4 text-lg font-semibold leading-snug text-[#1d1d1f]">{article.title}</h3>
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{article.summary}</p>
-                </div>
-              </Link>
+              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
         </div>

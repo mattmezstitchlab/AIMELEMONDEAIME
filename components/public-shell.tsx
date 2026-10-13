@@ -13,11 +13,13 @@ const PRIMARY = [
 // Une seule page « S'informer » qui réunit toutes les thématiques et les guides.
 const INFORMER = [
   { href: "/informations", label: "Tout voir" },
-  { href: "/informations/sante", label: "Santé" },
   { href: "/informations/famille", label: "Famille" },
+  { href: "/informations/mariage", label: "Mariage" },
+  { href: "/informations/sante", label: "Santé" },
+  { href: "/informations/argent", label: "Argent et difficultés" },
   { href: "/informations/logement", label: "Logement" },
   { href: "/informations/retraite", label: "Retraite" },
-  { href: "/informations/emploi", label: "Emploi" },
+  { href: "/informations/emploi", label: "Emploi agricole" },
   { href: "/informations/cotisations", label: "Activité et cotisations" },
 ];
 
@@ -90,10 +92,14 @@ export function PublicFooter() {
         </div>
         <nav aria-label="Liens de pied de page" className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-slate-600">
           <Link href="/informations" className="font-semibold text-emerald-700 hover:underline">S&apos;informer</Link>
-          <Link href="/informations/sante" className="hover:text-emerald-700">Santé</Link>
           <Link href="/informations/famille" className="hover:text-emerald-700">Famille</Link>
+          <Link href="/informations/mariage" className="hover:text-emerald-700">Mariage</Link>
+          <Link href="/informations/sante" className="hover:text-emerald-700">Santé</Link>
+          <Link href="/informations/argent" className="hover:text-emerald-700">Argent et difficultés</Link>
+          <Link href="/informations/logement" className="hover:text-emerald-700">Logement</Link>
           <Link href="/informations/retraite" className="hover:text-emerald-700">Retraite</Link>
           <Link href="/informations/emploi" className="hover:text-emerald-700">Emploi agricole</Link>
+          <Link href="/informations/cotisations" className="hover:text-emerald-700">Activité et cotisations</Link>
           <Link href="/accompagnement" className="hover:text-emerald-700">Accompagnement des démarches</Link>
           <Link href="/annuaire" className="hover:text-emerald-700">Points d&apos;accueil</Link>
           <Link href="/decouvrir" className="hover:text-emerald-700">Découvrir l&apos;espace (démo)</Link>

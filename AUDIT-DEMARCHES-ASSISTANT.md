@@ -873,3 +873,31 @@ du bailleur à obtenir avant le dossier).
 **Vérifié** : insertion ciblée sans raz (47 contenus, 7 logement), page
 thématique et 5 guides en 200 avec renvois aux parcours et entre fonds,
 accueil ouvert sur le fonds ; typecheck et ESLint verts.
+
+## 6octodecies. Consolidation du hub : « Guides à la une » épinglés (2026-10-13)
+
+**Demande** : l'accueil affichait les « Derniers guides » par date de
+publication — il a donc changé d'identité à chacun des six fonds publiés
+(mariage, argent, famille, santé, retraite, logement). Stabiliser la vitrine.
+
+**À la une épinglée** : `FEATURED_GUIDE_SLUGS` dans `lib/constants.ts` — un
+guide d'entrée par grande thématique, choisi durablement et ordonné comme un
+récit : le mariage d'abord (la profondeur historique du produit), puis
+naissance, accident du travail, difficultés de paiement, aide au logement,
+relevé de carrière. L'accueil gagne une section « Guides à la une. » (six
+cartes, composant de carte factorisé) au-dessus des « Derniers guides », qui
+excluent désormais les épinglés pour éviter tout doublon et redeviennent ce
+qu'ils doivent être : les nouveautés.
+
+**Ordre des thématiques** : `THEME_META` et `ARTICLE_CATEGORY_LABELS`
+réordonnés dans le même ordre de vie (famille, mariage, santé, argent,
+logement, retraite, puis les thématiques agricoles historiques emploi et
+cotisations) ; la mosaïque de l'accueil gagne les deux tuiles qui y
+brillaient par leur absence — Mariage et Argent et difficultés ; le menu
+« S'informer » et le pied de page publics, codés en dur avec six anciennes
+thématiques, sont alignés sur les huit, dans le même ordre.
+
+**Vérifié** : accueil (à la une dans l'ordre voulu, derniers guides du
+fonds logement sans l'épinglé), tuiles du hub et navigation dans l'ordre
+famille → cotisations ; build de production, typecheck et ESLint verts.
+Aucune donnée modifiée : consolidation purement éditoriale et structurelle.
