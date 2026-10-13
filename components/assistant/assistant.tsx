@@ -14,9 +14,10 @@ import {
 import { findScenario } from "@/lib/assistant/engine";
 import { matchSituation } from "@/lib/assistant/orientation";
 import {
-  buildAgenda, buildPieces, buildPoint, findCaseAnswer, personalIntent,
-  type AssistantSummary, type PersonalAnswer,
+  buildAgenda, buildPieces, buildPoint, findCaseAnswer, personalIntent, writeIntent,
+  type AssistantAction, type AssistantSummary, type PersonalAnswer,
 } from "@/lib/assistant/personal";
+import { assistantCreateDraft, assistantSetReminder, assistantTransmit } from "@/lib/actions/assistant";
 import { Icon } from "@/components/icon";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 
@@ -26,13 +27,17 @@ type Turn = {
   text: string;
   chips?: Suggestion[];
   scenarioId?: string;
+  /** Assistant niveau 2 : écriture proposée, exécutée seulement après confirmation. */
+  action?: AssistantAction;
 };
+
+type ActionState = { status: "busy" | "done" | "cancelled" | "error"; message?: string };
 
 type Guide = { scenarioId: string; stepIndex: number };
 
 const OPEN_KEY = "assistant-open";
 
-export function AssistantWidget({ role, userName, summary }: { role: AssistantRole; userName: string | null; summary?: AssistantSummary | null }) {
+export function AssistantWidget({ role, userName, summary, canAct = false }: { role: AssistantRole; userName: string | null; summary?: AssistantSummary | null; canAct?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -40,6 +45,7 @@ export function AssistantWidget({ role, userName, summary }: { role: AssistantRo
   const [guide, setGuide] = useState<Guide | null>(null);
   const [input, setInput] = useState("");
   const [highlightLabel, setHighlightLabel] = useState<string | null>(null);
+  const [actionState, setActionState] = useState<Record<string, ActionState>>({});
   const panelRef = useRef<HTMLDivElement | null>(null);
   const threadRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -67,7 +73,9 @@ export function AssistantWidget({ role, userName, summary }: { role: AssistantRo
   const scenarios = useMemo(() => scenariosForRole(role), [role]);
 
   const pushTurn = useCallback((turn: Omit<Turn, "id">) => {
-    setTurns((previous) => [...previous, { ...turn, id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}` }]);
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setTurns((previous) => [...previous, { ...turn, id }]);
+    return id;
   }, []);
 
   // Élément actuellement ouvert, pour des réponses situées (assistant niveau 1).
@@ -89,10 +97,69 @@ export function AssistantWidget({ role, userName, summary }: { role: AssistantRo
     return null;
   }, [pathname, summary]);
 
+  // Parcours ouvert sur la page de suivi, pour les propositions situées.
+  const focusJourney = useMemo(() => {
+    if (!summary) return null;
+    const suivi = pathname.match(/^\/espace\/demarches\/suivi\/(\d+)/);
+    if (!suivi) return null;
+    return summary.journeys.find((item) => item.id === Number(suivi[1])) ?? null;
+  }, [pathname, summary]);
+
   const answerPersonal = useCallback((answer: PersonalAnswer) => {
     pushTurn({ from: "assistant", text: answer.text, chips: answer.chips });
   }, [pushTurn]);
   
+
+  // Après « Faire le point » sur un suivi : proposer un rappel sur la
+  // prochaine étape (jamais sur une échéance officielle, que le serveur
+  // refuserait de toute façon).
+  const proposeReminderIfUseful = useCallback(() => {
+    if (!canAct || !focusJourney?.nextTask || focusJourney.nextTask.dueKind === "officielle") return;
+    pushTurn({
+      from: "assistant",
+      text: `Je peux aussi poser un rappel personnel sur la prochaine étape de ce parcours : « ${focusJourney.nextTask.label} ».`,
+      action: { kind: "rappel", taskId: focusJourney.nextTask.id, journeyId: focusJourney.id, taskLabel: focusJourney.nextTask.label },
+    });
+  }, [canAct, focusJourney, pushTurn]);
+
+  async function executeAction(turn: Turn, dateChoice?: string) {
+    const action = turn.action;
+    if (!action || actionState[turn.id]?.status === "busy") return;
+    setActionState((previous) => ({ ...previous, [turn.id]: { status: "busy" } }));
+    try {
+      const result =
+        action.kind === "creer_brouillon"
+          ? await assistantCreateDraft(action.situation)
+          : action.kind === "rappel"
+            ? await assistantSetReminder(action.taskId, dateChoice ?? "")
+            : await assistantTransmit(action.journeyId);
+      if (!result.ok) {
+        setActionState((previous) => ({ ...previous, [turn.id]: { status: "error", message: result.error } }));
+        return;
+      }
+      setActionState((previous) => ({ ...previous, [turn.id]: { status: "done" } }));
+      const chips: Suggestion[] =
+        action.kind === "creer_brouillon" && result.id
+          ? [
+              { label: "Répondre aux questions", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${result.id}` },
+              { label: "Voir Mes démarches", kind: "link", href: "/espace/demarches" },
+            ]
+          : action.kind === "transmettre" && result.id
+            ? [
+                { label: "Ouvrir le dossier créé", kind: "link", href: `/espace/demarches/${result.id}` },
+                { label: "Voir Mes démarches", kind: "link", href: "/espace/demarches" },
+              ]
+            : [{ label: "Ouvrir le suivi du parcours", kind: "link", href: `/espace/demarches/suivi/${action.kind === "rappel" ? action.journeyId : ""}` }];
+      pushTurn({ from: "assistant", text: result.message, chips });
+      router.refresh();
+    } catch {
+      setActionState((previous) => ({ ...previous, [turn.id]: { status: "error", message: "L'action n'a pas abouti. Vous pouvez la refaire depuis les formulaires habituels." } }));
+    }
+  }
+
+  function cancelAction(turn: Turn) {
+    setActionState((previous) => ({ ...previous, [turn.id]: { status: "cancelled" } }));
+  }
 
   const clearHighlight = useCallback(() => {
     document.querySelectorAll("[data-assistant-highlight]").forEach((element) => {
@@ -232,12 +299,93 @@ export function AssistantWidget({ role, userName, summary }: { role: AssistantRo
       const intent = personalIntent(value);
       if (intent === "pieces") { answerPersonal(buildPieces(summary)); return; }
       if (intent === "agenda") { answerPersonal(buildAgenda(summary)); return; }
-      if (intent === "point") { answerPersonal(buildPoint(summary, focusLine)); return; }
+      if (intent === "point") { answerPersonal(buildPoint(summary, focusLine)); proposeReminderIfUseful(); return; }
+    }
+
+    // Assistant niveau 2 : une intention d'écriture produit une proposition
+    // à confirmer (carte ci-dessous), jamais une exécution directe.
+    if (summary && canAct) {
+      const wIntent = writeIntent(value);
+      if (wIntent === "transmettre") {
+        const candidate = focusJourney ?? summary.journeys.find((j) => !j.transmitted) ?? null;
+        if (!candidate) {
+          const deja = summary.journeys.find((j) => j.transmitted);
+          pushTurn({
+            from: "assistant",
+            text: deja
+              ? "Votre parcours transmis a déjà son dossier auprès de votre bureau : le suivi continue là-bas, je n'ai rien à transmettre de plus."
+              : summary.drafts.length
+                ? "Terminez d'abord le questionnaire de votre parcours : c'est lui qui préparera le dossier à transmettre."
+                : "Vous n'avez pas encore de parcours à transmettre. Commencez par en préparer un, par situation.",
+            chips: [{ label: "Mes démarches", kind: "link", href: "/espace/demarches" }],
+          });
+          return;
+        }
+        pushTurn({
+          from: "assistant",
+          text: `Je peux transmettre le parcours « ${candidate.title} » à votre bureau d'accompagnement. Il deviendra un dossier suivi par votre bureau, qui pourra vous demander des pièces. Le parcours restera consultable, et rien ne part vers un organisme extérieur.`,
+          action: { kind: "transmettre", journeyId: candidate.id, title: candidate.title },
+        });
+        return;
+      }
+      if (wIntent === "rappel") {
+        const focused = focusJourney?.nextTask && focusJourney.nextTask.dueKind !== "officielle" ? focusJourney : null;
+        const candidate = focused ?? summary.journeys.find((j) => j.nextTask && j.nextTask.dueKind !== "officielle") ?? null;
+        if (!candidate?.nextTask) {
+          pushTurn({
+            from: "assistant",
+            text: "Je ne vois pas d'étape ouverte sur laquelle poser un rappel pour le moment : soit vos parcours sont à jour, soit la prochaine étape porte une échéance officielle, qui ne se remplace pas. Ouvrez le suivi d'un parcours pour y voir plus clair.",
+            chips: [{ label: "Mes démarches", kind: "link", href: "/espace/demarches" }],
+          });
+          return;
+        }
+        pushTurn({
+          from: "assistant",
+          text: `Je peux poser un rappel personnel sur l'étape « ${candidate.nextTask.label} » du parcours « ${candidate.title} ».`,
+          action: { kind: "rappel", taskId: candidate.nextTask.id, journeyId: candidate.id, taskLabel: candidate.nextTask.label },
+        });
+        return;
+      }
     }
 
     const orientation = matchSituation(value);
     if ((role === "membre" || role === "visiteur") && orientation.kind === "single" && orientation.matches[0].score >= 12) {
       const situation = orientation.matches[0];
+      // Niveau 2 : au membre connecté, proposer de créer le brouillon tout de
+      // suite (toujours après confirmation sur la carte).
+      if (canAct && summary) {
+        const existingJourney = summary.journeys.find((j) => j.situation === situation.key);
+        if (existingJourney) {
+          pushTurn({
+            from: "assistant",
+            text: `Vous avez déjà un parcours « ${situation.label} » en cours (${existingJourney.done}/${existingJourney.total} étapes faites). Le plus utile est de le continuer.`,
+            chips: [
+              { label: "Ouvrir le suivi", kind: "link", href: `/espace/demarches/suivi/${existingJourney.id}` },
+              { label: "Toutes mes démarches", kind: "link", href: "/espace/demarches" },
+            ],
+          });
+          return;
+        }
+        const existingDraft = summary.drafts.find((d) => d.situation === situation.key);
+        if (existingDraft) {
+          pushTurn({
+            from: "assistant",
+            text: `Vous aviez déjà commencé « ${situation.label} » : votre brouillon vous attend, rien à recréer.`,
+            chips: [
+              { label: "Reprendre le brouillon", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${existingDraft.id}` },
+              { label: "Comprendre ce parcours", kind: "link", href: `/accompagnement?besoin=${encodeURIComponent(situation.key)}` },
+            ],
+          });
+          return;
+        }
+        pushTurn({
+          from: "assistant",
+          text: `Votre formulation semble concerner « ${situation.label} ». ${situation.explanation}`,
+          action: { kind: "creer_brouillon", situation: situation.key, situationLabel: situation.label },
+          chips: [{ label: "Comprendre ce parcours d'abord", kind: "link", href: `/accompagnement?besoin=${encodeURIComponent(situation.key)}` }],
+        });
+        return;
+      }
       pushTurn({
         from: "assistant",
         text: `Votre formulation semble concerner « ${situation.label} ». ${situation.explanation} Je ne transmets aucune donnée à un organisme.`,
@@ -341,6 +489,64 @@ export function AssistantWidget({ role, userName, summary }: { role: AssistantRo
     return () => window.removeEventListener("keydown", handler);
   }, [open]);
 
+  function dateIn(days: number) {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+
+  /** Carte de confirmation d'une écriture (assistant niveau 2). */
+  function renderActionCard(turn: Turn) {
+    const action = turn.action;
+    if (!action) return null;
+    const state = actionState[turn.id];
+    if (state?.status === "cancelled") {
+      return <p className="px-1 text-xs text-slate-500">D&apos;accord, je ne fais rien. Vous pourrez toujours le faire depuis les pages habituelles.</p>;
+    }
+    if (state?.status === "done") return null;
+    const busy = state?.status === "busy";
+    const btn = "rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50";
+    return (
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-3.5 py-3">
+        {state?.status === "error" && (
+          <p className="mb-2 text-xs font-medium text-red-700">{state.message}</p>
+        )}
+        {action.kind === "creer_brouillon" && (
+          <>
+            <p className="text-sm font-semibold text-emerald-950">Créer le brouillon « {action.situationLabel} » ?</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Je crée un brouillon vide dans Mes démarches. Aucune donnée n&apos;est envoyée : vous répondrez aux questions ensuite, à votre rythme, avec la possibilité de tout relire avant la moindre transmission.</p>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "Création…" : "Oui, créer le brouillon"}</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
+            </div>
+          </>
+        )}
+        {action.kind === "rappel" && (
+          <>
+            <p className="text-sm font-semibold text-emerald-950">Poser un rappel pour « {action.taskLabel} » ?</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Rappel personnel, sans valeur officielle : vous recevrez une notification ici à l&apos;approche de la date.</p>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(1))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "En cours…" : "Demain"}</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(3))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>Dans 3 jours</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(7))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>Dans 1 semaine</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
+            </div>
+          </>
+        )}
+        {action.kind === "transmettre" && (
+          <>
+            <p className="text-sm font-semibold text-emerald-950">Transmettre « {action.title} » à votre bureau ?</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Confirmation définitive : un dossier sera créé et suivi par votre bureau d&apos;accompagnement, à partir des réponses que vous avez relues dans ce parcours. Rien ne part vers un organisme extérieur, et le parcours reste consultable.</p>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "Transmission…" : "Oui, transmettre à mon bureau"}</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
   const totalSteps = guide ? scenarios.find((item) => item.id === guide.scenarioId)?.steps.length ?? 0 : 0;
   const lastSuggestions = displayTurns.length > 0 ? displayTurns[displayTurns.length - 1].chips : undefined;
 
@@ -418,10 +624,13 @@ export function AssistantWidget({ role, userName, summary }: { role: AssistantRo
 
           <div ref={threadRef} className="flex-1 space-y-3 overflow-y-auto bg-[#fafaf9] px-4 py-4" aria-live="polite">
             {displayTurns.map((turn) => (
-              <div key={turn.id} className={`flex ${turn.from === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-emerald-800 text-white" : "bg-white text-slate-800 shadow-sm"}`}>
-                  {turn.text}
+              <div key={turn.id} className="space-y-2">
+                <div className={`flex ${turn.from === "user" ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[85%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-emerald-800 text-white" : "bg-white text-slate-800 shadow-sm"}`}>
+                    {turn.text}
+                  </div>
                 </div>
+                {turn.action && canAct && renderActionCard(turn)}
               </div>
             ))}
             {lastSuggestions && !guide && (
@@ -441,7 +650,7 @@ export function AssistantWidget({ role, userName, summary }: { role: AssistantRo
               {summary && (
                 <button
                   type="button"
-                  onClick={() => { pushTurn({ from: "user", text: "Faire le point sur mes démarches" }); answerPersonal(buildPoint(summary, focusLine)); }}
+                  onClick={() => { pushTurn({ from: "user", text: "Faire le point sur mes démarches" }); answerPersonal(buildPoint(summary, focusLine)); proposeReminderIfUseful(); }}
                   className="rounded-full border border-emerald-700 bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-900"
                 >
                   Faire le point sur mes démarches
@@ -472,9 +681,11 @@ export function AssistantWidget({ role, userName, summary }: { role: AssistantRo
               <PrimaryButton type="submit" className="!px-3 !py-2 text-xs">Envoyer</PrimaryButton>
             </form>
             <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
-              {summary
-                ? "Je peux faire le point sur vos démarches depuis vos données. Je ne modifie rien : aucune action n'est effectuée sans votre validation dans les formulaires habituels."
-                : "Aide à la navigation uniquement. Aucune réponse réglementaire n'est inventée et aucune action n'est effectuée sans votre validation dans les formulaires habituels."}
+              {canAct
+                ? "Avec votre confirmation explicite, je peux créer un brouillon, poser un rappel ou transmettre un parcours à votre bureau d'accompagnement. Je ne décide jamais d'un droit, ne calcule aucun montant et n'envoie rien à un organisme extérieur."
+                : summary
+                  ? "Je peux faire le point sur vos démarches depuis vos données. Je ne modifie rien : aucune action n'est effectuée sans votre validation dans les formulaires habituels."
+                  : "Aide à la navigation uniquement. Aucune réponse réglementaire n'est inventée et aucune action n'est effectuée sans votre validation dans les formulaires habituels."}
             </p>
           </div>
         </div>

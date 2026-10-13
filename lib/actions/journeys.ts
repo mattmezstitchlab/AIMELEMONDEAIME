@@ -404,12 +404,85 @@ const SITUATION_PROCEDURE_SLUG: Record<string, string> = {
   recruteur: "embauche-salarie-agricole",
 };
 
+export type TransmitJourneyResult =
+  | { ok: true; caseId: number; reference: string; already: boolean }
+  | { ok: false; error: string };
+
 /**
- * Transmettre son parcours à son bureau d'accompagnement : le parcours
- * « devient » un dossier instruit (un seul objet suit le membre, pas de
- * doublon). Idempotent : un parcours déjà transmis renvoie à son dossier.
- * Le parcours reste consultable ; ses pièces sont rattachées au dossier.
+ * Cœur de la transmission d'un parcours au bureau d'accompagnement (sans
+ * redirection) : utilisé par le formulaire de la page de suivi et par
+ * l'assistant niveau 2, qui ne l'appelle qu'après confirmation explicite.
+ * Le parcours « devient » un dossier instruit (un seul objet suit le membre,
+ * pas de doublon) et reste consultable ; ses pièces sont rattachées au
+ * dossier. Idempotent : un parcours déjà transmis renvoie son dossier.
  */
+export async function transmitJourneyCore(journeyId: number, user: { id: number; officeId: number | null }): Promise<TransmitJourneyResult> {
+  const journey = await ownJourney(journeyId, user.id);
+  if (!journey) return { ok: false, error: "Parcours introuvable." };
+  if (journey.status === "questionnaire") {
+    return { ok: false, error: "Terminez d'abord le questionnaire : c'est lui qui préparera votre dossier." };
+  }
+
+  const [existing] = await db.select({ id: cases.id, reference: cases.reference }).from(cases).where(eq(cases.journeyId, journeyId)).limit(1);
+  if (existing) return { ok: true, caseId: existing.id, reference: existing.reference, already: true };
+
+  const slug = SITUATION_PROCEDURE_SLUG[journey.situation] ?? "parcours-transmis";
+  const [procedure] = await db.select().from(procedureTypes).where(eq(procedureTypes.slug, slug)).limit(1);
+  if (!procedure) return { ok: false, error: "La transmission n'est pas disponible pour le moment." };
+
+  const tasks = await db.select().from(journeyTasks).where(eq(journeyTasks.journeyId, journeyId)).orderBy(asc(journeyTasks.sortOrder), asc(journeyTasks.id));
+  const actions = tasks.filter((t) => t.kind === "action");
+  const done = actions.filter((t) => ["termine", "effectue_declare"].includes(t.status)).length;
+  const next = actions.find((t) => !["termine", "effectue_declare"].includes(t.status));
+  const pieceDocIds = Array.from(new Set(tasks.map((t) => t.documentId).filter((v): v is number => !!v)));
+
+  // Reprise des réponses dont le nom correspond à un champ du dossier ;
+  // le résumé du parcours nourrit la procédure générique.
+  const data: Record<string, string> = {};
+  for (const field of procedure.fields) {
+    if (journey.answers[field.name]) data[field.name] = journey.answers[field.name];
+  }
+  if (slug === "parcours-transmis" && journey.summary && !data.resume) data.resume = journey.summary;
+
+  const reference = generateCaseReference();
+  const [created] = await db.insert(cases).values({
+    reference,
+    memberId: user.id,
+    procedureTypeId: procedure.id,
+    journeyId,
+    officeId: user.officeId ?? null,
+    status: "envoyee",
+    title: journey.title,
+    data,
+    requestedDocuments: [],
+    submittedAt: new Date(),
+  }).returning();
+
+  await db.insert(caseEvents).values({
+    caseId: created.id,
+    actorId: user.id,
+    type: "creation",
+    message: `Dossier créé par transmission du parcours « ${journey.title} » : ${done}/${actions.length} étapes faites${next ? `, prochaine étape restée en attente : « ${next.label} »` : ""}${pieceDocIds.length ? `, ${pieceDocIds.length} pièce(s) reprise(s) du parcours` : ""}.`,
+  });
+  await db.insert(caseEvents).values({
+    caseId: created.id,
+    actorId: user.id,
+    type: "soumission",
+    message: "Transmis au bureau d'accompagnement depuis le parcours guidé. Le suivi continue ici ; le parcours reste consultable.",
+  });
+
+  // Les pièces préparées dans le parcours sont rattachées au dossier.
+  if (pieceDocIds.length) {
+    await db.update(documents).set({ caseId: created.id }).where(and(inArray(documents.id, pieceDocIds), eq(documents.ownerId, user.id)));
+  }
+
+  await log(journeyId, user.id, `Parcours transmis à votre bureau d'accompagnement — dossier ${reference}. Le suivi continue dans le dossier.`);
+  await logAudit({ actorId: user.id, action: "transmission_parcours", entityType: "journey", entityId: journeyId, metadata: { dossier: reference } });
+  revalidatePath("/espace/demarches");
+  return { ok: true, caseId: created.id, reference, already: false };
+}
+
+/** Formulaire de la page de suivi : délègue au cœur, puis redirige comme avant. */
 export async function transmitJourneyToBureau(formData: FormData) {
   const journeyId = Number(formData.get("journeyId"));
   if (!Number.isSafeInteger(journeyId)) redirect("/espace/demarches");
@@ -421,69 +494,12 @@ export async function transmitJourneyToBureau(formData: FormData) {
     redirect("/connexion");
   }
 
-  const journey = await ownJourney(journeyId, user!.id);
-  if (!journey) redirect("/espace/demarches");
-  if (journey!.status === "questionnaire") {
-    redirect(`/espace/demarches/suivi/${journeyId}?erreur=${encodeURIComponent("Terminez d'abord le questionnaire : c'est lui qui préparera votre dossier.")}`);
+  const result = await transmitJourneyCore(journeyId, user!);
+  if (!result.ok) {
+    if (result.error.startsWith("Terminez d'abord")) {
+      redirect(`/espace/demarches/suivi/${journeyId}?erreur=${encodeURIComponent(result.error)}`);
+    }
+    redirect("/espace/demarches");
   }
-
-  const [existing] = await db.select({ id: cases.id }).from(cases).where(eq(cases.journeyId, journeyId)).limit(1);
-  if (existing) redirect(`/espace/demarches/${existing.id}`);
-
-  const slug = SITUATION_PROCEDURE_SLUG[journey!.situation] ?? "parcours-transmis";
-  const [procedure] = await db.select().from(procedureTypes).where(eq(procedureTypes.slug, slug)).limit(1);
-  if (!procedure) {
-    redirect(`/espace/demarches/suivi/${journeyId}?erreur=${encodeURIComponent("La transmission n'est pas disponible pour le moment.")}`);
-  }
-
-  const tasks = await db.select().from(journeyTasks).where(eq(journeyTasks.journeyId, journeyId)).orderBy(asc(journeyTasks.sortOrder), asc(journeyTasks.id));
-  const actions = tasks.filter((t) => t.kind === "action");
-  const done = actions.filter((t) => ["termine", "effectue_declare"].includes(t.status)).length;
-  const next = actions.find((t) => !["termine", "effectue_declare"].includes(t.status));
-  const pieceDocIds = Array.from(new Set(tasks.map((t) => t.documentId).filter((v): v is number => !!v)));
-
-  // Reprise des réponses dont le nom correspond à un champ du dossier ;
-  // le résumé du parcours nourrit la procédure générique.
-  const data: Record<string, string> = {};
-  for (const field of procedure!.fields) {
-    if (journey!.answers[field.name]) data[field.name] = journey!.answers[field.name];
-  }
-  if (slug === "parcours-transmis" && journey!.summary && !data.resume) data.resume = journey!.summary;
-
-  const reference = generateCaseReference();
-  const [created] = await db.insert(cases).values({
-    reference,
-    memberId: user!.id,
-    procedureTypeId: procedure!.id,
-    journeyId,
-    officeId: user!.officeId ?? null,
-    status: "envoyee",
-    title: journey!.title,
-    data,
-    requestedDocuments: [],
-    submittedAt: new Date(),
-  }).returning();
-
-  await db.insert(caseEvents).values({
-    caseId: created.id,
-    actorId: user!.id,
-    type: "creation",
-    message: `Dossier créé par transmission du parcours « ${journey!.title} » : ${done}/${actions.length} étapes faites${next ? `, prochaine étape restée en attente : « ${next.label} »` : ""}${pieceDocIds.length ? `, ${pieceDocIds.length} pièce(s) reprise(s) du parcours` : ""}.`,
-  });
-  await db.insert(caseEvents).values({
-    caseId: created.id,
-    actorId: user!.id,
-    type: "soumission",
-    message: "Transmis au bureau d'accompagnement depuis le parcours guidé. Le suivi continue ici ; le parcours reste consultable.",
-  });
-
-  // Les pièces préparées dans le parcours sont rattachées au dossier.
-  if (pieceDocIds.length) {
-    await db.update(documents).set({ caseId: created.id }).where(and(inArray(documents.id, pieceDocIds), eq(documents.ownerId, user!.id)));
-  }
-
-  await log(journeyId, user!.id, `Parcours transmis à votre bureau d'accompagnement — dossier ${reference}. Le suivi continue dans le dossier.`);
-  await logAudit({ actorId: user!.id, action: "transmission_parcours", entityType: "journey", entityId: journeyId, metadata: { dossier: reference } });
-  revalidatePath("/espace/demarches");
-  redirect(`/espace/demarches/${created.id}`);
+  redirect(`/espace/demarches/${result.caseId}`);
 }

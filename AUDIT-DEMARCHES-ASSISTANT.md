@@ -267,7 +267,42 @@ guidée, aucun résumé pour les visiteurs. Vigilance notée : le résumé est c
 le trafic le justifie. Restent ouverts : niveau 2 (exécution avec confirmation),
 P1 démarches (parcours Santé, échéances officielles + notifications).
 
-## 6. Ordre de chantier recommandé
+## 6bis. Niveau 2 de l'assistant — exécuté le 2026-08-10 (commit à suivre)
+
+L'assistant peut désormais **exécuter trois écritures, uniquement après
+confirmation explicite** sur une carte dédiée dans la conversation (rien ne
+part d'un simple message) :
+- **créer un brouillon de parcours** quand une situation est reconnue avec
+  confiance (dédupliqué : un brouillon ou un parcours existant est repris,
+  jamais recréé) ;
+- **poser un rappel personnel** sur la prochaine étape d'un parcours
+  (demain, 3 jours, 1 semaine ; jamais sur une échéance officielle, que le
+  serveur refuse de toute façon) ;
+- **transmettre un parcours à son bureau d'accompagnement** (le cœur de la
+  transmission a été extrait du formulaire de suivi et est partagé avec
+  l'assistant ; idempotent, le dossier créé est ouvert dans la foulée).
+
+Garde-fous, dans l'ordre : le widget ne propose ces actions qu'à un membre
+réel (`canAct` calculé côté serveur ; la visite guidée reste en lecture
+seule) ; chaque action revérifie le rôle, refuse la session de démonstration
+et délègue aux actions serveur existantes, qui revérifient la propriété ;
+chaque exécution est tracée au journal d'audit avec la provenance
+`assistant_niveau_2`. Lignes rouges inchangées : aucune décision de droit,
+aucun montant, aucun envoi à un organisme extérieur — la transmission vise
+le bureau du membre uniquement. Après exécution, la conversation se
+rafraîchit (`router.refresh`) : le résumé relu reflète la nouvelle réalité,
+et une seconde demande identique obtient « déjà fait » plutôt qu'un doublon.
+Vérifié : intentions d'écriture testées directement, résumé enrichi
+(`nextTask`, `transmitted`, situations) présent dans le widget du membre,
+absent chez le visiteur. Limite connue du banc d'essai (voir
+SIMPLIFICATION.md) : l'exécution navigateur d'un POST ne se simule pas en
+curl contre PGlite — le code suit le motif éprouvé des formulaires, avec
+double revérification serveur.
+
+Restent ouverts : le fonds éditorial (12 contenus publics) en continu, et
+les revues périodiques des règles et des liens d'organismes (section 3).
+
+## 7. Ordre de chantier recommandé
 
 1. **Assistant niveau 1** (synthèse personnelle, échéances, références) — le
    meilleur rapport valeur/risque : aucune écriture, l'assistant devient

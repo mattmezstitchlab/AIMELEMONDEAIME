@@ -9,13 +9,34 @@ import { normalizeOrientation } from "@/lib/assistant/orientation";
  * résumé (chargé côté serveur) en réponses et en liens profonds.
  */
 export type AssistantSummary = {
-  journeys: { id: number; title: string; done: number; total: number; next: string | null }[];
-  drafts: { id: number; title: string }[];
+  journeys: {
+    id: number; title: string; done: number; total: number; next: string | null;
+    /** Situation du parcours (clé des règles) — niveau 2 : déduplication. */
+    situation: string;
+    /** Prochaine étape ouverte : cible des rappels proposés par l'assistant. */
+    nextTask: { id: number; label: string; dueKind: string | null } | null;
+    /** Vrai quand le parcours a déjà été transmis au bureau (dossier créé). */
+    transmitted: boolean;
+  }[];
+  drafts: { id: number; title: string; situation: string }[];
   cases: { id: number; reference: string; title: string; status: string }[];
   dueTasks: { label: string; dueAt: string; official: boolean; journeyId: number }[];
   incoming: number;
   engagements: number;
 };
+
+/**
+ * Assistant niveau 2 : actions d'écriture que l'assistant peut PROPOSER.
+ * Elles ne sont jamais exécutées sans un clic explicite sur la carte de
+ * confirmation (voir le widget), et chacune repasse par les actions serveur
+ * existantes, qui revérifient les droits. Lignes rouges inchangées : aucune
+ * décision de droit, aucun montant, aucun envoi à un organisme extérieur —
+ * la transmission vise le bureau d'accompagnement, seul destinataire.
+ */
+export type AssistantAction =
+  | { kind: "creer_brouillon"; situation: string; situationLabel: string }
+  | { kind: "rappel"; taskId: number; journeyId: number; taskLabel: string }
+  | { kind: "transmettre"; journeyId: number; title: string };
 
 export type PersonalAnswer = { text: string; chips: Suggestion[] };
 
@@ -131,8 +152,18 @@ export type PersonalIntent = "pieces" | "agenda" | "point";
 /** Intention personnelle détectée dans la question (accents ignorés). */
 export function personalIntent(rawText: string): PersonalIntent | null {
   const text = normalizeOrientation(rawText);
-  if (["piece manquante", "pieces manquantes", "justificatif", "document manquant", "documents manquants", "que dois je fournir", "pieces a fournir"].some((k) => text.includes(k))) return "pieces";
+  if (["piece manquante", "pieces manquantes", "justificatif", "document manquant", "documents manquants", "que dois je fournir", "pieces a fournir", "pieces me manquent", "que me manque", "quoi fournir", "que manque t il", "pieces a donner", "documents a fournir"].some((k) => text.includes(k))) return "pieces";
   if (["qui m attend", "qu est ce qui m attend", "a traiter", "echeance", "prochainement", "a venir", "quoi de neuf", "a faire", "mes priorites"].some((k) => text.includes(k))) return "agenda";
   if (["ou en sont", "ou en est", "mes demarches", "mes dossiers", "avancement", "faire le point", "prochaine action", "prochaines actions", "point sur mes", "resume de mes"].some((k) => text.includes(k))) return "point";
+  return null;
+}
+
+export type WriteIntent = "transmettre" | "rappel";
+
+/** Intentions d'écriture détectées dans la question (accents ignorés). */
+export function writeIntent(rawText: string): WriteIntent | null {
+  const text = normalizeOrientation(rawText);
+  if (["transmettre", "transmets", "transmet", "envoyer a mon bureau", "envoyer au bureau", "transmission au bureau"].some((k) => text.includes(k))) return "transmettre";
+  if (["rappelle moi", "pose un rappel", "poser un rappel", "ajoute un rappel", "mets un rappel", "me rappeler de", "rappel pour"].some((k) => text.includes(k))) return "rappel";
   return null;
 }

@@ -125,13 +125,19 @@ export async function getDocumentsHub(userId: number) {
 export async function getAssistantSummary(userId: number): Promise<AssistantSummary> {
   const o = await getOverview(userId);
   const rows = await db
-    .select({ id: cases.id, reference: cases.reference, title: cases.title, status: cases.status })
+    .select({ id: cases.id, reference: cases.reference, title: cases.title, status: cases.status, journeyId: cases.journeyId })
     .from(cases)
     .where(eq(cases.memberId, userId))
     .orderBy(desc(cases.updatedAt));
+  const transmittedJourneyIds = new Set(rows.map((r) => r.journeyId).filter((v): v is number => v != null));
   return {
-    journeys: o.active.map((j) => ({ id: j.id, title: j.title, done: j.done, total: j.total, next: j.next?.label ?? null })),
-    drafts: o.drafts.map((j) => ({ id: j.id, title: j.title })),
+    journeys: o.active.map((j) => ({
+      id: j.id, title: j.title, done: j.done, total: j.total, next: j.next?.label ?? null,
+      situation: j.situation,
+      nextTask: j.next ? { id: j.next.id, label: j.next.label, dueKind: j.next.dueKind } : null,
+      transmitted: transmittedJourneyIds.has(j.id),
+    })),
+    drafts: o.drafts.map((j) => ({ id: j.id, title: j.title, situation: j.situation })),
     cases: rows,
     dueTasks: o.dueTasks.map((t) => ({ label: t.label, dueAt: t.dueAt!.toISOString(), official: t.dueKind === "officielle", journeyId: t.journeyId })),
     incoming: o.incomingRequests.length,

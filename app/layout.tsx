@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getSession } from "@/lib/auth";
 import { getAssistantSummary } from "@/lib/journey-queries";
 import { AssistantWidget } from "@/components/assistant/assistant";
 import type { AssistantRole } from "@/lib/assistant/registry";
@@ -18,6 +18,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // Assistant personnalisé (niveau 1) : résumé en lecture seule des démarches
   // du membre. En cas de base injoignable, l'assistant reste générique.
   const summary = user?.role === "membre" ? await getAssistantSummary(user.id).catch(() => null) : null;
+  // Assistant niveau 2 : les écritures confirmées ne sont proposées qu'à un
+  // membre réel — jamais à la visite guidée, qui reste en lecture seule.
+  const canAct = user?.role === "membre" && (await getSession())?.demo !== true;
   return (
     <html lang="fr">
       <body className="bg-white text-slate-900 antialiased">
@@ -25,7 +28,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           Aller au contenu principal
         </a>
         {children}
-        <AssistantWidget role={role} userName={user?.fullName ?? null} summary={summary} />
+        <AssistantWidget role={role} userName={user?.fullName ?? null} summary={summary} canAct={canAct} />
       </body>
     </html>
   );
