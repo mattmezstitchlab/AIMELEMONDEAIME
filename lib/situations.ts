@@ -3,9 +3,10 @@
  * Chaque situation : questions progressives → étapes expliquées, pièces, organismes et liens officiels.
  * Les règles sont versionnées et datées ; elles n'attribuent aucun droit et ne valident aucun dossier.
  */
-export const RULES_VERSION = "2026.10-c";
+export const RULES_VERSION = "2026.10-d";
 export const RULES_REVIEWED_AT = "2026-10-13";
 // 2026.10-c : parcours Santé, échéances officielles calculées dans les règles.
+// 2026.10-d : parcours Famille, Proche et Quotidien épaissis au même niveau.
 
 export type Question = {
   key: string;
@@ -171,20 +172,53 @@ export const SITUATIONS: Situation[] = [
     key: "famille",
     label: "Ma famille change",
     short: "Famille",
-    description: "Naissance, mariage, Pacs ou séparation : ce qui change et qui prévenir. Pour un décès, un parcours distinct vous accompagne.",
+    description: "Naissance, adoption, mariage, Pacs ou séparation : ce qui change, qui prévenir et dans quel délai. Pour un décès, un parcours distinct vous accompagne.",
     icon: "famille",
     image: "/images/hero-famille.jpg",
     questions: [
-      { key: "evenement", label: "Que se passe-t-il ?", type: "select", required: true, options: [["naissance", "Une naissance ou une adoption"], ["union", "Un mariage ou un Pacs"], ["separation", "Une séparation"], ["deces", "Un décès — utiliser le parcours dédié"]] },
+      { key: "evenement", label: "Que se passe-t-il ?", type: "select", required: true, options: [["naissance", "Une naissance"], ["adoption", "Une adoption"], ["union", "Un mariage ou un Pacs"], ["separation", "Une séparation ou un divorce"]] },
+      { key: "date", label: "Date de l'événement (passée ou prévue)", type: "date", required: true, why: "Certains délais légaux courent à partir de cette date, par exemple la déclaration de naissance." },
       { key: "regime", label: "Relevez-vous du régime agricole ?", type: "select", why: "Les prestations familiales sont versées par la CAF ou, pour le régime agricole, par la MSA.", options: [["non", "Non"], ["oui", "Oui"], ["inconnu", "Je ne sais pas"]] },
+      { key: "premier_enfant", label: "S'il s'agit d'une naissance ou d'une adoption : est-ce votre premier enfant ?", type: "select", options: [["oui", "Oui"], ["non", "Non"], ["sans_objet", "Sans objet (mariage, Pacs, séparation)"]] },
+      { key: "conge", label: "Envisagez-vous un congé lié à l'arrivée de l'enfant (parental, d'adoption, partagé) ?", type: "select", options: [["oui", "Oui"], ["non", "Non"], ["inconnu", "Je ne sais pas encore"], ["sans_objet", "Sans objet"]] },
     ],
-    build: (a) => [
-      ...(a.evenement === "naissance" ? [{ kind: "action" as const, label: "Déclarer la naissance en mairie", reason: "La déclaration de naissance se fait à la mairie du lieu de naissance, dans un délai légal.", organisms: ["mairie"], officialUrl: "https://www.service-public.fr" }] : []),
-      { kind: "action", label: a.regime === "oui" ? "Signaler le changement à la MSA" : a.regime === "inconnu" ? "Signaler le changement à la CAF ou à la MSA (selon votre régime)" : "Signaler le changement à la CAF", reason: "Les prestations familiales dépendent de la composition du foyer.", organisms: a.regime === "oui" ? ["msa"] : a.regime === "inconnu" ? ["caf", "msa"] : ["caf"], officialUrl: a.regime === "oui" ? "https://www.msa.fr" : "https://www.caf.fr" },
-      { kind: "action", label: "Mettre à jour la situation auprès de l'Assurance Maladie", reason: "Rattachement des enfants, changement de situation.", organisms: ["assurance-maladie"], officialUrl: "https://www.ameli.fr" },
-      { kind: "action", label: "Signaler le changement de situation aux impôts", reason: "La situation de famille influe sur l'impôt sur le revenu.", organisms: ["impots"], officialUrl: "https://www.impots.gouv.fr" },
-      { kind: "piece", label: "Acte d'état civil correspondant", reason: "Demandé par la plupart des organismes." },
-    ],
+    build: (a) => {
+      const caisse = a.regime === "oui" ? "msa" : a.regime === "inconnu" ? null : "caf";
+      const caisseLabel = caisse === "msa" ? "la MSA" : caisse === "caf" ? "la CAF" : "la CAF ou la MSA (selon votre régime)";
+      const declareCaisse: TaskRule = { kind: "action", label: `Déclarer le changement à ${caisseLabel}`, detail: "La composition du foyer conditionne les prestations familiales et plusieurs aides ; la déclaration peut se faire en ligne.", reason: "Ne pas déclarer retarde les prestations et peut générer des trop-perçus.", organisms: caisse ? [caisse] : ["caf", "msa"], officialUrl: caisse === "msa" ? "https://www.msa.fr" : "https://www.caf.fr" };
+      const t: TaskRule[] = [];
+      if (a.evenement === "naissance") {
+        t.push({ kind: "action", label: "Déclarer la naissance à la mairie du lieu de naissance sous 5 jours", detail: "La déclaration se fait en principe par la maternité ou par un parent, avec le certificat d'accouchement.", reason: "C'est l'acte qui établit l'état civil de l'enfant ; le délai est légal.", organisms: ["mairie"], officialUrl: "https://www.service-public.fr", due: { days: 5, from: "date", official: true, source: "service-public.fr — déclaration de naissance sous 5 jours" } });
+        t.push({ kind: "action", label: "Demander l'acte de naissance et faire mettre à jour le livret de famille", reason: "Ces documents sont demandés par presque tous les organismes ensuite.", organisms: ["mairie"] });
+      }
+      if (a.evenement === "adoption") {
+        t.push({ kind: "piece", label: "Jugement d'adoption ou attestation de l'organisme d'adoption", reason: "Il fonde l'état civil de l'enfant et l'ouverture des droits liés à l'adoption." });
+        t.push({ kind: "action", label: "Faire transcrire l'adoption sur les registres d'état civil", reason: "La transcription met à jour l'acte de naissance et le livret de famille.", organisms: ["mairie"], officialUrl: "https://www.service-public.fr", frameworkFlag: "cadre_a_verifier" });
+      }
+      if (a.evenement === "union") {
+        t.push({ kind: "piece", label: "Acte de mariage ou certificat d'enregistrement du Pacs", reason: "Demandé par les organismes pour mettre à jour votre situation." });
+        t.push({ kind: "action", label: "Faire mettre à jour le livret de famille", reason: "Il reprend les événements du foyer et sert de justificatif courant.", organisms: ["mairie"] });
+        t.push({ kind: "action", label: "Déclarer le changement de situation aux impôts", detail: "L'année du mariage ou du Pacs, des choix d'imposition existent ; les règles et leurs effets sont expliqués sur le site officiel, sans conseil personnalisé de la part d'AIME®.", reason: "La situation de famille influe sur l'impôt sur le revenu et le taux de prélèvement.", organisms: ["impots"], officialUrl: "https://www.impots.gouv.fr" });
+        t.push({ kind: "action", label: "Si vous le souhaitez : choisir un nom d'usage et faire actualiser vos pièces d'identité", reason: "Le nom d'usage est un choix personnel ; il se déclare et figure sur les titres d'identité.", organisms: ["france-titres", "mairie"], officialUrl: "https://www.service-public.fr" });
+      }
+      if (a.evenement === "separation") {
+        t.push({ kind: "piece", label: "Jugement de divorce ou convention de séparation", reason: "Il fixe la résidence des enfants, les contributions et la date des effets entre époux." });
+        t.push({ kind: "action", label: "Faire annoter le livret de famille et l'acte de mariage", reason: "Les documents à jour évitent les blocages dans les démarches suivantes.", organisms: ["mairie"] });
+        t.push({ kind: "action", label: "Point-justice : information gratuite sur la pension alimentaire, la garde et les démarches", detail: "Un premier avis neutre, avant d'engager des frais ; la médiation familiale y est aussi présentée.", reason: "La séparation engage des décisions durables : être informé avant de signer.", organisms: ["point-justice"], officialUrl: "https://www.justice.fr" });
+        t.push({ kind: "action", label: "Déclarer le changement de situation aux impôts", detail: "Séparation et divorce modifient le foyer fiscal et le taux de prélèvement ; délais et modalités sur le site officiel.", reason: "Éviter les trop-perçus et les régularisations l'année suivante.", organisms: ["impots"], officialUrl: "https://www.impots.gouv.fr" });
+      }
+      t.push(declareCaisse);
+      if ((a.evenement === "naissance" || a.evenement === "adoption") && a.premier_enfant === "oui") {
+        t.push({ kind: "action", label: "Estimer vos droits liés à l'arrivée d'un premier enfant (prime, prestation d'accueil)", detail: "Le simulateur officiel et votre caisse indiquent ce qui peut s'appliquer ; les conditions de ressources sont vérifiées par la caisse, jamais par AIME®.", reason: "Certaines aides se demandent dans des délais courts après la naissance ou l'adoption.", organisms: caisse ? [caisse] : ["caf", "msa"], officialUrl: "https://www.mesdroitssociaux.gouv.fr" });
+      }
+      if ((a.evenement === "naissance" || a.evenement === "adoption") && (a.conge === "oui" || a.conge === "inconnu")) {
+        t.push({ kind: "action", label: "Préparer la demande de congé parental ou d'adoption auprès de l'employeur", detail: "Le congé se demande à l'employeur avec des délais de prévenance qui dépendent de votre situation et de votre convention ; la prestation partagée se demande ensuite à la caisse.", reason: "Anticiper évite les ruptures de revenus entre la fin du congé maternité/paternité et la reprise.", organisms: caisse ? [caisse] : ["caf", "msa"], officialUrl: "https://www.service-public.fr", frameworkFlag: "cadre_a_verifier" });
+      }
+      t.push({ kind: "action", label: "Mettre à jour la situation auprès de l'Assurance Maladie", detail: "Rattachement de l'enfant à la carte Vitale d'un ou des deux parents, changement de situation personnelle.", reason: "Le rattachement évite les blocages de remboursements pour l'enfant.", organisms: ["assurance-maladie"], officialUrl: "https://www.ameli.fr" });
+      if (a.evenement === "naissance" || a.evenement === "adoption") t.push({ kind: "piece", label: "Acte de naissance (ou jugement) et livret de famille mis à jour", reason: "Le duo demandé pour inscrire l'enfant partout : crèche, mutuelle, prestations." });
+      else if (a.evenement === "union") t.push({ kind: "piece", label: "Livret de famille mis à jour", reason: "Justificatif courant de la nouvelle situation du foyer." });
+      return t;
+    },
   },
   {
     key: "logement",
@@ -209,35 +243,93 @@ export const SITUATIONS: Situation[] = [
     key: "quotidien",
     label: "J'ai besoin d'aide au quotidien",
     short: "Aide au quotidien",
-    description: "Courses, déplacements, démarches, difficultés passagères : trouver de l'aide près de chez vous.",
+    description: "Démarches, numérique, courses, déplacements ou coup de main ponctuel : trouver de l'aide près de chez vous, humaine d'abord.",
     icon: "entraide",
     image: "/images/hero-campagne.jpg",
     questions: [
-      { key: "besoin", label: "De quoi s'agit-il ?", type: "select", required: true, options: [["demarches", "Être aidé pour des démarches"], ["essentiels", "Des besoins essentiels (vêtements, nourriture…)"], ["deplacement", "Des déplacements"], ["droits", "Connaître mes droits sociaux"]] },
+      { key: "besoin", label: "De quoi s'agit-il ?", type: "select", required: true, options: [["demarches", "Être aidé pour des démarches et des papiers"], ["numerique", "Utiliser internet, un ordinateur ou un smartphone"], ["essentiels", "Des besoins essentiels (courses, nourriture, vêtements)"], ["deplacement", "Me déplacer (courses, rendez-vous, soins)"], ["services", "Un coup de main (jardin, petits travaux, animaux)"], ["droits", "Connaître mes droits sociaux"]] },
+      { key: "tentative", label: "Où en êtes-vous ?", type: "select", options: [["pas_encore", "Je n'ai pas encore essayé"], ["bloque", "J'ai essayé, mais je suis bloqué·e"], ["sans_equipement", "Je n'ai pas l'équipement ou la connexion"]] },
+      { key: "delai", label: "Y a-t-il un délai serré (moins d'une semaine) ?", type: "select", options: [["non", "Non"], ["oui", "Oui"], ["inconnu", "Je ne sais pas"]] },
+      { key: "frequence", label: "C'est un besoin…", type: "select", options: [["ponctuel", "Ponctuel (une fois)"], ["regulier", "Régulier (chaque semaine, par exemple)"]] },
     ],
-    build: (a) => [
-      { kind: "action", label: "Rencontrer un conseiller France services près de chez vous", reason: "Les espaces France services aident gratuitement pour les démarches de plusieurs organismes.", organisms: ["france-services"], officialUrl: "https://www.france-services.gouv.fr" },
-      ...(a.besoin === "droits" ? [{ kind: "action" as const, label: "Estimer vos droits sur Mes droits sociaux", reason: "Le simulateur public indique les aides auxquelles vous pourriez prétendre, sans les attribuer.", organisms: ["mes-droits-sociaux"], officialUrl: "https://www.mesdroitssociaux.gouv.fr" }] : []),
-      ...(a.besoin === "essentiels" || a.besoin === "deplacement" ? [{ kind: "action" as const, label: "Publier un besoin sur la carte AIME®", reason: "Voisins, producteurs et associations peuvent proposer un don, un prêt ou un trajet." }] : []),
-      { kind: "action", label: "Contacter le CCAS de votre commune", reason: "Il oriente vers les aides locales.", organisms: ["ccas"], officialUrl: "https://lannuaire.service-public.fr" },
-    ],
+    build: (a) => {
+      const t: TaskRule[] = [];
+      if (a.delai === "oui") t.push({ kind: "action", label: "Signaler le délai dès le premier contact", detail: "Que ce soit à France services, au CCAS ou dans une demande sur la carte AIME®, dites la date butoir : cela permet de prioriser et de trouver le bon interlocuteur.", reason: "Beaucoup de délais peuvent être tenus si l'on s'y prend avec le bon guichet dès le départ." });
+      if (a.besoin === "demarches") {
+        t.push({ kind: "action", label: "Prendre rendez-vous dans un espace France services près de chez vous", detail: "L'accompagnement est gratuit et humain, pour les démarches de plusieurs organismes ; apportez vos pièces et, si vous en avez, vos identifiants.", reason: "Un conseiller peut débloquer en une visite ce qui bloque depuis des semaines en ligne.", organisms: ["france-services"], officialUrl: "https://www.france-services.gouv.fr" });
+        if (a.tentative === "bloque") t.push({ kind: "action", label: "Reprendre la démarche bloquée avec le conseiller", detail: "Notez où le blocage survient (message affiché, pièce refusée, code perdu) : cela fait gagner la moitié du rendez-vous.", reason: "Le blocage précis évite de recommencer toute la démarche de zéro." });
+        t.push({ kind: "action", label: "Pour les titres (carte d'identité, passeport, carte grise) : faire la pré-demande sur France Titres", detail: "La pré-demande en ligne raccourcit le passage en mairie ; France services peut la faire avec vous.", reason: "C'est le passage obligé pour la plupart des titres.", organisms: ["france-titres"], officialUrl: "https://ants.gouv.fr" });
+      }
+      if (a.besoin === "numerique") {
+        t.push({ kind: "action", label: "Demander un accompagnement numérique (France services, médiathèque, association locale)", detail: "Ateliers collectifs ou rendez-vous individuel : précisez ce que vous voulez apprendre à faire vous-même, pas seulement faire faire.", reason: "Être aidé une fois en comprenant rend autonome pour la suivante.", organisms: ["france-services"], officialUrl: "https://www.france-services.gouv.fr" });
+        if (a.tentative === "sans_equipement") t.push({ kind: "action", label: "Repérer les points d'accès gratuits près de chez vous", detail: "France services, médiathèques et certaines mairies mettent à disposition ordinateurs et connexion ; le CCAS connaît aussi les aides à l'équipement.", reason: "Pas besoin d'acheter du matériel pour une démarche ponctuelle.", organisms: ["ccas", "france-services"] });
+        t.push({ kind: "action", label: "Publier une demande d'aide informatique sur la carte AIME®", detail: "Décrivez l'appareil et le blocage, sans jamais transmettre vos mots de passe ; la rencontre peut se faire dans un lieu public.", reason: "Des voisins à l'aise avec le numérique donnent volontiers un premier coup de main." });
+      }
+      if (a.besoin === "essentiels") {
+        t.push({ kind: "action", label: "Publier un besoin sur la carte AIME®", detail: "Don de nourriture, de vêtements ou de produits de première nécessité : décrivez le besoin, le lieu et le délai.", reason: "Producteurs, voisins et associations près de chez vous peuvent répondre vite." });
+        t.push({ kind: "action", label: "Contacter le CCAS de votre commune", detail: "Épicerie sociale, aides d'urgence, orientation vers les associations caritatives locales.", reason: "Le CCAS connaît les dispositifs de la commune et peut débloquer une aide d'urgence.", organisms: ["ccas"], officialUrl: "https://lannuaire.service-public.fr" });
+      }
+      if (a.besoin === "deplacement") {
+        t.push({ kind: "action", label: "Publier une demande de trajet sur la carte AIME®", detail: "Précisez le jour, l'heure, le lieu de départ et de destination, et si un accompagnement sur place est souhaité.", reason: "Les trajets partagés entre voisins sont l'entraide la plus simple à organiser." });
+        t.push({ kind: "action", label: "Se renseigner sur le transport solidaire et les services locaux", detail: "Certaines communes et associations organisent des navettes ou des chauffeurs bénévoles ; le CCAS tient la liste à jour.", reason: "Ces services existent souvent sans être connus.", organisms: ["ccas"] });
+      }
+      if (a.besoin === "services") {
+        t.push({ kind: "action", label: "Publier une demande sur la carte AIME®", detail: "Jardin, petits travaux, garde d'animaux : décrivez la tâche, le matériel disponible et le créneau ; convenez d'un échange ou d'un tarif clair avant de commencer.", reason: "Un cadre simple dès le départ évite les malentendus entre voisins." });
+        t.push({ kind: "action", label: "Pour les travaux engageant la sécurité (électricité, toiture, gaz) : passer par un professionnel déclaré", detail: "L'entraide convient aux coups de main simples ; les travaux à risque exigent un professionnel assuré.", reason: "En cas d'accident ou de dégât, l'assurance ne couvre pas un travail bénévole à risque.", frameworkFlag: "cadre_a_verifier" });
+      }
+      if (a.besoin === "droits") {
+        t.push({ kind: "action", label: "Estimer vos droits sur Mes droits sociaux", detail: "Le simulateur public parcourt les principales aides selon votre situation, sans rien attribuer : c'est un point de départ.", reason: "Beaucoup d'aides ne sont pas demandées faute d'être connues.", organisms: ["mes-droits-sociaux"], officialUrl: "https://www.mesdroitssociaux.gouv.fr" });
+        t.push({ kind: "action", label: "Faire vérifier le résultat avec un conseiller France services ou le CCAS", detail: "Apportez le résultat du simulateur : le conseiller confirme les guichets et les pièces pour chaque aide repérée.", reason: "Le simulateur oriente ; l'humain confirme et aide à constituer les demandes.", organisms: ["france-services", "ccas"] });
+      }
+      if (a.frequence === "regulier" && (a.besoin === "essentiels" || a.besoin === "deplacement" || a.besoin === "services")) {
+        t.push({ kind: "action", label: "Transformer l'aide ponctuelle en rendez-vous régulier", detail: "Si la même personne vous aide bien, proposez un rythme fixe et conservez le lien dans votre cercle AIME® plutôt que de republier à chaque fois.", reason: "La régularité rassure tout le monde et évite les ruptures d'aide." });
+      }
+      if (a.besoin !== "demarches" && a.besoin !== "numerique") t.push({ kind: "action", label: "En parallèle, un conseiller France services peut confirmer vos droits et démarches liées", reason: "Une situation du quotidien cache souvent un droit non demandé (aide, tarif, accompagnement).", organisms: ["france-services"], officialUrl: "https://www.france-services.gouv.fr" });
+      return t;
+    },
   },
   {
     key: "proche",
     label: "J'accompagne un proche",
     short: "Accompagner un proche",
-    description: "Perte d'autonomie, handicap, aide au quotidien : les interlocuteurs et le soutien aux aidants.",
+    description: "Perte d'autonomie, handicap, aide au quotidien : organiser le soutien, connaître les interlocuteurs et préserver aussi l'aidant. Aucune donnée médicale n'est demandée.",
     icon: "heart",
     image: "/images/hero-retraite.jpg",
     questions: [
       { key: "situation", label: "Votre proche est concerné par…", type: "select", required: true, why: "Les interlocuteurs ne sont pas les mêmes pour le handicap et pour la perte d'autonomie liée à l'âge. Aucune donnée médicale n'est demandée.", options: [["handicap", "Un handicap"], ["age", "Une perte d'autonomie liée à l'âge"], ["inconnu", "Je ne sais pas encore"]] },
+      { key: "domaine", label: "Quel est le besoin le plus pressant ?", type: "select", required: true, options: [["domicile", "L'aide à domicile et au quotidien"], ["soins", "Coordonner les soins et les rendez-vous"], ["decisions", "Les papiers, le budget, les décisions"], ["presence", "Rompre l'isolement, une présence"], ["tout", "Un peu de tout, je suis débordé·e"]] },
+      { key: "capacite", label: "Votre proche peut-il encore décider et signer seul·e ?", type: "select", why: "C'est ce qui détermine si des procurations ou une mesure de protection sont à envisager — jamais contre sa volonté.", options: [["oui", "Oui"], ["partiel", "En partie seulement"], ["non", "Non"]] },
+      { key: "accord", label: "Votre proche est-il d'accord pour être aidé ?", type: "select", options: [["oui", "Oui"], ["en_discussion", "C'est en discussion"], ["non", "Pas encore / il ou elle refuse"]] },
+      { key: "aidant", label: "Êtes-vous son aidant·e principal·e ?", type: "select", options: [["oui", "Oui"], ["partage", "C'est partagé dans la famille"], ["non", "Non, j'aide de loin"]] },
     ],
-    build: (a) => [
-      ...(a.situation !== "age" ? [{ kind: "action" as const, label: "Se renseigner auprès de la MDPH du département", reason: "La maison départementale des personnes handicapées instruit les demandes liées au handicap.", organisms: ["mdph"], officialUrl: "https://www.monparcourshandicap.gouv.fr" }] : []),
-      ...(a.situation !== "handicap" ? [{ kind: "action" as const, label: "Consulter le portail national pour les personnes âgées et leurs aidants", reason: "Il présente les aides à l'autonomie et les points d'information locaux.", organisms: ["personnes-agees"], officialUrl: "https://www.pour-les-personnes-agees.gouv.fr" }] : []),
-      { kind: "action", label: "Créer un cercle privé familial pour organiser l'aide", reason: "Partager agenda, nouvelles et tâches entre proches, sans exposer de documents administratifs." },
-      { kind: "piece", label: "Coordonnées des professionnels qui interviennent", reason: "Utile pour coordonner l'aide. Aucune donnée médicale n'est stockée dans AIME®." },
-    ],
+    build: (a) => {
+      const t: TaskRule[] = [];
+      if (a.accord && a.accord !== "oui") t.push({ kind: "action", label: "En parler avec votre proche avant toute démarche", detail: "Commencer par ce qu'il ou elle souhaite garder, puis ce qui devient difficile ; un tiers de confiance (médecin traitant, conseiller France services) peut aider la conversation.", reason: "Une aide acceptée dure ; une aide imposée se défait. Rien ne se décide à la place de votre proche tant qu'il peut exprimer ses choix." });
+      if (a.situation !== "age") t.push({ kind: "action", label: "Se renseigner auprès de la MDPH du département", detail: "Évaluation des besoins, droits et prestations liés au handicap ; le dossier peut se préparer en ligne.", reason: "La MDPH est le guichet unique du handicap : ses décisions ouvrent la plupart des aides.", organisms: ["mdph"], officialUrl: "https://www.monparcourshandicap.gouv.fr" });
+      if (a.situation !== "handicap") t.push({ kind: "action", label: "Consulter le portail national pour les personnes âgées et leurs aidants", detail: "Aides à l'autonomie (dont l'APA), points d'information locaux, soutien aux aidants.", reason: "Il présente les aides selon la situation, sans les attribuer.", organisms: ["personnes-agees"], officialUrl: "https://www.pour-les-personnes-agees.gouv.fr" });
+      if (a.domaine === "domicile" || a.domaine === "tout") {
+        t.push({ kind: "action", label: "Demander une évaluation des besoins à domicile", detail: "Aide-ménagère, auxiliaire de vie, portage de repas, adaptation du logement : l'évaluation se demande au département, à la caisse de retraite ou via la MDPH selon la situation.", reason: "L'évaluation ouvre les plans d'aide financés ; sans elle, tout repose sur la famille.", organisms: a.situation === "handicap" ? ["mdph"] : ["personnes-agees", "ccas"] });
+        t.push({ kind: "action", label: "Publier les premiers besoins sur la carte AIME®", detail: "Courses, présence, petits trajets : l'entraide de voisinage complète les aides professionnelles, elle ne les remplace pas.", reason: "Commencer petit permet de tester ce qui soulage vraiment." });
+      }
+      if (a.domaine === "soins" || a.domaine === "tout") {
+        t.push({ kind: "action", label: "Centraliser les rendez-vous dans un agenda partagé du cercle familial", detail: "Notez qui accompagne, où et quand ; ne consignez jamais de résultats médicaux détaillés dans AIME® — seulement les rendez-vous et les suites pratiques.", reason: "Ce qui use les aidants, c'est souvent la coordination plus que les soins eux-mêmes." });
+        t.push({ kind: "piece", label: "Coordonnées des professionnels qui interviennent", reason: "Médecin traitant, infirmiers, pharmacie, services à domicile : une liste à jour évite les urgences désorganisées." });
+      }
+      if (a.domaine === "decisions" || a.domaine === "tout" || a.capacite === "partiel" || a.capacite === "non") {
+        t.push({ kind: "action", label: "Point-justice : comprendre les procurations et les mesures de protection", detail: "Procuration bancaire, habilitation familiale, sauvegarde de justice, curatelle, tutelle, mandat de protection future : un juriste gratuit explique les différences et leurs effets.", reason: "Ces mesures encadrent les décisions sans les confisquer ; elles se choisissent informé, jamais dans l'urgence.", organisms: ["point-justice"], officialUrl: "https://www.justice.fr" });
+        if (a.capacite === "non") t.push({ kind: "action", label: "Si votre proche ne peut plus décider : faire évaluer la situation avec le médecin et le Point-justice", detail: "Un certificat médical circonstancié est le point de départ des mesures judiciaires ; la famille peut saisir le juge, qui décide.", reason: "Signer à la place d'un proche sans cadre légal expose tout le monde, y compris pour les dépenses courantes.", frameworkFlag: "cadre_a_verifier" });
+      }
+      if (a.domaine === "presence") {
+        t.push({ kind: "action", label: "Publier une demande de visite ou de présence sur la carte AIME®", detail: "Précisez les jours, la durée et ce que votre proche aime (conversation, lecture, promenade) : la régularité compte plus que la durée.", reason: "Une présence régulière vaut mieux qu'une grande visite exceptionnelle." });
+        t.push({ kind: "action", label: "Contacter le CCAS : visites de convivialité et registre des personnes fragiles", detail: "Le registre communal permet d'être contacté en cas de canicule ou de crise ; l'inscription est volontaire.", reason: "Dispositifs simples, souvent méconnus, tenus par la commune.", organisms: ["ccas"], officialUrl: "https://lannuaire.service-public.fr" });
+      }
+      t.push({ kind: "action", label: "Créer un cercle privé familial pour organiser l'aide", detail: "Agenda partagé, nouvelles et répartition des tâches entre proches — sans documents administratifs ni données médicales détaillées.", reason: "Un seul endroit pour coordonner évite les oublis et les doubles emplois." });
+      if (a.aidant === "oui" || a.aidant === "partage") {
+        t.push({ kind: "action", label: "Vérifier vos droits d'aidant : congé de proche aidant, allocation journalière, répit", detail: "Le portail des aidants et votre caisse (CAF ou MSA) présentent les conditions ; votre employeur peut aussi être concerné par le congé de proche aidant.", reason: "Aider durablement suppose d'être soi-même soutenu ; ces droits existent pour cela.", organisms: ["personnes-agees"], officialUrl: "https://www.pour-les-personnes-agees.gouv.fr", frameworkFlag: "cadre_a_verifier" });
+        t.push({ kind: "action", label: "Prévoir votre répit dès maintenant", detail: "Accueil de jour, relais ponctuel, famille ou voisins via la carte AIME® : bloquez des créneaux avant d'être épuisé.", reason: "Le répit se prévoit quand tout va à peu près bien ; en crise, il est introuvable." });
+      }
+      return t;
+    },
   },
   {
     key: "sante",

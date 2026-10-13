@@ -202,7 +202,27 @@ une trace au journal d'audit (déjà en place) :
   (anti-doublon vérifié : une seule notification après deux visites).
   Règles versionnées en `2026.10-c`.
 
-Restent en P1 : épaissir `famille`, `proche`, `quotidien` ; trous de couverture
+## 5ter. P1 démarches (partie 2) — exécuté le 2026-08-10 (commit à suivre)
+
+`famille`, `proche` et `quotidien` sont épaissis au niveau du pilote
+(règles `2026.10-d`) : questions discriminantes (date d'événement, régime,
+accord du proche, capacité à décider, équipement numérique, délai),
+tâches conditionnelles, pièces, organismes sourcés. Points saillants :
+- **famille** : la déclaration de naissance porte l'échéance officielle
+  de 5 jours ; naissance distinguée de l'adoption ; congé parental et
+  premier enfant conditionnent des étapes ; le décès reste au parcours dédié ;
+- **proche** : l'accord du proche et sa capacité à décider pilotent les
+  tâches (Point-justice, mesures de protection en dernier ressort),
+  droits et répit de l'aidant systématiquement proposés ;
+- **quotidien** : le numérique et l'absence d'équipement font l'objet
+  d'étapes propres ; la carte d'entraide et France services sont reliées
+  selon le besoin (délai signalé d'emblée quand il est serré).
+Comportements vérifiés directement sur les règles (7 tâches et échéance
+au 14/10 pour une naissance agricole du 09/10, protection prudente pour
+un proche qui ne peut plus décider…). Tuiles vérifiées dans l'assistant
+de création.
+
+Restent en P1 : trous de couverture
 (invalidité pour soi, transmission/cessation, réversion, recruteur).
 
 ## 6. Niveau 1 de l'assistant — exécuté le 2026-08-10 (commit à suivre)
