@@ -1,0 +1,209 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { and, eq, inArray, isNotNull, ne } from "drizzle-orm";
+import { db } from "@/db";
+import { appointments, communityEventPlans, communityTrips, journeys, journeyTasks, offices, projectMembers, projects } from "@/db/schema";
+import { getCurrentUser } from "@/lib/auth";
+import { SectionTitle, EmptyState } from "@/components/ui";
+import { PrintButton } from "@/components/community/print-button";
+import { buildYear, nextBirthday, relativeLabel, YEAR_EVENT_LABELS, type YearEvent, type YearEventKind } from "@/lib/annee";
+
+export const metadata: Metadata = { title: "Mon année à préparer — AIME®" };
+export const dynamic = "force-dynamic";
+
+const KIND_STYLES: Record<YearEventKind, string> = {
+  echeance: "bg-rose-700 text-white",
+  rappel: "bg-slate-200 text-slate-800",
+  "rendez-vous": "bg-sky-100 text-sky-900",
+  projet: "bg-emerald-100 text-emerald-900",
+  evenement: "bg-violet-100 text-violet-900",
+  trajet: "bg-amber-100 text-amber-900",
+  anniversaire: "bg-pink-100 text-pink-900",
+};
+
+const fmtWeekday = new Intl.DateTimeFormat("fr-FR", { weekday: "short" });
+const fmtHeure = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+function EventRow({ e, now }: { e: YearEvent; now: Date }) {
+  return (
+    <li>
+      <Link href={e.href} className="flex items-center gap-4 rounded-xl bg-[#fafaf9] px-4 py-3 transition hover:bg-emerald-50">
+        <span className="w-14 shrink-0 text-center">
+          <span className="block text-xl font-bold leading-none text-slate-900">{e.date.getDate()}</span>
+          <span className="mt-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">{fmtWeekday.format(e.date)}</span>
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-slate-900">{e.label}</span>
+          {e.detail || (e.kind === "echeance" && e.source) ? (
+            <span className="block truncate text-xs text-slate-500">
+              {e.detail}
+              {e.kind === "echeance" && e.source ? `${e.detail ? " · " : ""}source : ${e.source}` : ""}
+            </span>
+          ) : null}
+        </span>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${KIND_STYLES[e.kind]}`}>{YEAR_EVENT_LABELS[e.kind]}</span>
+        <span className="hidden w-24 shrink-0 text-right text-xs font-semibold text-slate-600 sm:block">{relativeLabel(e.date, now)}</span>
+      </Link>
+    </li>
+  );
+}
+
+export default async function MonAnnee() {
+  const user = (await getCurrentUser())!;
+  const now = new Date();
+  const events: YearEvent[] = [];
+
+  // Échéances et rappels des parcours en cours (tâches datées, non terminées).
+  const taskRows = await db
+    .select({ task: journeyTasks, journeyId: journeys.id, journeyTitle: journeys.title })
+    .from(journeyTasks)
+    .innerJoin(journeys, eq(journeyTasks.journeyId, journeys.id))
+    .where(
+      and(
+        eq(journeys.userId, user.id),
+        ne(journeys.status, "questionnaire"),
+        ne(journeys.status, "terminee"),
+        ne(journeyTasks.status, "termine"),
+        isNotNull(journeyTasks.dueAt),
+      ),
+    );
+  for (const r of taskRows) {
+    const officielle = r.task.dueKind === "officielle";
+    events.push({
+      date: r.task.dueAt!,
+      kind: officielle ? "echeance" : "rappel",
+      label: r.task.label,
+      detail: r.journeyTitle,
+      href: `/espace/demarches/suivi/${r.journeyId}`,
+      source: officielle ? r.task.dueSource : null,
+    });
+  }
+
+  // Rendez-vous demandés ou confirmés auprès d'un bureau.
+  const apptRows = await db
+    .select({ appt: appointments, officeName: offices.name })
+    .from(appointments)
+    .leftJoin(offices, eq(appointments.officeId, offices.id))
+    .where(and(eq(appointments.memberId, user.id), inArray(appointments.status, ["demandee", "confirmee"])));
+  for (const r of apptRows) {
+    events.push({
+      date: r.appt.requestedSlot,
+      kind: "rendez-vous",
+      label: r.appt.reason,
+      detail: `à ${fmtHeure.format(r.appt.requestedSlot)} · ${r.officeName ?? "Bureau AIME®"} · ${r.appt.status === "confirmee" ? "confirmé" : "demandé, en attente de confirmation"}`,
+      href: "/espace/echanges",
+    });
+  }
+
+  // Projets dont je suis organisateur ou participant accepté, encore ouverts.
+  const projetParId = new Map<number, { titre: string; ville: string; date: Date; role: string }>();
+  const owned = await db.select().from(projects).where(and(eq(projects.ownerId, user.id), eq(projects.status, "ouvert")));
+  for (const p of owned) projetParId.set(p.id, { titre: p.title, ville: p.city, date: p.startsAt, role: "organisateur" });
+  const memberRows = await db
+    .select({ project: projects, role: projectMembers.role })
+    .from(projectMembers)
+    .innerJoin(projects, eq(projectMembers.projectId, projects.id))
+    .where(and(eq(projectMembers.userId, user.id), eq(projectMembers.status, "accepte"), eq(projects.status, "ouvert")));
+  for (const r of memberRows) {
+    if (!projetParId.has(r.project.id)) projetParId.set(r.project.id, { titre: r.project.title, ville: r.project.city, date: r.project.startsAt, role: r.role });
+  }
+  for (const [id, p] of projetParId) {
+    events.push({
+      date: p.date,
+      kind: "projet",
+      label: p.titre,
+      detail: `${p.ville} · ${p.role === "organisateur" ? "vous organisez" : "vous participez"}`,
+      href: `/le-monde-aime/projets/${id}`,
+    });
+  }
+
+  // Événements communautaires que j'organise et trajets que je propose.
+  const eventRows = await db.select().from(communityEventPlans).where(and(eq(communityEventPlans.ownerId, user.id), eq(communityEventPlans.status, "actif")));
+  for (const e of eventRows) events.push({ date: e.eventDate, kind: "evenement", label: e.title, detail: e.city, href: "/le-monde-aime" });
+  const tripRows = await db.select().from(communityTrips).where(and(eq(communityTrips.ownerId, user.id), eq(communityTrips.status, "publie")));
+  for (const t of tripRows) events.push({ date: t.departureAt, kind: "trajet", label: `${t.startCity} → ${t.endCity}`, detail: `Trajet proposé · ${t.transportMode}`, href: "/le-monde-aime" });
+
+  // Mon anniversaire, projeté sur les 12 prochains mois.
+  if (user.birthDate) {
+    const prochain = nextBirthday(user.birthDate, now);
+    if (prochain) {
+      events.push({ date: prochain.date, kind: "anniversaire", label: "Votre anniversaire", detail: `Vous fêterez vos ${prochain.age} ans`, href: "/espace/profil" });
+    }
+  }
+
+  const year = buildYear(events, now);
+  const toutes = year.months.flatMap((m) => m.events);
+  const nbOfficielles = toutes.filter((e) => e.kind === "echeance").length;
+
+  return (
+    <div className="flex flex-col gap-8">
+      <SectionTitle
+        eyebrow="Mon année à préparer"
+        title="Votre année, d'un coup d'œil"
+        description="Toutes les dates de votre espace, réunies : échéances de vos parcours, rendez-vous, projets, et votre anniversaire. Rien n'est inventé — chaque date vient d'un parcours, d'un rendez-vous, d'un projet ou de votre profil."
+        actions={
+          <span className="print:hidden">
+            <PrintButton />
+          </span>
+        }
+      />
+
+      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+        <span className="font-semibold text-slate-800">{year.total} date{year.total > 1 ? "s" : ""} à préparer</span>
+        {nbOfficielles > 0 ? <span>· dont {nbOfficielles} échéance{nbOfficielles > 1 ? "s" : ""} officielle{nbOfficielles > 1 ? "s" : ""}</span> : null}
+        <span className="mx-1 hidden h-4 w-px bg-slate-200 sm:block" />
+        {(Object.keys(YEAR_EVENT_LABELS) as YearEventKind[]).map((k) => (
+          <span key={k} className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${KIND_STYLES[k]}`}>
+            {YEAR_EVENT_LABELS[k]}
+          </span>
+        ))}
+      </div>
+
+      {year.overdue.length > 0 ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
+          <h2 className="text-lg font-semibold text-rose-900">En retard — à traiter d&apos;abord</h2>
+          <p className="mt-1 text-sm text-rose-800">Ces dates sont passées et l&apos;étape n&apos;est pas marquée comme terminée. Les reprendre maintenant vaut presque toujours mieux que les laisser vieillir.</p>
+          <ul className="mt-4 space-y-2">
+            {year.overdue.map((e, i) => (
+              <EventRow key={`retard-${i}`} e={e} now={now} />
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {year.total === 0 ? (
+        <EmptyState
+          title="Votre année est encore vierge"
+          description="Dès qu'un parcours pose un rappel, qu'un rendez-vous est demandé ou qu'un projet prend date, tout apparaît ici, mois par mois."
+          action={
+            <span className="flex flex-wrap justify-center gap-3">
+              <Link href="/espace/demarches/nouvelle" className="font-semibold text-emerald-800 underline">Commencer un parcours</Link>
+              <Link href="/le-monde-aime?onglet=publier" className="font-semibold text-emerald-800 underline">Créer un projet</Link>
+            </span>
+          }
+        />
+      ) : (
+        <div className="flex flex-col gap-6">
+          {year.months.map((m) => (
+            <section key={m.key} aria-label={m.label}>
+              <h2 className="text-base font-bold text-slate-900">{m.label}</h2>
+              {m.events.length === 0 ? (
+                <p className="mt-2 text-sm text-slate-400">Rien de prévu pour l&apos;instant.</p>
+              ) : (
+                <ul className="mt-3 space-y-2">
+                  {m.events.map((e, i) => (
+                    <EventRow key={`${m.key}-${i}`} e={e} now={now} />
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
+        </div>
+      )}
+
+      <p className="rounded-2xl bg-[#fafaf9] p-5 text-sm leading-6 text-slate-600">
+        <strong className="text-slate-800">Comment lire cette page :</strong> les <strong>échéances officielles</strong> sont les seules dates qui engagent un organisme — leur source est indiquée. Les <strong>rappels personnels</strong> sont les dates que vos parcours ont calculées pour vous aider à avancer : utiles, mais ils n&apos;engagent que vous. Un projet ou un événement passé disparaît de l&apos;année ; une étape de parcours en retard, elle, reste affichée tant qu&apos;elle n&apos;est pas terminée.
+      </p>
+    </div>
+  );
+}

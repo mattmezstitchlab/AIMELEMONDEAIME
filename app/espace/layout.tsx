@@ -10,6 +10,7 @@ import { and, eq } from "drizzle-orm";
 const NAV: NavItem[] = [
   { href: "/espace", label: "Mon aperçu", icon: "home", exact: true },
   { href: "/espace/demarches", label: "Mes démarches", icon: "demarches" },
+  { href: "/espace/annee", label: "Mon année", icon: "calendar" },
   { href: "/espace/echanges", label: "Mes échanges & projets", icon: "echanges" },
   { href: "/espace/documents", label: "Mes documents", icon: "documents" },
   { href: "/espace/profil", label: "Mon profil", icon: "user" },
@@ -19,6 +20,7 @@ const NAV: NavItem[] = [
 const MOBILE: NavItem[] = [
   { href: "/espace", label: "Mon espace", icon: "home", exact: true },
   { href: "/espace/demarches", label: "Démarches", icon: "demarches" },
+  { href: "/espace/annee", label: "Année", icon: "calendar" },
   { href: "/le-monde-aime", label: "Carte", icon: "pin" },
   { href: "/le-monde-aime?onglet=publier", label: "Publier", icon: "filePlus" },
   { href: "/espace/echanges", label: "Échanges", icon: "echanges" },

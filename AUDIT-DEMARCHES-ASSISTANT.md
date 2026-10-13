@@ -625,3 +625,37 @@ sans raz — fixtures mariage et paiement préservées) ; hub avec la tuile,
 `/informations/argent`, les 4 pages `/guides/<slug>` et l'accueil en 200, fil
 d'Ariane « Argent et difficultés » ; build de production ; typecheck et
 ESLint verts.
+
+## 6undecies. « Mon année à préparer » — l'année de l'utilisateur d'un coup d'œil (2026-10-13)
+
+**Demande** : le chantier d'assemblage — transformer les dates déjà présentes
+dans l'espace en une année pré-remplie consultable d'un coup d'œil.
+
+**Principe** : la page `/espace/annee` n'invente aucune date. Elle agrège ce
+qui existe déjà, en gardant visibles la nature et la source de chaque date :
+les étapes datées des parcours en cours (tâches non terminées des parcours ni
+en questionnaire ni clos) — **échéances officielles avec leur source**,
+toujours distinctes des **rappels personnels** ; les rendez-vous demandés ou
+confirmés (heure, bureau, état) ; les projets ouverts dont l'utilisateur est
+organisateur ou participant accepté ; ses événements communautaires et ses
+trajets proposés ; et son anniversaire, seule projection calculée (récurrence
+annuelle depuis la date de naissance du profil, 29 février fêté le 28 les
+années non bissextiles).
+
+**Présentation** : bloc « En retard — à traiter d'abord » (échéances, rappels
+et rendez-vous passés non terminés — un projet passé, lui, disparaît : ce
+n'est pas un retard), puis 12 mois glissants, mois creux affichés comme tels,
+chaque date avec son badge de nature, son origine et son délai relatif
+(« dans 30 jours », « il y a 3 jours »). Note de lecture explicite en pied :
+seules les échéances officielles engagent un organisme. Bouton d'impression
+réutilisé. Entrée par la navigation de l'espace (bureau et mobile) et par la
+carte « Échéances proches » de l'accueil. Logique pure isolée dans
+`lib/annee.ts`, page sans aucune écriture.
+
+**Vérifié** : tests purs (projection d'anniversaire y compris 29 février et
+dates impossibles, fenêtre glissante à borne exclusive, tri, retards) ; en
+aperçu, l'année de Jean le 13/10/2026 : rappels du parcours paiement (J+2,
+J+3, J+30), un vrai retard de démonstration détecté, mariage du 19/06/2027,
+anniversaire projeté au 12/04/2027 (« dans 181 jours ») ; compte sans date de
+naissance : aucun anniversaire fabriqué ; sans session : redirection vers la
+connexion ; build de production, typecheck et ESLint verts.
