@@ -222,8 +222,25 @@ au 14/10 pour une naissance agricole du 09/10, protection prudente pour
 un proche qui ne peut plus décider…). Tuiles vérifiées dans l'assistant
 de création.
 
-Restent en P1 : trous de couverture
-(invalidité pour soi, transmission/cessation, réversion, recruteur).
+## 5quater. P1 démarches (partie 3) — exécuté le 2026-08-10 (commit 895cfb6)
+
+Les quatre trous de couverture sont comblés (règles `2026.10-e`, **15 parcours**) :
+- `transmission` — transmettre ou cesser une activité (repreneur trouvé ou
+  cherché, cessation, arrêt progressif ; salariés sécurisés ; Guichet unique,
+  MSA/Urssaf, point retraite) ;
+- `recruteur` — premier salarié, saisonnier, remplacement (France Travail,
+  DPAE MSA/Urssaf, Guso pour le spectacle ponctuel), correspondance avec la
+  procédure bureau « Embaucher un salarié agricole » ;
+- `invalidite` — handicap et travail pour soi (MDPH/RQTH, médecine du travail,
+  Cap emploi, pension d'invalidité évaluée par la caisse, jamais par AIME®) ;
+- `reversion` — droits du conjoint survivant (demande inter-régimes unique,
+  cas Pacs/concubinage traités honnêtement, allocation veuvage avant 55 ans).
+Vérifié sur les règles (plans conditionnels) et sur le routage de l'assistant,
+sans régression : « je suis en arrêt de travail » mène toujours à Santé,
+« un musicien pour la fête » toujours à l'événementiel.
+
+Le P1 démarches est clos. Reste le chantier suivant : assistant niveau 2,
+puis le fonds éditorial en continu.
 
 ## 6. Niveau 1 de l'assistant — exécuté le 2026-08-10 (commit à suivre)
 
