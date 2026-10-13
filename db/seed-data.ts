@@ -1471,6 +1471,55 @@ export async function seedDatabase(db: NodePgDatabase) {
     },
   ]);
 
+  console.log("Création du fonds emploi : 5 guides et articles publics…");
+  await db.insert(articles).values([
+    {
+      slug: "recherche-emploi-par-ou-commencer",
+      title: "Recherche d'emploi : par où commencer, selon votre situation",
+      category: "emploi",
+      audience: "Personnes en recherche d'emploi ou de formation",
+      summary: "France Travail, mission locale, Cap emploi, Compte Formation : la bonne première porte dépend de votre âge, de votre objectif et de vos besoins.",
+      content: "Chercher un emploi, ce n'est pas seulement consulter des annonces : c'est aussi ouvrir les bons dossiers auprès des bons interlocuteurs, pour que l'accompagnement — et, le cas échéant, l'indemnisation — puissent suivre.\n\nLa porte d'entrée générale est France Travail : s'y inscrire, ou mettre à jour son dossier si c'est déjà fait. C'est là que se construit l'accompagnement de votre recherche et que s'examine une éventuelle indemnisation — éventuelle, car elle dépend de votre parcours et s'instruit dossier par dossier.\n\nSi vous avez moins de 26 ans, une deuxième porte existe, souvent plus proche : la mission locale. Elle accompagne les jeunes de 16 à 25 ans sur l'emploi et la formation, mais aussi sur la vie quotidienne qui conditionne le reste — transport, logement, santé.\n\nSi un handicap fait partie de votre situation et que vous souhaitez un accompagnement adapté, Cap emploi est l'interlocuteur spécialisé de l'emploi des personnes en situation de handicap. C'est vous qui choisissez d'y recourir : cette question vous appartient.\n\nEt si votre objectif est plutôt de vous former ou de changer de métier, vos droits à la formation se consultent sur Mon Compte Formation, le service officiel : c'est là, et seulement là, que se vérifie ce à quoi vous pouvez prétendre. Dans tous les cas, un CV à jour vous servira à chaque rendez-vous.\n\nDans votre espace AIME®, le parcours « Je cherche un emploi ou une formation » vous pose ces quelques questions — âge, objectif, accompagnement souhaité — et vous indique vos interlocuteurs dans le bon ordre.",
+      kind: "guide",
+    },
+    {
+      slug: "premiere-embauche-les-gestes-dans-lordre",
+      title: "Première embauche : les gestes dans le bon ordre",
+      category: "emploi",
+      audience: "Employeurs, première embauche ou renfort ponctuel",
+      summary: "Une offre claire, une déclaration avant la prise de poste, un contrat écrit : l'ordre des gestes qui protège l'employeur comme le salarié.",
+      content: "Embaucher pour la première fois impressionne surtout par le nombre de sigles. En réalité, les gestes se comptent et ils ont un ordre — et c'est cet ordre qui vous protège, vous comme la personne recrutée.\n\nTout commence par l'offre : tâches, lieu, horaires, durée, compétences réellement nécessaires. Une offre claire attire les bons candidats et cadre la suite ; vous pouvez la déposer auprès de France Travail, qui peut aussi vous aider à la rédiger.\n\nAvant la prise de poste — c'est le geste à ne jamais remettre au lendemain — vient la déclaration préalable à l'embauche (DPAE) : auprès de la MSA si votre activité relève du régime agricole, auprès de l'Urssaf sinon. Elle se fait en ligne et déclenche l'immatriculation de votre salarié·e. Embaucher sans déclaration expose à des sanctions et laisse la personne sans droits.\n\nViennent ensuite le contrat de travail écrit — durée, horaires, rémunération — et l'organisation de la visite d'information et de prévention auprès du service de santé au travail. Pour une première embauche, prévoyez aussi un temps d'installation : comptes employeur auprès de la MSA ou de l'Urssaf, convention collective applicable, interlocuteurs repérés. France Services ou votre chambre consulaire peuvent vous aider à démarrer.\n\nReste la question des aides à l'embauche : elles existent selon le public recruté, le territoire et le type de contrat, elles évoluent souvent, et elles se vérifient au moment de l'embauche sur les sites officiels. Ni AIME® ni un tiers ne peuvent vous en garantir une : seuls les organismes la confirment.\n\nDans votre espace AIME®, le parcours « J'embauche ou je recrute » déroule ces gestes selon votre secteur et votre besoin — première embauche, saisonnier, remplacement ou poste durable.",
+      kind: "guide",
+    },
+    {
+      slug: "spectacle-occasionnel-declarer-avec-le-guso",
+      title: "Un artiste ou un technicien pour un soir : déclarer avec le Guso",
+      category: "emploi",
+      audience: "Organisateurs occasionnels de spectacles",
+      summary: "Pour le spectacle vivant, l'artiste rémunéré est présumé salarié : quand le spectacle n'est pas votre métier, le Guso gère déclaration, contrat et cotisations.",
+      content: "Vous organisez une fête, un mariage, un concert dans votre salle — et vous rémunérez un musicien ou un technicien pour la soirée. Le réflexe « il me fera une facture » peut vous mettre, et le mettre, hors cadre.\n\nPour le spectacle vivant, la règle de départ est protectrice : l'artiste rémunéré est présumé salarié. Autrement dit, sauf situation particulière vérifiée, la personne que vous payez pour jouer n'est pas votre prestataire indépendant, mais votre salarié·e le temps de la prestation — avec les droits qui vont avec. Une facture ou un numéro de Siret ne suffit pas toujours à établir un autre cadre.\n\nQuand le spectacle n'est pas votre activité principale, un dispositif a été créé exactement pour cela : le Guso. Il est obligatoire dans ce cadre, gratuit, et il gère pour vous la déclaration, le contrat et les cotisations liés à l'emploi de l'artiste ou du technicien. Vous déclarez la prestation, le cadre suit.\n\nLe bon moment pour vérifier tout cela, c'est avant de signer quoi que ce soit et avant la soirée — jamais après coup. Si votre situation est moins nette (activité régulière de spectacle, statuts mêlés), elle se vérifie au cas par cas auprès des organismes concernés.\n\nDans votre espace AIME®, le parcours « J'embauche ou je recrute » vous dirige vers le Guso dès que vous déclarez un recrutement dans le spectacle vivant ponctuel.",
+      kind: "article",
+    },
+    {
+      slug: "creer-son-activite-avant-les-formalites",
+      title: "Créer son activité : l'accompagnement avant les formalités",
+      category: "emploi",
+      audience: "Personnes qui créent ou développent une activité",
+      summary: "Clarifier le projet et choisir le statut avant de déclarer : la création se joue d'abord dans une conversation, ensuite au guichet unique.",
+      content: "Créer une activité — agricole, artisanale, commerciale, libérale ou artistique — commence rarement par un formulaire. Elle commence par une conversation : avec un accompagnement local, qui aide à clarifier le projet et à choisir le statut adapté avant toute formalité. Ce temps-là n'est pas du temps perdu : c'est celui qui évite de devoir refaire.\n\nQuand le projet est prêt, la déclaration de création passe par un seul endroit : le guichet unique des formalités d'entreprise, en ligne. Toutes les créations y transitent ; préparez votre pièce d'identité et un justificatif de domicile, demandés lors des formalités.\n\nLa protection sociale, elle, dépend de votre régime : si votre activité relève du régime agricole, c'est la MSA qui gère votre protection sociale ; sinon, c'est l'Urssaf qui recouvre les cotisations des travailleurs indépendants. Identifier le bon interlocuteur dès le départ simplifie toutes les déclarations suivantes.\n\nUn cas mérite une vérification avant de facturer : les activités artistiques. Pour le spectacle vivant, l'artiste rémunéré est présumé salarié — votre activité relève peut-être du salariat plutôt que de l'indépendance, et ce statut se vérifie avant de choisir une forme.\n\nDans votre espace AIME®, le parcours « Je commence ou développe une activité » tient compte de votre type d'activité et de votre stade — idée, création, activité existante — pour ordonner ces étapes.",
+      kind: "guide",
+    },
+    {
+      slug: "transmettre-ou-cesser-son-activite",
+      title: "Transmettre ou cesser son activité : préparer avant de déclarer",
+      category: "emploi",
+      audience: "Indépendants et exploitants qui transmettent ou cessent",
+      summary: "Rendre l'activité transmissible, sécuriser les salarié·es, aligner la retraite : la cessation propre se prépare des mois avant la radiation.",
+      content: "Transmettre ou cesser une activité — exploitation, commerce, micro-entreprise — est un chantier qui se prépare bien avant la formalité qui l'officialise. Voici l'ordre des gestes, du plus en amont au plus administratif.\n\nSi vous cherchez un repreneur, commencez par rendre l'activité transmissible : bilans, baux et autorisations à jour. Un repreneur — ou sa banque — demandera les trois derniers bilans, les baux en cours et l'état du matériel ; les chambres consulaires et les réseaux de transmission accompagnent cette préparation. Une activité dont les papiers sont prêts se transmet plus vite et à sa juste valeur. Si le repreneur est trouvé, formalisez avec un professionnel — notaire, expert-comptable, chambre consulaire : cession de fonds, de parts ou de bail, la forme choisie change les impôts, les droits et les garanties, et ce choix ne se délègue pas à un site.\n\nSi vous avez des salarié·es, leur situation se sécurise avant toute annonce de dates : transmission des contrats ou fin de contrat, documents obligatoires — les règles et les délais sont stricts. Un Point-justice ou un expert-comptable sécurise la procédure ; c'est le point le plus risqué juridiquement d'une cessation.\n\nLa formalité elle-même passe par le Guichet unique des formalités d'entreprise : c'est elle qui radie l'activité et déclenche les régularisations — cotisations de l'année de cessation auprès de la MSA (activité agricole) ou de l'Urssaf, droits santé et famille. Sans radiation, certaines cotisations et taxes continuent de courir.\n\nEnfin, cessation et départ en retraite ne coïncident pas toujours : faites le point sur votre relevé de carrière et vos dates possibles de départ pour aligner les deux — une année blanche évitée vaut quelques simulations.\n\nDans votre espace AIME®, le parcours « Je transmets ou je cesse mon activité » adapte ces étapes à votre projet : repreneur trouvé ou cherché, arrêt progressif, cessation sans repreneur.",
+      kind: "guide",
+    },
+  ]);
+
   console.log("Création de la carte : production locale et disponibilités…");
 
   // Points de production / présence déposés par des adhérents (données fictives).

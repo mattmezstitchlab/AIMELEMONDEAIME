@@ -57,7 +57,7 @@ export const ARTICLE_CATEGORY_LABELS: Record<string, string> = {
   logement: "Logement",
   retraite: "Retraite",
   cotisations: "Cotisations",
-  emploi: "Emploi agricole",
+  emploi: "Emploi et activité",
 };
 
 /**
@@ -85,7 +85,7 @@ export const THEME_META: Record<string, { image: string; icon: "sante" | "famill
   argent: { image: "/images/hero-difficultes.jpg", icon: "paiements", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", tagline: "Quand payer devient difficile, reprendre la main sans rester seul." },
   logement: { image: "/images/hero-logement.jpg", icon: "logement", desc: "Aides au logement et logement de fonction.", tagline: "Un toit adapté à votre vie à la campagne." },
   retraite: { image: "/images/hero-retraite.jpg", icon: "retraite", desc: "Relevé de carrière, demande de retraite.", tagline: "Préparer sereinement l'après, après une vie de travail de la terre." },
-  emploi: { image: "/images/hero-emploi.jpg", icon: "emploi", desc: "Embauche, contrats, prévention au travail.", tagline: "Employeurs et salariés agricoles, des démarches claires." },
+  emploi: { image: "/images/hero-emploi.jpg", icon: "emploi", desc: "Recherche d'emploi, formation, embauche, création et transmission d'activité.", tagline: "Travailler, recruter, créer ou transmettre : des démarches claires à chaque étape." },
   cotisations: { image: "/images/hero-cotisations.jpg", icon: "cotisations", desc: "Calcul, échéances et régularisations.", tagline: "Comprendre et anticiper vos cotisations, simplement." },
 };
 

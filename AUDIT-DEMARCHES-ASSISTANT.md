@@ -940,3 +940,30 @@ Doublons et traitements :
 ### 5. Vérifications
 
 - Typecheck et lint verts ; rebuild de production et redémarrage de l’aperçu. Vérifié dans le HTML servi : hero réduit à l’orientation + trois liens texte ; inscription proposant les situations de vie et « Votre bureau d’accompagnement » ; dock des cinq entrées présent sur l’accueil (Accueil actif) et sur /informations ; espace connecté conservant une seule navigation basse (la sienne).
+
+
+---
+
+## 6vicies. Fonds éditorial « Emploi et activité » : 5 guides publics (13 octobre 2026)
+
+> Suite logique des fonds thématiques : après mariage, argent, famille, santé, retraite et logement, la thématique « emploi » était la plus pauvre (3 courts articles hérités du monde agricole) alors que le produit porte quatre parcours d’activité. Même méthode que les fonds précédents : rédaction uniquement depuis le socle factuel déjà sourcé des parcours, aucun fait, montant, délai ou droit nouveau ; chaque contenu renvoie au parcours correspondant et reste complémentaire des articles génériques déjà présents au seed.
+
+### 1. Socle utilisé
+
+Parcours `emploi` (France Travail, mission locale pour les moins de 26 ans, Cap emploi, droits à la formation sur Mon Compte Formation), `recruteur` (offre déposée, DPAE auprès de la MSA ou de l’Urssaf avant la prise de poste, contrat et visite de santé au travail, Guso pour le spectacle ponctuel, aides à vérifier jamais promises), `activite` (accompagnement avant formalités, guichet unique, régime agricole ou Urssaf, artiste présumé salarié) et `transmission` (activité rendue transmissible — bilans, baux, matériel —, professionnel pour la forme, cessation au guichet unique, salarié·es sécurisé·es avant les dates, alignement avec la retraite).
+
+### 2. Les 5 contenus (catégorie `emploi`)
+
+1. **Recherche d’emploi : par où commencer, selon votre situation** (guide) — la bonne première porte selon l’âge, le handicap et l’objectif ; renvoi au parcours « Je cherche un emploi ou une formation ».
+2. **Première embauche : les gestes dans le bon ordre** (guide) — offre, DPAE, contrat, comptes employeur, aides vérifiées sur les sites officiels ; renvoi au parcours « J’embauche ou je recrute », complémentaire de « Embaucher un salarié saisonnier » et de « Prévention et sécurité au travail agricole » déjà au seed.
+3. **Un artiste ou un technicien pour un soir : déclarer avec le Guso** (article) — présomption de salariat du spectacle vivant, Guso obligatoire et gratuit hors activité principale ; renvoi au parcours recruteur.
+4. **Créer son activité : l’accompagnement avant les formalités** (guide) — statut clarifié avec un accompagnement local, déclaration au guichet unique, MSA ou Urssaf selon le régime ; renvoi au parcours « Je commence ou développe une activité ».
+5. **Transmettre ou cesser son activité : préparer avant de déclarer** (guide) — transmission préparée, salarié·es sécurisé·es, radiation et régularisations, retraite alignée ; renvoi au parcours « Je transmets ou je cesse mon activité ».
+
+### 3. Thématique alignée sur le produit d’aujourd’hui
+
+La catégorie `emploi` s’affiche désormais **« Emploi et activité »** (libellé de catégorie, tuile du hub, tagline : « Travailler, recruter, créer ou transmettre ») : la thématique n’est plus seulement l’emploi agricole, elle couvre les quatre parcours d’activité du produit. L’ordre des thématiques et les guides à la une ne changent pas.
+
+### 4. Vérifications
+
+Base d’aperçu recréée (migrations + seed complet, 52 articles publics), typecheck vert, build de production, aperçu redémarré. Vérifié dans le HTML visible : les 5 guides en 200 avec contenu réel, page thématique « Emploi et activité » listant les 5 titres, tuile du hub renommée, « Derniers guides » de l’accueil affichant les nouveautés emploi hors épinglés. Aucune promesse de droit, d’aide ou de délai : les aides « se vérifient au moment de l’embauche », l’indemnisation reste « éventuelle ».
