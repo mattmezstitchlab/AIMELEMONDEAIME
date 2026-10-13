@@ -579,6 +579,41 @@ export const projectDocuments = pgTable("project_documents", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Espace de travail du mariage, adossé au projet partagé créé par le parcours « Nous nous marions ». */
+export const weddingSettings = pgTable("wedding_settings", {
+  projectId: integer("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
+  envelopeCents: integer("envelope_cents"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const weddingGuestStatusEnum = ["a_inviter", "invite", "confirme", "peut_etre", "decline"] as const;
+export type WeddingGuestStatus = (typeof weddingGuestStatusEnum)[number];
+
+export const weddingGuests = pgTable("wedding_guests", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 120 }).notNull(),
+  persons: integer("persons").notNull().default(1),
+  groupe: varchar("groupe", { length: 16 }).notNull().default("famille"),
+  status: varchar("status", { length: 16 }).notNull().$type<WeddingGuestStatus>().default("a_inviter"),
+  note: varchar("note", { length: 200 }).notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const weddingBudgetItems = pgTable("wedding_budget_items", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  label: varchar("label", { length: 120 }).notNull(),
+  category: varchar("category", { length: 24 }).notNull().default("divers"),
+  estimatedCents: integer("estimated_cents").notNull().default(0),
+  actualCents: integer("actual_cents"),
+  settled: boolean("settled").notNull().default(false),
+  note: varchar("note", { length: 200 }).notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const circles = pgTable("circles", {
   id: serial("id").primaryKey(),
   ownerId: integer("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),

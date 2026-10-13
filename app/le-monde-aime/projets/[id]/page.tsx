@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { PublicPage } from "@/components/public-shell";
 import { getCurrentUser } from "@/lib/auth";
 import { getProjectDetail } from "@/lib/lma-queries";
+import { getWeddingWorkspace } from "@/lib/wedding-queries";
 import { UNIVERSE_LABEL } from "@/lib/lma";
 import { DocumentsPanel, JoinPanel, NeedsPanel, PendingMembers, ProgramEditor, ProjectChat, ReportContent, Section, StatusControl } from "@/components/community/project-panels";
+import { WeddingBudgetPanel, WeddingGuestsPanel } from "@/components/community/wedding-panels";
 
 export const metadata: Metadata = { title: "Projet — Le Monde Aime" };
 
@@ -20,6 +22,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const detail = await getProjectDetail(id, user?.id ?? null);
   if (!detail) notFound();
   const { project, viewer } = detail;
+  // Espace mariage (invités, budget) : réservé aux participants acceptés,
+  // noms et montants ne sont jamais exposés aux visiteurs du projet.
+  const wedding = viewer.isMember ? await getWeddingWorkspace(id) : null;
   return (
     <PublicPage solidHeader lma>
       <div className="bg-[#fafaf9]">
@@ -49,6 +54,22 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </Section>
 
           <Section title="Programme"><ProgramEditor projectId={id} program={project.program} editable={viewer.isOrganizer} /></Section>
+
+          {wedding && (
+            <div id="invites" className="scroll-mt-24">
+              <Section title="Invités du mariage" hint="La liste vit ici, partagée entre organisateurs : envois et réponses se notent au même endroit.">
+                <WeddingGuestsPanel projectId={id} guests={wedding.guests} stats={wedding.guestStats} invitesEstimes={wedding.invitesEstimes} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
+              </Section>
+            </div>
+          )}
+
+          {wedding && (
+            <div id="budget" className="scroll-mt-24">
+              <Section title="Budget du mariage" hint={wedding.envelopeFromJourney ? "L'enveloppe vient de la réponse donnée dans votre parcours ; elle s'ajuste ici à tout moment." : "Prévu, devis confirmés et déjà réglé, poste par poste. Aucun paiement ne transite par AIME®."}>
+                <WeddingBudgetPanel projectId={id} items={wedding.budgetItems} stats={wedding.budgetStats} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
+              </Section>
+            </div>
+          )}
 
           <Section title="Participants">
             {viewer.isMember ? <ul className="flex flex-wrap gap-2">{detail.members.map((m) => <li key={m.userId} className="rounded-full bg-slate-100 px-3 py-1 text-sm">{m.name}{m.role === "organisateur" ? " · organisateur" : ""}</li>)}</ul> : <p className="text-sm text-slate-600">La liste des participants est réservée aux participants du projet.</p>}

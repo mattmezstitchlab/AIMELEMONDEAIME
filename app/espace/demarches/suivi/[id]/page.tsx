@@ -8,6 +8,8 @@ import { ORGANISM_CATEGORY_LABEL, SITUATION_BY_KEY, TASK_STATUS_LABEL } from "@/
 import { AddTask, JourneyStatusButton, OrganizerEngagement, SendToArtist, SummaryEditor, TaskControls } from "@/components/espace/journey-ui";
 import { priceLabel } from "@/lib/lma";
 import { transmitJourneyToBureau } from "@/lib/actions/journeys";
+import { getWeddingWorkspace } from "@/lib/wedding-queries";
+import { formatEuro } from "@/lib/wedding";
 
 export const metadata: Metadata = { title: "Suivi de démarche — AIME®" };
 
@@ -29,6 +31,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
   const showArtists = j.status === "en_cours" && (j.situation === "evenement" || (j.situation === "mariage" && ["groupe", "dj"].includes(j.answers.musique ?? "")));
   const artists = showArtists ? await searchArtists(j.situation === "mariage" ? "Musique" : (j.answers.discipline ?? ""), project ? { lat: Number(project.lat), lng: Number(project.lng) } : null, user.id) : [];
   const engagedIds = new Set(d.engagements.filter((e) => !["refusee", "annulee"].includes(e.status)).map((e) => e.artistId));
+  const wedding = j.situation === "mariage" && project ? await getWeddingWorkspace(project.id) : null;
   const ser = (x: Date | null) => (x ? x.toISOString() : null);
 
   return (
@@ -96,6 +99,26 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
               <p className="mt-1 text-sm text-slate-600">Le projet <Link className="font-semibold text-emerald-800 underline" href={`/le-monde-aime/projets/${project.id}`}>{project.title}</Link> rassemble le programme, les besoins et les contributions confirmées. Les participants y voient l&apos;organisation, jamais votre démarche ni vos documents personnels.</p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">{[["produits locaux", "terre"], ["mobilier et vaisselle", "terre"], ["décoration", "terre"], ["matériel technique", "arts"], ["transport", "terre"], ["ateliers de transmission", "savoirs"]].map(([t, u]) => <Link key={t} href={`/le-monde-aime?univers=${u}&q=${encodeURIComponent(t.split(" ")[0])}`} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:border-emerald-500">Chercher : {t}</Link>)}</div>
               <p className="mt-2 text-xs text-slate-500">Chaque réservation est acceptée explicitement par son propriétaire ; les quantités et dates sont vérifiées côté serveur.</p>
+            </Card>
+          )}
+
+          {wedding && project && (
+            <Card>
+              <h2 className="text-lg font-semibold text-slate-900">Invités et budget, en direct du projet</h2>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl bg-[#fafaf9] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Invités</p>
+                  <p className="mt-1 text-sm text-slate-700"><strong>{wedding.guestStats.confirmees} personne(s) confirmée(s)</strong> sur {wedding.guestStats.personnesListees} listées · {wedding.guestStats.enAttente} en attente de réponse{wedding.invitesEstimes > 0 ? ` · estimation de départ : ~${wedding.invitesEstimes}` : ""}</p>
+                  <Link href={`/le-monde-aime/projets/${project.id}#invites`} className="mt-2 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir la liste des invités</Link>
+                </div>
+                <div className="rounded-xl bg-[#fafaf9] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Budget</p>
+                  <p className="mt-1 text-sm text-slate-700">Estimé <strong>{formatEuro(wedding.budgetStats.estimeCents)}</strong> · devis confirmés {formatEuro(wedding.budgetStats.confirmeCents)} · déjà réglé {formatEuro(wedding.budgetStats.regleCents)}{wedding.budgetStats.enveloppeCents !== null ? ` · enveloppe ${formatEuro(wedding.budgetStats.enveloppeCents)}` : ""}</p>
+                  {wedding.budgetStats.depasseEnveloppe && <p className="mt-1 text-xs font-semibold text-rose-700">L&apos;estimé dépasse l&apos;enveloppe : c&apos;est le moment d&apos;arbitrer, poste par poste.</p>}
+                  <Link href={`/le-monde-aime/projets/${project.id}#budget`} className="mt-2 inline-block text-sm font-semibold text-emerald-800 underline">Ouvrir le suivi de budget</Link>
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-slate-500">Ces compteurs vivent dans le projet partagé : votre conjoint·e et vos témoins organisateurs y notent les réponses et les devis au même endroit que vous.</p>
             </Card>
           )}
         </div>

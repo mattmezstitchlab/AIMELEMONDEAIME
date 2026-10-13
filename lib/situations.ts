@@ -3,7 +3,7 @@
  * Chaque situation : questions progressives → étapes expliquées, pièces, organismes et liens officiels.
  * Les règles sont versionnées et datées ; elles n'attribuent aucun droit et ne valident aucun dossier.
  */
-export const RULES_VERSION = "2026.10-f";
+export const RULES_VERSION = "2026.10-g";
 export const RULES_REVIEWED_AT = "2026-10-13";
 // 2026.10-c : parcours Santé, échéances officielles calculées dans les règles.
 // 2026.10-d : parcours Famille, Proche et Quotidien épaissis au même niveau.
@@ -146,6 +146,7 @@ export const SITUATIONS: Situation[] = [
       { key: "repas", label: "Le repas", type: "select", required: true, options: [["traiteur", "Un traiteur"], ["restaurant", "Un restaurant"], ["proches", "Un buffet préparé par nos proches"], ["inconnu", "Pas encore décidé"]] },
       { key: "musique", label: "La musique", type: "select", required: true, options: [["groupe", "Un groupe ou des musiciens en direct"], ["dj", "Un DJ"], ["playlist", "Une playlist que nous gérerons"], ["proche", "Un proche s'en chargera"], ["inconnu", "Pas encore décidé"]] },
       { key: "photo", label: "Les photos", type: "select", options: [["pro", "Un photographe professionnel"], ["proche", "Un proche talentueux"], ["inconnu", "Pas encore décidé"]] },
+      { key: "budget", label: "Budget global envisagé (€, facultatif)", type: "number", why: "Il devient l'enveloppe de départ du suivi de budget dans votre projet ; il s'ajuste là-bas à tout moment et ne vous engage à rien." },
     ],
     build: (a) => {
       const invites = Number(a.invites ?? 0);
@@ -155,6 +156,8 @@ export const SITUATIONS: Situation[] = [
       const t: TaskRule[] = [
         { kind: "action", label: "Partager le projet du mariage et y inviter votre conjoint·e, vos témoins et vos proches organisateurs", detail: "Le projet créé avec ce parcours rassemble programme, besoins, contributions et documents de la fête. Votre démarche et vos pièces personnelles, elles, restent privées.", reason: "Un mariage se prépare à plusieurs : un seul endroit pour coordonner évite les fils de messages contradictoires." },
       ];
+      t.push({ kind: "action", label: "Dresser la liste des invités dans le projet partagé", detail: "Foyer par foyer : nom, nombre de personnes, cercle (famille, amis, travail). Les réponses se noteront au même endroit, et le compteur des confirmés donnera le nombre de convives à transmettre au traiteur.", reason: "La liste conditionne les faire-part, le repas et le plan de table : elle se construit tôt et vit jusqu'au bout.", due: repere(-240) });
+      t.push({ kind: "action", label: "Ouvrir le suivi de budget dans le projet et y noter chaque devis", detail: "Chaque poste (lieu, repas, musique, photo…) avec son montant estimé, puis le montant du devis confirmé et sa case « réglé » quand vous l'avez payé par vos propres moyens. AIME® ne perçoit ni ne verse aucun paiement.", reason: "Un budget de mariage dérape rarement d'un coup : il dérape poste par poste, et ça se voit tôt quand tout est au même endroit.", due: repere(-240) });
       // --- Le lieu et les prestataires (les plus longs à réserver) ---
       if (a.salle === "a_trouver") t.push({ kind: "action", label: "Réserver le lieu de réception", detail: "Les lieux demandés partent 9 à 12 mois à l'avance. La carte AIME® recense des lieux et espaces près de chez vous ; la salle communale se réserve en mairie.", reason: "C'est le premier verrou du rétroplanning : tout le reste se cale sur le lieu.", organisms: ["mairie"], due: repere(-270) });
       if (a.salle === "salle_communale") t.push({ kind: "action", label: "Réserver la salle communale auprès de la mairie et signer la convention de location", detail: "Tarif habitants, caution, horaires, état des lieux et règles (musique, fin de soirée) sont fixés par la convention.", reason: "Les salles communales sont très demandées pour les mariages, surtout au printemps et en été.", organisms: ["mairie"], due: repere(-270) });
@@ -188,7 +191,7 @@ export const SITUATIONS: Situation[] = [
       if (invites > 0) {
         t.push({ kind: "action", label: "Envoyer les faire-part (avec date limite de réponse)", detail: "Indiquez la date de réponse souhaitée, les informations d'hébergement et de trajet ; le nombre définitif de convives se confirme au traiteur ensuite.", reason: "Huit à dix semaines laissent aux invités le temps de s'organiser.", due: repere(-60) });
         if (invites >= 50) t.push({ kind: "action", label: "Préparer l'information des invités : hébergements, trajets, covoiturage", detail: "Une page du projet ou un message groupé ; la carte AIME® aide pour les trajets partagés.", reason: "Au-delà de 50 invités, les questions logistiques deviennent un flux continu.", due: repere(-45) });
-        t.push({ kind: "action", label: "Relancer les invités sans réponse et figer le nombre de convives", detail: "Le nombre figé part au traiteur ou au restaurant et sert au plan de table.", reason: "C'est le chiffre dont dépendent repas, salle et budget final.", due: repere(-21) });
+        t.push({ kind: "action", label: "Relancer les invités sans réponse et figer le nombre de convives", detail: "Le nombre figé part au traiteur ou au restaurant et sert au plan de table. La liste des invités du projet affiche en direct les confirmés, les en-attente et les déclinés : c'est ce compteur-là qui fait foi.", reason: "C'est le chiffre dont dépendent repas, salle et budget final.", due: repere(-21) });
         t.push({ kind: "action", label: "Dresser le plan de table", detail: "À faire une fois le nombre de convives figé ; partagez-le dans le projet pour les témoins qui placeront les invités.", reason: "Le jour J, le plan de table évite dix minutes de flottement à l'entrée en salle.", due: repere(-7) });
       }
       if (a.ceremonie === "laique") t.push({ kind: "action", label: "Préparer la cérémonie Laïque : officiant, textes, rituels, musique", detail: "Désignez l'officiant et répétez le déroulement ; la cérémonie Laïque n'a pas de valeur légale, elle suit la cérémonie civile.", reason: "C'est souvent le moment le plus personnel de la journée : il se répète.", due: repere(-30) });

@@ -389,3 +389,46 @@ photographe « pour mon mariage » mène au parcours Mariage), et la
 officiels au 09/06/2027 pour un mariage le 19/06/2027, mariage simple
 (domicile, fait maison, playlist) sans aucune tâche Guso, aucune
 régression de routage (« je suis en arrêt de travail » reste santé).
+
+## 6quinquies. Mariage, deuxième temps : invités et budget vivants — exécuté le 2026-08-10 (commit à suivre)
+
+La direction « l'app la plus approfondie dans le monde du mariage » se
+poursuit là où le rétroplanning devenait vivant : les réponses des invités
+et les dépenses réelles, suivis dans le projet partagé du mariage.
+
+- **Liste d'invités par foyer** (table `wedding_guests`) : nom, nombre de
+  personnes, cercle (famille, amis, travail), réponse suivie (à inviter,
+  invitation envoyée, confirmé, peut-être, décliné). Le compteur des
+  **personnes confirmées** est le nombre qui part au traiteur au jalon
+  J-21 ; l'estimation du parcours reste affichée en regard. AIME® n'envoie
+  ni invitation ni relance : les réponses se notent, par les organisateurs.
+- **Suivi de budget** (table `wedding_budget_items`, réglages dans
+  `wedding_settings`) : poste par poste, montant estimé, montant du devis
+  confirmé, case « réglé ». Enveloppe globale (reprise de la nouvelle
+  question « Budget global envisagé » du parcours, ajustable) avec écart
+  en direct. Aucun paiement ne transite par AIME® : c'est un carnet de
+  bord, jamais un portefeuille.
+- **Branchements** : sections « Invités du mariage » et « Budget du
+  mariage » sur la page du projet (visibles des seuls participants
+  acceptés, modifiables par les seuls organisateurs — vérifié : un
+  non-membre ne voit ni nom ni montant) ; carte « en direct du projet »
+  dans le suivi du parcours. Deux tâches du rétroplanning y renvoient
+  (liste J-240, budget J-240) et le jalon « figer les convives » cite le
+  compteur réel. Règles `2026.10-g`.
+- **Gardes** : actions dédiées `lib/actions/wedding.ts`, mêmes patrons que
+  le reste (rôle membre, organisateur accepté, projet ouvert né d'un
+  parcours mariage) ; conversions d'euros strictement déterministes
+  (`parseEuroToCents` : « quatre mille » ou 3 décimales sont refusés, pas
+  interprétés) ; audit sans noms ni montants ; limites 600 foyers /
+  120 postes.
+- **Vérifié** : logique pure testée (compteurs, enveloppe, validateurs,
+  26 tâches du parcours complet, bans officiels inchangés) ; migration
+  `0002_wedding_workspace` appliquée ; rendu réel contrôlé sur un mariage
+  de démonstration (4 confirmées sur 17 listées, budget estimé 8 100 €,
+  enveloppe 15 000 € reprise du parcours, marge 6 900 €) ; refus serveur
+  d'une écriture par une non-organisatrice exécuté de bout en bout.
+  L'invocation manuelle répétée d'actions serveur reste intermittente
+  dans ce bac à sable (constat préexistant, sans rapport avec ce code).
+- **Restant, troisième temps possible** : plan de table assisté (places
+  par foyer confirmé), export de la liste pour le traiteur, modèles de
+  messages de relance à copier (jamais d'envoi par AIME®).
