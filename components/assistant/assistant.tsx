@@ -15,8 +15,8 @@ import { findScenario } from "@/lib/assistant/engine";
 import { matchSituation, normalizeOrientation } from "@/lib/assistant/orientation";
 import { SITUATION_BY_KEY, type Question } from "@/lib/situations";
 import {
-  buildAgenda, buildPieces, buildPoint, findCaseAnswer, personalIntent, writeIntent,
-  type AssistantAction, type AssistantSummary, type PersonalAnswer,
+  buildAgenda, buildAnnee, buildPieces, buildPoint, findCaseAnswer, personalIntent, writeIntent,
+  type AssistantAction, type AssistantSummary, type PersonalAnswer, type YearEventLite,
 } from "@/lib/assistant/personal";
 import { assistantCreateDraft, assistantFinalize, assistantSaveAnswer, assistantSetReminder, assistantTransmit } from "@/lib/actions/assistant";
 import { Icon } from "@/components/icon";
@@ -49,7 +49,7 @@ type PendingInterview = { journeyId: number; situation: string; title: string; a
 
 const OPEN_KEY = "assistant-open";
 
-export function AssistantWidget({ role, userName, summary, canAct = false }: { role: AssistantRole; userName: string | null; summary?: AssistantSummary | null; canAct?: boolean }) {
+export function AssistantWidget({ role, userName, summary, canAct = false, yearEvents = null }: { role: AssistantRole; userName: string | null; summary?: AssistantSummary | null; canAct?: boolean; yearEvents?: YearEventLite[] | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -514,6 +514,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
       if (byReference) { answerPersonal(byReference); return; }
       const intent = personalIntent(value);
       if (intent === "pieces") { answerPersonal(buildPieces(summary)); return; }
+      if (intent === "annee") { answerPersonal(buildAnnee(yearEvents ?? [], new Date())); return; }
       if (intent === "agenda") { answerPersonal(buildAgenda(summary)); return; }
       if (intent === "point") { answerPersonal(buildPoint(summary, focusLine)); proposeReminderIfUseful(); return; }
     }

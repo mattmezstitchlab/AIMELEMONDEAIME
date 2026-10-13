@@ -564,6 +564,7 @@ export async function seedDatabase(db: NodePgDatabase) {
     passwordHash: pw,
     role: "membre",
     fullName: "Visiteur de démonstration",
+    birthDate: "1985-05-14",
     officeId: beauce.id,
     onboardingCompleted: true,
     isDemo: true,

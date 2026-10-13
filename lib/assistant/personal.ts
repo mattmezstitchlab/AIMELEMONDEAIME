@@ -1,6 +1,7 @@
 import type { Suggestion } from "@/lib/assistant/registry";
 import { CASE_STATUS_LABELS } from "@/lib/constants";
 import { normalizeOrientation } from "@/lib/assistant/orientation";
+import { buildYear, YEAR_EVENT_LABELS, type YearEvent, type YearEventKind } from "@/lib/annee";
 
 /**
  * Assistant personnalisé, niveau 1 (voir AUDIT-DEMARCHES-ASSISTANT.md) :
@@ -108,10 +109,63 @@ export function buildAgenda(summary: AssistantSummary): PersonalAnswer {
   if (!lines.length) {
     return {
       text: "Rien ne vous attend dans l'immédiat : aucune pièce manquante, aucune échéance proche, aucune demande en attente. Pensez simplement à vos parcours en cours.",
-      chips: [link("Mes démarches", "/espace/demarches"), link("Mes échanges & projets", "/espace/echanges")],
+      chips: [link("Mon année à préparer", "/espace/annee"), link("Mes démarches", "/espace/demarches"), link("Mes échanges & projets", "/espace/echanges")],
     };
   }
-  return { text: lines.join("\n"), chips: [...chips, link("Mes démarches", "/espace/demarches")] };
+  return { text: lines.join("\n"), chips: [...chips, link("Mon année à préparer", "/espace/annee"), link("Mes démarches", "/espace/demarches")] };
+}
+
+/** Événement d'année tel qu'il voyage jusqu'au widget (dates sérialisées). */
+export type YearEventLite = Omit<YearEvent, "date"> & { date: string };
+
+const natureFr = (e: YearEvent): string => {
+  if (e.kind === "echeance") return `échéance officielle${e.source ? ` — source : ${e.source}` : ""}`;
+  return YEAR_EVENT_LABELS[e.kind].toLowerCase();
+};
+const dateFrD = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+const moisFr = (label: string) => label.split(" ")[0].toLowerCase();
+
+/**
+ * « Qu'est-ce que j'ai à préparer ce mois-ci / cette année ? » : la même
+ * année que la page « Mon année à préparer », racontée en quelques lignes —
+ * retards d'abord, mois courant, puis le rythme des mois suivants. Les
+ * échéances officielles sont nommées comme telles, avec leur source ; les
+ * rappels personnels restent des repères, jamais des obligations.
+ */
+export function buildAnnee(lite: YearEventLite[], now: Date): PersonalAnswer {
+  const events: YearEvent[] = lite.map((e) => ({ ...e, date: new Date(e.date) }));
+  const year = buildYear(events, now);
+  const chips: Suggestion[] = [link("Voir mon année à préparer", "/espace/annee")];
+  if (year.total === 0) {
+    return {
+      text: "Votre année est encore vierge : aucun parcours n'a posé de rappel, aucun rendez-vous ni projet n'a de date. Dès que ce sera le cas, tout apparaîtra ici et dans « Mon année à préparer ».",
+      chips: [...chips, link("Commencer un parcours", "/espace/demarches/nouvelle")],
+    };
+  }
+  const lines: string[] = ["Voici votre année à préparer :"];
+  if (year.overdue.length) {
+    lines.push(`D'abord, ${year.overdue.length} date${year.overdue.length > 1 ? "s" : ""} en retard :`);
+    for (const e of year.overdue.slice(0, 3)) lines.push(`• ${dateFrD(e.date)} : ${e.label} (${natureFr(e)}).`);
+    chips.push(link(`Traiter : ${court(year.overdue[0].label)}`, year.overdue[0].href));
+  }
+  const [courant, ...suivants] = year.months;
+  if (courant.events.length) {
+    lines.push(`En ${moisFr(courant.label)} (ce mois-ci) :`);
+    for (const e of courant.events.slice(0, 4)) lines.push(`• ${dateFrD(e.date)} : ${e.label} (${natureFr(e)}).`);
+    if (courant.events.length > 4) lines.push(`• … et ${courant.events.length - 4} autre(s) date(s) ce mois-ci.`);
+  }
+  const remplis = suivants.filter((m) => m.events.length);
+  if (remplis.length) {
+    const resume = remplis.slice(0, 3).map((m) => {
+      const officielles = m.events.filter((e) => e.kind === "echeance").length;
+      return `${m.events.length} en ${moisFr(m.label)}${officielles ? ` (dont ${officielles} échéance${officielles > 1 ? "s" : ""} officielle${officielles > 1 ? "s" : ""})` : ""}`;
+    });
+    lines.push(`Puis, plus loin : ${resume.join(", ")}${remplis.length > 3 ? ", et d'autres mois ensuite" : ""}.`);
+  }
+  const prochaines = year.months.flatMap((m) => m.events).slice(0, 2);
+  chips.push(...prochaines.map((e) => link(`Ouvrir : ${court(e.label)}`, e.href)));
+  lines.push("Les échéances officielles sont les seules qui engagent un organisme ; les rappels personnels sont vos repères. Le détail mois par mois est dans « Mon année à préparer ».");
+  return { text: lines.join("\n"), chips };
 }
 
 /** « Quelles pièces me manquent ? » */
@@ -148,12 +202,13 @@ export function findCaseAnswer(summary: AssistantSummary, rawText: string): Pers
   };
 }
 
-export type PersonalIntent = "pieces" | "agenda" | "point";
+export type PersonalIntent = "pieces" | "annee" | "agenda" | "point";
 
 /** Intention personnelle détectée dans la question (accents ignorés). */
 export function personalIntent(rawText: string): PersonalIntent | null {
   const text = normalizeOrientation(rawText);
   if (["piece manquante", "pieces manquantes", "justificatif", "document manquant", "documents manquants", "que dois je fournir", "pieces a fournir", "pieces me manquent", "que me manque", "quoi fournir", "que manque t il", "pieces a donner", "documents a fournir"].some((k) => text.includes(k))) return "pieces";
+  if (["mon annee", "mon planning", "mon calendrier", "a preparer ce mois", "qu est ce que j ai a preparer", "quoi preparer ce mois", "a traiter ce mois", "mes dates a venir"].some((k) => text.includes(k))) return "annee";
   if (["qui m attend", "qu est ce qui m attend", "a traiter", "echeance", "prochainement", "a venir", "quoi de neuf", "a faire", "mes priorites"].some((k) => text.includes(k))) return "agenda";
   if (["ou en sont", "ou en est", "mes demarches", "mes dossiers", "avancement", "faire le point", "prochaine action", "prochaines actions", "point sur mes", "resume de mes"].some((k) => text.includes(k))) return "point";
   return null;

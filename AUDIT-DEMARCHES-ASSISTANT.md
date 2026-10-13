@@ -659,3 +659,42 @@ J+3, J+30), un vrai retard de démonstration détecté, mariage du 19/06/2027,
 anniversaire projeté au 12/04/2027 (« dans 181 jours ») ; compte sans date de
 naissance : aucun anniversaire fabriqué ; sans session : redirection vers la
 connexion ; build de production, typecheck et ESLint verts.
+
+## 6duodecies. L'assistant raconte l'année du membre (2026-10-13)
+
+**Demande** : brancher l'assistant sur « Mon année à préparer » — répondre aux
+questions d'année et de mois depuis les mêmes données que la page, et donner
+une date de naissance au compte de visite guidée.
+
+**Source unique** : la collecte des événements d'année sort de la page vers
+`lib/annee-queries.ts` (`getYearEvents`) ; la page et l'assistant consomment
+exactement la même fonction — impossible que l'assistant raconte une autre
+année que celle affichée. Le layout racine charge ces événements (sérialisés)
+pour les membres et les passe au widget, comme il charge déjà le résumé
+personnel.
+
+**L'intention « annee »** (assistant niveau 1, lecture seule) : détectée avant
+l'agenda, avec un lexique volontairement étroit — « mon annee », « mon
+planning », « mon calendrier », « a preparer ce mois », « a traiter ce mois »…
+Les formulations ambiguës ont été écartées et testées : « on se marie
+l'année prochaine » et « nous préparons notre mariage dans les prochains
+mois » ne sont **pas** détournées (elles continuent vers le parcours mariage).
+La réponse (`buildAnnee`) réutilise `buildYear` : retards en premier, mois
+courant détaillé (4 dates max), rythme des mois suivants avec le compte des
+échéances officielles, phrase de distinction systématique (« les échéances
+officielles sont les seules qui engagent un organisme ; les rappels
+personnels sont vos repères »), chips vers la page et vers les étapes.
+L'agenda existant gagne le chip « Mon année à préparer » dans ses deux
+sorties. Aucune écriture, aucune donnée inventée : si l'année est vierge,
+l'assistant le dit.
+
+**Visite guidée** : le compte `demo@aime-demo.fr` naît désormais le
+14 mai 1985 au seed (et en base d'aperçu) — la démonstration montre
+l'anniversaire projeté en mai 2027, comme pour un vrai membre.
+
+**Vérifié** : tests purs du routage (10 questions, dont les deux pièges
+mariage), du texte généré (retard nommé « rappel personnel », officielles
+comptées par mois, source dans la réponse) et du pont agenda ; en aperçu :
+page année inchangée après extraction (compte Jean), anniversaire visible
+en visite guidée, charge utile de l'assistant peuplée des événements de
+Jean ; build de production, typecheck et ESLint verts.
