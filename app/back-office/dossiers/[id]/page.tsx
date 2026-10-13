@@ -95,7 +95,7 @@ export default async function CaseworkerCaseDetail({ params }: { params: Promise
           <Card>
             <h2 className="text-lg font-semibold text-slate-900">Répondre à l&apos;adhérent</h2>
             <div className="mt-3">
-              <div data-assistant-id="case-message"><CaseMessageForm caseId={item.id} sendMessage={(id, msg) => caseworkerReply(id, msg)} label="Message à l'adhérent" /></div>
+              <div data-assistant-id="case-message"><CaseMessageForm caseId={item.id} sendMessage={caseworkerReply} label="Message à l'adhérent" /></div>
             </div>
           </Card>
         </div>
