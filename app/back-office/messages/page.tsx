@@ -29,7 +29,7 @@ export default async function BackOfficeMessages() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-famille.jpg" eyebrow="Messagerie" title="Messages des adhérents" description="Questions générales adressées à votre bureau (hors dossiers)." />
+      <SectionTitle eyebrow="Messagerie" title="Messages des adhérents" description="Questions générales adressées à votre bureau (hors dossiers)." />
       {threads.size === 0 ? (
         <EmptyState title="Aucun message" />
       ) : (

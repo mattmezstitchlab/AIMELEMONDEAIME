@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function InscriptionPage() {
   const officeList = await db.select().from(offices);
   return (
-    <AuthSplit image="/images/hero-famille.jpg" title="Votre espace, en quelques minutes." subtitle="Quelques informations suffisent pour personnaliser votre accueil et préremplir vos démarches.">
+    <AuthSplit title="Votre espace, en quelques minutes." subtitle="Quelques informations suffisent pour personnaliser votre accueil et préremplir vos démarches.">
       <h2 className="text-3xl font-bold text-[#1d1d1f]">Créer mon espace</h2>
       <p className="mt-2 text-sm text-slate-600">Aucune donnée réelle n&apos;est demandée (ni numéro de sécurité sociale, ni information médicale).</p>
       <RegisterForm offices={officeList} />

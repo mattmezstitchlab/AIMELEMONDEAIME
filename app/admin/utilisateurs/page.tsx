@@ -20,7 +20,7 @@ export default async function UtilisateursPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-emploi.jpg" eyebrow="Administration" title="Utilisateurs et rôles" description="Attribuez les rôles et les bureaux autorisés. Les gestionnaires ne voient que les dossiers de leur bureau." />
+      <SectionTitle eyebrow="Administration" title="Utilisateurs et rôles" description="Attribuez les rôles et les bureaux autorisés. Les gestionnaires ne voient que les dossiers de leur bureau." />
       <Card>
         <h2 className="mb-4 text-lg font-semibold text-slate-900">Créer un compte agent</h2>
         <CreateStaffForm offices={officeList} />

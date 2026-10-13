@@ -29,7 +29,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-campagne.jpg" eyebrow="Administration" title="Pilotage de la plateforme" description="Rôles, bureaux, contenus publics et journal d'audit." />
+      <SectionTitle eyebrow="Administration" title="Pilotage de la plateforme" description="Rôles, bureaux, contenus publics et journal d'audit." />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {stats.map((s) => (
           <Card key={s.label} className="flex flex-col items-start">

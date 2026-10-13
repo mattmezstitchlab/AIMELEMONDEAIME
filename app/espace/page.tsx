@@ -21,7 +21,7 @@ export default async function Apercu() {
   const toAnswer = o.engagementsToAnswer.length + o.incomingRequests.length + o.casesToComplete.length;
   return (
     <div className="flex flex-col gap-8">
-      <SectionTitle image="/images/hero-espace.jpg" eyebrow="Mon aperçu" title={`Bonjour ${(user.displayName ?? user.fullName).split(" ")[0]}`} description="Vous expliquez votre situation. AIME® vous aide à trouver les personnes, les ressources et les démarches pour avancer." />
+      <SectionTitle eyebrow="Mon aperçu" title={`Bonjour ${(user.displayName ?? user.fullName).split(" ")[0]}`} description="Vous expliquez votre situation. AIME® vous aide à trouver les personnes, les ressources et les démarches pour avancer." />
 
       {next?.next ? (
         <Link href={`/espace/demarches/suivi/${next.id}`} className="group flex items-center gap-4 rounded-2xl bg-emerald-800 p-6 text-white shadow-sm hover:bg-emerald-900">

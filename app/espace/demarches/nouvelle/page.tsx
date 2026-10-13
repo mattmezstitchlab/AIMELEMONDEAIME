@@ -31,7 +31,7 @@ export default async function NouvelleDemarche({ searchParams }: { searchParams:
       .where(and(eq(projectMembers.userId, user.id), eq(projectMembers.role, "organisateur"), eq(projectMembers.status, "accepte"), eq(projects.status, "ouvert")));
     return (
       <div className="flex flex-col gap-6">
-        <SectionTitle image={def.image} eyebrow="Nouvelle démarche" title={def.label} description={def.description} />
+        <SectionTitle eyebrow="Nouvelle démarche" title={def.label} description={def.description} />
         <Link href="/espace/demarches/nouvelle" className="text-sm font-semibold text-emerald-800 underline">← Choisir une autre situation</Link>
         <Card><JourneyWizard situation={def.key} questions={def.questions} initial={journey?.answers ?? {}} journeyId={journey?.id} projects={myProjects} /></Card>
         <p className="text-xs text-slate-500">Vos réponses restent privées : elles ne sont visibles ni sur la carte, ni par les participants de vos projets, ni par votre famille ou vos cercles.</p>
@@ -46,7 +46,7 @@ export default async function NouvelleDemarche({ searchParams }: { searchParams:
   const procedures = q ? allProcedures.filter((p) => normalize(`${p.title} ${p.description}`).includes(q)) : allProcedures;
   return (
     <div className="flex flex-col gap-8">
-      <SectionTitle image="/images/hero-campagne.jpg" eyebrow="Nouvelle démarche" title="De quoi avez-vous besoin aujourd'hui ?" description="Un parcours guidé pour préparer vous-même, ou un dossier suivi par un bureau : tout commence ici. Quelques questions suffisent ; vous pourrez enregistrer et reprendre plus tard." />
+      <SectionTitle eyebrow="Nouvelle démarche" title="De quoi avez-vous besoin aujourd'hui ?" description="Un parcours guidé pour préparer vous-même, ou un dossier suivi par un bureau : tout commence ici. Quelques questions suffisent ; vous pourrez enregistrer et reprendre plus tard." />
       <form role="search" className="flex max-w-xl gap-2"><label htmlFor="sq" className="sr-only">Chercher une situation</label><input id="sq" name="q" defaultValue={sp.q} placeholder="Ex. naissance, logement, concert, retraite…" className="min-w-0 flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm" /><button className="rounded-lg bg-emerald-800 px-4 text-sm font-bold text-white">Chercher</button></form>
       <p className="-mt-6 text-xs text-slate-500">La recherche porte sur les mots des situations proposées : elle ne comprend pas librement toutes les demandes. En cas de doute, un conseiller France services peut vous orienter.</p>
       {sp.erreur && <p role="alert" className="-mb-2 rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">{sp.erreur}</p>}

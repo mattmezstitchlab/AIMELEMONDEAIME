@@ -13,7 +13,7 @@ export default async function BureauxPage() {
   const list = await db.select().from(offices).orderBy(asc(offices.name));
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-logement.jpg" eyebrow="Administration" title="Bureaux locaux" description="Gérez l'annuaire public et le périmètre d'accès des gestionnaires." />
+      <SectionTitle eyebrow="Administration" title="Bureaux locaux" description="Gérez l'annuaire public et le périmètre d'accès des gestionnaires." />
       <Card>
         <h2 className="mb-4 text-lg font-semibold text-slate-900">Ajouter un bureau</h2>
         <OfficeForm />

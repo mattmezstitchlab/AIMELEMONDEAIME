@@ -1,31 +1,32 @@
 import Link from "next/link";
 import { PublicPage } from "@/components/public-shell";
-import { Hero, LinkButton, FeatureIcon, Tag } from "@/components/ui";
+import { Hero, LinkButton, FeatureIcon, Tag, FamilyMark, CategoryLegend } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icon";
 import { db } from "@/db";
 import { articles, offices } from "@/db/schema";
 import { and, desc, eq, inArray, notInArray } from "drizzle-orm";
-import { ARTICLE_CATEGORY_LABELS, FEATURED_GUIDE_SLUGS, THEME_META } from "@/lib/constants";
+import { ARTICLE_CATEGORY_LABELS, FEATURED_GUIDE_SLUGS, THEME_TONE, type ColorFamily } from "@/lib/constants";
 import { SITUATIONS } from "@/lib/situations";
 import { OrientationEntry } from "@/components/orientation-entry";
 
-const MOSAIC_TINT = "from-slate-950/70 via-slate-900/20 to-transparent";
+type MosaicItem = { label: string; desc: string; href: string; icon: IconName; family: ColorFamily };
 
-const MOSAIC: Array<{ label: string; desc: string; href: string; image: string; icon: IconName }> = [
-  { label: "Santé", desc: "Remboursements, arrêts de travail, prévention.", href: "/informations/sante", image: "/images/hero-sante.jpg", icon: "sante" },
-  { label: "Famille", desc: "Naissance, union, séparation, prestations.", href: "/informations/famille", image: "/images/hero-famille.jpg", icon: "famille" },
-  { label: "Mariage", desc: "Le mariage de bout en bout : dossier, invités, budget, jour J.", href: "/informations/mariage", image: "/images/hero-mariage.jpg", icon: "heart" },
-  { label: "Logement", desc: "Louer, être aidé, connaître ses droits.", href: "/informations/logement", image: "/images/hero-logement.jpg", icon: "logement" },
-  { label: "Argent et difficultés", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", href: "/informations/argent", image: "/images/hero-difficultes.jpg", icon: "paiements" },
-  { label: "Retraite", desc: "Carrière, estimation, demande en ligne.", href: "/informations/retraite", image: "/images/hero-retraite.jpg", icon: "retraite" },
-  { label: "Activité et cotisations", desc: "Créer, déclarer, cotiser.", href: "/informations/cotisations", image: "/images/hero-cotisations.jpg", icon: "cotisations" },
-  { label: "Emploi", desc: "Embauche, recherche d'emploi, formation.", href: "/informations/emploi", image: "/images/hero-emploi.jpg", icon: "emploi" },
-  { label: "Terre & quotidien", desc: "Produits locaux, dons, prêts, trajets, jardins.", href: "/le-monde-aime?univers=terre", image: "/images/univers-terre.jpg", icon: "sprout" },
-  { label: "Arts & rencontres", desc: "Artistes, concerts, ateliers, lieux, matériel.", href: "/le-monde-aime?univers=arts", image: "/images/univers-arts.jpg", icon: "music" },
-  { label: "Savoirs & générations", desc: "Transmission, cuisine, couture, mémoire locale.", href: "/le-monde-aime?univers=savoirs", image: "/images/univers-savoirs.jpg", icon: "graduation" },
-  { label: "Événements et artistes", desc: "Organiser, engager un artiste, préparer.", href: "/le-monde-aime?univers=arts", image: "/images/hero-accueil.jpg", icon: "calendar" },
-  { label: "Accompagner un proche", desc: "Autonomie, handicap, soutien aux aidants.", href: "/accompagnement", image: "/images/hero-conseiller.jpg", icon: "heart" },
-  { label: "Vie administrative", desc: "Orientation et organismes de référence.", href: "/informations", image: "/images/hero-espace.jpg", icon: "shield" },
+/** Index des thématiques : une ligne par sujet, repérée par une forme et un libellé (aucune image). */
+const MOSAIC: MosaicItem[] = [
+  { label: "Santé", desc: "Remboursements, arrêts de travail, prévention.", href: "/informations/sante", icon: "sante", family: "demarche" },
+  { label: "Famille", desc: "Naissance, union, séparation, prestations.", href: "/informations/famille", icon: "famille", family: "demarche" },
+  { label: "Mariage", desc: "Le mariage de bout en bout : dossier, invités, budget, jour J.", href: "/informations/mariage", icon: "heart", family: "arts" },
+  { label: "Logement", desc: "Louer, être aidé, connaître ses droits.", href: "/informations/logement", icon: "logement", family: "demarche" },
+  { label: "Argent et difficultés", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", href: "/informations/argent", icon: "paiements", family: "demarche" },
+  { label: "Retraite", desc: "Carrière, estimation, demande en ligne.", href: "/informations/retraite", icon: "retraite", family: "demarche" },
+  { label: "Activité et cotisations", desc: "Créer, déclarer, cotiser.", href: "/informations/cotisations", icon: "cotisations", family: "demarche" },
+  { label: "Emploi", desc: "Embauche, recherche d'emploi, formation.", href: "/informations/emploi", icon: "emploi", family: "demarche" },
+  { label: "Terre & quotidien", desc: "Produits locaux, dons, prêts, trajets, jardins.", href: "/le-monde-aime?univers=terre", icon: "sprout", family: "terre" },
+  { label: "Arts & rencontres", desc: "Artistes, concerts, ateliers, lieux, matériel.", href: "/le-monde-aime?univers=arts", icon: "music", family: "arts" },
+  { label: "Savoirs & générations", desc: "Transmission, cuisine, couture, mémoire locale.", href: "/le-monde-aime?univers=savoirs", icon: "graduation", family: "savoirs" },
+  { label: "Événements et artistes", desc: "Organiser, engager un artiste, préparer.", href: "/le-monde-aime?univers=arts", icon: "calendar", family: "arts" },
+  { label: "Accompagner un proche", desc: "Autonomie, handicap, soutien aux aidants.", href: "/accompagnement", icon: "heart", family: "demarche" },
+  { label: "Vie administrative", desc: "Orientation et organismes de référence.", href: "/informations", icon: "shield", family: "encre" },
 ];
 
 export const dynamic = "force-dynamic";
@@ -34,16 +35,14 @@ type ArticleRow = typeof articles.$inferSelect;
 
 function ArticleCard({ article }: { article: ArticleRow }) {
   return (
-    <Link href={`/guides/${article.slug}`} className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.04] transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="h-48 overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={THEME_META[article.category]?.image ?? "/images/hero-accueil.jpg"} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-      </div>
-      <div className="p-7">
+    <Link href={`/guides/${article.slug}`} className="group flex flex-col gap-5 border-t-2 border-encre pt-6 transition hover:bg-[#fafaf9]">
+      <div className="flex items-center gap-3">
+        <FamilyMark family={THEME_TONE[article.category] ?? "encre"} chip />
         <Tag>{ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}</Tag>
-        <h3 className="mt-4 text-lg font-semibold leading-snug text-[#1d1d1f]">{article.title}</h3>
-        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{article.summary}</p>
       </div>
+      <h3 className="text-2xl font-bold leading-tight tracking-[-0.02em] text-encre group-hover:underline group-hover:underline-offset-4">{article.title}</h3>
+      <p className="line-clamp-3 text-base leading-relaxed text-slate-600">{article.summary}</p>
+      <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-encre">Lire le guide <Icon name="arrow" className="h-4 w-4 transition group-hover:translate-x-1" /></span>
     </Link>
   );
 }
@@ -59,16 +58,26 @@ export default async function HomePage() {
       <Hero
         size="xl"
         tone="encre"
-        image="/images/hero-accueil.jpg"
         eyebrow="AIME® · Le Monde Aime"
         title={<>La terre, les arts<br />et les générations.</>}
         subtitle="Trouvez près de vous de quoi vivre, créer et transmettre. Dites votre situation : AIME® vous oriente vers les personnes, les ressources et les démarches pour avancer."
         footer={
-          <div className="grid h-3 grid-cols-3 overflow-hidden rounded-full" aria-hidden="true">
-            <span className="bg-terre" />
-            <span className="bg-arts" />
-            <span className="bg-savoirs" />
-          </div>
+          <ol className="grid gap-10 text-white sm:grid-cols-3">
+            {[
+              { family: "terre" as const, title: "La terre", text: "Produits locaux, dons, prêts, jardins." },
+              { family: "arts" as const, title: "Les arts", text: "Artistes, ateliers, événements, lieux." },
+              { family: "savoirs" as const, title: "Les générations", text: "Transmission, cuisine, mémoire locale." },
+            ].map((item, i) => (
+              <li key={item.title} className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <FamilyMark family={item.family} chip />
+                  <span className="text-sm font-bold tabular-nums text-white/70">0{i + 1}</span>
+                </div>
+                <p className="text-2xl font-bold tracking-[-0.02em]">{item.title}</p>
+                <p className="text-base text-white/80">{item.text}</p>
+              </li>
+            ))}
+          </ol>
         }
       >
         <div className="mt-8 max-w-xl"><OrientationEntry variant="hero" /></div>
@@ -98,17 +107,23 @@ export default async function HomePage() {
             <p className="mt-6 text-lg leading-relaxed text-slate-600">Les sujets du quotidien et les univers de Le Monde Aime, au même endroit.</p>
           </div>
         </div>
-        <div className="grid grid-cols-2">
-          {MOSAIC.map((t) => (
-            <Link key={t.label} href={t.href} className="group relative isolate flex aspect-square flex-col justify-end overflow-hidden p-6 focus-visible:z-10 sm:p-10">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={t.image} alt="" className="absolute inset-0 z-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-              <div className={`absolute inset-0 z-10 bg-gradient-to-t ${MOSAIC_TINT}`} />
-              <span className="relative z-20 mb-auto grid h-11 w-11 place-items-center rounded-xl bg-white/15 text-white backdrop-blur"><Icon name={t.icon} className="h-5 w-5" /></span>
-              <h3 className="relative z-20 text-xl font-bold leading-tight text-white sm:text-3xl">{t.label}</h3>
-              <p className="relative z-20 mt-2 text-sm leading-relaxed text-white/85 sm:text-base">{t.desc}</p>
-            </Link>
-          ))}
+        <div className="mx-auto mt-16 max-w-7xl px-6 lg:px-8">
+          <CategoryLegend />
+          <ol className="mt-16 border-t-2 border-encre">
+            {MOSAIC.map((t, i) => (
+              <li key={t.label} className="border-b border-slate-300">
+                <Link href={t.href} className="group grid grid-cols-[2.5rem_1fr] items-baseline gap-x-4 gap-y-3 py-7 transition hover:bg-white md:grid-cols-12 md:gap-6">
+                  <span className="text-sm font-bold tabular-nums text-slate-500 md:col-span-1">0{i + 1}</span>
+                  <span className="flex items-center gap-4 md:col-span-4">
+                    <FamilyMark family={t.family} chip />
+                    <span className="text-2xl font-bold leading-tight tracking-[-0.02em] text-encre group-hover:underline group-hover:underline-offset-4 sm:text-3xl">{t.label}</span>
+                  </span>
+                  <span className="col-start-2 text-base leading-relaxed text-slate-600 md:col-span-6 md:col-start-auto">{t.desc}</span>
+                  <span className="col-start-2 md:col-span-1 md:col-start-auto md:justify-self-end"><Icon name="arrow" className="h-5 w-5 transition group-hover:translate-x-1" /></span>
+                </Link>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 

@@ -146,20 +146,17 @@ export function PublicPage({ children, solidHeader = false }: { children: ReactN
  * l'ancienne troisième coquille (auth-split) — il n'en reste que deux :
  * celle-ci (publique et ses variantes) et app-shell (espaces connectés).
  */
-export function AuthSplit({ image, title, subtitle, children }: { image: string; title: string; subtitle: string; children: ReactNode }) {
+export function AuthSplit({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <div className="grid flex-1 lg:grid-cols-2">
-        <div className="relative isolate flex min-h-[320px] flex-col justify-between overflow-hidden p-8 lg:min-h-0 lg:p-12">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
-          <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/65 via-black/25 to-black/15" />
-          <Link href="/" aria-label="Retour à l'accueil" className="relative z-20 self-start">
+        <div className="flex flex-col justify-between gap-12 bg-encre p-8 text-white lg:p-12">
+          <Link href="/" aria-label="Retour à l'accueil" className="self-start">
             <Logo light />
           </Link>
-          <div className="animate-fade-up relative z-20 max-w-md">
-            <h1 className="text-4xl font-bold leading-tight text-white lg:text-5xl">{title}</h1>
-            <p className="mt-4 text-lg text-white/85">{subtitle}</p>
+          <div className="animate-fade-up max-w-md">
+            <h1 className="text-5xl font-bold leading-[0.95] tracking-[-0.035em] lg:text-6xl">{title}</h1>
+            <p className="mt-6 text-lg leading-relaxed text-white/85">{subtitle}</p>
           </div>
         </div>
         <main id="contenu-principal" className="flex items-center justify-center px-6 py-14 sm:px-12">

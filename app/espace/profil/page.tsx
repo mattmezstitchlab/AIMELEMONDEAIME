@@ -15,7 +15,7 @@ export default async function MonProfil({ searchParams }: { searchParams: Promis
   const { user: u, hasPhoto } = (await getMyProfile(user.id))!;
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-emploi.jpg" eyebrow="Mon profil" title={bienvenue ? "Bienvenue ! Complétez votre profil" : "Activités, compétences, disponibilités"} description="Une même personne peut être artiste, agriculteur, parent, bénévole ou retraité. Tout est facultatif." />
+      <SectionTitle eyebrow="Mon profil" title={bienvenue ? "Bienvenue ! Complétez votre profil" : "Activités, compétences, disponibilités"} description="Une même personne peut être artiste, agriculteur, parent, bénévole ou retraité. Tout est facultatif." />
       <div className="grid gap-4 sm:grid-cols-2">
         <Card><h2 className="font-bold text-slate-900">Confidentialité</h2><ul className="mt-2 space-y-1 text-sm text-slate-600"><li>• <strong>Public</strong> (si vous le choisissez) : nom d&apos;affichage, présentation, activités, position approximative.</li><li>• <strong>Projets</strong> : informations d&apos;organisation partagées avec les participants.</li><li>• <strong>Privé</strong> : vos démarches, réponses et documents. Personne d&apos;autre n&apos;y accède sans partage explicite.</li></ul></Card>
         <Card><h2 className="font-bold text-slate-900">Espace artiste et technicien</h2><p className="mt-2 text-sm text-slate-600">Disciplines, fiche technique, prestations, demandes d&apos;engagement reçues.</p><Link href="/le-monde-aime/artiste" className="mt-3 inline-block text-sm font-bold text-emerald-800 underline">Ouvrir l&apos;espace artiste →</Link></Card>

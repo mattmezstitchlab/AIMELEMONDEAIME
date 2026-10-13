@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CASE_STATUS_LABELS, CASE_STATUS_STYLES, type ColorFamily } from "@/lib/constants";
+import { CASE_STATUS_LABELS, CASE_STATUS_STYLES, COLOR_FAMILY_HINTS, COLOR_FAMILY_LABELS, type ColorFamily } from "@/lib/constants";
 import { Icon } from "@/components/icon";
 
 export function Logo({ light = false, size = "md" }: { light?: boolean; size?: "sm" | "md" }) {
@@ -20,20 +20,45 @@ export function Logo({ light = false, size = "md" }: { light?: boolean; size?: "
   );
 }
 
-const TONE_CLASSES: Record<ColorFamily, { band: string; eyebrow: string; sub: string }> = {
-  demarche: { band: "bg-demarche text-white", eyebrow: "text-white/85", sub: "text-white/90" },
-  terre: { band: "bg-terre text-white", eyebrow: "text-white/85", sub: "text-white/90" },
-  arts: { band: "bg-arts text-white", eyebrow: "text-white/85", sub: "text-white/90" },
-  savoirs: { band: "bg-savoirs text-encre", eyebrow: "text-encre/80", sub: "text-encre/85" },
-  encre: { band: "bg-encre text-white", eyebrow: "text-white/70", sub: "text-white/85" },
+const TONE_CLASSES: Record<ColorFamily, { band: string; eyebrow: string; sub: string; rule: string }> = {
+  demarche: { band: "bg-demarche text-white", eyebrow: "text-white/85", sub: "text-white/90", rule: "border-white/50" },
+  terre: { band: "bg-terre text-white", eyebrow: "text-white/85", sub: "text-white/90", rule: "border-white/50" },
+  arts: { band: "bg-arts text-white", eyebrow: "text-white/85", sub: "text-white/90", rule: "border-white/50" },
+  savoirs: { band: "bg-savoirs text-encre", eyebrow: "text-encre/80", sub: "text-encre/85", rule: "border-encre/50" },
+  encre: { band: "bg-encre text-white", eyebrow: "text-white/70", sub: "text-white/85", rule: "border-white/30" },
 };
 
+/** Forme propre à chaque famille : l'information ne repose jamais sur la seule couleur. */
+const FAMILY_GLYPH: Record<ColorFamily, ReactNode> = {
+  demarche: <rect x="3.5" y="3.5" width="9" height="9" />,
+  terre: <circle cx="8" cy="8" r="4.5" />,
+  arts: <path d="M8 3.5 L12.5 12.5 L3.5 12.5 Z" />,
+  savoirs: <path d="M8 2.5 L13.5 8 L8 13.5 L2.5 8 Z" />,
+  encre: <rect x="3" y="7" width="10" height="2" />,
+};
+
+const FAMILY_CHIP: Record<ColorFamily, string> = {
+  demarche: "bg-demarche text-white",
+  terre: "bg-terre text-white",
+  arts: "bg-arts text-white",
+  savoirs: "bg-savoirs text-encre",
+  encre: "bg-encre text-white",
+};
+
+/** Repère de famille : une forme (et son libellé, à côté) identifie la catégorie. */
+export function FamilyMark({ family, chip = false }: { family: ColorFamily; chip?: boolean }) {
+  return (
+    <span className={`inline-grid h-6 w-6 shrink-0 place-items-center rounded-[4px] ${chip ? FAMILY_CHIP[family] : ""}`} aria-hidden="true">
+      <svg viewBox="0 0 16 16" className="h-4 w-4 fill-current" focusable="false">{FAMILY_GLYPH[family]}</svg>
+    </span>
+  );
+}
+
 /**
- * Héros typographique : la typographie domine, la couleur porte la famille (code couleur),
- * l'image est une colonne de la grille et non un fond. Alignement à gauche, grille de 12 colonnes.
+ * Héros typographique, sans image : fond de couleur, titre dominant, alignement à gauche,
+ * grille de 12 colonnes. La famille est signalée par une forme et un libellé.
  */
 export function Hero({
-  image,
   tone = "encre",
   eyebrow,
   title,
@@ -43,7 +68,6 @@ export function Hero({
   size = "lg",
   children,
 }: {
-  image?: string;
   tone?: ColorFamily;
   eyebrow?: string;
   title: ReactNode;
@@ -54,59 +78,77 @@ export function Hero({
   children?: ReactNode;
 }) {
   const t = TONE_CLASSES[tone];
-  const padding = size === "xl" ? "pb-16 pt-28 md:pb-24 md:pt-36" : size === "lg" ? "pb-14 pt-24 md:pb-20 md:pt-28" : "pb-12 pt-20 md:pb-16 md:pt-24";
+  const padding = size === "xl" ? "pb-20 pt-10 md:pb-28 md:pt-14" : size === "lg" ? "pb-16 pt-10 md:pb-22 md:pt-12" : "pb-12 pt-8 md:pb-16 md:pt-10";
   return (
     <section className={`relative isolate overflow-hidden ${t.band}`}>
-      <div className={`animate-fade-up relative mx-auto grid w-full max-w-7xl gap-12 px-6 lg:grid-cols-12 lg:gap-10 lg:px-8 ${padding}`}>
-        <div className={`flex flex-col justify-between gap-10 ${image ? "lg:col-span-7" : "lg:col-span-12"}`}>
-          <div>
-            {eyebrow && (
-              <p className={`flex items-center gap-3 border-t border-current pt-4 text-xs font-semibold uppercase tracking-[0.16em] ${t.eyebrow}`}>
-                {eyebrow}
-              </p>
-            )}
-            <h1 className="mt-8 text-[clamp(2.75rem,7vw,6.25rem)] font-bold leading-[0.95] tracking-[-0.035em]">{title}</h1>
-            {subtitle && <p className={`mt-8 max-w-xl text-lg leading-relaxed sm:text-xl ${t.sub}`}>{subtitle}</p>}
+      <div className={`animate-fade-up mx-auto w-full max-w-7xl px-6 lg:px-8 ${padding}`}>
+        <header className={`flex items-center gap-3 border-t-2 pt-4 text-xs font-semibold uppercase tracking-[0.16em] ${t.rule} ${t.eyebrow}`}>
+          {tone !== "encre" && <FamilyMark family={tone} />}
+          {eyebrow}
+        </header>
+        <h1 className="mt-12 max-w-5xl text-[clamp(3rem,9vw,8.5rem)] font-bold leading-[0.92] tracking-[-0.04em]">{title}</h1>
+        <div className="mt-12 grid gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-6 lg:col-start-7">
+            {subtitle && <p className={`text-lg leading-relaxed sm:text-xl ${t.sub}`}>{subtitle}</p>}
             {actions && <div className="mt-9 flex flex-wrap gap-3">{actions}</div>}
             {children}
           </div>
         </div>
-        {image && (
-          <div className="lg:col-span-5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={image} alt="" className="animate-hero-zoom aspect-[4/5] w-full rounded-2xl object-cover" />
-          </div>
-        )}
       </div>
-      {footer && <div className="relative mx-auto w-full max-w-7xl px-6 pb-10 lg:px-8">{footer}</div>}
+      {footer && <div className={`relative mx-auto w-full max-w-7xl border-t-2 px-6 pb-12 pt-8 lg:px-8 ${t.rule}`}>{footer}</div>}
     </section>
   );
 }
 
-/** Bandeau visuel immersif pour les espaces connectés (membre, gestionnaire, admin). */
+/** Légende des quatre familles : forme, numéro, libellé et rôle. Le repère se lit sans couleur. */
+export function CategoryLegend() {
+  const families: ColorFamily[] = ["demarche", "terre", "arts", "savoirs"];
+  return (
+    <section aria-labelledby="reperes-titre" className="border-t-2 border-encre pt-6">
+      <h2 id="reperes-titre" className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">Repères</h2>
+      <ol className="mt-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        {families.map((f, i) => (
+          <li key={f} className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <FamilyMark family={f} chip />
+              <span className="text-sm font-bold tabular-nums text-slate-500">0{i + 1}</span>
+            </div>
+            <p className="text-xl font-bold leading-tight text-encre">{COLOR_FAMILY_LABELS[f]}</p>
+            <p className="text-sm leading-relaxed text-slate-600">{COLOR_FAMILY_HINTS[f]}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+/** Bandeau de titre des espaces connectés (membre, gestionnaire, administration). Sans image. */
 export function SectionTitle({
   eyebrow,
   title,
   description,
-  image = "/images/hero-espace.jpg",
+  tone = "encre",
   actions,
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
-  image?: string;
+  tone?: ColorFamily;
   actions?: ReactNode;
 }) {
+  const t = TONE_CLASSES[tone];
   return (
-    <section className="relative isolate -mx-4 -mt-6 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
-      <div className="hero-overlay absolute inset-0 z-10" />
-      <div className="animate-fade-up relative z-20 flex min-h-[260px] flex-col justify-end gap-5 px-6 py-8 sm:min-h-[300px] sm:px-10 sm:py-10 md:flex-row md:items-end md:justify-between">
-        <div className="max-w-2xl">
-          {eyebrow && <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">{eyebrow}</p>}
-          <h1 className="mt-2 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">{title}</h1>
-          {description && <p className="mt-3 max-w-xl text-base text-white/85 sm:text-lg">{description}</p>}
+    <section className={`relative isolate -mx-4 -mt-6 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl ${t.band}`}>
+      <div className="animate-fade-up flex flex-col justify-between gap-6 px-6 py-10 sm:px-10 sm:py-12 md:flex-row md:items-end">
+        <div className="max-w-3xl">
+          {eyebrow && (
+            <p className={`flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.16em] ${t.eyebrow}`}>
+              {tone !== "encre" && <FamilyMark family={tone} />}
+              {eyebrow}
+            </p>
+          )}
+          <h1 className="mt-5 text-4xl font-bold leading-[0.95] tracking-[-0.035em] sm:text-5xl lg:text-6xl">{title}</h1>
+          {description && <p className={`mt-4 max-w-xl text-base sm:text-lg ${t.sub}`}>{description}</p>}
         </div>
         {actions && <div className="flex shrink-0 flex-wrap items-center gap-3">{actions}</div>}
       </div>

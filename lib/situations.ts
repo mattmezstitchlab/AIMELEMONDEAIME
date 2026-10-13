@@ -58,7 +58,6 @@ export type Situation = {
   short: string;
   description: string;
   icon: "emploi" | "search" | "music" | "famille" | "logement" | "entraide" | "heart" | "retraite" | "sante" | "paiements";
-  image: string;
   pilot?: boolean;
   questions: Question[];
   build: (a: Record<string, string>) => TaskRule[];
@@ -73,7 +72,6 @@ export const SITUATIONS: Situation[] = [
     short: "Événement et artiste",
     description: "Fête, mariage, repas associatif, concert : trouver un artiste, préparer l'engagement, les autorisations et les ressources.",
     icon: "music",
-    image: "/images/hero-famille.jpg",
     pilot: true,
     questions: [
       { key: "event_type", label: "Quel type d'événement ?", type: "select", required: true, options: [["prive", "Fête privée, mariage, anniversaire"], ["village", "Fête de village, repas associatif"], ["concert", "Concert ou spectacle"], ["atelier", "Atelier ou rencontre"], ["autre", "Autre"]] },
@@ -134,7 +132,6 @@ export const SITUATIONS: Situation[] = [
     short: "Mariage complet",
     description: "Le mariage de bout en bout : dossier civil en mairie et ses délais, rétroplanning de la fête calculé depuis la date, prestataires et coordination dans un projet partagé — puis l'après-mariage enchaîné.",
     icon: "heart",
-    image: "/images/hero-mariage.jpg",
     pilot: true,
     questions: [
       { key: "date", label: "Date du mariage", type: "date", required: true, why: "Tout le rétroplanning — réservations, dossier de mairie, bans — se calcule à rebours depuis cette date." },
@@ -213,7 +210,6 @@ export const SITUATIONS: Situation[] = [
     short: "Difficultés de paiement",
     description: "Factures, loyer, crédits, impôts : faire le point sans attendre que ça s'aggrave, limiter les frais qui s'ajoutent, et contacter les bons interlocuteurs. Aucun montant ni décision ne sont promis : chaque organisme décide pour ce qui le concerne.",
     icon: "paiements",
-    image: "/images/hero-difficultes.jpg",
     questions: [
       { key: "quoi", label: "Qu'est-ce qui devient difficile à payer ?", type: "select", required: true, why: "Chaque difficulté a ses interlocuteurs et ses leviers : on commence par celle qui vous pèse le plus.", options: [["loyer", "Le loyer ou les charges du logement"], ["factures", "Les factures (énergie, eau, téléphone, assurances)"], ["quotidien", "Les courses et le quotidien"], ["credit", "Un crédit ou des dettes"], ["impots", "Les impôts ou des cotisations"], ["plusieurs", "Plusieurs choses à la fois"], ["autre", "Autre chose"]] },
       { key: "depuis", label: "Depuis quand ces difficultés durent-elles ?", type: "select", options: [["moins_dun_mois", "Moins d'un mois"], ["quelques_mois", "Quelques mois"], ["plus_six_mois", "Plus de six mois"]] },
@@ -308,7 +304,6 @@ export const SITUATIONS: Situation[] = [
     short: "Activité",
     description: "Créer une activité indépendante, agricole ou artistique, ou faire évoluer celle que vous avez.",
     icon: "emploi",
-    image: "/images/hero-cotisations.jpg",
     questions: [
       { key: "type", label: "Quel type d'activité ?", type: "select", required: true, options: [["agricole", "Agricole"], ["artisanale", "Artisanale ou commerciale"], ["liberale", "Libérale ou services"], ["artistique", "Artistique"]] },
       { key: "stade", label: "Où en êtes-vous ?", type: "select", required: true, options: [["idee", "J'ai une idée"], ["creation", "Je suis prêt à créer"], ["existante", "Mon activité existe déjà"]] },
@@ -330,7 +325,6 @@ export const SITUATIONS: Situation[] = [
     short: "Transmission et cessation",
     description: "Reprendre, vendre ou arrêter une exploitation, un commerce ou une micro-entreprise : les étapes, les guichets et ce qu'il faut anticiper, sans décider du prix ni des conditions à votre place.",
     icon: "retraite",
-    image: "/images/hero-craft.jpg",
     questions: [
       { key: "activite", label: "Quelle activité est concernée ?", type: "select", required: true, options: [["exploitation", "Une exploitation agricole"], ["commerce", "Un commerce ou une activité artisanale"], ["micro", "Une micro-entreprise"], ["autre", "Autre activité indépendante"]] },
       { key: "projet", label: "Où en est votre projet ?", type: "select", required: true, options: [["repreneur_trouve", "J'ai déjà un repreneur"], ["cherche_repreneur", "Je cherche un repreneur"], ["cessation", "Je cesse sans repreneur"], ["progressif", "Je réduis progressivement avant d'arrêter"]] },
@@ -359,7 +353,6 @@ export const SITUATIONS: Situation[] = [
     short: "Emploi et formation",
     description: "Trouver un emploi, une formation, un apprentissage, ou un accompagnement adapté.",
     icon: "search",
-    image: "/images/hero-emploi.jpg",
     questions: [
       { key: "age", label: "Avez-vous moins de 26 ans ?", type: "select", required: true, why: "Les missions locales accompagnent spécifiquement les jeunes de 16 à 25 ans.", options: [["non", "Non"], ["oui", "Oui"]] },
       { key: "handicap", label: "Souhaitez-vous un accompagnement lié à un handicap ?", type: "select", why: "Question facultative : elle permet de vous indiquer Cap emploi. Votre réponse reste privée.", options: [["non", "Non ou je préfère ne pas répondre"], ["oui", "Oui"]] },
@@ -379,7 +372,6 @@ export const SITUATIONS: Situation[] = [
     short: "Recruter et embaucher",
     description: "Premier salarié, saisonnier, remplacement ou renfort ponctuel : déposer une offre, déclarer l'embauche et accueillir la personne dans les règles, sans promesse d'aide non vérifiée.",
     icon: "emploi",
-    image: "/images/hero-emploi.jpg",
     questions: [
       { key: "secteur", label: "Dans quel secteur recrutez-vous ?", type: "select", required: true, options: [["agricole", "Agricole"], ["spectacle", "Spectacle vivant (ponctuel)"], ["autre", "Autre secteur"]] },
       { key: "besoin", label: "Quel est le besoin ?", type: "select", required: true, options: [["premier", "Ma première embauche"], ["saisonnier", "Un renfort saisonnier"], ["remplacement", "Un remplacement"], ["durable", "Un poste durable"]] },
@@ -410,7 +402,6 @@ export const SITUATIONS: Situation[] = [
     short: "Famille",
     description: "Naissance, adoption, mariage, Pacs ou séparation : ce qui change, qui prévenir et dans quel délai. Pour un décès, un parcours distinct vous accompagne.",
     icon: "famille",
-    image: "/images/hero-famille.jpg",
     questions: [
       { key: "evenement", label: "Que se passe-t-il ?", type: "select", required: true, options: [["naissance", "Une naissance"], ["adoption", "Une adoption"], ["union", "Un mariage ou un Pacs"], ["separation", "Une séparation ou un divorce"]] },
       { key: "date", label: "Date de l'événement (passée ou prévue)", type: "date", required: true, why: "Certains délais légaux courent à partir de cette date, par exemple la déclaration de naissance." },
@@ -462,7 +453,6 @@ export const SITUATIONS: Situation[] = [
     short: "Logement",
     description: "Louer, être aidé pour le loyer, trouver une solution d'urgence ou connaître ses droits.",
     icon: "logement",
-    image: "/images/hero-logement.jpg",
     questions: [
       { key: "besoin", label: "Votre besoin", type: "select", required: true, options: [["location", "Trouver une location"], ["aide", "Être aidé pour payer le loyer"], ["urgence", "Une solution rapide"], ["droits", "Connaître mes droits"]] },
       { key: "salarie", label: "Êtes-vous salarié d'une entreprise du secteur privé ?", type: "select", why: "Action Logement accompagne notamment les salariés du secteur privé.", options: [["non", "Non"], ["oui", "Oui"]] },
@@ -481,7 +471,6 @@ export const SITUATIONS: Situation[] = [
     short: "Aide au quotidien",
     description: "Démarches, numérique, courses, déplacements ou coup de main ponctuel : trouver de l'aide près de chez vous, humaine d'abord.",
     icon: "entraide",
-    image: "/images/hero-campagne.jpg",
     questions: [
       { key: "besoin", label: "De quoi s'agit-il ?", type: "select", required: true, options: [["demarches", "Être aidé pour des démarches et des papiers"], ["numerique", "Utiliser internet, un ordinateur ou un smartphone"], ["essentiels", "Des besoins essentiels (courses, nourriture, vêtements)"], ["deplacement", "Me déplacer (courses, rendez-vous, soins)"], ["services", "Un coup de main (jardin, petits travaux, animaux)"], ["droits", "Connaître mes droits sociaux"]] },
       { key: "tentative", label: "Où en êtes-vous ?", type: "select", options: [["pas_encore", "Je n'ai pas encore essayé"], ["bloque", "J'ai essayé, mais je suis bloqué·e"], ["sans_equipement", "Je n'ai pas l'équipement ou la connexion"]] },
@@ -530,7 +519,6 @@ export const SITUATIONS: Situation[] = [
     short: "Accompagner un proche",
     description: "Perte d'autonomie, handicap, aide au quotidien : organiser le soutien, connaître les interlocuteurs et préserver aussi l'aidant. Aucune donnée médicale n'est demandée.",
     icon: "heart",
-    image: "/images/hero-retraite.jpg",
     questions: [
       { key: "situation", label: "Votre proche est concerné par…", type: "select", required: true, why: "Les interlocuteurs ne sont pas les mêmes pour le handicap et pour la perte d'autonomie liée à l'âge. Aucune donnée médicale n'est demandée.", options: [["handicap", "Un handicap"], ["age", "Une perte d'autonomie liée à l'âge"], ["inconnu", "Je ne sais pas encore"]] },
       { key: "domaine", label: "Quel est le besoin le plus pressant ?", type: "select", required: true, options: [["domicile", "L'aide à domicile et au quotidien"], ["soins", "Coordonner les soins et les rendez-vous"], ["decisions", "Les papiers, le budget, les décisions"], ["presence", "Rompre l'isolement, une présence"], ["tout", "Un peu de tout, je suis débordé·e"]] },
@@ -573,7 +561,6 @@ export const SITUATIONS: Situation[] = [
     short: "Santé et arrêt de travail",
     description: "Maladie, accident du travail ou hospitalisation : les déclarations à faire, leurs délais et les pièces à réunir, sans décider ni promettre d'indemnisation à votre place.",
     icon: "sante",
-    image: "/images/hero-sante.jpg",
     questions: [
       { key: "statut", label: "Quelle est votre situation professionnelle ?", type: "select", required: true, options: [["salarie_agricole", "Salarié·e agricole"], ["exploitant", "Exploitant·e agricole"], ["salarie_general", "Salarié·e hors régime agricole"], ["independant", "Indépendant·e, artisan, commerçant·e"], ["autre", "Autre ou je ne sais pas"]] },
       { key: "cause", label: "Que se passe-t-il ?", type: "select", required: true, options: [["maladie", "Une maladie"], ["accident_travail", "Un accident du travail ou de trajet"], ["maladie_pro", "Une maladie que je relie à mon travail"], ["hospitalisation", "Une hospitalisation"], ["autre", "Autre chose"]] },
@@ -614,7 +601,6 @@ export const SITUATIONS: Situation[] = [
     short: "Handicap, invalidité et travail",
     description: "Reconnaissance du handicap, adaptation du poste, pension d'invalidité ou reconversion : les interlocuteurs et les démarches, sans décider d'un taux ni d'un droit à votre place.",
     icon: "sante",
-    image: "/images/hero-sante.jpg",
     questions: [
       { key: "statut", label: "Quelle est votre situation professionnelle ?", type: "select", required: true, options: [["salarie_agricole", "Salarié·e agricole"], ["exploitant", "Exploitant·e agricole"], ["salarie", "Salarié·e hors agricole"], ["independant", "Indépendant·e"], ["sans_emploi", "Sans emploi actuellement"]] },
       { key: "etat", label: "Où en êtes-vous ?", type: "select", required: true, options: [["en_poste", "En poste, mais avec des difficultés croissantes"], ["en_arret", "En arrêt de travail prolongé"], ["sans_activite", "Sans activité à cause de ma santé"], ["retour", "Je prépare un retour après un arrêt long"]] },
@@ -646,7 +632,6 @@ export const SITUATIONS: Situation[] = [
     short: "Retraite",
     description: "Vérifier sa carrière, estimer sa retraite, demander sa pension au bon moment.",
     icon: "retraite",
-    image: "/images/hero-retraite.jpg",
     questions: [
       { key: "regime", label: "Avez-vous travaillé dans l'agriculture ?", type: "select", why: "La retraite de base agricole est gérée par la MSA ; le régime général par l'Assurance retraite.", options: [["non", "Non"], ["oui", "Oui"], ["mixte", "En partie"]] },
       { key: "horizon", label: "Dans combien de temps ?", type: "select", required: true, options: [["plus5", "Plus de 5 ans"], ["moins5", "Moins de 5 ans"], ["moins1", "Moins d'un an"]] },
@@ -665,7 +650,6 @@ export const SITUATIONS: Situation[] = [
     short: "Déménagement",
     description: "Préparer le nouveau logement, mettre à jour ses coordonnées et trouver de l'aide locale sans refaire les mêmes formalités.",
     icon: "logement",
-    image: "/images/hero-logement.jpg",
     questions: [
       { key: "logement", label: "Quelle est votre situation dans le logement que vous quittez ?", type: "select", required: true, options: [["locataire", "Locataire"], ["proprietaire", "Propriétaire"], ["autre", "Autre ou je ne sais pas encore"]] },
       { key: "date", label: "Date envisagée (facultatif)", type: "date", why: "Uniquement pour organiser vos rappels personnels. Ce n'est pas une date transmise aux organismes." },
@@ -690,7 +674,6 @@ export const SITUATIONS: Situation[] = [
     short: "Après un décès",
     description: "Trouver les premiers interlocuteurs, organiser les démarches et demander de l'aide, à votre rythme.",
     icon: "heart",
-    image: "/images/hero-retraite.jpg",
     questions: [
       { key: "lieu", label: "Où cela s'est-il passé ?", type: "select", required: true, why: "À l'hôpital ou en Ehpad, l'établissement effectue en général la déclaration à la mairie. À domicile, un professionnel de santé constate le décès. Aucun détail médical n'est demandé ici.", options: [["etablissement", "À l'hôpital ou en Ehpad"], ["domicile", "À domicile"], ["etranger", "À l'étranger"], ["inconnu", "Je ne sais pas / je préfère ne pas préciser"]] },
       { key: "lien", label: "Quel était votre lien avec cette personne ? (facultatif)", type: "select", why: "Cela aide seulement à afficher des interlocuteurs possibles. AIME® ne vous demande ni son identité ni ses données médicales.", options: [["conjoint", "Conjoint ou partenaire"], ["parent", "Parent"], ["autre", "Autre"], ["inconnu", "Je préfère ne pas répondre"]] },
@@ -711,7 +694,6 @@ export const SITUATIONS: Situation[] = [
     short: "Droits du conjoint survivant",
     description: "Après le décès d'un conjoint : pension de réversion, allocation veuvage, droits selon les régimes. Le parcours « Un proche est décédé » couvre les toutes premières démarches ; celui-ci s'occupe de vos droits dans la durée.",
     icon: "heart",
-    image: "/images/hero-famille.jpg",
     questions: [
       { key: "lien", label: "Quel était votre lien avec la personne décédée ?", type: "select", required: true, options: [["marie", "Nous étions mariés"], ["pacse", "Nous étions pacsés"], ["divorce", "Nous étions divorcés"], ["concubinage", "Nous vivions en concubinage"]] },
       { key: "regime_defunt", label: "De quel(s) régime(s) relevait votre conjoint ?", type: "select", required: true, options: [["agricole", "Régime agricole (MSA)"], ["salarie", "Salarié du privé"], ["independant", "Indépendant, artisan, commerçant"], ["plusieurs", "Plusieurs régimes dans sa carrière"], ["inconnu", "Je ne sais pas"]] },

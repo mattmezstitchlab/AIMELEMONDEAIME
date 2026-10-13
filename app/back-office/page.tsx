@@ -37,7 +37,6 @@ export default async function BackOfficeDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <SectionTitle
-        image="/images/hero-conseiller.jpg"
         eyebrow={office ? office.name : "Tous les bureaux"}
         title="Tableau de bord gestionnaire"
         description="Vue d'ensemble des dossiers de votre bureau et de vos dossiers en charge."

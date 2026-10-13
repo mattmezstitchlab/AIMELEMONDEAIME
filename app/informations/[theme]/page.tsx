@@ -31,7 +31,6 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
     <PublicPage>
       <Hero
         tone={THEME_TONE[theme] ?? "encre"}
-        image={meta.image}
         eyebrow="Information par thématique"
         title={label}
         subtitle={meta.tagline}

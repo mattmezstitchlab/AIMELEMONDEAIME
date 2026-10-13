@@ -29,7 +29,6 @@ export default async function InformationsHub({ searchParams }: { searchParams: 
       <Hero
         size="md"
         tone="encre"
-        image="/images/hero-campagne.jpg"
         eyebrow="Informations"
         title={guidesOnly ? "Guides pratiques" : "Tout ce qu'il faut savoir, au même endroit"}
         subtitle={guidesOnly

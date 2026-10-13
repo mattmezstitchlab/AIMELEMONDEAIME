@@ -16,7 +16,7 @@ export default async function DocumentsPage() {
   const hub = await getDocumentsHub(user.id);
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-logement.jpg" eyebrow="Mes documents" title="Vos pièces, au même endroit" description="Chaque document existe une seule fois. Vous choisissez précisément qui peut l'ouvrir, et vous pouvez révoquer l'accès à tout moment." />
+      <SectionTitle eyebrow="Mes documents" title="Vos pièces, au même endroit" description="Chaque document existe une seule fois. Vous choisissez précisément qui peut l'ouvrir, et vous pouvez révoquer l'accès à tout moment." />
       <Card>
         <h2 className="text-lg font-semibold text-slate-900">Déposer un document</h2>
         <p className="mt-1 text-sm text-slate-600">Il reste privé. Vous pourrez ensuite le relier à une démarche ou le partager. Ne déposez ni numéro de sécurité sociale, ni document médical.</p>

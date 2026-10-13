@@ -96,7 +96,7 @@ export default async function DemarchesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-conseiller.jpg" eyebrow="Mes démarches" title="Accompagner vos moments de vie" description="Comprendre, préparer, organiser et suivre — sans recommencer votre histoire à chaque étape. Parcours guidés et dossiers suivis par l'équipe vivent ici, au même endroit."
+      <SectionTitle eyebrow="Mes démarches" title="Accompagner vos moments de vie" description="Comprendre, préparer, organiser et suivre — sans recommencer votre histoire à chaque étape. Parcours guidés et dossiers suivis par l'équipe vivent ici, au même endroit."
         actions={<LinkButton href="/espace/demarches/nouvelle"><Icon name="filePlus" className="h-4 w-4" /> Nouvelle démarche</LinkButton>} />
       <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
         <strong>Ce que fait AIME® dans cette version :</strong> orientation (interlocuteurs, liens officiels) et préparation (étapes, pièces, rappels, récapitulatif).

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCaseDetail } from "@/lib/queries";
 import { Card, SectionTitle, StatusBadge, Tag, formatDateTime, formatDate } from "@/components/ui";
-import { CASE_EVENT_LABELS, SITUATION_LABELS, THEME_META } from "@/lib/constants";
+import { CASE_EVENT_LABELS, SITUATION_LABELS } from "@/lib/constants";
 import { StatusForm } from "./status-form";
 import { AssignButton } from "./assign-button";
 import { DocumentUploader } from "@/components/document-uploader";
@@ -34,7 +34,6 @@ export default async function CaseworkerCaseDetail({ params }: { params: Promise
     <div className="flex flex-col gap-6">
       <Link href="/back-office/dossiers" className="text-sm font-medium text-emerald-800 hover:underline">← Dossiers</Link>
       <SectionTitle
-        image={THEME_META[procedureType?.category ?? ""]?.image ?? "/images/hero-conseiller.jpg"}
         eyebrow={`Dossier ${item.reference} · ${member?.fullName ?? ""}`}
         title={item.title}
         description={detail.caseworker ? `Gestionnaire : ${detail.caseworker.fullName}` : "Dossier non affecté"}

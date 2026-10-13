@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCaseDetail } from "@/lib/queries";
 import { Card, SectionTitle, StatusBadge, Tag, formatDateTime } from "@/components/ui";
-import { CASE_EVENT_LABELS, THEME_META } from "@/lib/constants";
+import { CASE_EVENT_LABELS } from "@/lib/constants";
 import { CaseForm } from "./case-form";
 import { DocumentUploader } from "@/components/document-uploader";
 import { CaseMessageForm } from "@/components/case-message-form";
@@ -31,7 +31,6 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
     <div className="flex flex-col gap-6">
       <Link href="/espace/demarches" className="text-sm font-medium text-emerald-800 hover:underline">← Mes démarches</Link>
       <SectionTitle
-        image={THEME_META[procedureType?.category ?? ""]?.image ?? "/images/hero-campagne.jpg"}
         eyebrow={`Mes démarches · Dossier ${item.reference}`}
         title={item.title}
         description={procedureType?.description}

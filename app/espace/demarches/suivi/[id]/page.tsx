@@ -36,7 +36,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image={def.image} eyebrow={`Mes démarches · ${def.short}`} title={j.title} description={def.description} />
+      <SectionTitle eyebrow={`Mes démarches · ${def.short}`} title={j.title} description={def.description} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link href="/espace/demarches" className="text-sm font-semibold text-emerald-800 underline">← Mes démarches</Link>
         <div className="flex flex-wrap gap-3"><a href={`/api/demarches/${j.id}/recapitulatif`} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700">Télécharger le récapitulatif</a><JourneyStatusButton journeyId={j.id} status={j.status} /></div>

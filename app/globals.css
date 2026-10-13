@@ -89,26 +89,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   left: 0;
 }
 
-.hero-overlay {
-  background: linear-gradient(90deg, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0.36) 46%, rgba(17, 17, 17, 0.06) 100%);
-}
-
-.hero-overlay-bottom {
-  background: linear-gradient(180deg, rgba(17, 17, 17, 0) 28%, rgba(17, 17, 17, 0.58) 100%);
-}
-
-@keyframes hero-zoom {
-  from { transform: scale(1.08); }
-  to { transform: scale(1); }
-}
-
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-hero-zoom {
-  animation: hero-zoom 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-fade-up {

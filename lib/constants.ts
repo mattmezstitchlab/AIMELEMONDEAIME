@@ -78,15 +78,15 @@ export const FEATURED_GUIDE_SLUGS = [
 
 export const ARTICLE_CATEGORIES = Object.keys(ARTICLE_CATEGORY_LABELS);
 
-export const THEME_META: Record<string, { image: string; icon: "sante" | "famille" | "logement" | "retraite" | "cotisations" | "emploi" | "heart" | "paiements"; desc: string; tagline: string }> = {
-  famille: { image: "/images/hero-famille.jpg", icon: "famille", desc: "Allocations, naissance, mariage, Pacs.", tagline: "Accompagner chaque étape de la vie de votre famille." },
-  mariage: { image: "/images/hero-mariage.jpg", icon: "heart", desc: "Dossier civil, rétroplanning, prestataires, invités, budget, jour J : le mariage de bout en bout.", tagline: "Préparer son mariage sereinement, de la mairie aux remerciements." },
-  sante: { image: "/images/hero-sante.jpg", icon: "sante", desc: "Remboursements, arrêts de travail, prévention.", tagline: "Votre santé et celle de vos proches, au cœur de nos territoires." },
-  argent: { image: "/images/hero-difficultes.jpg", icon: "paiements", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", tagline: "Quand payer devient difficile, reprendre la main sans rester seul." },
-  logement: { image: "/images/hero-logement.jpg", icon: "logement", desc: "Aides au logement et logement de fonction.", tagline: "Un toit adapté à votre vie à la campagne." },
-  retraite: { image: "/images/hero-retraite.jpg", icon: "retraite", desc: "Relevé de carrière, demande de retraite.", tagline: "Préparer sereinement l'après, après une vie de travail de la terre." },
-  emploi: { image: "/images/hero-emploi.jpg", icon: "emploi", desc: "Recherche d'emploi, formation, embauche, création et transmission d'activité.", tagline: "Travailler, recruter, créer ou transmettre : des démarches claires à chaque étape." },
-  cotisations: { image: "/images/hero-cotisations.jpg", icon: "cotisations", desc: "Calcul, échéances et régularisations.", tagline: "Comprendre et anticiper vos cotisations, simplement." },
+export const THEME_META: Record<string, { icon: "sante" | "famille" | "logement" | "retraite" | "cotisations" | "emploi" | "heart" | "paiements"; desc: string; tagline: string }> = {
+  famille: { icon: "famille", desc: "Allocations, naissance, mariage, Pacs.", tagline: "Accompagner chaque étape de la vie de votre famille." },
+  mariage: { icon: "heart", desc: "Dossier civil, rétroplanning, prestataires, invités, budget, jour J : le mariage de bout en bout.", tagline: "Préparer son mariage sereinement, de la mairie aux remerciements." },
+  sante: { icon: "sante", desc: "Remboursements, arrêts de travail, prévention.", tagline: "Votre santé et celle de vos proches, au cœur de nos territoires." },
+  argent: { icon: "paiements", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", tagline: "Quand payer devient difficile, reprendre la main sans rester seul." },
+  logement: { icon: "logement", desc: "Aides au logement et logement de fonction.", tagline: "Un toit adapté à votre vie à la campagne." },
+  retraite: { icon: "retraite", desc: "Relevé de carrière, demande de retraite.", tagline: "Préparer sereinement l'après, après une vie de travail de la terre." },
+  emploi: { icon: "emploi", desc: "Recherche d'emploi, formation, embauche, création et transmission d'activité.", tagline: "Travailler, recruter, créer ou transmettre : des démarches claires à chaque étape." },
+  cotisations: { icon: "cotisations", desc: "Calcul, échéances et régularisations.", tagline: "Comprendre et anticiper vos cotisations, simplement." },
 };
 
 /** Code couleur des familles : une couleur, un sens (voir CHARTE-VISUELLE.md). */
@@ -98,6 +98,14 @@ export const COLOR_FAMILY_LABELS: Record<ColorFamily, string> = {
   arts: "Arts et rencontres",
   savoirs: "Savoirs et générations",
   encre: "Information générale",
+};
+
+export const COLOR_FAMILY_HINTS: Record<ColorFamily, string> = {
+  demarche: "Droits, aides, démarches administratives, santé, famille, argent, logement.",
+  terre: "Produits locaux, dons, prêts, trajets, jardins partagés.",
+  arts: "Artistes, ateliers, événements, lieux, mariage.",
+  savoirs: "Transmission, cuisine, couture, mémoire locale.",
+  encre: "Information générale et orientation.",
 };
 
 /** Famille de couleur de chaque thématique d'information. */

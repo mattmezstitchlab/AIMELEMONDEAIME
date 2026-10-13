@@ -32,7 +32,7 @@ export default async function EchangesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-campagne.jpg" eyebrow="Mes échanges & projets" title="Conversations, projets, cercles, dons et prêts" description="Tout ce que vous échangez, organisez et partagez — avec le voisinage, vos cercles et l'équipe d'accompagnement."
+      <SectionTitle eyebrow="Mes échanges & projets" title="Conversations, projets, cercles, dons et prêts" description="Tout ce que vous échangez, organisez et partagez — avec le voisinage, vos cercles et l'équipe d'accompagnement."
         actions={<LinkButton href="/le-monde-aime?onglet=publier"><Icon name="filePlus" className="h-4 w-4" /> Créer un projet</LinkButton>} />
 
       <div className="grid gap-3 sm:grid-cols-3">

@@ -16,7 +16,7 @@ export default async function RendezVousPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-sante.jpg" eyebrow="Agenda" title="Rendez-vous" description="Confirmez, annulez ou clôturez les demandes de rendez-vous de votre bureau." />
+      <SectionTitle eyebrow="Agenda" title="Rendez-vous" description="Confirmez, annulez ou clôturez les demandes de rendez-vous de votre bureau." />
       {items.length === 0 ? (
         <EmptyState title="Aucune demande de rendez-vous" />
       ) : (

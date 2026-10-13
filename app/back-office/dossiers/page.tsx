@@ -30,7 +30,7 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-cotisations.jpg" eyebrow="Back-office" title="Dossiers" description="Filtrez, affectez, inspectez et traitez les dossiers de votre bureau." />
+      <SectionTitle eyebrow="Back-office" title="Dossiers" description="Filtrez, affectez, inspectez et traitez les dossiers de votre bureau." />
 
       <Card>
         <form className="flex flex-wrap items-end gap-3">

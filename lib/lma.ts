@@ -8,14 +8,13 @@ export const BRAND = {
 
 export type UniverseKey = "terre" | "arts" | "savoirs";
 
-export const UNIVERSES: Array<{ key: UniverseKey; label: string; short: string; description: string; icon: "sprout" | "music" | "graduation"; image: string }> = [
+export const UNIVERSES: Array<{ key: UniverseKey; label: string; short: string; description: string; icon: "sprout" | "music" | "graduation" }> = [
   {
     key: "terre",
     label: "Terre & quotidien",
     short: "Terre",
     description: "Produits locaux, artisanat, dons, prêts, locations, trajets, jardins partagés et découverte des métiers.",
     icon: "sprout",
-    image: "/images/hero-emploi.jpg",
   },
   {
     key: "arts",
@@ -23,7 +22,6 @@ export const UNIVERSES: Array<{ key: UniverseKey; label: string; short: string; 
     short: "Arts",
     description: "Musiciens, artistes, techniciens, lieux culturels, concerts, ateliers, matériel et espaces de répétition.",
     icon: "music",
-    image: "/images/hero-famille.jpg",
   },
   {
     key: "savoirs",
@@ -31,7 +29,6 @@ export const UNIVERSES: Array<{ key: UniverseKey; label: string; short: string; 
     short: "Savoirs",
     description: "Transmission de savoir-faire, cuisine, couture, réparation, musique, récits de vie et mémoire locale.",
     icon: "graduation",
-    image: "/images/hero-retraite.jpg",
   },
 ];
 
