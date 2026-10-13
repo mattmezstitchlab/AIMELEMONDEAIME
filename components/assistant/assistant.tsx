@@ -375,7 +375,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
     pushTurn({
       from: "assistant",
       text: lignes.join("\n"),
-      action: { kind: "finaliser", journeyId: iv.journeyId, title: iv.title, evenement: iv.situation === "evenement" },
+      action: { kind: "finaliser", journeyId: iv.journeyId, title: iv.title, evenement: iv.situation === "evenement" || iv.situation === "mariage" },
       chips: [{ label: "Ouvrir le formulaire pour corriger", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${iv.journeyId}` }],
     });
   }
@@ -766,7 +766,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
         {action.kind === "finaliser" && (
           <>
             <p className="text-sm font-semibold text-emerald-950">Préparer le plan « {action.title} » à partir de ces réponses ?</p>
-            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Je génère vos étapes et vos pièces depuis les réponses relues ci-dessus.{action.evenement ? " Un projet d'événement sera créé dans votre espace, comme depuis le formulaire." : ""} Aucune transmission à votre bureau : ce sera une autre étape, seulement si vous la demandez.</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Je génère vos étapes et vos pièces depuis les réponses relues ci-dessus.{action.evenement ? " Un projet partagé sera créé dans votre espace pour coordonner l'organisation, comme depuis le formulaire." : ""} Aucune transmission à votre bureau : ce sera une autre étape, seulement si vous la demandez.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
               <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "Préparation…" : "Oui, préparer mon plan"}</button>
               <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>

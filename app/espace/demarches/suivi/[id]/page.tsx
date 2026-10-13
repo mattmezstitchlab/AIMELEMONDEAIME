@@ -26,7 +26,8 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
   const pieces = tasks.filter((t) => t.kind === "piece");
   const next = actions.find((t) => !["termine", "effectue_declare"].includes(t.status));
   const orgBySlug = new Map(organisms.map((o) => [o.slug, o]));
-  const artists = j.situation === "evenement" && j.status === "en_cours" ? await searchArtists(j.answers.discipline ?? "", project ? { lat: Number(project.lat), lng: Number(project.lng) } : null, user.id) : [];
+  const showArtists = j.status === "en_cours" && (j.situation === "evenement" || (j.situation === "mariage" && ["groupe", "dj"].includes(j.answers.musique ?? "")));
+  const artists = showArtists ? await searchArtists(j.situation === "mariage" ? "Musique" : (j.answers.discipline ?? ""), project ? { lat: Number(project.lat), lng: Number(project.lng) } : null, user.id) : [];
   const engagedIds = new Set(d.engagements.filter((e) => !["refusee", "annulee"].includes(e.status)).map((e) => e.artistId));
   const ser = (x: Date | null) => (x ? x.toISOString() : null);
 
@@ -63,14 +64,14 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
             <AddTask journeyId={j.id} />
           </Card>
 
-          {j.situation === "evenement" && (
+          {(j.situation === "evenement" || j.situation === "mariage") && (
             <Card>
-              <h2 className="text-lg font-semibold text-slate-900">Engager un artiste</h2>
+              <h2 className="text-lg font-semibold text-slate-900">{j.situation === "mariage" ? "Engager les musiciens ou le DJ" : "Engager un artiste"}</h2>
               <p className="mt-1 text-xs text-slate-500">Demande envoyée → proposition reçue → devis accepté → contrat signé (déclaré) → embauche déclarée. Chaque étape est distincte ; AIME® n&apos;effectue ni signature, ni paiement, ni déclaration.</p>
               {d.engagements.length > 0 && <div className="mt-4 space-y-3">{d.engagements.map((e) => <OrganizerEngagement key={e.id} artistName={e.artistName} docs={d.myDocs} e={{ id: e.id, status: e.status, proposalMode: e.proposalMode, proposalAmount: e.proposalAmount, proposalFramework: e.proposalFramework, proposalNote: e.proposalNote, requestMessage: e.requestMessage, eventDate: e.eventDate.toISOString() }} />)}</div>}
-              {j.status === "en_cours" && (
+              {showArtists && (
                 <div className="mt-5">
-                  <h3 className="text-sm font-bold text-slate-800">Artistes visibles sur la carte {j.answers.discipline && j.answers.discipline !== "autre" ? `· ${j.answers.discipline}` : ""}</h3>
+                  <h3 className="text-sm font-bold text-slate-800">Artistes visibles sur la carte {j.answers.discipline && j.answers.discipline !== "autre" ? `· ${j.answers.discipline}` : j.situation === "mariage" ? "· Musique" : ""}</h3>
                   {artists.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucun artiste visible pour l&apos;instant. <Link href="/le-monde-aime?univers=arts" className="font-semibold text-emerald-800 underline">Explorer l&apos;univers Arts sur la carte</Link></p> : (
                     <ul className="mt-3 grid gap-3 sm:grid-cols-2">
                       {artists.slice(0, 8).map((a) => (

@@ -69,8 +69,8 @@ export function JourneyWizard({ situation, questions, initial, journeyId, projec
       {done && (
         <div className="space-y-4">
           <p className="text-lg font-bold text-slate-900">Merci, c&apos;est suffisant pour préparer votre plan.</p>
-          {situation === "evenement" && (
-            <div><label htmlFor="pj-choice" className={label}>Projet de l&apos;événement</label>
+          {(situation === "evenement" || situation === "mariage") && (
+            <div><label htmlFor="pj-choice" className={label}>{situation === "mariage" ? "Projet du mariage" : "Projet de l'événement"}</label>
               <select id="pj-choice" value={projectChoice} onChange={(e) => setProjectChoice(e.target.value)} className={input}>
                 <option value="new">Créer un nouveau projet partagé</option>
                 {projects.map((p) => <option key={p.id} value={p.id}>Réutiliser : {p.title}</option>)}

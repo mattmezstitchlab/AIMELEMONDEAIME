@@ -330,6 +330,33 @@ des dossiers affiche l'attente par dossier et le même bouton ; la page
 détail le propose dans la carte de gestion. Vérifié sur le dossier réel
 DOS-2026-100245 : bouton et bloc de relance rendus aux trois endroits.
 
+## 6quater. Parcours « Mariage complet » — exécuté le 2026-08-10 (commit à suivre)
+
+Direction validée : faire de l'application la référence du mariage en
+profondeur, en capitalisant l'architecture existante plutôt qu'en ajoutant
+une couche. La situation `mariage` (« Nous nous marions », 16e parcours,
+règles `2026.10-f`) couvre le mariage de bout en bout :
+- **dossier civil** : rendez-vous mairie, pièces (actes de naissance
+  récents, témoins, certificat du notaire si contrat) et **publication des
+  bans en échéance officielle sourcée à J-10** ;
+- **rétroplanning daté** : chaque jalon (lieu J-270, photographe et
+  traiteur J-180, faire-part J-60, convives J-21, déroulé du jour J-7) est
+  une échéance calculée à rebours depuis la date du mariage — repères
+  personnels notifiés comme les autres échéances, aucun délai inventé ;
+- **fête** : projet partagé créé à la préparation (généralisation du
+  parcours événementiel), musiciens ou DJ engageables depuis le suivi
+  avec le même cycle demande → proposition → contrat et le cadre Guso
+  rappelé, prestataires et ressources branchés sur la carte ;
+- **après** : correspondance bureau « Déclarer une naissance ou un
+  mariage », enchaînement vers le parcours Famille « union ».
+Le questionnaire conversationnel y répond comme pour les autres parcours.
+Routage affiné sans régression : « je déclare mon mariage aux impôts »
+mène à Famille (24), « j'organise mon mariage » au Mariage (20), la fête
+de village reste à l'événementiel. Vérifié sur les règles (24 tâches pour
+un mariage de 120 invités) et dans l'assistant de création. Reportés à un
+second temps, si l'usage le confirme : liste d'invités/RSVP et suivi de
+budget dans le projet.
+
 Restent ouverts : le fonds éditorial (12 contenus publics) en continu, et
 les revues périodiques des règles et des liens d'organismes (section 3).
 

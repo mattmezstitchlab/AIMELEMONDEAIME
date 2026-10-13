@@ -151,7 +151,7 @@ export async function assistantFinalize(journeyId: number): Promise<AResult> {
       .limit(1);
     if (!j) return { ok: false, error: "Brouillon introuvable." };
     if (j.status !== "questionnaire") return { ok: false, error: "Le plan de ce parcours est déjà préparé." };
-    const result = await finalizeJourney(journeyId, j.situation === "evenement" ? "new" : "");
+    const result = await finalizeJourney(journeyId, j.situation === "evenement" || j.situation === "mariage" ? "new" : "");
     if (!result.ok) return result;
     await logAudit({ actorId: user.id, action: "assistant_finalisation_questionnaire", entityType: "journey", entityId: journeyId, metadata: { via: VIA, situation: j.situation } });
     return {

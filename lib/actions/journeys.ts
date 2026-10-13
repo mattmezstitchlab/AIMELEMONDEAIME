@@ -81,7 +81,7 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
     if (missing.length) return { ok: false, error: `Il manque une réponse : « ${missing[0].label} ».` };
 
     let projectId: number | null = null;
-    if (j.situation === "evenement") {
+    if (j.situation === "evenement" || j.situation === "mariage") {
       if (projectChoice && projectChoice !== "new") {
         const pid = Number(projectChoice);
         const [m] = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, pid), eq(projectMembers.userId, user.id), eq(projectMembers.role, "organisateur"), eq(projectMembers.status, "accepte"))).limit(1);
@@ -89,12 +89,14 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
         projectId = pid;
       } else {
         const date = new Date(`${j.answers.date}T12:00:00`);
-        if (Number.isNaN(date.getTime())) return { ok: false, error: "Date de l'événement invalide." };
+        if (Number.isNaN(date.getTime())) return { ok: false, error: j.situation === "mariage" ? "Date du mariage invalide." : "Date de l'événement invalide." };
         const coords = await approxCoords(j.answers.lieu, user.id);
-        const label = def.questions[0].options?.find(([v]) => v === j.answers.event_type)?.[1] ?? "Événement";
+        const label = j.situation === "mariage" ? "Mariage" : (def.questions[0].options?.find(([v]) => v === j.answers.event_type)?.[1] ?? "Événement");
         const [p] = await db.insert(projects).values({
           ownerId: user.id, title: `${label.split(",")[0]} — ${j.answers.lieu}`.slice(0, 140),
-          intention: `Événement préparé avec AIME®${j.answers.public ? ` pour environ ${j.answers.public} personnes` : ""}. Discipline recherchée : ${j.answers.discipline}.`,
+          intention: j.situation === "mariage"
+            ? `Mariage préparé avec AIME®${j.answers.invites ? ` pour environ ${j.answers.invites} invités` : ""}. Le projet rassemble les futurs mariés, les témoins et les proches qui organisent la fête.`
+            : `Événement préparé avec AIME®${j.answers.public ? ` pour environ ${j.answers.public} personnes` : ""}. Discipline recherchée : ${j.answers.discipline}.`,
           city: j.answers.lieu, lat: coords.lat, lng: coords.lng, startsAt: date, universes: ["arts", "terre"],
         }).returning({ id: projects.id });
         await db.insert(projectMembers).values({ projectId: p.id, userId: user.id, role: "organisateur", status: "accepte" });
@@ -115,7 +117,7 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
         }));
       }
       const summary = def.questions.filter((q) => j.answers[q.key]).map((q) => `${q.label} ${q.options?.find(([v]) => v === j.answers[q.key])?.[1] ?? j.answers[q.key]}`).join("\n");
-      await tx.update(journeys).set({ status: "en_cours", projectId, summary, rulesVersion: RULES_VERSION, title: j.situation === "evenement" ? `Événement à ${j.answers.lieu}` : def.short, updatedAt: new Date() }).where(eq(journeys.id, j.id));
+      await tx.update(journeys).set({ status: "en_cours", projectId, summary, rulesVersion: RULES_VERSION, title: j.situation === "evenement" ? `Événement à ${j.answers.lieu}` : j.situation === "mariage" ? `Mariage à ${j.answers.lieu}` : def.short, updatedAt: new Date() }).where(eq(journeys.id, j.id));
     });
     await log(j.id, user.id, `Plan préparé : ${rules.length} étapes et pièces (règles ${RULES_VERSION}).${projectId ? " Projet relié." : ""}`);
     await logAudit({ actorId: user.id, action: "plan_demarche", entityType: "journey", entityId: String(j.id) });
@@ -227,7 +229,7 @@ export async function sendEngagementRequest(journeyId: number, artistId: number,
   try {
     const user = await requireRole(["membre"]);
     const j = await ownJourney(journeyId, user.id);
-    if (!j || j.situation !== "evenement" || j.status !== "en_cours") return { ok: false, error: "Démarche d'événement introuvable." };
+    if (!j || !["evenement", "mariage"].includes(j.situation) || j.status !== "en_cours") return { ok: false, error: "Parcours introuvable pour engager un artiste." };
     if (artistId === user.id) return { ok: false, error: "Vous ne pouvez pas vous engager vous-même." };
     const [artist] = await db.select({ id: artistProfiles.userId }).from(artistProfiles).innerJoin(users, eq(artistProfiles.userId, users.id)).where(and(eq(artistProfiles.userId, artistId), eq(users.isActive, true))).limit(1);
     if (!artist) return { ok: false, error: "Artiste introuvable." };
@@ -402,6 +404,7 @@ const SITUATION_PROCEDURE_SLUG: Record<string, string> = {
   retraite: "demande-retraite-agricole",
   sante: "declaration-arret-travail",
   recruteur: "embauche-salarie-agricole",
+  mariage: "declarer-naissance-ou-mariage",
 };
 
 export type TransmitJourneyResult =
