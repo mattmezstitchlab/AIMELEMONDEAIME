@@ -735,3 +735,41 @@ visiteur couvre /espace (bannière prochaine action, pièce attendue),
 mariage (invités, tables, budget) et sa page jour J en tant qu'organisatrice,
 les documents et les échanges (rendez-vous confirmé) ; charges utiles de
 l'assistant peuplées. Typecheck et ESLint verts sur le seed.
+
+## 6quaterdecies. Fonds éditorial « Ma famille change » (2026-10-13)
+
+**Demande** : raconter en public les moments de famille — naissance,
+séparation, deuil — avec la même discipline que les fonds mariage et argent.
+La catégorie `famille` existait déjà (hub, icône, visuel) : aucun changement
+de code, un troisième insert dédié au seed (33 contenus en base, l'accueil
+s'ouvre désormais sur ce fonds).
+
+**Les 5 contenus** : `naissance-premieres-demarches` (guide : la déclaration
+en mairie **dans les 5 jours**, seul délai cité car officiel et sourcé
+service-public.fr — c'est celui que le parcours pose déjà comme échéance
+officielle ; acte et livret de famille, caisse CAF ou MSA selon le régime,
+rattachement Vitale, congé aux délais variables donc « cadre à vérifier ») ;
+`se-separer-les-demarches` (jugement ou convention, documents annotés,
+point-justice gratuit avant de signer, caisse et impôts, renvoi croisé vers
+le parcours difficultés de paiement pour la transition financière) ;
+`deces-dun-proche-premieres-demarches` (déclaration selon le lieu —
+établissement, domicile, étranger — sans délai inventé, comme le parcours ;
+acte de décès en copies, organismes un par un faute de service unique,
+logement via l'ADIL, notaire pour la succession, France Services et le
+droit d'aller à son rythme) ; `conjoint-survivant-pension-de-reversion`
+(article : la réversion **ne vient jamais toute seule**, dossier unique
+inter-régimes, mariage/divorce vs Pacs/concubinage, allocation veuvage,
+simulateur — tout « sous conditions », aucune éligibilité affirmée) ;
+`se-pacser-ce-que-ca-change` (convention et déclaration en mairie ou chez
+le notaire, et la différence la plus lourde avec le mariage : pas de
+réversion dans la plupart des régimes de base).
+
+**Méthode** : chaque fait cité vient du socle déjà sourcé des parcours
+(famille, deces_proche, reversion relus ligne à ligne avant rédaction) —
+aucun fait nouveau introduit par l'éditorial, aucun montant, aucun délai
+ajouté, chaque contenu renvoyant à son parcours de l'espace.
+
+**Vérifié** : insertion ciblée en aperçu sans raz (33 contenus, dont 7
+famille), page thématique et 5 pages guides en 200 avec renvois aux
+parcours, accueil ouvert sur le fonds ; typecheck et ESLint verts (seed
+seul modifié, aucun rebuild applicatif requis).

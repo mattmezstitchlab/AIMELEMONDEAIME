@@ -1284,6 +1284,55 @@ export async function seedDatabase(db: NodePgDatabase) {
     },
   ]);
 
+  console.log("Création du fonds famille : 5 guides et articles publics…");
+  await db.insert(articles).values([
+    {
+      slug: "naissance-premieres-demarches",
+      title: "Une naissance : les démarches des premiers jours",
+      category: "famille",
+      audience: "Futurs et jeunes parents",
+      summary: "Déclaration en mairie sous 5 jours, livret de famille, caisse, carte Vitale : l'ordre simple des premières démarches.",
+      content: "Un enfant arrive, et avec lui quelques démarches — moins nombreuses qu'on le craint, à condition de les prendre dans l'ordre.\n\nLa première est la seule vraiment datée : la déclaration de naissance, à la mairie du lieu de naissance, dans les 5 jours qui suivent la naissance (source : service-public.fr). En pratique, la maternité s'en charge souvent ou vous guide ; elle se fait avec le certificat d'accouchement. C'est elle qui établit l'état civil de votre enfant.\n\nDemandez dans la foulée des copies de l'acte de naissance et faites établir ou mettre à jour le livret de famille : presque tous les organismes vous les demanderont.\n\nEnsuite, déclarez la naissance à votre caisse — la CAF, ou la MSA si vous relevez du régime agricole. La composition du foyer conditionne vos prestations ; ne pas déclarer retarde les aides et peut créer des trop-perçus. S'il s'agit d'un premier enfant, certaines aides liées à l'arrivée d'un enfant existent (prime, prestation d'accueil) : le simulateur officiel « Mes droits sociaux » donne une estimation, votre caisse vérifie ensuite les conditions — c'est elle qui décide.\n\nPensez aussi au rattachement de l'enfant à la carte Vitale d'un parent (ou des deux), pour que ses soins soient pris en charge sans friction, et, si vous envisagez un congé parental ou partagé, renseignez-vous tôt auprès de votre employeur : les délais pour le prévenir varient selon votre situation et votre convention.\n\nDans votre espace AIME®, le parcours « Ma famille change » met ces étapes dans l'ordre depuis la date de naissance, avec l'échéance officielle des 5 jours signalée comme telle.",
+      kind: "guide",
+    },
+    {
+      slug: "se-separer-les-demarches",
+      title: "Se séparer : les démarches à ne pas oublier",
+      category: "famille",
+      audience: "Personnes qui se séparent",
+      summary: "Documents annotés, caisse, impôts, logement : la liste posée, une fois la décision prise ou le jugement rendu.",
+      content: "Une séparation n'est jamais seulement administrative, mais l'administratif, lui, se traite avec une liste. Voici celle qui évite les blocages des mois suivants.\n\nD'abord, les documents qui fondent tout le reste : le jugement de divorce ou la convention de séparation — ils fixent notamment la résidence des enfants et les contributions de chacun. Faites ensuite annoter le livret de famille et l'acte de mariage auprès de la mairie : des pièces à jour débloquent presque toutes les démarches suivantes.\n\nAvant de signer quoi que ce soit d'engageant, un détour gratuit s'impose : les points-justice informent sans frais sur la pension alimentaire, la garde des enfants et la médiation familiale. Être informé avant de décider vaut mieux que contester après.\n\nCôté organismes, déclarez le changement de situation à votre caisse (CAF ou MSA selon votre régime) : la composition du foyer change, vos prestations et votre aide au logement peuvent être réexaminées — la décision appartient à la caisse, le signalement à vous. Les impôts aussi : séparation et divorce modifient le foyer fiscal et le taux de prélèvement, et le déclarer tôt évite les régularisations l'année suivante.\n\nEnfin, si payer devient difficile dans la période de transition — deux logements, des frais qui se dédoublent —, un parcours dédié « Je n'arrive pas à payer » existe dans votre espace : mieux vaut l'ouvrir tôt que tard.\n\nDans votre espace AIME®, le parcours « Ma famille change » prépare ces étapes dans l'ordre, selon votre situation.",
+      kind: "guide",
+    },
+    {
+      slug: "deces-dun-proche-premieres-demarches",
+      title: "Un proche est décédé : les premières démarches, à votre rythme",
+      category: "famille",
+      audience: "Proches confrontés à un deuil",
+      summary: "Déclaration selon le lieu, acte de décès, organismes à prévenir un par un : ce qui doit se faire, et ce qui peut attendre.",
+      content: "Dans les premiers jours d'un deuil, on vous demandera beaucoup de choses à la fois. L'essentiel tient en quelques gestes — et beaucoup de démarches peuvent attendre que vous ayez soufflé.\n\nLa première étape dépend du lieu. Si le décès a eu lieu à l'hôpital ou en Ehpad, l'établissement effectue en général la déclaration à la mairie. À domicile, un professionnel de santé constate le décès, et la déclaration se fait ensuite en mairie. À l'étranger, l'autorité locale et le consulat de France sont vos interlocuteurs. AIME® ne réalise aucune de ces déclarations : elle vous aide à les préparer.\n\nDemandez à la mairie compétente plusieurs copies de l'acte de décès : banques, caisses et organismes vous en demanderont un exemplaire presque à chaque fois.\n\nVient ensuite le tour des organismes à prévenir — il n'existe pas de service unique qui prévient toutes les administrations d'un décès. Selon la situation : la banque, les caisses de retraite, la CAF ou la MSA, l'Assurance Maladie, et le cas échéant l'employeur du défunt. Allez-y un par un, en gardant la trace de qui a été prévenu et quand.\n\nSi un logement doit être organisé (bail, assurance, départ ou maintien des lieux), l'ADIL de votre département informe gratuitement sur les règles applicables. Et pour la succession, un notaire est l'interlocuteur naturel dès qu'il y a des biens ou des questions entre héritiers.\n\nSurtout : vous n'avez pas à porter cela seul. Les espaces France Services aident gratuitement à identifier et à mener ces démarches, à votre rythme.\n\nDans votre espace AIME®, le parcours « Un proche est décédé » vous accompagne étape par étape, sans rien précipiter.",
+      kind: "guide",
+    },
+    {
+      slug: "conjoint-survivant-pension-de-reversion",
+      title: "Veuvage : la pension de réversion se demande, elle ne vient pas toute seule",
+      category: "famille",
+      audience: "Conjoints survivants",
+      summary: "Jamais automatique, un dossier unique pour la plupart des régimes, des règles différentes selon le lien : l'essentiel à vérifier.",
+      content: "C'est le point le plus important, et le plus souvent ignoré : la pension de réversion n'est jamais versée automatiquement. Même lorsque vous y avez droit, rien ne se déclenche tant que la demande n'est pas déposée.\n\nBonne nouvelle : pour la plupart des régimes, un seul dossier suffit. Le service en ligne inter-régimes (info-retraite.fr) transmet votre demande aux caisses concernées par la carrière de votre conjoint. Si sa carrière comprenait une part agricole, la MSA applique aussi ses règles propres : faites-la confirmer.\n\nQui peut y prétendre ? Dans la plupart des régimes de base, la réversion est réservée aux conjoints mariés — y compris, sous conditions, aux ex-conjoints divorcés. Le Pacs et le concubinage n'ouvrent pas les mêmes droits : ce n'est pas un jugement, c'est l'état des règles, et mieux vaut une réponse vérifiée qu'un renoncement ou un espoir infondés. L'âge compte aussi (souvent autour de 55 ans selon les régimes), ainsi que, dans plusieurs régimes, vos ressources.\n\nSi vous êtes plus jeune, renseignez-vous sur l'allocation veuvage : sous conditions, elle peut être versée pendant une durée limitée, en attendant l'âge d'ouverture de la réversion.\n\nAu-delà de la retraite, le décès d'un conjoint change presque tous les droits du foyer — logement, famille, santé. Le simulateur officiel « Mes droits sociaux » en donne une vue d'ensemble ; chaque organisme confirme ensuite ce qui le concerne.\n\nLes pièces qui serviront partout : l'acte de décès, le livret de famille à jour, votre dernier avis d'imposition et vos justificatifs de ressources.\n\nDans votre espace AIME®, le parcours « Je suis veuf ou veuve : mes droits et ma pension » vérifie ces étapes selon votre lien et le régime de votre conjoint.",
+      kind: "article",
+    },
+    {
+      slug: "se-pacser-ce-que-ca-change",
+      title: "Se pacser : la démarche, et ce que ça change (et ne change pas)",
+      category: "famille",
+      audience: "Couples qui se pacsent",
+      summary: "Convention et déclaration en mairie, impôts, livret de famille — et la différence avec le mariage qui compte le plus.",
+      content: "Le Pacs se conclut en deux temps : une convention, que vous rédigez librement (des modèles officiels existent), et une déclaration conjointe, déposée à la mairie de votre domicile ou chez un notaire. Après enregistrement, un certificat vous est remis — gardez-le, il sera votre justificatif de situation.\n\nFaites ensuite mettre à jour ce qui doit l'être : le livret de famille, et votre situation auprès des organismes — à commencer par votre caisse (CAF ou MSA selon votre régime), car la composition du foyer conditionne plusieurs prestations. Côté impôts, la situation de famille influe sur l'imposition et le taux de prélèvement : l'année du Pacs, des choix existent, expliqués sur le site officiel des impôts.\n\nCe que le Pacs change, concrètement : une vie commune reconnue, des droits et devoirs réciproques (aide matérielle, solidarité pour les dettes du quotidien), et une séparation qui se règle par une déclaration, bien plus simplement qu'un divorce.\n\nCe qu'il ne change pas — et c'est la différence la plus lourde avec le mariage : dans la plupart des régimes de base, le partenaire pacsé survivant n'a pas droit à la pension de réversion, réservée aux conjoints mariés. Si cette protection compte pour vous, elle mérite d'être regardée en face, éventuellement avec un notaire, avant de choisir la forme de votre union.\n\nDans votre espace AIME®, le parcours « Ma famille change » prépare les démarches d'un mariage comme d'un Pacs, et le parcours mariage en raconte la version longue si le cœur vous en dit.",
+      kind: "article",
+    },
+  ]);
+
   console.log("Création de la carte : production locale et disponibilités…");
 
   // Points de production / présence déposés par des adhérents (données fictives).
