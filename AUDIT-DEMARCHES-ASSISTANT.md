@@ -183,6 +183,31 @@ une trace au journal d'audit (déjà en place) :
 
 ---
 
+## 6. Niveau 1 de l'assistant — exécuté le 2026-08-10 (commit à suivre)
+
+Le niveau 1 est en place, sans aucune écriture :
+- le layout charge un **résumé personnel** du membre (`getAssistantSummary`) et le
+  transmet au widget ; en cas de base injoignable, l'assistant reste générique ;
+- **« Faire le point sur mes démarches »** (bouton dédié + question libre) répond
+  depuis les vraies données : parcours en cours et leur prochaine action,
+  questionnaires à terminer, dossiers par statut, alertes pièces manquantes ;
+- **« Qu'est-ce qui m'attend ? »** : pièces attendues, échéances proches,
+  demandes reçues et engagements en attente ;
+- **« Quelles pièces me manquent ? »** : les dossiers concernés, avec liens
+  directs ;
+- **référence citée** (`DOS-2026-…`, ancien format `MSA-…` accepté) : le dossier
+  s'ouvre directement, ou l'assistant dit honnêtement qu'il ne le retrouve pas
+  parmi ceux du membre ;
+- **réponses situées** : sur la page d'un dossier ou d'un parcours, le point
+  commence par l'élément ouvert.
+
+Vérifié sur le build de production : résumé du membre présent dans le widget
+(parcours, dossiers et références réels), résumé vide et cohérent pour la visite
+guidée, aucun résumé pour les visiteurs. Vigilance notée : le résumé est chargé
+à chaque page pour les membres (une poignée de lectures) — à mettre en cache si
+le trafic le justifie. Restent ouverts : niveau 2 (exécution avec confirmation),
+P1 démarches (parcours Santé, échéances officielles + notifications).
+
 ## 6. Ordre de chantier recommandé
 
 1. **Assistant niveau 1** (synthèse personnelle, échéances, références) — le

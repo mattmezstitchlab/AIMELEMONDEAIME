@@ -13,6 +13,10 @@ import {
 } from "@/lib/assistant/registry";
 import { findScenario } from "@/lib/assistant/engine";
 import { matchSituation } from "@/lib/assistant/orientation";
+import {
+  buildAgenda, buildPieces, buildPoint, findCaseAnswer, personalIntent,
+  type AssistantSummary, type PersonalAnswer,
+} from "@/lib/assistant/personal";
 import { Icon } from "@/components/icon";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 
@@ -28,7 +32,7 @@ type Guide = { scenarioId: string; stepIndex: number };
 
 const OPEN_KEY = "assistant-open";
 
-export function AssistantWidget({ role, userName }: { role: AssistantRole; userName: string | null }) {
+export function AssistantWidget({ role, userName, summary }: { role: AssistantRole; userName: string | null; summary?: AssistantSummary | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -58,11 +62,37 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
 
   const route = routeForPath(pathname);
   const suggestions = useMemo(() => suggestionsForPath(pathname, role), [pathname, role]);
+
+
   const scenarios = useMemo(() => scenariosForRole(role), [role]);
 
   const pushTurn = useCallback((turn: Omit<Turn, "id">) => {
     setTurns((previous) => [...previous, { ...turn, id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}` }]);
   }, []);
+
+  // Élément actuellement ouvert, pour des réponses situées (assistant niveau 1).
+  const focusLine = useMemo(() => {
+    if (!summary) return null;
+    const suivi = pathname.match(/^\/espace\/demarches\/suivi\/(\d+)/);
+    if (suivi) {
+      const actif = summary.journeys.find((item) => item.id === Number(suivi[1]));
+      if (actif) return `Le parcours ouvert (« ${actif.title} ») : ${actif.done}/${actif.total} étapes faites${actif.next ? `, prochaine : ${actif.next}` : ""}.`;
+      const brouillon = summary.drafts.find((item) => item.id === Number(suivi[1]));
+      if (brouillon) return `Le parcours ouvert (« ${brouillon.title} ») : questionnaire à terminer.`;
+      return null;
+    }
+    const dossier = pathname.match(/^\/espace\/demarches\/(\d+)$/);
+    if (dossier) {
+      const c = summary.cases.find((item) => item.id === Number(dossier[1]));
+      return c ? `Le dossier ouvert (${c.reference} « ${c.title} ») fait partie de vos démarches.` : null;
+    }
+    return null;
+  }, [pathname, summary]);
+
+  const answerPersonal = useCallback((answer: PersonalAnswer) => {
+    pushTurn({ from: "assistant", text: answer.text, chips: answer.chips });
+  }, [pushTurn]);
+  
 
   const clearHighlight = useCallback(() => {
     document.querySelectorAll("[data-assistant-highlight]").forEach((element) => {
@@ -192,6 +222,17 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
     if (lowered.includes("bonjour") || lowered.includes("salut")) {
       pushTurn({ from: "assistant", text: "Bonjour ! Dites-moi ce que vous cherchez, ou choisissez une suggestion ci-dessous.", chips: suggestions });
       return;
+    }
+
+    // Assistant personnalisé (niveau 1, lecture seule) : référence citée et
+    // questions sur les démarches du membre, répondues depuis ses données.
+    if (summary) {
+      const byReference = findCaseAnswer(summary, value);
+      if (byReference) { answerPersonal(byReference); return; }
+      const intent = personalIntent(value);
+      if (intent === "pieces") { answerPersonal(buildPieces(summary)); return; }
+      if (intent === "agenda") { answerPersonal(buildAgenda(summary)); return; }
+      if (intent === "point") { answerPersonal(buildPoint(summary, focusLine)); return; }
     }
 
     const orientation = matchSituation(value);
@@ -397,6 +438,15 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
 
           <div className="border-t border-slate-100 bg-white px-3 py-3">
             {!lastSuggestions && !guide && <div className="mb-2 flex flex-wrap gap-1.5">
+              {summary && (
+                <button
+                  type="button"
+                  onClick={() => { pushTurn({ from: "user", text: "Faire le point sur mes démarches" }); answerPersonal(buildPoint(summary, focusLine)); }}
+                  className="rounded-full border border-emerald-700 bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-900"
+                >
+                  Faire le point sur mes démarches
+                </button>
+              )}
               {suggestions.map((suggestion) => (
                 <button
                   key={suggestion.label}
@@ -422,8 +472,9 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
               <PrimaryButton type="submit" className="!px-3 !py-2 text-xs">Envoyer</PrimaryButton>
             </form>
             <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
-              Aide à la navigation uniquement. Aucune réponse réglementaire n&apos;est inventée et aucune action n&apos;est effectuée sans
-              votre validation dans les formulaires habituels.
+              {summary
+                ? "Je peux faire le point sur vos démarches depuis vos données. Je ne modifie rien : aucune action n'est effectuée sans votre validation dans les formulaires habituels."
+                : "Aide à la navigation uniquement. Aucune réponse réglementaire n'est inventée et aucune action n'est effectuée sans votre validation dans les formulaires habituels."}
             </p>
           </div>
         </div>

@@ -6,6 +6,7 @@ import {
   organisms, projectDocuments, projectMembers, projects, users,
 } from "@/db/schema";
 import { distanceKm } from "@/lib/lma";
+import type { AssistantSummary } from "@/lib/assistant/personal";
 
 const pub = (d: string | null, f: string) => d ?? f.split(" ")[0];
 
@@ -114,5 +115,26 @@ export async function getDocumentsHub(userId: number) {
     own: own.map((d) => ({ ...d, shares: shares.filter((s) => s.s.documentId === d.id).map((s) => ({ id: s.s.id, to: s.s.projectId ? `Projet « ${s.projectTitle} »` : pub(s.grantee, s.granteeFull ?? "Membre") })) })),
     sharedWithMe: uniqueShared.map((d) => ({ id: d.id, filename: d.filename, ownerName: pub(d.owner, d.ownerFull) })),
     projectDocs, projectsForShare,
+  };
+}
+
+/**
+ * Résumé personnel pour l'assistant (niveau 1) : uniquement des lectures sur
+ * les données du membre, sous une forme sérialisable pour le widget client.
+ */
+export async function getAssistantSummary(userId: number): Promise<AssistantSummary> {
+  const o = await getOverview(userId);
+  const rows = await db
+    .select({ id: cases.id, reference: cases.reference, title: cases.title, status: cases.status })
+    .from(cases)
+    .where(eq(cases.memberId, userId))
+    .orderBy(desc(cases.updatedAt));
+  return {
+    journeys: o.active.map((j) => ({ id: j.id, title: j.title, done: j.done, total: j.total, next: j.next?.label ?? null })),
+    drafts: o.drafts.map((j) => ({ id: j.id, title: j.title })),
+    cases: rows,
+    dueTasks: o.dueTasks.map((t) => ({ label: t.label, dueAt: t.dueAt!.toISOString(), official: t.dueKind === "officielle", journeyId: t.journeyId })),
+    incoming: o.incomingRequests.length,
+    engagements: o.engagementsToAnswer.length,
   };
 }

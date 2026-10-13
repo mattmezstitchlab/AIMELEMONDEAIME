@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
+import { getAssistantSummary } from "@/lib/journey-queries";
 import { AssistantWidget } from "@/components/assistant/assistant";
 import type { AssistantRole } from "@/lib/assistant/registry";
 
@@ -14,6 +15,9 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const user = await getCurrentUser();
   const role: AssistantRole = user ? (user.role as AssistantRole) : "visiteur";
+  // Assistant personnalisé (niveau 1) : résumé en lecture seule des démarches
+  // du membre. En cas de base injoignable, l'assistant reste générique.
+  const summary = user?.role === "membre" ? await getAssistantSummary(user.id).catch(() => null) : null;
   return (
     <html lang="fr">
       <body className="bg-white text-slate-900 antialiased">
@@ -21,7 +25,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           Aller au contenu principal
         </a>
         {children}
-        <AssistantWidget role={role} userName={user?.fullName ?? null} />
+        <AssistantWidget role={role} userName={user?.fullName ?? null} summary={summary} />
       </body>
     </html>
   );
