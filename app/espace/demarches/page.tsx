@@ -1,10 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getMyJourneys } from "@/lib/journey-queries";
 import { getMemberCases } from "@/lib/queries";
 import { Card, SectionTitle, StatusBadge, LinkButton, EmptyState, formatDate } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { SITUATION_BY_KEY } from "@/lib/situations";
+
+export const metadata: Metadata = { title: "Mes démarches — AIME®" };
 
 export const dynamic = "force-dynamic";
 

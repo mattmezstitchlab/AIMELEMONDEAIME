@@ -1,8 +1,11 @@
 import { getCurrentUser } from "@/lib/auth";
+import type { Metadata } from "next";
 import { getOfficeAppointments } from "@/lib/queries";
 import { Card, SectionTitle, EmptyState, formatDateTime } from "@/components/ui";
 import { APPOINTMENT_STATUS_LABELS } from "@/lib/constants";
 import { AppointmentActions } from "./appointment-actions";
+
+export const metadata: Metadata = { title: "Rendez-vous — Back-office AIME®" };
 
 export const dynamic = "force-dynamic";
 

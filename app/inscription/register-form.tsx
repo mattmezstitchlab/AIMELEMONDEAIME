@@ -17,7 +17,7 @@ export function RegisterForm({ offices }: { offices: Office[] }) {
         <Field label="Adresse e-mail" name="email" type="email" required autoComplete="email" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Mot de passe" name="password" type="password" required autoComplete="new-password" hint="8 caractères minimum" />
+        <Field label="Mot de passe" name="password" type="password" required autoComplete="new-password" hint="12 caractères minimum" />
         <Field label="Téléphone" name="phone" autoComplete="tel" />
       </div>
       <div>
@@ -28,7 +28,7 @@ export function RegisterForm({ offices }: { offices: Office[] }) {
         </select>
       </div>
       <div>
-        <label htmlFor="officeId" className="block text-sm font-medium text-slate-700">Point d'accueil de rattachement (démonstration)</label>
+        <label htmlFor="officeId" className="block text-sm font-medium text-slate-700">Point d&apos;accueil de rattachement (démonstration)</label>
         <select id="officeId" name="officeId" defaultValue="" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm">
           <option value="">Choisissez un bureau</option>
           {offices.map((office) => <option key={office.id} value={office.id}>{office.name} — {office.city}</option>)}

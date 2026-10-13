@@ -1,9 +1,12 @@
 import { getCurrentUser } from "@/lib/auth";
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { payments } from "@/db/schema";
 import { and, desc, eq, ilike } from "drizzle-orm";
 import { Card, SectionTitle, EmptyState, formatDate, formatAmount, Tag } from "@/components/ui";
 import { PAYMENT_TYPE_LABELS } from "@/lib/constants";
+
+export const metadata: Metadata = { title: "Mes paiements — AIME®" };
 
 export const dynamic = "force-dynamic";
 

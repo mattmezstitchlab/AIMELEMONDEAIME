@@ -1,8 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { AuthSplit } from "@/components/auth-split";
 import { RegisterForm } from "./register-form";
 import { db } from "@/db";
 import { offices } from "@/db/schema";
+
+export const metadata: Metadata = { title: "Créer mon espace — AIME®", description: "Créez votre espace AIME® pour être accompagné dans vos démarches et rencontrer les personnes près de vous." };
 
 export const dynamic = "force-dynamic";
 

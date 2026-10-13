@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { messages, appointments, offices } from "@/db/schema";
 import { or, eq, asc } from "drizzle-orm";
@@ -8,6 +9,8 @@ import { OfficeMessageForm } from "./office-message-form";
 import { AppointmentForm } from "./appointment-form";
 import { getMyCommunityData } from "@/lib/community-queries";
 import { MyExchangesClient } from "./my-exchanges-client";
+
+export const metadata: Metadata = { title: "Mes échanges — AIME®" };
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +35,7 @@ export default async function EchangesPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-slate-900">Messagerie avec l'équipe d'accompagnement</h2>
+          <h2 className="text-lg font-semibold text-slate-900">Messagerie avec l&apos;équipe d&apos;accompagnement</h2>
           {thread.length === 0 ? (
             <EmptyState title="Aucun message" description="Envoyez un message à l'équipe d'accompagnement pour une question générale." />
           ) : (

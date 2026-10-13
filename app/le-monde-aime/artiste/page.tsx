@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { PublicPage } from "@/components/public-shell";
 import { getCurrentUser } from "@/lib/auth";
@@ -8,6 +9,8 @@ import { ArtistEngagement } from "@/components/espace/journey-ui";
 import { ArtistForm, ArtistRequestActions } from "@/components/community/profile-forms";
 import { Section } from "@/components/community/project-panels";
 import { STATUS_LABEL, priceLabel } from "@/lib/lma";
+
+export const metadata: Metadata = { title: "Espace artiste — Le Monde Aime", description: "Artistes : présentez votre pratique et recevez des demandes d'engagement." };
 
 export const dynamic = "force-dynamic";
 

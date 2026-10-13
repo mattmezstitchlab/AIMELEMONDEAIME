@@ -1,10 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
 import { db } from "@/db";
 import { articles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS } from "@/lib/constants";
 import { SInformClient } from "./s-informer-client";
+
+export const metadata: Metadata = { title: "S'informer — AIME®", description: "Articles et repères pour comprendre vos droits et vos démarches." };
 
 export const dynamic = "force-dynamic";
 

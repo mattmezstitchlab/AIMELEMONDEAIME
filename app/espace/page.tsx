@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getOverview } from "@/lib/journey-queries";
 import { getAllNotifications } from "@/lib/queries";
@@ -7,6 +8,8 @@ import { Icon } from "@/components/icon";
 import { SITUATIONS, TASK_STATUS_LABEL } from "@/lib/situations";
 import { NotificationList } from "./notification-list";
 import { OrientationEntry } from "@/components/orientation-entry";
+
+export const metadata: Metadata = { title: "Mon espace — AIME®" };
 
 export const dynamic = "force-dynamic";
 

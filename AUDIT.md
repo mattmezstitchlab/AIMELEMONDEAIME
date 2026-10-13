@@ -185,3 +185,30 @@ PGlite (PostgreSQL compilé en WASM, hors dépôt) exposé sur `127.0.0.1:5432`.
 pendant les tests (« Connection terminated » avec `maxConnections=1`, rotation des IDs d'actions en mode dev Turbopack)
 venaient de cette infrastructure d'aperçu, **pas de l'application** — vérifié en build de production, où la connexion
 réelle, la matrice des rôles et les protections IDOR fonctionnent.*
+
+---
+
+## Addendum — achèvement de l'application (13 octobre 2026, même journée)
+
+Tous les constats de l'audit ont été traités ; vérifié par `npm run check` (typecheck + lint + build) et une
+nouvelle batterie de tests dynamiques sur le build de production, base réinitialisée via les migrations.
+
+| Constat | Traitement |
+|---|---|
+| §1 Faille critique Server Actions | Corrigée pendant l'audit ; rejeu sur le nouveau build : `Server Action unavailable` ✅ |
+| §2 Démarrage impossible | Alias/Drizzle corrigés ; **migrations versionnées** commitées (`drizzle/`, `npm run db:migrate` testé sur base vierge) ; `README.md`, `.env.example`, scripts `db:*` ; `drizzle.config.ts` lit `DATABASE_URL` |
+| §3.1 Seed dangereux en production | `db/seed.ts` **refuse** `NODE_ENV=production` sans `ALLOW_DEMO_SEED=1` (testé : exit 1, message explicite) |
+| §3.2 Next.js vulnérable (1 critique, 7 hautes) | **Next 16.4.0** + `eslint-config-next` 16.4.0, PostCSS à jour : la critique a disparu. Restent 9 alertes **uniquement dans l'outillage de dev** (ESLint `braces/micromatch`, drizzle-kit `esbuild`) — aucun impact runtime |
+| §3.3 Bourrage d'identifiants | `lib/rate-limit.ts` : 10 tentatives/15 min par IP+compte à la connexion (testé : blocage à la 11ᵉ), 10 inscriptions/heure/IP ; mot de passe **12 caractères** minimum (inscription + création de comptes par l'admin) |
+| §4.1 En-têtes de sécurité | CSP, `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` sur toutes les réponses ; `X-Powered-By` supprimé (vérifiés par `curl`) |
+| §4.2 Documents servis `inline` | `inline` réservé aux images/PDF, `attachment` sinon, `nosniff` systématique |
+| §4.3 Uploads incohérents | Politique unifiée dans `lib/uploads.ts` (types + taille), utilisée par les documents, projets, cercles et profils |
+| §4.4 ESLint rouge (51 erreurs) | **0 erreur, 0 avertissement** : hook formulaire sans ref, apostrophes JSX, effets `setState` refactorés (initialisation paresseuse, état dérivé, synchronisation URL pendant le rendu), `<img>` d'API justifiés, lien `<a>` → `<Link>` |
+| §4.5 Erreurs génériques | `app/error.tsx` + `app/not-found.tsx` en français ; `getCurrentUser` dégrade en visiteur si la base tombe |
+| §4.6 Performance | Les requêtes « y a-t-il une photo ? » ne chargent plus les `bytea` (via `photoMime`) ; le reste (pagination, ISR, stockage objet) reste un chantier d'industrialisation, pas un bloqueur |
+| §4.7 Métadonnées | Titres/descriptions sur **toutes** les pages, `generateMetadata` pour les guides et thématiques |
+| §5 Divers | Ancien lien `/le-monde-aime/profil` : vraie redirection 307 préservant `?bienvenue=1` ; page-relais supprimée ; `void item` mort supprimé ; statuts HTTP de l'API REST centralisés dans `lib/api-status.ts` |
+| Visuels absents | 10 photos générées (accueil, santé, famille, logement, retraite, cotisations, emploi, campagne, conseiller, espace). Restent 3 visuels « univers » (terre, arts, savoirs) en dégradés d'attente — limite de génération d'images atteinte pendant la session ; à générer ou remplacer par les photos officielles |
+
+**État final vérifié :** build de production ✅ · routes publiques et privées ✅ · matrice des rôles ✅ ·
+anti-IDOR ✅ (403/404) · connexion réelle ✅ · rate-limit ✅ · en-têtes ✅ · page 404 de marque ✅.

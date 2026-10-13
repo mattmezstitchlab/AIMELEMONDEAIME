@@ -1,8 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getOfficeCases } from "@/lib/queries";
 import { Card, SectionTitle, StatusBadge, EmptyState, formatDate } from "@/components/ui";
 import { CASE_STATUS_LABELS } from "@/lib/constants";
+
+export const metadata: Metadata = { title: "Dossiers — Back-office AIME®" };
 
 export const dynamic = "force-dynamic";
 

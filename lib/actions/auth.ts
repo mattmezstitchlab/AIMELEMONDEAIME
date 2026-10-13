@@ -5,6 +5,7 @@ import { users, type Role } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { hashPassword, verifyPassword, setSessionCookie, clearSessionCookie } from "@/lib/auth";
 import { loginSchema, registerSchema, parseOrError } from "@/lib/validation";
+import { clientIp, hitRateLimit, clearRateLimit } from "@/lib/rate-limit";
 import { logAudit } from "@/lib/audit";
 import { redirect } from "next/navigation";
 
@@ -31,6 +32,12 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
   });
   if (!parsed.ok) return { ok: false, error: parsed.error };
 
+  // Anti-bourrage : 10 tentatives par quart d'heure et par couple IP + compte.
+  const loginKey = `connexion:${await clientIp()}:${parsed.data.email.toLowerCase()}`;
+  if (hitRateLimit(loginKey, 10, 15 * 60_000)) {
+    return { ok: false, error: "Trop de tentatives de connexion. Réessayez dans quelques minutes." };
+  }
+
   const [user] = await db.select().from(users).where(eq(users.email, parsed.data.email.toLowerCase())).limit(1);
   if (!user || !user.isActive) {
     return { ok: false, error: "Identifiants incorrects." };
@@ -40,6 +47,7 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
     return { ok: false, error: "Identifiants incorrects." };
   }
 
+  clearRateLimit(loginKey);
   await setSessionCookie({ userId: user.id, role: user.role, fullName: user.fullName, email: user.email });
   await logAudit({ actorId: user.id, action: "connexion", entityType: "user", entityId: user.id });
 
@@ -62,6 +70,11 @@ export async function registerAction(_prev: ActionResult | null, formData: FormD
   };
   const parsed = parseOrError(registerSchema, raw);
   if (!parsed.ok) return { ok: false, error: parsed.error };
+
+  // Anti-abus : 10 créations de compte par heure et par adresse IP.
+  if (hitRateLimit(`inscription:${await clientIp()}`, 10, 60 * 60_000)) {
+    return { ok: false, error: "Trop de créations de compte. Réessayez plus tard." };
+  }
 
   const birth = new Date(parsed.data.birthDate);
   const adultAt = new Date(birth);

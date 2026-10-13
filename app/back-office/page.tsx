@@ -1,7 +1,10 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getOfficeCases, getOfficeById } from "@/lib/queries";
 import { Card, SectionTitle, StatusBadge, EmptyState, formatDate } from "@/components/ui";
+
+export const metadata: Metadata = { title: "Back-office — AIME®" };
 
 export const dynamic = "force-dynamic";
 

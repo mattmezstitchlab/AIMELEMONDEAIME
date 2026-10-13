@@ -1,8 +1,11 @@
 import { db } from "@/db";
+import type { Metadata } from "next";
 import { offices } from "@/db/schema";
 import { asc } from "drizzle-orm";
 import { Card, SectionTitle } from "@/components/ui";
 import { OfficeForm, OfficeCard } from "../admin-forms";
+
+export const metadata: Metadata = { title: "Bureaux — Administration AIME®" };
 
 export const dynamic = "force-dynamic";
 

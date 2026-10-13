@@ -1,8 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
 import { Hero } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
+
+export const metadata: Metadata = { title: "Informations par thématique — AIME®", description: "Santé, famille, logement, retraite, emploi : l'information classée par sujet de la vie quotidienne." };
 
 export default function InformationsHub() {
   return (

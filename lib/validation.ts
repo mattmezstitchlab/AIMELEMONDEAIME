@@ -8,7 +8,7 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   fullName: z.string().min(2, "Nom complet requis").max(160),
   email: z.string().email("Adresse e-mail invalide"),
-  password: z.string().min(8, "8 caractères minimum"),
+  password: z.string().min(12, "12 caractères minimum pour le mot de passe"),
   city: z.string().min(1, "Indiquez votre commune").max(120),
   birthDate: z.string().min(8, "Indiquez votre date de naissance").max(10),
   phone: z.string().max(30).optional().default(""),

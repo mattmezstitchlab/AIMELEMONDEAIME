@@ -5,7 +5,13 @@ export type UploadResult =
   | null;
 
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-export const DOCUMENT_TYPES = [...IMAGE_TYPES, "application/pdf", "text/plain"];
+export const DOCUMENT_TYPES = [
+  ...IMAGE_TYPES,
+  "application/pdf",
+  "text/plain",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
 
 export async function readUpload(form: FormData, field: string, allowed: string[], maxBytes: number): Promise<UploadResult> {
   const file = form.get(field);

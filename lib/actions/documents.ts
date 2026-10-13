@@ -7,36 +7,22 @@ import { requireUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { linkDocumentEvent } from "@/lib/case-events";
+import { DOCUMENT_TYPES, readUpload } from "@/lib/uploads";
 
 export type ActionResult = { ok: true; id?: number } | { ok: false; error: string };
 
 const MAX_SIZE = 8 * 1024 * 1024;
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
 
 export async function uploadDocument(formData: FormData): Promise<ActionResult> {
   try {
     const user = await requireUser();
-    const file = formData.get("file");
     const category = String(formData.get("category") || "autre");
     const caseIdRaw = formData.get("caseId");
     const caseId = caseIdRaw ? Number(caseIdRaw) : null;
 
-    if (!(file instanceof File) || file.size === 0) {
-      return { ok: false, error: "Veuillez sélectionner un fichier." };
-    }
-    if (file.size > MAX_SIZE) {
-      return { ok: false, error: "Fichier trop volumineux (8 Mo maximum)." };
-    }
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return { ok: false, error: "Format non autorisé (PDF, JPG, PNG ou Word uniquement)." };
-    }
+    const upload = await readUpload(formData, "file", DOCUMENT_TYPES, MAX_SIZE);
+    if (!upload) return { ok: false, error: "Veuillez sélectionner un fichier." };
+    if (!upload.ok) return upload;
 
     if (caseId) {
       const [item] = await db.select().from(cases).where(eq(cases.id, caseId)).limit(1);
@@ -49,17 +35,16 @@ export async function uploadDocument(formData: FormData): Promise<ActionResult> 
       }
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
     const [created] = await db
       .insert(documents)
       .values({
         ownerId: user.role === "membre" ? user.id : (caseId ? (await db.select().from(cases).where(eq(cases.id, caseId)).limit(1))[0].memberId : user.id),
         caseId: caseId,
         category,
-        filename: file.name.slice(0, 190),
-        mimeType: file.type,
-        sizeBytes: file.size,
-        content: buffer,
+        filename: upload.name,
+        mimeType: upload.mime,
+        sizeBytes: upload.size,
+        content: upload.data,
         isSpecimen: false,
         uploadedById: user.id,
       })

@@ -198,7 +198,7 @@ export async function respondToMissingDocument(caseId: number, message: string):
 export async function assignCaseToSelf(caseId: number): Promise<ActionResult> {
   try {
     const user = await requireRole(["gestionnaire", "administrateur"]);
-    const { item } = await assertCaseAccess(caseId);
+    await assertCaseAccess(caseId);
     await db.update(cases).set({ assignedCaseworkerId: user.id, updatedAt: new Date() }).where(eq(cases.id, caseId));
     await db.insert(caseEvents).values({
       caseId,
@@ -209,7 +209,6 @@ export async function assignCaseToSelf(caseId: number): Promise<ActionResult> {
     await logAudit({ actorId: user.id, action: "affectation_dossier", entityType: "case", entityId: caseId });
     revalidatePath(`/back-office/dossiers/${caseId}`);
     revalidatePath("/back-office/dossiers");
-    void item;
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Erreur inattendue." };

@@ -97,7 +97,7 @@ export function PublicFooter() {
           <Link href="/s-informer#theme-emploi" className="hover:text-emerald-700">Emploi agricole</Link>
           <Link href="/accompagnement" className="hover:text-emerald-700">Accompagnement des démarches</Link>
           <Link href="/annuaire" className="hover:text-emerald-700">Points d&apos;accueil</Link>
-          <Link href="/decouvrir" className="hover:text-emerald-700">Découvrir l'espace (démo)</Link>
+          <Link href="/decouvrir" className="hover:text-emerald-700">Découvrir l&apos;espace (démo)</Link>
           <Link href="/vision" className="hover:text-emerald-700">Notre méthode et nos limites</Link>
           <Link href="/le-monde-aime" className="font-semibold text-emerald-700 hover:underline">Explorer la carte</Link>
           <Link href="/connexion" className="hover:text-emerald-700">Connexion</Link>

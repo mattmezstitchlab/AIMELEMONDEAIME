@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
 import { Hero, Tag, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icon";
@@ -6,6 +7,8 @@ import { db } from "@/db";
 import { articles } from "@/db/schema";
 import { and, eq, ilike, or } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
+
+export const metadata: Metadata = { title: "Guides pratiques — AIME®", description: "Des guides pas à pas pour vos démarches du quotidien." };
 
 export const dynamic = "force-dynamic";
 

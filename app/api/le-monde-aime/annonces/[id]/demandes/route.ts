@@ -1,5 +1,7 @@
 import { requestCommunityListing } from "@/lib/actions/community";
 
+import { communityErrorStatus } from "@/lib/api-status";
+
 export const runtime = "nodejs";
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -18,5 +20,5 @@ export async function POST(request: Request, context: RouteContext) {
   if (typeof body.endsAt === "string") form.set("endsAt", body.endsAt);
   if (typeof body.eventPlanId === "number") form.set("eventPlanId", String(body.eventPlanId));
   const result = await requestCommunityListing(form);
-  return Response.json(result, { status: result.ok ? 201 : result.error.includes("Connectez-vous") ? 401 : 400 });
+  return Response.json(result, { status: result.ok ? 201 : communityErrorStatus("demande", result.error) });
 }

@@ -52,7 +52,12 @@ function PersonCard({ p, highlighted }: { p: Person; highlighted: boolean }) {
   return (
     <article className={`rounded-2xl border bg-white p-4 ${highlighted ? "border-emerald-700 ring-2 ring-emerald-100" : "border-black/[0.06] shadow-sm"}`}>
       <div className="flex gap-3">
-        {p.hasPhoto ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/api/profil/${p.id}/photo`} alt="" className="h-14 w-14 rounded-full object-cover" loading="lazy" /> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-100 text-lg font-bold text-violet-900" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>}
+        {p.hasPhoto ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
+            <img src={`/api/profil/${p.id}/photo`} alt="" className="h-14 w-14 rounded-full object-cover" loading="lazy" />
+          </>
+        ) : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-100 text-lg font-bold text-violet-900" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>}
         <div className="min-w-0">
           <span className="inline-flex rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-800">Personne{p.isDemo ? " · profil fictif" : ""}</span>
           <h3 className="mt-1 text-base font-bold text-slate-900">{p.name}</h3>
@@ -107,12 +112,17 @@ export function CommunityApp({ data }: { data: LmaData }) {
   const [clusterSelection, setClusterSelection] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  useEffect(() => {
+  // Synchronisation URL → filtres : ajustement d'état pendant le rendu
+  // (patron recommandé par React plutôt qu'un setState dans un effet).
+  const paramsKey = params.toString();
+  const [syncedParamsKey, setSyncedParamsKey] = useState(paramsKey);
+  if (paramsKey !== syncedParamsKey) {
+    setSyncedParamsKey(paramsKey);
     const u = params.get("univers");
     if (u) setUniverse(u);
     const q = params.get("q");
     if (q !== null) setKeyword(q);
-  }, [params]);
+  }
 
   const [pubType, setPubType] = useState<"proposition" | "besoin" | "projet">("proposition");
   const [pubSub, setPubSub] = useState<"annonce" | "trajet">("annonce");
@@ -122,7 +132,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
   const [lienTab, setLienTab] = useState<"echanges" | "projets" | "cercles">("echanges");
 
   const goTab = (key: Tab) => router.push(key === "explorer" ? "/le-monde-aime" : `/le-monde-aime?onglet=${key}`, { scroll: false });
-  const requests = mine?.requests ?? [];
+  const requests = useMemo(() => mine?.requests ?? [], [mine]);
 
   // ---- Éléments de la carte : personnes, offres, besoins, lieux, projets, trajets, services externes
   const items = useMemo<Item[]>(() => {

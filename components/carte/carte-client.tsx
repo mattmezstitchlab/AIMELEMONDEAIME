@@ -128,7 +128,7 @@ export function CarteClient({
 
         {/* Légende */}
         <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
-          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-emerald-800" aria-hidden="true" /> Point d'accueil (démo)</li>
+          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-emerald-800" aria-hidden="true" /> Point d&apos;accueil (démo)</li>
           <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-emerald-300 bg-white" aria-hidden="true" /> Production locale</li>
           <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-slate-300 bg-white" aria-hidden="true" /> Présence / entraide</li>
           <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-amber-400" aria-hidden="true" /> Jeune disponible</li>
@@ -182,7 +182,7 @@ export function CarteClient({
           {selectedOffice && (
             <div className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                <Icon name="building" className="h-3.5 w-3.5" /> Point d'accueil (démonstration)
+                <Icon name="building" className="h-3.5 w-3.5" /> Point d&apos;accueil (démonstration)
               </span>
               <h2 className="mt-3 text-xl font-bold text-slate-900">{selectedOffice.name}</h2>
               <p className="text-sm text-slate-500">{selectedOffice.region}</p>

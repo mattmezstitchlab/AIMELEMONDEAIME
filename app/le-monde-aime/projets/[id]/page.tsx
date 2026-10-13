@@ -1,10 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicPage } from "@/components/public-shell";
 import { getCurrentUser } from "@/lib/auth";
 import { getProjectDetail } from "@/lib/lma-queries";
 import { UNIVERSE_LABEL } from "@/lib/lma";
 import { DocumentsPanel, JoinPanel, NeedsPanel, PendingMembers, ProgramEditor, ProjectChat, ReportContent, Section, StatusControl } from "@/components/community/project-panels";
+
+export const metadata: Metadata = { title: "Projet — Le Monde Aime" };
 
 export const dynamic = "force-dynamic";
 const fmt = (d: Date | null) => (d ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(d) : "");

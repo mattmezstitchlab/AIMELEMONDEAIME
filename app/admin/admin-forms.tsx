@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 import {
@@ -21,17 +21,17 @@ function useFormAction(fn: (fd: FormData) => Promise<Result>, resetOnSuccess = t
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [pending, start] = useTransition();
-  const ref = useRef<HTMLFormElement>(null);
   const router = useRouter();
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     start(async () => {
       const res = await fn(fd);
       if (res.ok) {
         setError(null);
         setSuccess(true);
-        if (resetOnSuccess) ref.current?.reset();
+        if (resetOnSuccess) form.reset();
         router.refresh();
       } else {
         setSuccess(false);
@@ -39,7 +39,7 @@ function useFormAction(fn: (fd: FormData) => Promise<Result>, resetOnSuccess = t
       }
     });
   }
-  return { error, success, pending, ref, onSubmit };
+  return { error, success, pending, onSubmit };
 }
 
 const input = "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm";
@@ -57,7 +57,7 @@ function F({ label, name, defaultValue, type = "text", required = true }: { labe
 export function CreateStaffForm({ offices }: { offices: { id: number; name: string }[] }) {
   const f = useFormAction(createStaffUser);
   return (
-    <form ref={f.ref} onSubmit={f.onSubmit} className="grid gap-3 sm:grid-cols-2">
+    <form onSubmit={f.onSubmit} className="grid gap-3 sm:grid-cols-2">
       <F label="Nom complet" name="fullName" />
       <F label="E-mail" name="email" type="email" />
       <F label="Mot de passe initial" name="password" type="password" />
@@ -142,7 +142,7 @@ type Office = { id: number; name: string; code: string; address: string; city: s
 export function OfficeForm({ office, onDone }: { office?: Office; onDone?: () => void }) {
   const f = useFormAction(async (fd) => { const r = await upsertOffice(fd); if (r.ok) onDone?.(); return r; }, !office);
   return (
-    <form ref={f.ref} onSubmit={f.onSubmit} className="grid gap-3 sm:grid-cols-2">
+    <form onSubmit={f.onSubmit} className="grid gap-3 sm:grid-cols-2">
       {office && <input type="hidden" name="id" value={office.id} />}
       <F label="Nom" name="name" defaultValue={office?.name} />
       <F label="Code" name="code" defaultValue={office?.code} />
@@ -199,7 +199,7 @@ type Article = { id: number; title: string; category: string; audience: string; 
 export function ArticleForm({ article, onDone }: { article?: Article; onDone?: () => void }) {
   const f = useFormAction(async (fd) => { const r = await upsertArticle(fd); if (r.ok) onDone?.(); return r; }, !article);
   return (
-    <form ref={f.ref} onSubmit={f.onSubmit} className="grid gap-3 sm:grid-cols-2">
+    <form onSubmit={f.onSubmit} className="grid gap-3 sm:grid-cols-2">
       {article && <input type="hidden" name="id" value={article.id} />}
       <div className="sm:col-span-2"><F label="Titre" name="title" defaultValue={article?.title} /></div>
       <div>

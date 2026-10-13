@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function LeMondeAimeError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => { console.error("Le Monde Aime — erreur de chargement", error); }, [error]);
@@ -14,9 +15,9 @@ export default function LeMondeAimeError({ error, reset }: { error: Error & { di
         {error.digest && <p className="mt-3 text-xs text-slate-400">Référence technique : {error.digest}</p>}
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button type="button" onClick={() => reset()} className="rounded-lg bg-emerald-800 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-900">Réessayer</button>
-          <a href="/" className="rounded-lg border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">Retour à l’accueil</a>
+          <Link href="/" className="rounded-lg border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">Retour à l’accueil</Link>
         </div>
-        <p className="mt-6 text-xs text-slate-500">Le Monde Aime est une initiative indépendante. Les structures d'accompagnement externes restent consultables dans la rubrique « Services et accompagnement ».</p>
+        <p className="mt-6 text-xs text-slate-500">Le Monde Aime est une initiative indépendante. Les structures d&apos;accompagnement externes restent consultables dans la rubrique « Services et accompagnement ».</p>
       </section>
     </main>
   );

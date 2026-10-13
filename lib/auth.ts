@@ -65,9 +65,15 @@ export async function getSession(): Promise<SessionPayload | null> {
 export async function getCurrentUser() {
   const session = await getSession();
   if (!session) return null;
-  const [user] = await db.select().from(users).where(eq(users.id, session.userId)).limit(1);
-  if (!user || !user.isActive) return null;
-  return user;
+  try {
+    const [user] = await db.select().from(users).where(eq(users.id, session.userId)).limit(1);
+    if (!user || !user.isActive) return null;
+    return user;
+  } catch {
+    // Base momentanément injoignable : dégrader en visiteur plutôt que de
+    // faire échouer toutes les pages (le layout racine appelle cette fonction).
+    return null;
+  }
 }
 
 export async function requireUser() {

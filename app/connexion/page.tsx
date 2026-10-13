@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { AuthSplit } from "@/components/auth-split";
 import { LoginForm } from "./login-form";
 
@@ -11,6 +12,8 @@ const DEMO = [
   { role: "Équipe d'accompagnement — Beauce", email: "agent.beauce@aime-demo.fr" },
   { role: "Administration", email: "admin@aime-demo.fr" },
 ];
+
+export const metadata: Metadata = { title: "Connexion — AIME®", description: "Connectez-vous à votre espace AIME® : démarches, projets, échanges et documents au même endroit." };
 
 export default async function ConnexionPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;

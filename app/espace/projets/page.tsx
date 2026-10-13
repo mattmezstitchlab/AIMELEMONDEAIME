@@ -1,9 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getMyLinks } from "@/lib/lma-queries";
 import { Card, SectionTitle, EmptyState, LinkButton, formatDate } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { CreateCircleForm, InviteResponses } from "@/components/community/circle-panels";
+
+export const metadata: Metadata = { title: "Mes projets — AIME®" };
 
 export const dynamic = "force-dynamic";
 

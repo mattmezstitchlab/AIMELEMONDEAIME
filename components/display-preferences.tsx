@@ -7,35 +7,40 @@ type Prefs = { text: "normal" | "grand"; contrast: "standard" | "renforce"; moti
 const DEFAULT: Prefs = { text: "normal", contrast: "standard", motion: "auto" };
 const COOKIE = "aime_display";
 
-function applyPreferences(prefs: Prefs) {
+function applyDataset(prefs: Prefs) {
   const root = document.documentElement;
   root.dataset.textScale = prefs.text;
   root.dataset.contrast = prefs.contrast;
   root.dataset.motion = prefs.motion;
+}
+
+function persistPreferences(prefs: Prefs) {
   document.cookie = `${COOKIE}=${encodeURIComponent(JSON.stringify(prefs))};path=/;max-age=31536000;samesite=lax`;
+}
+
+/** Lecture unique du cookie, en initialisation paresseuse (pas de setState dans un effet). */
+function readStoredPrefs(): Prefs {
+  if (typeof document === "undefined") return DEFAULT;
+  try {
+    const stored = document.cookie.split("; ").find((part) => part.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1);
+    if (!stored) return DEFAULT;
+    const parsed = JSON.parse(decodeURIComponent(stored)) as Partial<Prefs>;
+    return {
+      text: parsed.text === "grand" ? "grand" : "normal",
+      contrast: parsed.contrast === "renforce" ? "renforce" : "standard",
+      motion: parsed.motion === "reduit" ? "reduit" : "auto",
+    };
+  } catch { /* Cookie invalide : valeurs par défaut. */ return DEFAULT; }
 }
 
 /** Préférences de présentation seulement : cookie de première partie, aucune donnée de parcours. */
 export function DisplayPreferences({ mode = "footer" }: { mode?: "footer" | "sidebar" | "mobile" }) {
-  const [prefs, setPrefs] = useState<Prefs>(DEFAULT);
-  useEffect(() => {
-    try {
-      const stored = document.cookie.split("; ").find((part) => part.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1);
-      if (!stored) return;
-      const parsed = JSON.parse(decodeURIComponent(stored)) as Partial<Prefs>;
-      const next: Prefs = {
-        text: parsed.text === "grand" ? "grand" : "normal",
-        contrast: parsed.contrast === "renforce" ? "renforce" : "standard",
-        motion: parsed.motion === "reduit" ? "reduit" : "auto",
-      };
-      setPrefs(next);
-      applyPreferences(next);
-    } catch { /* Cookie invalide : valeurs par défaut. */ }
-  }, []);
+  const [prefs, setPrefs] = useState<Prefs>(readStoredPrefs);
+  useEffect(() => { applyDataset(prefs); }, [prefs]);
   function change<Key extends keyof Prefs>(key: Key, value: Prefs[Key]) {
     const next = { ...prefs, [key]: value };
     setPrefs(next);
-    applyPreferences(next);
+    persistPreferences(next);
   }
   const popover = mode === "mobile";
   return (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicPage } from "@/components/public-shell";
 import { getCurrentUser } from "@/lib/auth";
@@ -6,6 +7,8 @@ import { getCircleDetail } from "@/lib/lma-queries";
 import { InviteForm, PostActions, PostForm } from "@/components/community/circle-panels";
 import { POST_KIND_LABEL } from "@/lib/lma";
 import { Section } from "@/components/community/project-panels";
+
+export const metadata: Metadata = { title: "Cercle — Le Monde Aime" };
 
 export const dynamic = "force-dynamic";
 const KIND: Record<string, string> = { famille: "Famille", association: "Association", groupe: "Groupe local" };
@@ -38,7 +41,12 @@ export default async function CirclePage({ params }: { params: Promise<{ id: str
                 <li key={p.id} className="rounded-xl border border-slate-200 p-4">
                   <p className="text-xs font-bold uppercase tracking-wide text-emerald-800">{POST_KIND_LABEL[p.kind] ?? p.kind} · {p.authorName}</p>
                   <h3 className="mt-1 text-lg font-bold text-slate-900">{p.title}</h3>
-                  {p.hasPhoto && /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/api/cercles/posts/${p.id}/photo`} alt="" className="mt-3 max-h-72 w-full rounded-xl object-cover" loading="lazy" />}
+                  {p.hasPhoto && (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
+                      <img src={`/api/cercles/posts/${p.id}/photo`} alt="" className="mt-3 max-h-72 w-full rounded-xl object-cover" loading="lazy" />
+                    </>
+                  )}
                   {p.body && <p className="mt-2 whitespace-pre-line text-sm text-slate-700">{p.body}</p>}
                   <PostActions postId={p.id} visibility={p.visibility} mine={p.mine} canDelete={p.canDelete} />
                 </li>))}</ul>)}

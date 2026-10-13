@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicPage } from "@/components/public-shell";
 import { Hero, LinkButton } from "@/components/ui";
@@ -9,6 +10,13 @@ import { eq } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const [article] = await db.select({ title: articles.title, summary: articles.summary }).from(articles).where(eq(articles.slug, slug)).limit(1);
+  if (!article) return { title: "Guide introuvable — AIME®" };
+  return { title: `${article.title} — AIME®`, description: article.summary };
+}
 
 export default async function GuideDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

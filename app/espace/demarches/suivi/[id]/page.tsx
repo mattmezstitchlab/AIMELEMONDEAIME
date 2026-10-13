@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getJourneyDetail, searchArtists } from "@/lib/journey-queries";
@@ -6,6 +7,8 @@ import { Card, SectionTitle, formatDate, formatDateTime } from "@/components/ui"
 import { ORGANISM_CATEGORY_LABEL, SITUATION_BY_KEY, TASK_STATUS_LABEL } from "@/lib/situations";
 import { AddTask, JourneyStatusButton, OrganizerEngagement, SendToArtist, SummaryEditor, TaskControls } from "@/components/espace/journey-ui";
 import { priceLabel } from "@/lib/lma";
+
+export const metadata: Metadata = { title: "Suivi de démarche — AIME®" };
 
 export const dynamic = "force-dynamic";
 

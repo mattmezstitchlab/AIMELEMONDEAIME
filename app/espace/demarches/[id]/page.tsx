@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCaseDetail } from "@/lib/queries";
@@ -8,6 +9,8 @@ import { CaseForm } from "./case-form";
 import { DocumentUploader } from "@/components/document-uploader";
 import { CaseMessageForm } from "@/components/case-message-form";
 import { respondToMissingDocument } from "@/lib/actions/cases";
+
+export const metadata: Metadata = { title: "Ma démarche — AIME®" };
 
 export const dynamic = "force-dynamic";
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { journeys, projectMembers, projects } from "@/db/schema";
@@ -9,6 +10,8 @@ import { Icon } from "@/components/icon";
 import { SITUATIONS, SITUATION_BY_KEY } from "@/lib/situations";
 import { JourneyWizard } from "@/components/espace/journey-ui";
 import { startProcedure } from "@/lib/actions/cases";
+
+export const metadata: Metadata = { title: "Nouvelle démarche — AIME®" };
 
 export const dynamic = "force-dynamic";
 

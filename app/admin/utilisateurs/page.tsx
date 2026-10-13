@@ -1,9 +1,12 @@
 import { db } from "@/db";
+import type { Metadata } from "next";
 import { users, offices } from "@/db/schema";
 import { asc } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth";
 import { Card, SectionTitle } from "@/components/ui";
 import { CreateStaffForm, UserRow } from "../admin-forms";
+
+export const metadata: Metadata = { title: "Utilisateurs — Administration AIME®" };
 
 export const dynamic = "force-dynamic";
 

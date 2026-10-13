@@ -89,21 +89,33 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
     }, 400);
   }, []);
 
-  // Message d'accueil à la première ouverture
-  useEffect(() => {
-    if (!open || turns.length > 0) return;
-    const greeting = route
-      ? `Bonjour${userName ? ` ${userName.split(" ")[0]}` : ""}. Vous êtes sur « ${route.label} ». ${route.purpose}`
-      : "Bonjour. Je peux vous guider dans le site.";
-    pushTurn({ from: "assistant", text: greeting, chips: suggestions });
-  }, [open, turns.length, pushTurn, route, suggestions, userName]);
+  // Message d'accueil : dérivé de l'état (aucun setState dans un effet).
+  // Il s'affiche tant qu'aucun échange n'a commencé, puis disparaît du fil.
+  const greetingTurn: Turn | null = open && turns.length === 0
+    ? {
+        id: "accueil",
+        from: "assistant",
+        text: route
+          ? `Bonjour${userName ? ` ${userName.split(" ")[0]}` : ""}. Vous êtes sur « ${route.label} ». ${route.purpose}`
+          : "Bonjour. Je peux vous guider dans le site.",
+        chips: suggestions,
+      }
+    : null;
+  const displayTurns = greetingTurn ? [greetingTurn, ...turns] : turns;
 
-  // Au changement de page, proposer l'aide contextuelle
+  // Au changement de page, proposer l'aide contextuelle.
+  // Ajout différé après le rendu de la nouvelle page (synchronisation externe).
   useEffect(() => {
     if (!open) { lastPath.current = pathname; return; }
     if (lastPath.current && lastPath.current !== pathname) {
       const current = routeForPath(pathname);
-      if (current) pushTurn({ from: "assistant", text: `Nous sommes maintenant sur « ${current.label} ». ${current.purpose}`, chips: suggestionsForPath(pathname, role) });
+      if (current) {
+        const timer = window.setTimeout(() => {
+          pushTurn({ from: "assistant", text: `Nous sommes maintenant sur « ${current.label} ». ${current.purpose}`, chips: suggestionsForPath(pathname, role) });
+        }, 0);
+        lastPath.current = pathname;
+        return () => window.clearTimeout(timer);
+      }
     }
     lastPath.current = pathname;
   }, [pathname, open, pushTurn, role]);
@@ -289,7 +301,7 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
   }, [open]);
 
   const totalSteps = guide ? scenarios.find((item) => item.id === guide.scenarioId)?.steps.length ?? 0 : 0;
-  const lastSuggestions = turns.length > 0 ? turns[turns.length - 1].chips : undefined;
+  const lastSuggestions = displayTurns.length > 0 ? displayTurns[displayTurns.length - 1].chips : undefined;
 
   return (
     <>
@@ -364,7 +376,7 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
           )}
 
           <div ref={threadRef} className="flex-1 space-y-3 overflow-y-auto bg-[#fafaf9] px-4 py-4" aria-live="polite">
-            {turns.map((turn) => (
+            {displayTurns.map((turn) => (
               <div key={turn.id} className={`flex ${turn.from === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-emerald-800 text-white" : "bg-white text-slate-800 shadow-sm"}`}>
                   {turn.text}
@@ -380,7 +392,7 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
                 ))}
               </div>
             )}
-            {turns.length === 0 && <p className="text-sm text-slate-500">Posez votre question ou choisissez une suggestion.</p>}
+            {turns.length === 0 && !greetingTurn && <p className="text-sm text-slate-500">Posez votre question ou choisissez une suggestion.</p>}
           </div>
 
           <div className="border-t border-slate-100 bg-white px-3 py-3">

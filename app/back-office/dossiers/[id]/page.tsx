@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCaseDetail } from "@/lib/queries";
@@ -9,6 +10,8 @@ import { AssignButton } from "./assign-button";
 import { DocumentUploader } from "@/components/document-uploader";
 import { CaseMessageForm } from "@/components/case-message-form";
 import { caseworkerReply } from "@/lib/actions/cases";
+
+export const metadata: Metadata = { title: "Dossier — Back-office AIME®" };
 
 export const dynamic = "force-dynamic";
 
