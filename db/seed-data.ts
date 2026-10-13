@@ -1469,6 +1469,10 @@ export async function seedDatabase(db: NodePgDatabase) {
   await seedLmaDemoIfEmpty(db);
   await seedAimeIfEmpty(db);
   await seedCommunityDemoIfEmpty(db);
+  // Normalisation de marque : les données historiques du seed utilisent
+  // encore d'anciens préfixes (MSA-) et libellés, convertis ici en DOS- /
+  // « équipe d'accompagnement » comme le fait l'application.
+  await rebrandData(db);
 
   console.log("Terminé. Comptes de démonstration (mot de passe : Demo1234!) :");
   console.log("  Administrateur : admin@aime-demo.fr");
