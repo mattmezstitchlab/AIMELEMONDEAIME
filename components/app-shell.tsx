@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { SidebarLink, BottomNavLink } from "@/components/nav-link";
 import { logoutAction } from "@/lib/actions/auth";
-import { Logo, PrototypeBanner } from "@/components/ui";
+import { Logo } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icon";
 
 export type NavItem = { href: string; label: string; icon: IconName; exact?: boolean };
@@ -35,7 +35,6 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen flex-col bg-[#fafaf9]">
-      <PrototypeBanner />
       <div className="flex flex-1">
         <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-black/[0.06] bg-white/80 px-5 py-7 backdrop-blur-xl md:flex">
           <Link href={homeHref} className="mb-8 px-2" aria-label="Accueil de l'espace">

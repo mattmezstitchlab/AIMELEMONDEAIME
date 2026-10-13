@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
-import { Logo, PrototypeBanner } from "@/components/ui";
+import { Logo } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { getCurrentUser } from "@/lib/auth";
 import { BottomTabs } from "@/components/bottom-tabs";
@@ -27,7 +27,6 @@ export async function PublicHeader({ solid = false }: { solid?: boolean }) {
   const text = solid ? "text-slate-700 hover:text-emerald-800" : "text-white/85 hover:text-white";
   return (
     <header className={solid ? "relative z-30 border-b border-black/[0.06] bg-white" : "absolute inset-x-0 top-0 z-30"}>
-      <PrototypeBanner dark={!solid} />
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-8">
         <Link href="/" aria-label="AIME® — accueil">
           <Logo light={!solid} />

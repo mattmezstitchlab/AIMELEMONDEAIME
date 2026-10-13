@@ -3,15 +3,6 @@ import type { ReactNode } from "react";
 import { CASE_STATUS_LABELS, CASE_STATUS_STYLES } from "@/lib/constants";
 import { Icon } from "@/components/icon";
 
-export function PrototypeBanner({ dark = false }: { dark?: boolean }) {
-  return (
-    <div className={`px-4 py-1.5 text-center text-xs ${dark ? "bg-black/40 text-white/90 backdrop-blur" : "border-b border-slate-200 bg-[#fafaf9] text-slate-600"}`}>
-      <strong className="font-semibold">Prototype de démonstration — AIME® est une initiative indépendante.</strong>{" "}
-      Aucune affiliation avec la MSA, la CAF, l&apos;Assurance Maladie ou un autre organisme public. Données fictives.
-    </div>
-  );
-}
-
 export function Logo({ light = false, size = "md" }: { light?: boolean; size?: "sm" | "md" }) {
   const box = size === "sm" ? "h-8 w-8" : "h-10 w-10";
   return (

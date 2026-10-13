@@ -1,11 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Logo, PrototypeBanner } from "@/components/ui";
+import { Logo } from "@/components/ui";
 
 export function AuthSplit({ image, title, subtitle, children }: { image: string; title: string; subtitle: string; children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <PrototypeBanner />
       <div className="grid flex-1 lg:grid-cols-2">
         <div className="relative isolate flex min-h-[320px] flex-col justify-between overflow-hidden p-8 lg:min-h-0 lg:p-12">
           {/* eslint-disable-next-line @next/next/no-img-element */}
