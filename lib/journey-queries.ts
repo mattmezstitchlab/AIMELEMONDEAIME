@@ -33,12 +33,13 @@ export async function getJourneyDetail(id: number, userId: number) {
   const slugs = Array.from(new Set(tasks.flatMap((t) => t.organismSlugs)));
   const orgs = slugs.length ? await db.select().from(organisms).where(inArray(organisms.slug, slugs)) : [];
   const myDocs = await db.select({ id: documents.id, filename: documents.filename, category: documents.category }).from(documents).where(eq(documents.ownerId, userId)).orderBy(desc(documents.createdAt));
+  const [linkedCase] = await db.select({ id: cases.id, reference: cases.reference, status: cases.status, submittedAt: cases.submittedAt }).from(cases).where(eq(cases.journeyId, id)).limit(1);
   const [project] = j.projectId ? await db.select().from(projects).where(eq(projects.id, j.projectId)).limit(1) : [];
   const myProjects = await db.select({ id: projects.id, title: projects.title, startsAt: projects.startsAt }).from(projectMembers).innerJoin(projects, eq(projectMembers.projectId, projects.id))
     .where(and(eq(projectMembers.userId, userId), eq(projectMembers.role, "organisateur"), eq(projectMembers.status, "accepte"), ne(projects.status, "suspendu")));
   const engagementRows = j.situation === "evenement" ? await db.select({ e: artistEngagements, name: users.displayName, full: users.fullName }).from(artistEngagements).innerJoin(users, eq(artistEngagements.artistId, users.id)).where(eq(artistEngagements.journeyId, id)).orderBy(desc(artistEngagements.createdAt)) : [];
   return {
-    journey: j, tasks, events, organisms: orgs, myDocs, project: project ?? null, myProjects,
+    journey: j, tasks, events, organisms: orgs, myDocs, project: project ?? null, myProjects, linkedCase: linkedCase ?? null,
     engagements: engagementRows.map((r) => ({ ...r.e, artistName: pub(r.name, r.full) })),
   };
 }

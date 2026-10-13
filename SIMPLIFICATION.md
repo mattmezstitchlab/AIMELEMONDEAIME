@@ -63,15 +63,22 @@ L'accueil passerait de 12 tuiles mosaïque à 6 thématiques + 3 univers carte, 
 > présentées dans le même flux, filtrables par la même recherche. Les deux pages de détail gardent
 > leurs routes (aucun lien cassé, back-office inchangé) mais partagent le même fil d'Ariane.
 > Vérifié sur le build de production avec les deux familles de données réelles.
-> **Reste le temps 2 (fusion des données)** : faire « devenir » dossier un parcours transmis à un
-> bureau (lien `journeys → cases`, reprise des tâches et des pièces), au lieu de deux objets parallèles.
-> ⚠️ Constat à l'implémentation : ce temps 2 suppose une décision produit qui n'existe pas encore dans
-> l'app — aucune correspondance situation → procédure de bureau n'est définie (45 situations, dont
-> l'essentiel n'a pas d'équivalent « dossier »), et les parcours sont par conception **non transmis**
-> (promesse affichée au membre). Le coder aujourd'hui reviendrait à inventer une fonctionnalité, pas à
-> simplifier : il est donc **en attente d'une décision produit** (« veut-on pouvoir transmettre un
-> parcours à son bureau, et vers quelle procédure ? »). La façade unique du temps 1 rend ce branchement
-> possible le jour venu, sans rien changer pour le membre.
+> **Temps 2 (fusion des données) exécuté le 2026-08-10 (commit à suivre).** Le parcours transmis
+> « devient » le dossier, comme prévu : nouvelle colonne `cases.journey_id` (migration `0001`),
+> action `transmitJourneyToBureau` idempotente (un parcours déjà transmis renvoie à son dossier),
+> qui reprend le titre, les réponses compatibles, le résumé, l'état d'avancement des étapes
+> (dans l'historique du dossier) et rattache les pièces préparées au dossier (`documents.case_id`).
+> Correspondances nommées quand elles existent (famille → changement de situation familiale,
+> logement → aide au logement, retraite → retraite agricole) ; sinon, procédure générique
+> « Dossier transmis depuis un parcours guidé » créée par le seed. Dans la liste unifiée, le
+> parcours transmis n'apparaît plus en double : seul son dossier subsiste, annoté « Né de votre
+> parcours… » ; le suivi affiche l'état « Transmis à votre bureau » et le dossier rappelle son
+> origine. Le destinataire reste l'équipe d'accompagnement (simulée dans cette version) — la
+> transmission ne prétend pas joindre un organisme réel. Vérifié : migration + seed sur base
+> jetable, pages du parcours transmis et du dossier sur le build de production (données de test
+> créées puis supprimées). Limite du banc d'essai : les POST d'actions serveur ne s'exécutent pas
+> sous curl contre la base WASM d'aperçu (une action témoin préexistante échoue à l'identique) ;
+> l'action suit le même motif que les actions éprouvées et sa garde est vérifiée en base.
 
 C'est le doublon le plus coûteux. Deux modèles cohabitent et s'affichent **mélangés dans la même liste** `/espace/demarches` :
 les `cases` (dossiers formels instruits par le back-office : statuts, pièces, affectation) et les `journeys`

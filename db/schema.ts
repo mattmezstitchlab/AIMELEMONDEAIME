@@ -123,6 +123,8 @@ export const cases = pgTable("cases", {
   procedureTypeId: integer("procedure_type_id")
     .notNull()
     .references(() => procedureTypes.id),
+  /** Parcours guidé dont ce dossier est issu (chantier 2, temps 2) : le parcours « devient » dossier. */
+  journeyId: integer("journey_id").references(() => journeys.id),
   officeId: integer("office_id").references(() => offices.id),
   assignedCaseworkerId: integer("assigned_caseworker_id").references(() => users.id),
   status: varchar("status", { length: 20 }).notNull().$type<CaseStatus>().default("brouillon"),

@@ -745,6 +745,21 @@ export async function seedDatabase(db: NodePgDatabase) {
           { name: "usage", label: "Usage de l'attestation", type: "text" },
         ],
       },
+      {
+        // Procédure d'accueil des parcours transmis (chantier 2, temps 2) :
+        // quand un membre transmet son parcours guidé à son bureau, il
+        // « devient » un dossier de ce type (sauf correspondance nommée).
+        slug: "parcours-transmis",
+        title: "Dossier transmis depuis un parcours guidé",
+        description: "Votre parcours, vos étapes et vos pièces, repris par votre bureau d'accompagnement qui vous répond dans le dossier.",
+        category: "parcours",
+        kind: "parcours",
+        requiredDocuments: [],
+        fields: [
+          { name: "resume", label: "Votre situation, avec vos mots", type: "textarea" },
+          { name: "attente", label: "Ce que vous attendez de votre bureau", type: "textarea" },
+        ],
+      },
     ])
     .returning();
   void prefillCommon;

@@ -24,7 +24,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   if (!detail) notFound();
   if (detail.item.memberId !== user.id) redirect("/espace/demarches");
 
-  const { item, procedureType, events, actorMap, caseDocuments } = detail;
+  const { item, procedureType, events, actorMap, caseDocuments, journey } = detail;
   const editable = item.status === "brouillon" || item.status === "piece_manquante";
 
   return (
@@ -37,6 +37,12 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         description={procedureType?.description}
         actions={<StatusBadge status={item.status} onDark />}
       />
+      {journey && (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          Ce dossier fait suite à votre parcours guidé <strong>« {journey.title} »</strong> : vos étapes et vos pièces y ont été reprises, sans rien ressaisir.{" "}
+          <Link href={`/espace/demarches/suivi/${journey.id}`} className="font-bold underline">Revoir le parcours</Link>
+        </p>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">

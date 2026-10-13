@@ -52,8 +52,9 @@ export default async function DemarchesPage() {
   const user = (await getCurrentUser())!;
   const [js, memberCases] = await Promise.all([getMyJourneys(user.id), getMemberCases(user.id)]);
 
+  const transmittedJourneyIds = new Set(memberCases.map((c) => c.journeyId).filter((v): v is number => !!v));
   const items: UnifiedItem[] = [
-    ...js.map((j): UnifiedItem => {
+    ...js.filter((j) => !transmittedJourneyIds.has(j.id)).map((j): UnifiedItem => {
       const def = SITUATION_BY_KEY.get(j.situation);
       const status = j.status === "questionnaire" ? "Questionnaire à terminer" : j.status === "terminee" ? "Terminée" : "En cours";
       return {
@@ -80,13 +81,13 @@ export default async function DemarchesPage() {
       title: c.title,
       kind: "Dossier suivi par l'équipe",
       status: CASE_MEMBER_LABEL[c.status] ?? c.status,
-      detail: c.status === "piece_manquante"
+      detail: (c.journeyTitle ? `Né de votre parcours « ${c.journeyTitle} ». ` : "") + (c.status === "piece_manquante"
         ? "L'équipe attend une pièce de votre part."
         : c.status === "brouillon"
           ? "Complétez le formulaire puis transmettez-le à l'équipe."
           : c.submittedAt
             ? `Transmis le ${formatDate(c.submittedAt)}`
-            : "Suivi par votre bureau d'accompagnement.",
+            : "Suivi par votre bureau d'accompagnement."),
       progress: null,
       updatedAt: c.updatedAt,
       isDemo: false,

@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/db";
-import { cases, caseEvents, offices, procedureTypes, users, appointments, payments, documents, messages, notifications, localPoints, localProducts, localOrders, workerAvailabilities } from "@/db/schema";
+import { cases, caseEvents, journeys, offices, procedureTypes, users, appointments, payments, documents, messages, notifications, localPoints, localProducts, localOrders, workerAvailabilities } from "@/db/schema";
 import { and, desc, eq, inArray } from "drizzle-orm";
 
 export async function getOfficeById(officeId: number | null) {
@@ -22,9 +22,12 @@ export async function getMemberCases(memberId: number) {
       requestedDocuments: cases.requestedDocuments,
       procedureCategory: procedureTypes.category,
       assignedCaseworkerId: cases.assignedCaseworkerId,
+      journeyId: cases.journeyId,
+      journeyTitle: journeys.title,
     })
     .from(cases)
     .innerJoin(procedureTypes, eq(cases.procedureTypeId, procedureTypes.id))
+    .leftJoin(journeys, eq(cases.journeyId, journeys.id))
     .where(eq(cases.memberId, memberId))
     .orderBy(desc(cases.updatedAt));
 }
@@ -52,8 +55,11 @@ export async function getCaseDetail(caseId: number) {
   const caseworker = item.assignedCaseworkerId
     ? (await db.select().from(users).where(eq(users.id, item.assignedCaseworkerId)).limit(1))[0]
     : null;
+  const journey = item.journeyId
+    ? (await db.select({ id: journeys.id, title: journeys.title, situation: journeys.situation }).from(journeys).where(eq(journeys.id, item.journeyId)).limit(1))[0] ?? null
+    : null;
 
-  return { item, procedureType, events, actorMap, caseDocuments, member, caseworker };
+  return { item, procedureType, events, actorMap, caseDocuments, member, caseworker, journey };
 }
 
 export async function getRecentActivityForMember(memberId: number, limit = 6) {

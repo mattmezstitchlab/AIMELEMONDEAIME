@@ -7,16 +7,18 @@ import { Card, SectionTitle, formatDate, formatDateTime } from "@/components/ui"
 import { ORGANISM_CATEGORY_LABEL, SITUATION_BY_KEY, TASK_STATUS_LABEL } from "@/lib/situations";
 import { AddTask, JourneyStatusButton, OrganizerEngagement, SendToArtist, SummaryEditor, TaskControls } from "@/components/espace/journey-ui";
 import { priceLabel } from "@/lib/lma";
+import { transmitJourneyToBureau } from "@/lib/actions/journeys";
 
 export const metadata: Metadata = { title: "Suivi de démarche — AIME®" };
 
 export const dynamic = "force-dynamic";
 
-export default async function SuiviDemarche({ params }: { params: Promise<{ id: string }> }) {
+export default async function SuiviDemarche({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ erreur?: string }> }) {
   const id = Number((await params).id);
   const user = (await getCurrentUser())!;
   if (!Number.isSafeInteger(id)) notFound();
   const d = await getJourneyDetail(id, user.id);
+  const erreur = (await searchParams).erreur;
   if (!d) notFound();
   const { journey: j, tasks, organisms, project } = d;
   const def = SITUATION_BY_KEY.get(j.situation)!;
@@ -99,6 +101,28 @@ export default async function SuiviDemarche({ params }: { params: Promise<{ id: 
 
         <div className="flex flex-col gap-6">
           <Card><h2 className="text-lg font-semibold text-slate-900">Ma situation</h2><div className="mt-3"><SummaryEditor journeyId={j.id} summary={j.summary} /></div></Card>
+          <Card>
+            <h2 className="text-lg font-semibold text-slate-900">Transmettre à mon bureau</h2>
+            {erreur && <p role="alert" className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{erreur}</p>}
+            {d.linkedCase ? (
+              <div className="mt-2 text-sm text-slate-700">
+                <p><span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800">Transmis à votre bureau</span></p>
+                <p className="mt-2">Ce parcours est devenu le dossier <strong>{d.linkedCase.reference}</strong>{d.linkedCase.submittedAt ? `, transmis le ${formatDate(d.linkedCase.submittedAt)}` : ""}. Votre bureau y reprend vos étapes et vos pièces, et vous y répond.</p>
+                <Link href={`/espace/demarches/${d.linkedCase.id}`} className="mt-3 inline-block rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white">Ouvrir le dossier</Link>
+                <p className="mt-2 text-xs text-slate-500">Ce parcours reste consultable ici, en lecture : le suivi se poursuit dans le dossier, sans rien ressaisir.</p>
+              </div>
+            ) : j.status === "questionnaire" ? (
+              <p className="mt-2 text-sm text-slate-600">Terminez le questionnaire pour pouvoir transmettre ce parcours à votre bureau d&apos;accompagnement.</p>
+            ) : (
+              <div className="mt-2 text-sm text-slate-700">
+                <p>Vous préférez être accompagné ? Transmettez ce parcours à votre bureau : il <strong>devient un dossier</strong> qui reprend vos étapes et vos pièces reliées. L&apos;équipe vous répond dans le dossier — inutile de recommencer votre histoire. Dans cette version, l&apos;équipe est simulée, aucun organisme réel n&apos;est destinataire.</p>
+                <form action={transmitJourneyToBureau} className="mt-3">
+                  <input type="hidden" name="journeyId" value={j.id} />
+                  <button type="submit" className="rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-900">Transmettre à mon bureau</button>
+                </form>
+              </div>
+            )}
+          </Card>
           <Card>
             <h2 className="text-lg font-semibold text-slate-900">Pièces à préparer</h2>
             {pieces.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucune pièce identifiée.</p> : <ul className="mt-3 space-y-3">{pieces.map((t) => <li key={t.id} className="rounded-lg bg-[#fafaf9] p-3 text-sm"><p className="font-semibold">{t.label}</p><p className="text-xs text-slate-500">{t.reason}</p><TaskControls task={{ id: t.id, status: t.status, dueAt: ser(t.dueAt), dueKind: t.dueKind, documentId: t.documentId, kind: t.kind }} docs={d.myDocs} /></li>)}</ul>}

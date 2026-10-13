@@ -1,16 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, gte, inArray, isNull, lt, ne } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, isNull, lt, ne } from "drizzle-orm";
 import { db } from "@/db";
 import {
-  artistEngagements, artistProfiles, communityListings, documentShares, documents, journeyEvents, journeyTasks, journeys,
-  journeyTaskStatusEnum, offices, organisms, projectMembers, projects, users, type JourneyTaskStatus,
+  artistEngagements, artistProfiles, cases, caseEvents, communityListings, documentShares, documents, journeyEvents, journeyTasks, journeys,
+  journeyTaskStatusEnum, offices, organisms, procedureTypes, projectMembers, projects, users, type JourneyTaskStatus,
 } from "@/db/schema";
 import { AuthError, requireRole } from "@/lib/auth";
 import { createNotification } from "@/lib/queries";
 import { logAudit } from "@/lib/audit";
 import { RULES_VERSION, SITUATION_BY_KEY } from "@/lib/situations";
+import { generateCaseReference } from "@/lib/reference";
+import { redirect } from "next/navigation";
 
 export type JResult = { ok: true; message: string; id?: number } | { ok: false; error: string };
 const fail = (e: unknown, msg: string): JResult => (e instanceof AuthError ? { ok: false, error: "Connectez-vous avec un compte membre." } : { ok: false, error: msg });
@@ -382,4 +384,100 @@ export async function updateOrganism(form: FormData): Promise<JResult> {
     revalidatePath("/admin/organismes"); revalidatePath("/accompagnement");
     return { ok: true, message: verify ? "Fiche enregistrée et marquée vérifiée aujourd'hui." : "Fiche enregistrée." };
   } catch (e) { return e instanceof AuthError ? { ok: false, error: "Réservé à l'administration." } : { ok: false, error: "Enregistrement impossible." }; }
+}
+
+/**
+ * Situations qui correspondent à une procédure de bureau existante.
+ * Les autres parcours transmis tombent sur la procédure générique
+ * « parcours-transmis » : le dossier reprend alors le titre, le résumé,
+ * les étapes et les pièces du parcours (chantier 2, temps 2).
+ */
+const SITUATION_PROCEDURE_SLUG: Record<string, string> = {
+  famille: "changement-situation-familiale",
+  logement: "demande-aide-logement",
+  retraite: "demande-retraite-agricole",
+};
+
+/**
+ * Transmettre son parcours à son bureau d'accompagnement : le parcours
+ * « devient » un dossier instruit (un seul objet suit le membre, pas de
+ * doublon). Idempotent : un parcours déjà transmis renvoie à son dossier.
+ * Le parcours reste consultable ; ses pièces sont rattachées au dossier.
+ */
+export async function transmitJourneyToBureau(formData: FormData) {
+  const journeyId = Number(formData.get("journeyId"));
+  if (!Number.isSafeInteger(journeyId)) redirect("/espace/demarches");
+
+  let user;
+  try {
+    user = await requireRole(["membre"]);
+  } catch {
+    redirect("/connexion");
+  }
+
+  const journey = await ownJourney(journeyId, user!.id);
+  if (!journey) redirect("/espace/demarches");
+  if (journey!.status === "questionnaire") {
+    redirect(`/espace/demarches/suivi/${journeyId}?erreur=${encodeURIComponent("Terminez d'abord le questionnaire : c'est lui qui préparera votre dossier.")}`);
+  }
+
+  const [existing] = await db.select({ id: cases.id }).from(cases).where(eq(cases.journeyId, journeyId)).limit(1);
+  if (existing) redirect(`/espace/demarches/${existing.id}`);
+
+  const slug = SITUATION_PROCEDURE_SLUG[journey!.situation] ?? "parcours-transmis";
+  const [procedure] = await db.select().from(procedureTypes).where(eq(procedureTypes.slug, slug)).limit(1);
+  if (!procedure) {
+    redirect(`/espace/demarches/suivi/${journeyId}?erreur=${encodeURIComponent("La transmission n'est pas disponible pour le moment.")}`);
+  }
+
+  const tasks = await db.select().from(journeyTasks).where(eq(journeyTasks.journeyId, journeyId)).orderBy(asc(journeyTasks.sortOrder), asc(journeyTasks.id));
+  const actions = tasks.filter((t) => t.kind === "action");
+  const done = actions.filter((t) => ["termine", "effectue_declare"].includes(t.status)).length;
+  const next = actions.find((t) => !["termine", "effectue_declare"].includes(t.status));
+  const pieceDocIds = Array.from(new Set(tasks.map((t) => t.documentId).filter((v): v is number => !!v)));
+
+  // Reprise des réponses dont le nom correspond à un champ du dossier ;
+  // le résumé du parcours nourrit la procédure générique.
+  const data: Record<string, string> = {};
+  for (const field of procedure!.fields) {
+    if (journey!.answers[field.name]) data[field.name] = journey!.answers[field.name];
+  }
+  if (slug === "parcours-transmis" && journey!.summary && !data.resume) data.resume = journey!.summary;
+
+  const reference = generateCaseReference();
+  const [created] = await db.insert(cases).values({
+    reference,
+    memberId: user!.id,
+    procedureTypeId: procedure!.id,
+    journeyId,
+    officeId: user!.officeId ?? null,
+    status: "envoyee",
+    title: journey!.title,
+    data,
+    requestedDocuments: [],
+    submittedAt: new Date(),
+  }).returning();
+
+  await db.insert(caseEvents).values({
+    caseId: created.id,
+    actorId: user!.id,
+    type: "creation",
+    message: `Dossier créé par transmission du parcours « ${journey!.title} » : ${done}/${actions.length} étapes faites${next ? `, prochaine étape restée en attente : « ${next.label} »` : ""}${pieceDocIds.length ? `, ${pieceDocIds.length} pièce(s) reprise(s) du parcours` : ""}.`,
+  });
+  await db.insert(caseEvents).values({
+    caseId: created.id,
+    actorId: user!.id,
+    type: "soumission",
+    message: "Transmis au bureau d'accompagnement depuis le parcours guidé. Le suivi continue ici ; le parcours reste consultable.",
+  });
+
+  // Les pièces préparées dans le parcours sont rattachées au dossier.
+  if (pieceDocIds.length) {
+    await db.update(documents).set({ caseId: created.id }).where(and(inArray(documents.id, pieceDocIds), eq(documents.ownerId, user!.id)));
+  }
+
+  await log(journeyId, user!.id, `Parcours transmis à votre bureau d'accompagnement — dossier ${reference}. Le suivi continue dans le dossier.`);
+  await logAudit({ actorId: user!.id, action: "transmission_parcours", entityType: "journey", entityId: journeyId, metadata: { dossier: reference } });
+  revalidatePath("/espace/demarches");
+  redirect(`/espace/demarches/${created.id}`);
 }
