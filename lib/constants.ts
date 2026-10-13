@@ -39,6 +39,7 @@ export const ARTICLE_CATEGORY_LABELS: Record<string, string> = {
   sante: "Santé",
   famille: "Famille",
   mariage: "Mariage",
+  argent: "Argent et difficultés",
   logement: "Logement",
   retraite: "Retraite",
   cotisations: "Cotisations",
@@ -47,7 +48,7 @@ export const ARTICLE_CATEGORY_LABELS: Record<string, string> = {
 
 export const ARTICLE_CATEGORIES = Object.keys(ARTICLE_CATEGORY_LABELS);
 
-export const THEME_META: Record<string, { image: string; icon: "sante" | "famille" | "logement" | "retraite" | "cotisations" | "emploi" | "heart"; desc: string; tagline: string }> = {
+export const THEME_META: Record<string, { image: string; icon: "sante" | "famille" | "logement" | "retraite" | "cotisations" | "emploi" | "heart" | "paiements"; desc: string; tagline: string }> = {
   sante: { image: "/images/hero-sante.jpg", icon: "sante", desc: "Remboursements, arrêts de travail, prévention.", tagline: "Votre santé et celle de vos proches, au cœur de nos territoires." },
   famille: { image: "/images/hero-famille.jpg", icon: "famille", desc: "Allocations, naissance, mariage, Pacs.", tagline: "Accompagner chaque étape de la vie de votre famille." },
   mariage: { image: "/images/hero-mariage.jpg", icon: "heart", desc: "Dossier civil, rétroplanning, prestataires, invités, budget, jour J : le mariage de bout en bout.", tagline: "Préparer son mariage sereinement, de la mairie aux remerciements." },
@@ -55,6 +56,7 @@ export const THEME_META: Record<string, { image: string; icon: "sante" | "famill
   retraite: { image: "/images/hero-retraite.jpg", icon: "retraite", desc: "Relevé de carrière, demande de retraite.", tagline: "Préparer sereinement l'après, après une vie de travail de la terre." },
   cotisations: { image: "/images/hero-cotisations.jpg", icon: "cotisations", desc: "Calcul, échéances et régularisations.", tagline: "Comprendre et anticiper vos cotisations, simplement." },
   emploi: { image: "/images/hero-emploi.jpg", icon: "emploi", desc: "Embauche, contrats, prévention au travail.", tagline: "Employeurs et salariés agricoles, des démarches claires." },
+  argent: { image: "/images/hero-difficultes.jpg", icon: "paiements", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", tagline: "Quand payer devient difficile, reprendre la main sans rester seul." },
 };
 
 export const CASE_EVENT_LABELS: Record<string, string> = {

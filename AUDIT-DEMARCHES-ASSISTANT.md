@@ -585,3 +585,43 @@ procédure + perte d'emploi » : 15 tâches, tâche urgente en tête, rappels
 personnels calculés (J+2 → 15/10), page de suivi rendue ; tuile présente dans
 le questionnaire ; build de production ; typecheck et ESLint verts. Règles
 `2026.10-j`.
+
+## 6decies. Fonds éditorial « difficultés de paiement » (2026-10-13)
+
+**Demande** : raconter le parcours « Je n'arrive pas à payer » en public, avec
+la même recette que le fonds mariage (thématique de hub + contenus seedés).
+
+**La thématique** : catégorie `argent` — libellé « Argent et difficultés »
+(`ARTICLE_CATEGORY_LABELS`), thème de hub (`THEME_META` : visuel
+`hero-difficultes.jpg` déjà livré avec le parcours, icône `paiements` ajoutée
+à l'union des icônes de thème, tagline « Quand payer devient difficile,
+reprendre la main sans rester seul. »). Sous-titre du hub étendu. La
+catégorie alimente automatiquement le sélecteur du formulaire d'administration
+des articles.
+
+**Les 4 contenus** (audience « Foyers en difficulté », 3 guides + 1 article,
+troisième insert dédié du seed — donc « Derniers guides » de l'accueil ouverts
+sur ce fonds, comme la trilogie mariage avant lui) :
+`ne-plus-arriver-a-payer-par-ou-commencer` (les premiers gestes dans l'ordre :
+point écrit, triage logement-énergie, contact précoce et par écrit, droits non
+réclamés) ; `loyer-en-retard-parler-au-bailleur` (bailleur prévenu tôt,
+échéancier écrit réaliste, signalement CAF, ADIL gratuit, Action Logement,
+document d'huissier) ; `surendettement-explique-simplement` (article : la
+commission de surendettement, le dépôt **gratuit** à la Banque de France,
+l'avertissement contre les intermédiaires payants, le piège du nouveau crédit
+pour rembourser) ; `demander-un-delai-impots-factures` (délai/échéancier/
+remise gracieuse avec décision réservée à l'administration, fournisseurs avant
+coupure, chèque énergie, aides CCAS selon les départements).
+
+**Discipline éditoriale** — les lignes rouges du produit, mot pour mot :
+aucun montant, aucun seuil, aucun délai chiffré, aucun droit présenté comme
+acquis ; l'estimation « Mes droits sociaux » jamais confondue avec une
+décision ; chaque contenu renvoie au parcours de l'espace, jamais à une
+promesse de l'application. Faits institutionnels stables uniquement (gratuité
+du dépôt de surendettement, ADIL, CCAS, France Services, points-justice).
+
+**Vérifié** : insertion ciblée en base d'aperçu (28 contenus dont 4 `argent`,
+sans raz — fixtures mariage et paiement préservées) ; hub avec la tuile,
+`/informations/argent`, les 4 pages `/guides/<slug>` et l'accueil en 200, fil
+d'Ariane « Argent et difficultés » ; build de production ; typecheck et
+ESLint verts.

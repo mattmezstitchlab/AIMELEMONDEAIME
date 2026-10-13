@@ -1239,6 +1239,46 @@ export async function seedDatabase(db: NodePgDatabase) {
     },
   ]);
 
+  console.log("Création du fonds difficultés de paiement : 4 guides et articles publics…");
+  await db.insert(articles).values([
+    {
+      slug: "ne-plus-arriver-a-payer-par-ou-commencer",
+      title: "Je n'arrive plus à payer : par où commencer ?",
+      category: "argent",
+      audience: "Foyers en difficulté",
+      summary: "Faire le point, protéger l'essentiel, contacter avant que ça s'aggrave : l'ordre des premiers gestes.",
+      content: "Une perte d'emploi, une séparation, une maladie, ou simplement des fins de mois qui se resserrent depuis trop longtemps : les difficultés de paiement arrivent à des foyers qui n'ont rien fait de travers. Ce qui les aggrave presque toujours, c'est d'attendre.\n\nPremier geste : faire le point, sur une page. Ce qui rentre chaque mois, ce qui doit sortir, ce qui est déjà en retard. Sans vous juger — ce document servira partout : bailleur, fournisseur, CCAS, banque.\n\nDeuxième geste : trier par urgence. Le logement et l'énergie d'abord, parce que ce sont eux qui protègent tout le reste. Les impôts et les crédits ensuite, le reste après.\n\nTroisième geste : contacter avant que ça s'aggrave, et par écrit quand c'est possible. Un échéancier demandé tôt coûte presque toujours moins cher qu'un silence suivi de frais. Et répondez aux relances, même simplement pour demander un délai : beaucoup de procédures naissent d'une absence de réponse.\n\nQuatrième geste : vérifier les droits que vous ne réclamez peut-être pas. Le simulateur officiel « Mes droits sociaux » donne une estimation des aides de votre foyer — une estimation, pas une décision : chaque organisme instruit ensuite.\n\nVous n'avez pas à faire tout cela seul : le CCAS de votre commune, les France Services et les points-justice conseillent gratuitement. Dans votre espace AIME®, le parcours « Je n'arrive pas à payer » met ces gestes dans l'ordre, selon ce qui vous pèse le plus, sans promettre ni montant ni décision.",
+      kind: "guide",
+    },
+    {
+      slug: "loyer-en-retard-parler-au-bailleur",
+      title: "Loyer en retard : parler à son bailleur avant que ça s'aggrave",
+      category: "argent",
+      audience: "Foyers en difficulté",
+      summary: "Un bailleur prévenu tôt a plus de marge qu'un bailleur qui découvre trois impayés.",
+      content: "Le premier loyer en retard est le moment où tout se joue. Un bailleur prévenu dès ce moment-là peut proposer un échéancier ; un bailleur qui découvre trois impayés n'a souvent plus que la voie des relances.\n\nExpliquez la situation simplement, avec vos chiffres : ce qui rentre, ce qui est en retard, ce que vous proposez. Demandez l'échéancier par écrit, et ne promettez que ce que vous pourrez tenir — un échéancier réaliste respecté vaut mieux qu'un engagement rapide qui casse au deuxième mois.\n\nEn parallèle, si vos revenus ont baissé, si vous avez perdu un emploi ou si votre foyer a changé, signalez-le à la CAF : votre aide au logement peut être réexaminée. La décision lui appartient ; le signalement, lui, ne doit pas attendre — et il évite les trop-perçus à rembourser.\n\nPour un conseil gratuit et neutre, l'ADIL de votre département informe sur les rapports locatifs et les démarches amiables, sans prendre parti. Si vous êtes salarié, regardez aussi du côté d'Action Logement : des aides liées au logement existent selon les situations, leurs conditions se vérifient auprès d'eux.\n\nEt si un document d'un commissaire de justice (huissier) arrive, gardez-le, notez ses dates et ne le laissez pas sans réponse : sur une procédure, les délais pour réagir sont courts. Un point-justice vous aide gratuitement à le comprendre.\n\nDans votre espace AIME®, le parcours « Je n'arrive pas à payer » prépare ces étapes dans l'ordre quand le loyer est ce qui pèse le plus.",
+      kind: "guide",
+    },
+    {
+      slug: "surendettement-explique-simplement",
+      title: "Le surendettement, expliqué simplement",
+      category: "argent",
+      audience: "Foyers en difficulté",
+      summary: "Quand rembourser est devenu impossible, une voie existe — gratuite, et pensée pour protéger.",
+      content: "On parle de surendettement quand les dettes — crédits, factures, loyers, découverts — dépassent durablement ce qu'un foyer peut rembourser, même en serrant toutes les dépenses. Ce n'est ni une faute ni une honte : c'est une situation prévue, avec une procédure faite pour elle.\n\nCette procédure passe par la commission de surendettement, dont le secrétariat est assuré par la Banque de France. Le dépôt d'un dossier est gratuit. C'est un point à retenir fermement : si une société vous propose de monter votre dossier contre paiement, passez votre chemin — la démarche elle-même ne coûte rien, et des aides gratuites existent pour la préparer.\n\nQue peut-il en sortir ? La commission étudie votre situation complète — revenus, charges, dettes — et cherche une solution adaptée : rééchelonnement, mesures négociées, ou d'autres dispositions selon les cas. Rien n'est automatique et rien n'est promis d'avance : c'est précisément pour cela que le dossier doit être complet et sincère.\n\nDeux réflexes à garder en tête. D'abord, ne souscrivez pas un nouveau crédit pour rembourser les anciens : c'est le réflexe le plus coûteux, il transforme une difficulté passagère en dette durable. Ensuite, ne restez pas seul face aux formulaires : un point-justice ou le CCAS de votre commune vous aide gratuitement à vérifier si cette voie est la vôtre et à rassembler les pièces.\n\nLa première pièce à préparer, c'est la liste complète de vos crédits et dettes, avec montants et dates. Dans votre espace AIME®, le parcours « Je n'arrive pas à payer » vous aide à la constituer avant d'en parler à un interlocuteur.",
+      kind: "article",
+    },
+    {
+      slug: "demander-un-delai-impots-factures",
+      title: "Impôts, factures : demander un délai avant que les frais ne s'ajoutent",
+      category: "argent",
+      audience: "Foyers en difficulté",
+      summary: "Un délai demandé tôt coûte presque toujours moins cher qu'un silence suivi de majorations.",
+      content: "Un impôt ou une facture qu'on sait ne pas pouvoir payer à la date prévue se traite presque toujours mieux avant l'échéance qu'après. Le principe est le même partout : signaler tôt, proposer un rythme réaliste, garder une trace écrite.\n\nPour les impôts, la demande de délai de paiement ou d'échéancier se fait depuis votre espace en ligne sur impots.gouv.fr ou auprès de votre centre des finances publiques. Expliquez la difficulté, proposez un rythme que vous pourrez tenir. Pour les situations les plus tendues, des remises gracieuses existent ; dans tous les cas, la décision appartient à l'administration — mais un impôt signalé se traite, un impôt ignoré se majore. Si vos revenus ont baissé, vérifiez aussi que vos prélèvements mensuels correspondent encore à votre situation.\n\nPour les factures — énergie, eau, téléphone, assurances —, appelez le fournisseur avant la coupure, la réduction ou les frais : la plupart peuvent proposer un échéancier quand on les joint à temps. Pour l'énergie, vérifiez que votre chèque énergie, si vous le recevez, a bien été pris en compte.\n\nSi la facture reste impossible, le CCAS de votre commune peut instruire des aides ponctuelles et, selon les départements, des aides pour les factures d'énergie ou d'eau. Et répondez toujours aux relances, même par un simple courrier demandant un délai : le silence est ce qui transforme une facture en procédure.\n\nDans votre espace AIME®, le parcours « Je n'arrive pas à payer » prépare ces demandes dans l'ordre, avec les pièces qui serviront partout.",
+      kind: "guide",
+    },
+  ]);
+
   console.log("Création de la carte : production locale et disponibilités…");
 
   // Points de production / présence déposés par des adhérents (données fictives).
