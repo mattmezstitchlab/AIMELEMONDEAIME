@@ -3,10 +3,11 @@
  * Chaque situation : questions progressives → étapes expliquées, pièces, organismes et liens officiels.
  * Les règles sont versionnées et datées ; elles n'attribuent aucun droit et ne valident aucun dossier.
  */
-export const RULES_VERSION = "2026.10-d";
+export const RULES_VERSION = "2026.10-e";
 export const RULES_REVIEWED_AT = "2026-10-13";
 // 2026.10-c : parcours Santé, échéances officielles calculées dans les règles.
 // 2026.10-d : parcours Famille, Proche et Quotidien épaissis au même niveau.
+// 2026.10-e : quatre parcours de couverture ajoutés (transmission, recruteur, invalidité, réversion).
 
 export type Question = {
   key: string;
@@ -149,6 +150,35 @@ export const SITUATIONS: Situation[] = [
     ],
   },
   {
+    key: "transmission",
+    label: "Je transmets ou je cesse mon activité",
+    short: "Transmission et cessation",
+    description: "Reprendre, vendre ou arrêter une exploitation, un commerce ou une micro-entreprise : les étapes, les guichets et ce qu'il faut anticiper, sans décider du prix ni des conditions à votre place.",
+    icon: "retraite",
+    image: "/images/hero-craft.jpg",
+    questions: [
+      { key: "activite", label: "Quelle activité est concernée ?", type: "select", required: true, options: [["exploitation", "Une exploitation agricole"], ["commerce", "Un commerce ou une activité artisanale"], ["micro", "Une micro-entreprise"], ["autre", "Autre activité indépendante"]] },
+      { key: "projet", label: "Où en est votre projet ?", type: "select", required: true, options: [["repreneur_trouve", "J'ai déjà un repreneur"], ["cherche_repreneur", "Je cherche un repreneur"], ["cessation", "Je cesse sans repreneur"], ["progressif", "Je réduis progressivement avant d'arrêter"]] },
+      { key: "horizon", label: "À quel horizon ?", type: "select", options: [["moins_6_mois", "Moins de 6 mois"], ["6_12_mois", "Entre 6 et 12 mois"], ["plus_12_mois", "Plus d'un an — j'anticipe"]] },
+      { key: "salaries", label: "Avez-vous des salarié·es ?", type: "select", options: [["non", "Non"], ["oui", "Oui"]], why: "Une cessation avec des salariés suit des règles et des délais propres." },
+    ],
+    build: (a) => {
+      const agricole = a.activite === "exploitation";
+      const t: TaskRule[] = [];
+      if (a.projet === "cherche_repreneur") t.push({ kind: "action", label: "Rendre l'activité transmissible : bilans, baux et autorisations à jour", detail: "Un repreneur (ou une banque) demandera les trois derniers bilans, les baux en cours et l'état du matériel ; les chambres consulaires et les réseaux de transmission accompagnent cette préparation.", reason: "Une activité dont les papiers sont prêts se transmet plus vite et à sa juste valeur." });
+      if (a.projet === "repreneur_trouve") t.push({ kind: "action", label: "Formaliser la transmission avec un professionnel (notaire, expert-comptable, chambre consulaire)", detail: "Cession de fonds, de parts ou de bail : la forme choisie change les impôts, les droits et les garanties du repreneur ; AIME® n'arbitre pas ce choix.", reason: "Les erreurs de forme coûtent plus cher que l'accompagnement.", frameworkFlag: "cadre_a_verifier" });
+      if (a.projet === "progressif") t.push({ kind: "action", label: "Construire l'arrêt progressif : réduction d'activité et effets sur les cotisations et la retraite", detail: "Réduire avant d'arrêter peut lisser les revenus, mais modifie les cotisations et parfois les droits à la retraite : faire simuler avant de décider.", reason: "Une décision prise sur une simulation évite les mauvaises surprises l'année suivante.", organisms: agricole ? ["msa", "info-retraite"] : ["urssaf", "info-retraite"] });
+      t.push({ kind: "action", label: "Déclarer la cessation au Guichet unique des formalités d'entreprise", detail: "C'est la formalité qui radie l'activité et déclenche les régularisations auprès des organismes ; elle peut se préparer en ligne.", reason: "Sans radiation, certaines cotisations et taxes continuent de courir.", organisms: ["guichet-unique"], officialUrl: "https://formalites.entreprises.gouv.fr" });
+      if (agricole) t.push({ kind: "action", label: "Régulariser votre situation auprès de la MSA", detail: "Cotisations de l'année de cessation, droits santé et famille, et lien avec votre retraite agricole.", reason: "La MSA suit l'ensemble de votre protection sociale agricole.", organisms: ["msa"], officialUrl: "https://www.msa.fr" });
+      else t.push({ kind: "action", label: "Régulariser vos cotisations auprès de l'Urssaf", detail: "Déclaration des derniers revenus et solde de cotisations après la radiation.", reason: "Le solde conditionne la clôture propre de l'activité.", organisms: ["urssaf"], officialUrl: "https://www.urssaf.fr" });
+      if (a.salaries === "oui") t.push({ kind: "action", label: "Sécuriser la situation de vos salarié·es avant toute annonce de dates", detail: "Licenciement économique, transmission des contrats au repreneur, documents de fin de contrat : les règles et délais sont stricts ; un Point-justice ou un expert-comptable sécurise la procédure.", reason: "C'est le point le plus risqué juridiquement d'une cessation.", organisms: ["point-justice"], officialUrl: "https://www.justice.fr", frameworkFlag: "cadre_a_verifier" });
+      t.push({ kind: "action", label: "Faire le point sur votre retraite : relevé de carrière et date possible de départ", detail: "Cessation et départ en retraite ne coïncident pas toujours ; le relevé inter-régimes montre vos trimestres et les âges possibles.", reason: "Aligner la cessation sur la retraite évite les années blanches.", organisms: ["info-retraite"], officialUrl: "https://www.info-retraite.fr" });
+      t.push({ kind: "piece", label: "Bilans ou déclarations des trois dernières années", reason: "Demandés par le repreneur, la banque et les organismes pour régulariser." });
+      t.push({ kind: "piece", label: "Baux, titres et contrats en cours liés à l'activité", reason: "Ils déterminent ce qui peut être transmis, repris ou résilié." });
+      return t;
+    },
+  },
+  {
     key: "emploi",
     label: "Je cherche un emploi ou une formation",
     short: "Emploi et formation",
@@ -167,6 +197,37 @@ export const SITUATIONS: Situation[] = [
       ...(a.objectif !== "emploi" ? [{ kind: "action" as const, label: "Consulter vos droits à la formation sur Mon Compte Formation", reason: "Votre objectif inclut une formation.", organisms: ["mon-compte-formation"], officialUrl: "https://www.moncompteformation.gouv.fr" }] : []),
       { kind: "piece", label: "CV à jour", reason: "Utile pour chaque candidature et rendez-vous." },
     ],
+  },
+  {
+    key: "recruteur",
+    label: "J'embauche ou je recrute",
+    short: "Recruter et embaucher",
+    description: "Premier salarié, saisonnier, remplacement ou renfort ponctuel : déposer une offre, déclarer l'embauche et accueillir la personne dans les règles, sans promesse d'aide non vérifiée.",
+    icon: "emploi",
+    image: "/images/hero-emploi.jpg",
+    questions: [
+      { key: "secteur", label: "Dans quel secteur recrutez-vous ?", type: "select", required: true, options: [["agricole", "Agricole"], ["spectacle", "Spectacle vivant (ponctuel)"], ["autre", "Autre secteur"]] },
+      { key: "besoin", label: "Quel est le besoin ?", type: "select", required: true, options: [["premier", "Ma première embauche"], ["saisonnier", "Un renfort saisonnier"], ["remplacement", "Un remplacement"], ["durable", "Un poste durable"]] },
+      { key: "duree", label: "Pour quelle durée envisagée ?", type: "select", options: [["quelques_jours", "Quelques jours"], ["quelques_semaines", "Quelques semaines"], ["plusieurs_mois", "Plusieurs mois ou indéterminée"]] },
+      { key: "deja_employeur", label: "Avez-vous déjà employé quelqu'un ?", type: "select", options: [["non", "Non, jamais"], ["oui", "Oui"]] },
+    ],
+    build: (a) => {
+      const agricole = a.secteur === "agricole";
+      const t: TaskRule[] = [];
+      t.push({ kind: "action", label: "Décrire le poste et le déposer auprès de France Travail", detail: "Tâches, lieu, horaires, durée, compétences réellement nécessaires ; France Travail peut aussi vous aider à rédiger l'offre.", reason: "Une offre claire attire les bons candidats et cadre la suite.", organisms: ["france-travail"], officialUrl: "https://www.francetravail.fr" });
+      if (a.secteur === "spectacle") {
+        t.push({ kind: "action", label: "Pour un artiste ou un technicien ponctuel : déclarer via le Guso", detail: "Le Guso est obligatoire et gratuit quand le spectacle n'est pas votre activité principale ; il gère déclaration, contrat et cotisations.", reason: "C'est le cadre légal du spectacle occasionnel ; l'événement lui-même suit le parcours « Organiser un événement ».", organisms: ["guso"], officialUrl: "https://www.guso.fr" });
+      } else {
+        t.push({ kind: "action", label: `Faire la déclaration préalable à l'embauche (DPAE) auprès de ${agricole ? "la MSA" : "l'Urssaf"}`, detail: "La DPAE se fait avant la prise de poste et déclenche l'immatriculation du salarié ; elle peut se faire en ligne.", reason: "Embaucher sans déclaration expose à des sanctions et laisse le salarié sans droits.", organisms: [agricole ? "msa" : "urssaf"], officialUrl: agricole ? "https://www.msa.fr" : "https://www.urssaf.fr" });
+        t.push({ kind: "action", label: "Préparer le contrat de travail et la visite d'information et de prévention (santé au travail)", detail: "Le contrat écrit précise durée, horaires et rémunération ; la visite santé s'organise après l'embauche selon les délais du service de santé au travail.", reason: "Ce sont les deux pièces que tout contrôle demandera en premier.", frameworkFlag: "cadre_a_verifier" });
+      }
+      if (a.deja_employeur === "non") t.push({ kind: "action", label: "Première embauche : créer vos comptes employeur et repérer vos interlocuteurs", detail: `Compte ${agricole ? "MSA" : "Urssaf"}, santé au travail, convention collective applicable ; France services ou votre chambre consulaire peuvent vous aider à démarrer.`, reason: "Tout se déclare ensuite plus simplement quand les comptes existent déjà.", organisms: [agricole ? "msa" : "urssaf", "france-services"] });
+      if (a.besoin === "saisonnier") t.push({ kind: "action", label: "Anticiper le pic d'activité : logement, transport et enchaînement des contrats", detail: "Pour les saisonniers agricoles, le titre emploi simplifié agricole (TESA) de la MSA peut simplifier les formalités.", reason: "Un saisonnier bien accueilli revient la saison suivante.", organisms: agricole ? ["msa"] : ["france-travail"], frameworkFlag: agricole ? "cadre_a_verifier" : undefined });
+      if (a.besoin === "remplacement") t.push({ kind: "action", label: "Préciser le motif et la durée du remplacement dès l'offre", detail: "Un contrat de remplacement mentionne la personne remplacée et le motif ; la fin du contrat suit le retour de celle-ci.", reason: "C'est la mention qui rend le contrat valable.", frameworkFlag: "cadre_a_verifier" });
+      t.push({ kind: "action", label: "Vérifier les aides à l'embauche mobilisables sur les sites officiels", detail: "Aides selon le public recruté, le territoire et le type de contrat ; elles évoluent souvent et se vérifient au moment de l'embauche, jamais sur une promesse.", reason: "Ni AIME® ni un tiers ne peuvent garantir une aide : seuls les organismes la confirment.", organisms: ["france-travail"], officialUrl: "https://www.francetravail.fr" });
+      t.push({ kind: "piece", label: "Pièce d'identité et justificatif d'aptitude du salarié (si le poste l'exige)", reason: "À demander au moment de l'embauche, dans le respect des règles sur les documents exigibles." });
+      return t;
+    },
   },
   {
     key: "famille",
@@ -373,6 +434,38 @@ export const SITUATIONS: Situation[] = [
     },
   },
   {
+    key: "invalidite",
+    label: "Mon handicap ou ma santé m'empêche de travailler comme avant",
+    short: "Handicap, invalidité et travail",
+    description: "Reconnaissance du handicap, adaptation du poste, pension d'invalidité ou reconversion : les interlocuteurs et les démarches, sans décider d'un taux ni d'un droit à votre place.",
+    icon: "sante",
+    image: "/images/hero-sante.jpg",
+    questions: [
+      { key: "statut", label: "Quelle est votre situation professionnelle ?", type: "select", required: true, options: [["salarie_agricole", "Salarié·e agricole"], ["exploitant", "Exploitant·e agricole"], ["salarie", "Salarié·e hors agricole"], ["independant", "Indépendant·e"], ["sans_emploi", "Sans emploi actuellement"]] },
+      { key: "etat", label: "Où en êtes-vous ?", type: "select", required: true, options: [["en_poste", "En poste, mais avec des difficultés croissantes"], ["en_arret", "En arrêt de travail prolongé"], ["sans_activite", "Sans activité à cause de ma santé"], ["retour", "Je prépare un retour après un arrêt long"]] },
+      { key: "reconnaissance", label: "Votre handicap est-il déjà reconnu (RQTH, invalidité, AAH…) ?", type: "select", options: [["oui", "Oui"], ["en_cours", "Demande en cours"], ["non", "Non, pas encore"]] },
+      { key: "souhait", label: "Qu'aimeriez-vous explorer en priorité ?", type: "select", options: [["adapter", "Adapter mon poste ou mon activité"], ["changer", "Changer de métier ou me former"], ["droits", "Connaître mes droits (invalidité, AAH)"], ["oriente", "Je ne sais pas, être orienté·e"]] },
+    ],
+    build: (a) => {
+      const agricole = a.statut === "salarie_agricole" || a.statut === "exploitant";
+      const caisse = agricole ? "msa" : "assurance-maladie";
+      const t: TaskRule[] = [];
+      if (a.reconnaissance !== "oui") t.push({ kind: "action", label: "Constituer un dossier auprès de la MDPH de votre département", detail: "La reconnaissance de la qualité de travailleur handicapé (RQTH), l'AAH et les orientations passent par ce dossier ; il se prépare en ligne, avec un certificat médical récent.", reason: "La reconnaissance ouvre les adaptations, les aides et l'accompagnement spécialisé.", organisms: ["mdph"], officialUrl: "https://www.monparcourshandicap.gouv.fr" });
+      if (a.reconnaissance === "en_cours") t.push({ kind: "action", label: "Suivre votre dossier MDPH et compléter les pièces demandées", detail: "Les délais d'instruction sont longs ; un dossier complet dès le départ évite les relances.", reason: "La plupart des retards viennent de pièces manquantes.", organisms: ["mdph"] });
+      if (a.etat === "en_poste" || a.etat === "retour") t.push({ kind: "action", label: "Demander une visite avec la médecine du travail (pré-reprise ou à votre demande)", detail: "Le médecin du travail peut proposer des aménagements de poste ou de rythme ; l'employeur décide ensuite de leur mise en œuvre.", reason: "C'est l'interlocuteur qui peut adapter concrètement le travail, en protégeant le secret médical.", organisms: ["france-services"] });
+      if (a.souhait === "adapter" || a.souhait === "oriente") t.push({ kind: "action", label: "Explorer les adaptations possibles : poste, outils, organisation, temps partiel", detail: "Des aides financières existent pour l'aménagement (Agefiph pour le privé, dispositifs de la MSA pour l'agricole) ; Cap emploi accompagne salariés et employeurs.", reason: "Beaucoup de situations se débloquent par un aménagement plutôt qu'un arrêt définitif.", organisms: ["cap-emploi", "mdph"], officialUrl: "https://www.monparcourshandicap.gouv.fr" });
+      if (a.souhait === "changer" || a.souhait === "oriente") {
+        t.push({ kind: "action", label: "Construire une reconversion accompagnée : Cap emploi et bilan de compétences", detail: "Cap emploi évalue avec vous ce qui reste possible et souhaitable ; le bilan de compétences peut être financé selon votre situation.", reason: "Changer de métier se prépare mieux accompagné que seul face aux offres.", organisms: ["cap-emploi"], officialUrl: "https://www.cheops-ops.org" });
+        t.push({ kind: "action", label: "Consulter vos droits à la formation sur Mon Compte Formation", reason: "Vos droits acquis restent mobilisables pour une formation de reconversion.", organisms: ["mon-compte-formation"], officialUrl: "https://www.moncompteformation.gouv.fr" });
+      }
+      if (a.souhait === "droits" || a.etat === "en_arret" || a.etat === "sans_activite") t.push({ kind: "action", label: `Faire évaluer vos droits à une pension d'invalidité par ${agricole ? "la MSA" : "votre caisse d'assurance maladie"}`, detail: "La pension d'invalidité dépend de votre capacité de travail et de vos droits ouverts ; c'est le médecin-conseil de la caisse qui évalue, jamais AIME®.", reason: "Si travailler comme avant est durablement impossible, cette évaluation sécurise vos revenus pendant la suite.", organisms: [caisse], officialUrl: agricole ? "https://www.msa.fr" : "https://www.ameli.fr", frameworkFlag: "cadre_a_verifier" });
+      if (a.statut === "sans_emploi" || a.statut === "exploitant") t.push({ kind: "action", label: "Vérifier en parallèle les droits ouverts par la MDPH (AAH et compléments)", detail: "L'allocation aux adultes handicapés et ses conditions sont instruites via la MDPH et versées par la CAF ou la MSA selon votre régime.", reason: "Invalidité et AAH répondent à des règles différentes ; les deux pistes valent d'être vérifiées.", organisms: ["mdph", caisse] });
+      t.push({ kind: "piece", label: "Certificat médical récent et comptes rendus utiles", reason: "Ils fondent le dossier MDPH et l'évaluation de la caisse ; gardez les originaux, transmettez des copies." });
+      t.push({ kind: "piece", label: "Justificatifs d'activité et de revenus récents", reason: "Demandés pour l'invalidité, l'AAH et les aides à la reconversion." });
+      return t;
+    },
+  },
+  {
     key: "retraite",
     label: "Je prépare ma retraite",
     short: "Retraite",
@@ -436,6 +529,36 @@ export const SITUATIONS: Situation[] = [
       { kind: "action", label: "Demander une aide humaine si nécessaire", detail: "Un espace France services ou un point d'information local peut vous aider à identifier les démarches. Prenez le temps nécessaire.", reason: "Ces démarches sont nombreuses et votre situation peut nécessiter un accompagnement personnalisé.", organisms: ["france-services"], officialUrl: "https://www.france-services.gouv.fr" },
       { kind: "piece", label: "Liste des pièces à demander à la mairie ou à l'établissement", detail: "Consultez le guide officiel pour savoir qui doit fournir l'acte et quelles pièces sont nécessaires. Ne téléversez ici ni données médicales ni numéro de sécurité sociale.", reason: "Cette liste est une aide à la préparation, pas une collecte de pièces sensibles.", officialUrl: "https://www.service-public.gouv.fr/particuliers/vosdroits/F16507" },
     ],
+  },
+  {
+    key: "reversion",
+    label: "Je suis veuf ou veuve : mes droits et ma pension",
+    short: "Droits du conjoint survivant",
+    description: "Après le décès d'un conjoint : pension de réversion, allocation veuvage, droits selon les régimes. Le parcours « Un proche est décédé » couvre les toutes premières démarches ; celui-ci s'occupe de vos droits dans la durée.",
+    icon: "heart",
+    image: "/images/hero-famille.jpg",
+    questions: [
+      { key: "lien", label: "Quel était votre lien avec la personne décédée ?", type: "select", required: true, options: [["marie", "Nous étions mariés"], ["pacse", "Nous étions pacsés"], ["divorce", "Nous étions divorcés"], ["concubinage", "Nous vivions en concubinage"]] },
+      { key: "regime_defunt", label: "De quel(s) régime(s) relevait votre conjoint ?", type: "select", required: true, options: [["agricole", "Régime agricole (MSA)"], ["salarie", "Salarié du privé"], ["independant", "Indépendant, artisan, commerçant"], ["plusieurs", "Plusieurs régimes dans sa carrière"], ["inconnu", "Je ne sais pas"]] },
+      { key: "age", label: "Avez-vous 55 ans ou plus ?", type: "select", why: "L'âge conditionne plusieurs droits du conjoint survivant ; en dessous, d'autres dispositifs temporaires existent.", options: [["oui", "Oui"], ["non", "Non"]] },
+      { key: "deja_demande", label: "Avez-vous déjà déposé une demande de réversion ?", type: "select", options: [["non", "Non"], ["en_cours", "Oui, elle est en cours"], ["refusee", "Oui, elle a été refusée"]] },
+    ],
+    build: (a) => {
+      const t: TaskRule[] = [];
+      if (a.lien === "marie" || a.lien === "divorce") {
+        if (a.deja_demande !== "en_cours") t.push({ kind: "action", label: "Déposer la demande de pension de réversion — un seul dossier pour la plupart des régimes", detail: "Le service en ligne inter-régimes transmet votre demande aux caisses concernées par la carrière de votre conjoint ; un ex-conjoint divorcé peut aussi y avoir droit, sous conditions.", reason: "La réversion n'est jamais versée automatiquement : elle se demande.", organisms: ["info-retraite"], officialUrl: "https://www.info-retraite.fr" });
+        if (a.deja_demande === "refusee") t.push({ kind: "action", label: "Comprendre le motif du refus et vérifier les recours", detail: "Ressources, âge, durée de mariage : le motif écrit de la caisse indique ce qui peut être contesté ou redemandé plus tard ; un conseiller France services peut relire la décision avec vous.", reason: "Un refus à un moment donné n'est pas toujours définitif.", organisms: ["info-retraite", "france-services"] });
+        if (a.regime_defunt === "agricole") t.push({ kind: "action", label: "Vérifier aussi la part agricole auprès de la MSA", detail: "La retraite agricole de votre conjoint peut ouvrir une réversion MSA, avec ses règles propres ; le dossier inter-régimes la couvre en principe, la MSA confirme.", reason: "Les carrières agricoles ont des règles spécifiques qu'il vaut mieux faire confirmer.", organisms: ["msa"], officialUrl: "https://www.msa.fr" });
+      } else {
+        t.push({ kind: "action", label: "Vérifier précisément vos droits : le Pacs et le concubinage n'ouvrent pas les mêmes droits que le mariage", detail: "Dans la plupart des régimes de base, la pension de réversion est réservée aux conjoints mariés (y compris divorcés) ; d'autres aides peuvent néanmoins exister selon votre situation (logement, famille, solidarité).", reason: "Mieux vaut une réponse claire et vérifiée qu'un espoir ou un renoncement infondés.", organisms: ["info-retraite", "france-services"], officialUrl: "https://www.service-public.fr", frameworkFlag: "cadre_a_verifier" });
+      }
+      if (a.age === "non") t.push({ kind: "action", label: "Renseignez-vous sur l'allocation veuvage (dispositif temporaire)", detail: "Sous conditions d'âge et de ressources, une allocation peut être versée pendant une durée limitée après le décès ; elle se demande à la caisse du régime de votre conjoint.", reason: "Elle fait le pont avant l'âge d'ouverture de la réversion.", organisms: a.regime_defunt === "agricole" ? ["msa"] : ["assurance-maladie"], officialUrl: "https://www.service-public.fr", frameworkFlag: "cadre_a_verifier" });
+      t.push({ kind: "action", label: "Estimer l'ensemble de vos droits après le décès (logement, famille, santé)", detail: "Le simulateur officiel parcourt les aides selon votre nouvelle situation ; la CAF ou la MSA confirme ensuite vos droits de famille et de logement.", reason: "Le décès d'un conjoint change presque tous les droits du foyer.", organisms: ["mes-droits-sociaux"], officialUrl: "https://www.mesdroitssociaux.gouv.fr" });
+      t.push({ kind: "action", label: "Signaler le changement de situation aux impôts et à votre banque", detail: "Le foyer fiscal change l'année du décès ; la banque sécurise les comptes et vous aide pour les prélèvements en cours.", reason: "Évite les trop-perçus et les blocages de paiement.", organisms: ["impots"], officialUrl: "https://www.impots.gouv.fr" });
+      t.push({ kind: "piece", label: "Acte de décès et livret de famille à jour", reason: "Demandés par toutes les caisses pour instruire vos droits." });
+      t.push({ kind: "piece", label: "Dernier avis d'imposition et justificatifs de vos ressources", reason: "Plusieurs droits du conjoint survivant sont soumis à des conditions de ressources." });
+      return t;
+    },
   },
 ];
 

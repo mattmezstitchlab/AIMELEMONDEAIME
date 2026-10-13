@@ -401,6 +401,7 @@ const SITUATION_PROCEDURE_SLUG: Record<string, string> = {
   logement: "demande-aide-logement",
   retraite: "demande-retraite-agricole",
   sante: "declaration-arret-travail",
+  recruteur: "embauche-salarie-agricole",
 };
 
 /**
