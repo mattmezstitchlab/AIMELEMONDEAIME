@@ -21,7 +21,7 @@ export default async function ArtistePage() {
   const engagements = await getArtistEngagements(user.id);
   const a = space.artist;
   return (
-    <PublicPage solidHeader lma>
+    <PublicPage solidHeader>
       <div className="bg-[#fafaf9]">
         <div className="mx-auto max-w-4xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/espace" className="text-sm font-semibold text-emerald-800 underline">← Mon espace</Link>

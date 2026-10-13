@@ -25,7 +25,7 @@ export default async function LeMondeAimePage({ searchParams }: { searchParams: 
     products: p.products.map((x) => ({ id: x.id, name: x.name, description: x.description, price: x.price, unit: x.unit, stock: x.stock })),
   }));
   return (
-    <PublicPage solidHeader lma>
+    <PublicPage solidHeader>
       <Suspense fallback={null}>
         <CommunityApp data={{ ...explorer, servicePins, people: extras.people, projects: extras.projects, stories: extras.stories, mine, user: user ? { id: user.id, role: user.role } : null }} />
       </Suspense>

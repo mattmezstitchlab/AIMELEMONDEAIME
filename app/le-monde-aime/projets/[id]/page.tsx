@@ -27,7 +27,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   // noms et montants ne sont jamais exposés aux visiteurs du projet.
   const wedding = viewer.isMember ? await getWeddingWorkspace(id) : null;
   return (
-    <PublicPage solidHeader lma>
+    <PublicPage solidHeader>
       <div className="bg-[#fafaf9]">
         <div className="mx-auto max-w-5xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/espace" className="text-sm font-semibold text-emerald-800 underline">← Mes liens</Link>

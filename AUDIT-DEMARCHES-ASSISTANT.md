@@ -901,3 +901,42 @@ thématiques, sont alignés sur les huit, dans le même ordre.
 fonds logement sans l'épinglé), tuiles du hub et navigation dans l'ordre
 famille → cotisations ; build de production, typecheck et ESLint verts.
 Aucune donnée modifiée : consolidation purement éditoriale et structurelle.
+
+
+---
+
+## 6novodecies. Simplification des entrées : hero allégé, inscription refondée, dock mobile, audit des doublons (2 août 2026)
+
+> Demande : le hero de l’accueil est chargé ; la page inscription est restée « MSA » alors que le produit a évolué ; les entrées sont nombreuses — relever tous les doublons ; un dock en bas pourrait solutionner le nettoyage.
+
+### 1. Hero allégé
+
+- Avant : pastille, grand titre, sous-titre, **deux gros boutons** (« Créer mon espace », « Explorer la carte ») **puis** le champ d’orientation. Les deux boutons dupliquaient le bandeau « Envie de voir à quoi ressemble Mon espace ? » situé plus bas (mêmes deux actions).
+- Après : le hero ne contient qu’**un seul élément interactif** — l’orientation (« Décrivez votre situation… ») — suivi d’une ligne de **liens texte discrets** (Créer mon espace · Découvrir la démo · Explorer la carte). Le bandeau démo plus bas garde les boutons pleins : une action, un endroit qui la porte fort.
+
+### 2. Inscription refondée (sortie de l’univers « MSA »)
+
+- Le dernier vestige n’était pas un texte mais le champ **« Votre situation »**, limité aux statuts agricoles (Salarié agricole, Exploitant agricole, Employeur agricole, Retraité agricole, Ayant droit / famille).
+- Nouveau champ « Votre situation aujourd’hui » : **situations de vie** — Je travaille (emploi, indépendant, agriculture…) ; Je cherche un emploi ou une activité ; J’emploie ou je recrute ; Je suis à la retraite ; Ma famille change (naissance, mariage, séparation…) ; Ma santé m’empêche de travailler comme avant ; J’aide un proche au quotidien.
+- Compatibilité : les clés historiques (`salarie_agricole`, `exploitant`) restent dans la table d’affichage `SITUATION_LABELS` (profils, carte, back-office continuent d’afficher les anciens comptes) ; seules les **options proposées** changent (`REGISTRATION_SITUATION_KEYS`). Un texte d’aide rappelle que la situation personnalise l’accueil et évoluera par les parcours.
+- Le bureau devient **« Votre bureau d’accompagnement »** (« l’équipe qui pourra suivre les dossiers que vous choisirez de lui transmettre ; modifiable dans le profil »), sans la mention « (démonstration) » sur le champ.
+
+### 3. Dock mobile public (l’idée de l’utilisateur, généralisée)
+
+- Un dock existait, mais **limité aux pages de la carte** (3 onglets). Il devient l’entrée de nettoyage mobile de **toutes les pages publiques** : **Accueil · S’informer · Carte · Publier · Mon espace**, avec état actif (page courante), zone sûre bas d’écran et contenu public protégé (`pb-16` mobile).
+- Non-doublons vérifiés : l’assistant flotte déjà **au-dessus du dock** sur mobile (`bottom-20`) ; l’espace connecté garde **sa propre** barre basse (`AppShell`) — les deux coquilles ne se cumulent jamais ; les pages d’authentification (`AuthSplit`) restent sans dock.
+
+### 4. Inventaire des entrées et doublons relevés
+
+Entrées publiques : en-tête (Explorer la carte, Être accompagné·e, S’informer → 8 thèmes, Mon espace) ; hero (orientation) ; mosaïque de destinations (14 tuiles) ; grille des 17 situations ; Guides à la une (6) ; Derniers guides (3) ; bandeau démo ; recherche de l’annuaire ; pied de page (thématiques, produit, contact) ; dock mobile (5) ; assistant (toutes pages). Espace connecté : barre latérale, barre basse propre, accueil espace (orientation + grille), « Mon année », assistant personnel.
+
+Doublons et traitements :
+1. **Hero CTA ⇔ bandeau démo** (mêmes actions) → boutons du hero retirés (§1).
+2. **Thématiques atteignables par menu, mosaïque, /informations, pied de page, dock** → conservés (surfaces complémentaires desktop/mobile/éditoriale) ; l’ordre unique famille → cotisations a été aligné au chantier hub.
+3. **Situations via orientation, grille d’accueil, grille d’espace, assistant** → la grille est la surface de découverte assumée, l’orientation le raccourci ; aucune surface nouvelle créée.
+4. **Carte via en-tête, tuile univers, dock Carte/Publier** → regroupé par le dock en mobile ; inchangé sur ordinateur.
+5. **Inscription via hero (retiré), bandeau démo, en-tête Mon espace → /espace → /connexion** → chemin principal unique assumé (bandeau + en-tête).
+
+### 5. Vérifications
+
+- Typecheck et lint verts ; rebuild de production et redémarrage de l’aperçu. Vérifié dans le HTML servi : hero réduit à l’orientation + trois liens texte ; inscription proposant les situations de vie et « Votre bureau d’accompagnement » ; dock des cinq entrées présent sur l’accueil (Accueil actif) et sur /informations ; espace connecté conservant une seule navigation basse (la sienne).

@@ -125,19 +125,17 @@ export function PublicFooter() {
   );
 }
 
-export function PublicPage({ children, solidHeader = false, lma = false }: { children: ReactNode; solidHeader?: boolean; lma?: boolean }) {
+export function PublicPage({ children, solidHeader = false }: { children: ReactNode; solidHeader?: boolean }) {
   return (
-    <div className={`flex min-h-screen flex-col bg-white ${lma ? "pb-16 md:pb-0" : ""}`}>
+    <div className="flex min-h-screen flex-col bg-white pb-16 md:pb-0">
       <PublicHeader solid={solidHeader} />
       <main id="contenu-principal" className="flex-1">
         {children}
       </main>
       <PublicFooter />
-      {lma && (
-        <Suspense fallback={null}>
-          <BottomTabs />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        <BottomTabs />
+      </Suspense>
     </div>
   );
 }

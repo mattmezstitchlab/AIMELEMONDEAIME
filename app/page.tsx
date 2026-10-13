@@ -61,18 +61,16 @@ export default async function HomePage() {
         image="/images/hero-accueil.jpg"
         eyebrow="AIME® · Le Monde Aime"
         title={<>La terre, les arts<br />et les générations.</>}
-        subtitle="Trouvez près de vous de quoi vivre, créer et transmettre. Vous expliquez votre situation : AIME® vous aide à trouver les personnes, les ressources et les démarches pour avancer."
-        actions={
-          <>
-            <LinkButton href="/inscription">
-              Créer mon espace
-              <Icon name="arrow" className="h-4 w-4" />
-            </LinkButton>
-            <LinkButton href="/le-monde-aime" variant="ghost">Explorer la carte</LinkButton>
-          </>
-        }
+        subtitle="Trouvez près de vous de quoi vivre, créer et transmettre. Dites votre situation : AIME® vous oriente vers les personnes, les ressources et les démarches pour avancer."
       >
         <div className="mt-8 max-w-xl"><OrientationEntry variant="hero" /></div>
+        <p className="mt-5 text-sm text-white/75">
+          <Link href="/inscription" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Créer mon espace</Link>
+          <span aria-hidden="true" className="mx-2 text-white/40">·</span>
+          <Link href="/decouvrir" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Découvrir la démo</Link>
+          <span aria-hidden="true" className="mx-2 text-white/40">·</span>
+          <Link href="/le-monde-aime" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Explorer la carte</Link>
+        </p>
       </Hero>
 
       <section className="bg-white">

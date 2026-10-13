@@ -15,7 +15,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   const p = await getPersonProfile(id);
   if (!p) notFound();
   return (
-    <PublicPage solidHeader lma>
+    <PublicPage solidHeader>
       <div className="bg-[#fafaf9]">
         <div className="mx-auto max-w-3xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/le-monde-aime" className="text-sm font-semibold text-emerald-800 underline">← Retour à la carte</Link>
