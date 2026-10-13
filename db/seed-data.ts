@@ -1333,6 +1333,55 @@ export async function seedDatabase(db: NodePgDatabase) {
     },
   ]);
 
+  console.log("Création du fonds santé : 5 guides et articles publics…");
+  await db.insert(articles).values([
+    {
+      slug: "accident-du-travail-les-bons-reflexes",
+      title: "Accident du travail : les bons réflexes des premières 48 heures",
+      category: "sante",
+      audience: "Salariés, exploitants et employeurs",
+      summary: "C'est l'employeur qui déclare, la feuille d'accident évite l'avance de frais : ce qui se joue tout de suite.",
+      content: "Un accident du travail ne se traite pas comme une maladie ordinaire — et c'est une bonne nouvelle, à condition de le déclarer comme tel dès le départ.\n\nLe premier réflexe : prévenir votre employeur sans attendre. C'est à lui de déclarer l'accident à votre caisse (MSA ou Assurance Maladie selon votre régime) dans les 48 heures (source : service-public.fr). S'il tarde ou hésite, ce délai court quand même : signalez-le par écrit.\n\nLe deuxième : demandez à l'employeur la feuille d'accident du travail. Présentée aux médecins, pharmaciens et soignants, elle vous évite d'avancer les frais des soins liés à l'accident. Sans elle, les soins risquent d'être remboursés comme une maladie ordinaire — moins bien, et avec des démarches pour régulariser.\n\nLe troisième : le certificat médical. Le médecin qui vous examine décrit les lésions constatées ; ce certificat initial est la pièce maîtresse du dossier. Gardez l'original accessible, photographiez-le, et conservez chaque prolongation.\n\nSi un arrêt de travail est prescrit, les règles habituelles s'appliquent en plus : avis d'arrêt transmis à la caisse et à l'employeur dans les 48 heures, attestation de salaire complétée par l'employeur pour le calcul des indemnités — dont le montant dépend de votre situation et que seule la caisse calcule.\n\nDans votre espace AIME®, le parcours « Je suis malade ou en arrêt de travail » pose ces échéances officielles à 48 heures depuis la date de l'accident, et distingue ce qui relève de vous, de l'employeur et de la caisse.",
+      kind: "guide",
+    },
+    {
+      slug: "arret-long-preparer-la-reprise",
+      title: "Arrêt long : préparer la reprise avant d'y être obligé",
+      category: "sante",
+      audience: "Personnes en arrêt prolongé",
+      summary: "Visite de pré-reprise, médecine du travail, reprise impossible : les questions à ouvrir pendant l'arrêt, pas au pied du mur.",
+      content: "Un arrêt qui dure change la question. Au début, il s'agit de se soigner et de déclarer ; après quelques semaines, il s'agit aussi de préparer la suite — quelle qu'elle soit.\n\nL'interlocuteur central de la reprise, c'est la médecine du travail. Vous pouvez demander une visite de pré-reprise pendant l'arrêt : elle sert à regarder, sans engager, ce qu'un retour pourrait donner — poste aménagé, rythme, gestes à éviter. Le médecin du travail est tenu au secret médical vis-à-vis de l'employeur : il ne transmet que des conclusions d'aptitude et des propositions d'aménagement, jamais votre dossier de santé.\n\nÀ la fin d'un arrêt long, une visite de reprise est en principe organisée à l'initiative de l'employeur. Ne la subissez pas comme un examen : c'est le moment où se décide concrètement dans quelles conditions vous reprenez.\n\nEt si la reprise au même poste semble impossible ? Mieux vaut ouvrir la question pendant l'arrêt qu'au pied du mur. Trois portes existent : l'inaptitude, que seul le médecin du travail peut prononcer ; la pension d'invalidité, que la caisse instruit si travailler comme avant devient durablement impossible ; et la MDPH, qui évalue la reconnaissance du handicap et les compensations. Aucun de ces organismes ne décide vite, ni à votre place de demander : ce sont des dossiers qui se préparent.\n\nDans votre espace AIME®, le parcours « Je suis malade ou en arrêt de travail » fait apparaître ces étapes quand l'arrêt se prolonge, et le parcours « Mon handicap ou ma santé m'empêche de travailler comme avant » prend le relais si la reprise devient un changement de cap.",
+      kind: "guide",
+    },
+    {
+      slug: "maladie-professionnelle-la-faire-reconnaitre",
+      title: "Maladie professionnelle : la faire reconnaître, étape par étape",
+      category: "sante",
+      audience: "Salariés et exploitants concernés",
+      summary: "Un certificat qui relie la maladie au travail, une caisse qui instruit : la reconnaissance ouvre des droits spécifiques.",
+      content: "Certaines maladies viennent du travail — gestes répétés, produits, postures, bruits. Quand c'est le cas, les faire reconnaître comme maladies professionnelles change la prise en charge et ouvre des droits spécifiques. Encore faut-il le demander : rien ne se déclenche tout seul.\n\nLa démarche commence chez le médecin. Demandez un certificat médical initial qui décrive la maladie et le travail que vous exercez : c'est ce lien, écrit par un médecin, qui fonde la demande. Sans lui, la caisse n'a rien à instruire.\n\nLa déclaration se dépose ensuite auprès de votre caisse — MSA ou Assurance Maladie selon votre régime. C'est elle qui instruit : elle vérifie notamment si votre maladie figure dans les tableaux de maladies professionnelles ou peut être reconnue par une autre voie, elle peut demander des examens et des avis complémentaires. Cette instruction prend du temps ; c'est normal, et ce n'est ni un refus ni une acceptation tant qu'elle n'est pas terminée.\n\nPendant ce temps, si vous êtes en arrêt, les règles habituelles continuent de courir : avis transmis dans les 48 heures, attestation de salaire, indemnités calculées par la caisse. Conservez tout ce qui décrit votre exposition au travail — postes occupés, produits, durées : le dossier se nourrit de faits datés.\n\nDans votre espace AIME®, le parcours « Je suis malade ou en arrêt de travail » prépare la déclaration et ses pièces quand vous reliez votre maladie à votre travail ; la décision, elle, appartiendra toujours à la caisse.",
+      kind: "article",
+    },
+    {
+      slug: "handicap-travailler-autrement",
+      title: "Handicap et travail : adapter, se reconvertir, faire reconnaître",
+      category: "sante",
+      audience: "Personnes en situation de handicap",
+      summary: "MDPH, médecine du travail, Cap emploi, invalidité : les interlocuteurs dans l'ordre, sans qu'on décide d'un taux à votre place.",
+      content: "Quand la santé empêche durablement de travailler comme avant, il n'y a pas une seule porte mais plusieurs — et elles ne s'ouvrent pas dans n'importe quel ordre.\n\nLa première est souvent la MDPH de votre département. Son dossier — en ligne, avec un certificat médical récent — fonde la reconnaissance de la qualité de travailleur handicapé (RQTH), l'allocation aux adultes handicapés (AAH) et les orientations vers l'accompagnement adapté. Les délais d'instruction sont longs : un dossier complet dès le départ est le meilleur moyen de ne pas les allonger.\n\nLa deuxième porte se trouve au travail même. La médecine du travail peut proposer des aménagements — poste, outils, horaires, temps partiel — que l'employeur met ensuite en œuvre ; des aides financières à l'aménagement existent (Agefiph pour le secteur privé, dispositifs de la MSA pour l'agricole), et Cap emploi accompagne salariés comme employeurs dans ces ajustements. Beaucoup de situations se débloquent par un aménagement plutôt que par un arrêt définitif.\n\nSi changer de métier devient la piste, Cap emploi aide à évaluer ce qui reste possible et souhaitable, un bilan de compétences peut être financé selon votre situation, et vos droits sur Mon Compte Formation restent mobilisables pour une formation de reconversion.\n\nReste la question des revenus quand travailler comme avant n'est plus possible : la pension d'invalidité. C'est le médecin-conseil de votre caisse qui évalue votre capacité de travail et le droit qui peut en découler — jamais une application, jamais un simulateur. Invalidité et AAH répondent à des règles différentes : les deux pistes valent d'être vérifiées plutôt que choisies à l'aveugle.\n\nDans votre espace AIME®, le parcours « Mon handicap ou ma santé m'empêche de travailler comme avant » ordonne ces démarches selon votre situation — en poste, en arrêt, ou sans activité.",
+      kind: "guide",
+    },
+    {
+      slug: "ne-pas-renoncer-aux-soins",
+      title: "Ne pas renoncer aux soins quand l'argent manque",
+      category: "sante",
+      audience: "Personnes aux revenus modestes",
+      summary: "Complémentaire santé solidaire, suivi de vos remboursements, aides à vérifier : se soigner sans s'endetter.",
+      content: "Différer un soin parce qu'il coûte est un réflexe compréhensible — et presque toujours le plus cher, en santé d'abord, et souvent en argent ensuite. Avant de renoncer, plusieurs vérifications valent la peine.\n\nLa première : la complémentaire santé solidaire. Selon vos ressources, elle peut prendre en charge la part complémentaire de vos soins, gratuitement ou pour une participation modeste. C'est votre caisse — MSA ou Assurance Maladie — qui instruit la demande et décide ; le simulateur officiel « Mes droits sociaux » donne une première estimation des aides de votre foyer, sans valeur de décision.\n\nLa deuxième : vos remboursements actuels. Sur le site de votre caisse (ameli ou MSA), vous suivez ce qui est pris en charge, ce qui reste à votre charge, et vous contestez à temps une erreur plutôt que de la découvrir des mois plus tard.\n\nLa troisième : parlez-en. À votre médecin d'abord — beaucoup adaptent ordonnances et parcours quand ils savent ; au CCAS de votre commune ou à un France Services ensuite, qui connaissent les aides locales et peuvent regarder votre situation dans son ensemble.\n\nSi c'est l'ensemble du budget qui ne tient plus, soins compris, un parcours dédié « Je n'arrive pas à payer » existe dans votre espace : il commence par vérifier les droits non réclamés avant de toucher à l'essentiel.\n\nDans votre espace AIME®, les parcours santé préparent vos démarches de soins, et « Je n'arrive pas à payer » prend le relais quand c'est le budget qui bloque.",
+      kind: "guide",
+    },
+  ]);
+
   console.log("Création de la carte : production locale et disponibilités…");
 
   // Points de production / présence déposés par des adhérents (données fictives).

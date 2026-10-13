@@ -773,3 +773,37 @@ ajouté, chaque contenu renvoyant à son parcours de l'espace.
 famille), page thématique et 5 pages guides en 200 avec renvois aux
 parcours, accueil ouvert sur le fonds ; typecheck et ESLint verts (seed
 seul modifié, aucun rebuild applicatif requis).
+
+## 6quindecies. Fonds éditorial « Santé et arrêt de travail » (2026-10-13)
+
+**Demande** : le troisième pilier des moments de vie — santé, arrêt, handicap —
+raconté en public avec la même méthode que les fonds mariage, argent et
+famille : relire les parcours (`sante`, `invalidite`) ligne à ligne et
+n'écrire que ce que leur socle sourcé contient déjà. Catégorie `sante`
+existante : insert dédié au seed (38 contenus en base, accueil ouvert sur
+ce fonds), aucun changement de code.
+
+**Les 5 contenus** : `accident-du-travail-les-bons-reflexes` (déclaration
+par l'employeur **sous 48 heures** — officiel, service-public.fr, déjà
+l'échéance du parcours — feuille d'accident contre l'avance de frais,
+certificat initial) ; `arret-long-preparer-la-reprise` (visite de
+pré-reprise, secret médical de la médecine du travail, inaptitude /
+invalidité / MDPH ouvertes pendant l'arrêt plutôt qu'au pied du mur) ;
+`maladie-professionnelle-la-faire-reconnaitre` (le certificat qui relie la
+maladie au travail, la caisse qui instruit — tableaux « vérifiés par la
+caisse », aucun tableau reproduit) ; `handicap-travailler-autrement`
+(dossier MDPH et ses délais longs dits simplement, aménagements et Agefiph,
+Cap emploi et reconversion, pension d'invalidité évaluée par le
+médecin-conseil — jamais un taux, jamais une éligibilité) ;
+`ne-pas-renoncer-aux-soins` (le pont santé × argent : complémentaire santé
+solidaire instruite par la caisse, simulateur = estimation, renvoi au
+parcours difficultés de paiement).
+
+**Discipline** : aucun montant d'indemnité, aucun taux, aucune durée chiffrée
+hors les 48 heures officielles ; les deux articles santé du seed d'origine
+(génériques, teintés démonstration) ne sont pas dupliqués — le fonds vise
+les branches (accident, reprise, maladie professionnelle, handicap, soins).
+
+**Vérifié** : insertion ciblée sans raz (38 contenus, 7 santé), page
+thématique et 5 guides en 200 avec renvois aux parcours, accueil ouvert sur
+le fonds ; typecheck et ESLint verts.
