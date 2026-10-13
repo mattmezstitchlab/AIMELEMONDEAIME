@@ -33,7 +33,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
         subtitle={article.summary}
       />
       <article className="mx-auto max-w-3xl px-6 py-20">
-        <Link href="/guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
+        <Link href="/informations?vue=guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
           <Icon name="arrow" className="h-4 w-4 rotate-180" /> Retour aux guides
         </Link>
         <p className="mt-6 text-sm font-medium text-slate-500">Public concerné : {article.audience}</p>

@@ -50,7 +50,7 @@ export function OrientationEntry({ variant = "light" }: { variant?: "light" | "h
       <div id={`orientation-results-${variant}`}>
         {show && result.kind === "unknown" && (
           <div role="status" className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
-            Je n&apos;ai pas de parcours préparé pour cette demande. Je préfère ne pas inventer de réponse : <Link href="/s-informer" className="font-semibold underline">consultez les guides</Link> ou <Link href="/accompagnement" className="font-semibold underline">trouvez un interlocuteur humain</Link>.
+            Je n&apos;ai pas de parcours préparé pour cette demande. Je préfère ne pas inventer de réponse : <Link href="/informations" className="font-semibold underline">consultez les guides</Link> ou <Link href="/accompagnement" className="font-semibold underline">trouvez un interlocuteur humain</Link>.
           </div>
         )}
         {show && result.matches.length > 0 && (

@@ -24,8 +24,7 @@ export type RouteEntry = {
 export const ROUTES: RouteEntry[] = [
   { path: "/", label: "Accueil du site public", roles: ALL_ROLES, purpose: "Présenter les services et orienter vers les informations ou l'espace personnel." },
   { path: "/informations", label: "Informations par thématique", roles: ALL_ROLES, purpose: "Regrouper les articles et guides par sujet : santé, famille, logement, retraite, cotisations, emploi." },
-  { path: "/guides", label: "Articles et guides pratiques", roles: ALL_ROLES, purpose: "Rechercher un article ou un guide par mot-clé et par thématique." },
-  { path: "/s-informer", label: "S'informer", roles: ALL_ROLES, purpose: "Lire les articles et guides par thématique ou mot-clé." },
+  { path: "/informations", label: "S'informer", roles: ALL_ROLES, purpose: "Rechercher et lire les articles et guides par thématique ou mot-clé ; le détail d'un guide s'ouvre depuis la liste." },
   { path: "/accompagnement", label: "Être accompagné", roles: ALL_ROLES, purpose: "Choisir une situation et retrouver ses interlocuteurs externes, sans transmission automatique." },
   { path: "/decouvrir", label: "Découvrir Mon espace", roles: ALL_ROLES, purpose: "Voir un aperçu fictif et non interactif de l'espace personnel." },
   { path: "/vision", label: "Notre méthode", roles: ALL_ROLES, purpose: "Comprendre ce qui fonctionne, ce qui existe ailleurs et les intégrations encore indisponibles." },

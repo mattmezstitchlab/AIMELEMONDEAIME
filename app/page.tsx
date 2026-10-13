@@ -18,12 +18,12 @@ const MOSAIC: Array<{ label: string; desc: string; href: string; image: string; 
   { label: "Retraite", desc: "Carrière, estimation, demande en ligne.", href: "/informations/retraite", image: "/images/hero-retraite.jpg", icon: "retraite" },
   { label: "Activité et cotisations", desc: "Créer, déclarer, cotiser.", href: "/informations/cotisations", image: "/images/hero-cotisations.jpg", icon: "cotisations" },
   { label: "Emploi", desc: "Embauche, recherche d'emploi, formation.", href: "/informations/emploi", image: "/images/hero-emploi.jpg", icon: "emploi" },
-  { label: "Terre & quotidien", desc: "Produits locaux, dons, prêts, trajets, jardins.", href: "/univers/terre", image: "/images/univers-terre.jpg", icon: "sprout" },
-  { label: "Arts & rencontres", desc: "Artistes, concerts, ateliers, lieux, matériel.", href: "/univers/arts", image: "/images/univers-arts.jpg", icon: "music" },
-  { label: "Savoirs & générations", desc: "Transmission, cuisine, couture, mémoire locale.", href: "/univers/savoirs", image: "/images/univers-savoirs.jpg", icon: "graduation" },
-  { label: "Événements et artistes", desc: "Organiser, engager un artiste, préparer.", href: "/univers/evenements", image: "/images/hero-accueil.jpg", icon: "calendar" },
-  { label: "Accompagner un proche", desc: "Autonomie, handicap, soutien aux aidants.", href: "/univers/aidants", image: "/images/hero-conseiller.jpg", icon: "heart" },
-  { label: "Vie administrative", desc: "Orientation et organismes de référence.", href: "/univers/administratif", image: "/images/hero-espace.jpg", icon: "shield" },
+  { label: "Terre & quotidien", desc: "Produits locaux, dons, prêts, trajets, jardins.", href: "/le-monde-aime?univers=terre", image: "/images/univers-terre.jpg", icon: "sprout" },
+  { label: "Arts & rencontres", desc: "Artistes, concerts, ateliers, lieux, matériel.", href: "/le-monde-aime?univers=arts", image: "/images/univers-arts.jpg", icon: "music" },
+  { label: "Savoirs & générations", desc: "Transmission, cuisine, couture, mémoire locale.", href: "/le-monde-aime?univers=savoirs", image: "/images/univers-savoirs.jpg", icon: "graduation" },
+  { label: "Événements et artistes", desc: "Organiser, engager un artiste, préparer.", href: "/le-monde-aime?univers=arts", image: "/images/hero-accueil.jpg", icon: "calendar" },
+  { label: "Accompagner un proche", desc: "Autonomie, handicap, soutien aux aidants.", href: "/accompagnement", image: "/images/hero-conseiller.jpg", icon: "heart" },
+  { label: "Vie administrative", desc: "Orientation et organismes de référence.", href: "/informations", image: "/images/hero-espace.jpg", icon: "shield" },
 ];
 
 export const dynamic = "force-dynamic";
@@ -119,7 +119,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <h2 className="text-4xl font-bold text-[#1d1d1f] sm:text-5xl">Derniers guides.</h2>
-            <Link href="/guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
+            <Link href="/informations?vue=guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
               Tous les guides <Icon name="arrow" className="h-4 w-4" />
             </Link>
           </div>

@@ -234,9 +234,9 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
       text: "Je n'ai pas de réponse préparée à cette question. Je ne veux pas inventer d'information réglementaire. Vous pouvez :",
       chips: role === "gestionnaire" || role === "administrateur" ? [
         { label: "Ouvrir la messagerie de l'équipe", kind: "link", href: "/back-office/messages" },
-        { label: "Lire les guides", kind: "link", href: `/s-informer?q=${encodeURIComponent(value)}` },
+        { label: "Lire les guides", kind: "link", href: `/informations?q=${encodeURIComponent(value)}` },
       ] : [
-        { label: "Rechercher dans les guides", kind: "link", href: `/s-informer?q=${encodeURIComponent(value)}` },
+        { label: "Rechercher dans les guides", kind: "link", href: `/informations?q=${encodeURIComponent(value)}` },
         { label: "Trouver un interlocuteur", kind: "link", href: "/accompagnement#organismes" },
       ],
     });
@@ -275,7 +275,7 @@ export function AssistantWidget({ role, userName }: { role: AssistantRole; userN
             ]
           : role === "visiteur"
             ? [
-                { label: "Parcourir les guides pratiques", kind: "link", href: "/s-informer" },
+                { label: "Parcourir les guides pratiques", kind: "link", href: "/informations?vue=guides" },
                 { label: "Voir la carte de France", kind: "link", href: "/le-monde-aime" },
                 { label: "Créer mon espace", kind: "link", href: "/inscription" },
               ]

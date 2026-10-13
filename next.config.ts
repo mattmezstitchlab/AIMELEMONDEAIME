@@ -38,6 +38,15 @@ const nextConfig: NextConfig = {
       { source: "/le-monde-aime/profil", has: [{ type: "query", key: "bienvenue", value: "1" }], destination: "/espace/profil?bienvenue=1", permanent: false },
       { source: "/le-monde-aime/profil", destination: "/espace/profil", permanent: false },
       { source: "/le-monde-aime", has: [{ type: "query", key: "onglet", value: "liens" }], destination: "/espace", permanent: false },
+      // Simplification « une porte par besoin » : anciennes portes d'information → /informations et la carte.
+      { source: "/s-informer", destination: "/informations", permanent: true },
+      { source: "/guides", destination: "/informations?vue=guides", permanent: true },
+      { source: "/univers/terre", destination: "/le-monde-aime?univers=terre", permanent: true },
+      { source: "/univers/arts", destination: "/le-monde-aime?univers=arts", permanent: true },
+      { source: "/univers/savoirs", destination: "/le-monde-aime?univers=savoirs", permanent: true },
+      { source: "/univers/evenements", destination: "/le-monde-aime?univers=arts", permanent: true },
+      { source: "/univers/aidants", destination: "/accompagnement", permanent: true },
+      { source: "/univers/administratif", destination: "/informations", permanent: true },
     ];
   },
 };

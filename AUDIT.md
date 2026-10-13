@@ -208,7 +208,9 @@ nouvelle batterie de tests dynamiques sur le build de production, base réinitia
 | §4.6 Performance | Les requêtes « y a-t-il une photo ? » ne chargent plus les `bytea` (via `photoMime`) ; le reste (pagination, ISR, stockage objet) reste un chantier d'industrialisation, pas un bloqueur |
 | §4.7 Métadonnées | Titres/descriptions sur **toutes** les pages, `generateMetadata` pour les guides et thématiques |
 | §5 Divers | Ancien lien `/le-monde-aime/profil` : vraie redirection 307 préservant `?bienvenue=1` ; page-relais supprimée ; `void item` mort supprimé ; statuts HTTP de l'API REST centralisés dans `lib/api-status.ts` |
-| Visuels absents | 10 photos générées (accueil, santé, famille, logement, retraite, cotisations, emploi, campagne, conseiller, espace). Restent 3 visuels « univers » (terre, arts, savoirs) en dégradés d'attente — limite de génération d'images atteinte pendant la session ; à générer ou remplacer par les photos officielles |
+| Visuels absents | **13 photos générées** (accueil, santé, famille, logement, retraite, cotisations, emploi, campagne, conseiller, espace, univers terre/arts/savoirs) |
+| Bandeau « Prototype » | Supprimé de toutes les pages (composant `PrototypeBanner` retiré des 3 coquilles) ; la mention légale subsiste une fois, dans le pied de page |
+| Portes « s'informer » en quadruple exemplaire | **Chantier 1 de `SIMPLIFICATION.md` exécuté** : `/informations` unique (explorateur riche déplacé, `?vue=guides`, `?theme=`), redirections 308 depuis `/s-informer`, `/guides`, `/univers/*`, liens internes et assistant mis à jour — aucune fonctionnalité perdue (recherche, filtres public/thématique, lecture, détails de guides) |
 
 **État final vérifié :** build de production ✅ · routes publiques et privées ✅ · matrice des rôles ✅ ·
 anti-IDOR ✅ (403/404) · connexion réelle ✅ · rate-limit ✅ · en-têtes ✅ · page 404 de marque ✅.

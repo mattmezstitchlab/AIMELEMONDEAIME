@@ -22,6 +22,15 @@ c'est l'endroit où ce type d'information doit vivre — visible, mais sans s'im
 Si vous voulez aussi l'y retirer, c'est une ligne à enlever dans `components/public-shell.tsx` ;
 je conseille de la garder, ou de la déplacer vers une page « Méthode et limites » déjà existante (`/vision`).
 
+## ✅ Chantier 1 exécuté (voir détail ci-dessous)
+
+`/informations` est devenue la porte unique : l'explorateur riche (recherche, filtres thématique/public,
+lecture intégrée) y a été déplacé, `?vue=guides` filtre les guides pratiques, `?theme=` et `?q=` fonctionnent.
+Redirections permanentes 308 depuis `/s-informer`, `/guides`, `/univers/terre|arts|savoirs|evenements|aidants|administratif`,
+liens internes (accueil, en-tête, pied de page, assistant, orientation) mis à jour, pages supprimées.
+Le détail des guides reste sur `/guides/[slug]`. **Aucune fonctionnalité perdue**, vérifié sur le build de production.
+Routes publiques supprimées : 3 (`/s-informer`, `/guides`, `/univers/[slug]`) + 2 fichiers.
+
 ## Les 5 chantiers, par ordre de rentabilité
 
 ### 1. Fusionner les 4 portes « s'informer » (gain : élevé · effort : faible à moyen)

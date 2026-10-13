@@ -144,7 +144,7 @@ export async function upsertArticle(formData: FormData): Promise<ActionResult> {
     }
     await logAudit({ actorId: admin.id, action: id ? "maj_article" : "creation_article", entityType: "article", entityId: id });
     revalidatePath("/admin/contenus");
-    revalidatePath("/guides");
+    revalidatePath("/informations");
     revalidatePath("/informations");
     return { ok: true };
   } catch (e) {
@@ -158,7 +158,7 @@ export async function toggleArticlePublished(id: number, isPublished: boolean): 
     await db.update(articles).set({ isPublished }).where(eq(articles.id, id));
     await logAudit({ actorId: admin.id, action: isPublished ? "publication_article" : "depublication_article", entityType: "article", entityId: id });
     revalidatePath("/admin/contenus");
-    revalidatePath("/guides");
+    revalidatePath("/informations");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Erreur inattendue." };

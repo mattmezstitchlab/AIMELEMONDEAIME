@@ -12,13 +12,13 @@ const PRIMARY = [
 ];
 // Une seule page « S'informer » qui réunit toutes les thématiques et les guides.
 const INFORMER = [
-  { href: "/s-informer", label: "Tout voir" },
-  { href: "/s-informer#theme-sante", label: "Santé" },
-  { href: "/s-informer#theme-famille", label: "Famille" },
-  { href: "/s-informer#theme-logement", label: "Logement" },
-  { href: "/s-informer#theme-retraite", label: "Retraite" },
-  { href: "/s-informer#theme-emploi", label: "Emploi" },
-  { href: "/s-informer#theme-cotisations", label: "Activité et cotisations" },
+  { href: "/informations", label: "Tout voir" },
+  { href: "/informations/sante", label: "Santé" },
+  { href: "/informations/famille", label: "Famille" },
+  { href: "/informations/logement", label: "Logement" },
+  { href: "/informations/retraite", label: "Retraite" },
+  { href: "/informations/emploi", label: "Emploi" },
+  { href: "/informations/cotisations", label: "Activité et cotisations" },
 ];
 
 export async function PublicHeader({ solid = false }: { solid?: boolean }) {
@@ -89,11 +89,11 @@ export function PublicFooter() {
           <Logo />
         </div>
         <nav aria-label="Liens de pied de page" className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-slate-600">
-          <Link href="/s-informer" className="font-semibold text-emerald-700 hover:underline">S&apos;informer</Link>
-          <Link href="/s-informer#theme-sante" className="hover:text-emerald-700">Santé</Link>
-          <Link href="/s-informer#theme-famille" className="hover:text-emerald-700">Famille</Link>
-          <Link href="/s-informer#theme-retraite" className="hover:text-emerald-700">Retraite</Link>
-          <Link href="/s-informer#theme-emploi" className="hover:text-emerald-700">Emploi agricole</Link>
+          <Link href="/informations" className="font-semibold text-emerald-700 hover:underline">S&apos;informer</Link>
+          <Link href="/informations/sante" className="hover:text-emerald-700">Santé</Link>
+          <Link href="/informations/famille" className="hover:text-emerald-700">Famille</Link>
+          <Link href="/informations/retraite" className="hover:text-emerald-700">Retraite</Link>
+          <Link href="/informations/emploi" className="hover:text-emerald-700">Emploi agricole</Link>
           <Link href="/accompagnement" className="hover:text-emerald-700">Accompagnement des démarches</Link>
           <Link href="/annuaire" className="hover:text-emerald-700">Points d&apos;accueil</Link>
           <Link href="/decouvrir" className="hover:text-emerald-700">Découvrir l&apos;espace (démo)</Link>

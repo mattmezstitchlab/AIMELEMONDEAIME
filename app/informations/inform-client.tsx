@@ -13,7 +13,7 @@ type Article = {
 
 function norm(s: string) { return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
 
-export function SInformClient({ articles, categories }: {
+export function InformClient({ articles, categories }: {
   articles: Article[];
   categories: Record<string, string>;
 }) {
