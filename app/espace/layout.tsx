@@ -1,0 +1,36 @@
+import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+import { AppShell, type NavItem } from "@/components/app-shell";
+import { db } from "@/db";
+import { notifications } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
+
+const NAV: NavItem[] = [
+  { href: "/espace", label: "Mon aperçu", icon: "home", exact: true },
+  { href: "/espace/demarches", label: "Mes démarches", icon: "demarches" },
+  { href: "/espace/projets", label: "Mes projets", icon: "calendar" },
+  { href: "/espace/echanges", label: "Mes échanges", icon: "echanges" },
+  { href: "/espace/documents", label: "Mes documents", icon: "documents" },
+  { href: "/espace/profil", label: "Mon profil", icon: "user" },
+  { href: "/le-monde-aime", label: "La carte", icon: "pin" },
+];
+
+const MOBILE: NavItem[] = [
+  { href: "/espace", label: "Mon espace", icon: "home", exact: true },
+  { href: "/espace/demarches", label: "Démarches", icon: "demarches" },
+  { href: "/le-monde-aime", label: "Carte", icon: "pin" },
+  { href: "/le-monde-aime?onglet=publier", label: "Publier", icon: "filePlus" },
+  { href: "/espace/echanges", label: "Échanges", icon: "echanges" },
+];
+
+export default async function EspaceLayout({ children }: { children: ReactNode }) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "membre") redirect("/connexion");
+  const unread = await db.select({ id: notifications.id }).from(notifications).where(and(eq(notifications.userId, user.id), eq(notifications.isRead, false)));
+  return (
+    <AppShell navItems={NAV} mobileItems={MOBILE} roleLabel="Mon espace AIME®" userName={user.displayName ?? user.fullName} homeHref="/espace" notificationCount={unread.length} officeName={user.profileCity ?? user.city}>
+      {children}
+    </AppShell>
+  );
+}

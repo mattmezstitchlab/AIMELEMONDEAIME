@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/*
+ * AIME® — design system encre, papier et couleurs sémantiques de carte.
+ * Les anciennes classes « emerald » restent pour compatibilité des composants,
+ * mais leur palette est neutre. La conformité RGAA/WCAG nécessite encore un audit humain.
+ */
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Palette monochrome « encre » (référence : Linear / Notion / Stripe).
+     Les boutons et actions primaires passent en noir profond ; la couleur est
+     réservée aux états et aux marqueurs de la carte (primaires Bauhaus). */
+  --color-emerald-50: #fafaf9;
+  --color-emerald-100: #f0f0ee;
+  --color-emerald-200: #e2e2df;
+  --color-emerald-300: #c9c9c4;
+  --color-emerald-400: #8f8f88;
+  --color-emerald-500: #5c5c56;
+  --color-emerald-600: #3d3d38;
+  --color-emerald-700: #262622;
+  --color-emerald-800: #171715;
+  --color-emerald-900: #0e0e0d;
+  --color-emerald-950: #050504;
+
+  --color-brand: #171715;
+  --color-ink: #1d1d1f;
+  --color-mist: #fafaf9;
+  --color-paper: #f7f7f5;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-block-start: 6rem;
+  scroll-padding-block-end: 7rem;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #1d1d1f;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.025em;
+}
+
+:focus-visible {
+  outline: 3px solid #171715;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(23, 23, 21, 0.4);
+  outline-offset: 0;
+  border-color: #171715;
+}
+
+[data-assistant-highlight] {
+  outline: 3px solid #171715 !important;
+  outline-offset: 5px;
+  border-radius: 10px;
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 0 0 10px rgba(23, 23, 21, 0.16);
+  scroll-margin-top: 120px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: #1d1d1f;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  z-index: 100;
+  border-radius: 0 0 8px 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+.hero-overlay {
+  background: linear-gradient(90deg, rgba(17, 17, 17, 0.84) 0%, rgba(17, 17, 17, 0.48) 46%, rgba(17, 17, 17, 0.12) 100%);
+}
+
+.hero-overlay-bottom {
+  background: linear-gradient(180deg, rgba(17, 17, 17, 0) 28%, rgba(17, 17, 17, 0.76) 100%);
+}
+
+@keyframes hero-zoom {
+  from { transform: scale(1.08); }
+  to { transform: scale(1); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hero-zoom {
+  animation: hero-zoom 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

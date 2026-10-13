@@ -1,0 +1,64 @@
+import Link from "next/link";
+import { and, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { journeys, projectMembers, projects } from "@/db/schema";
+import { getCurrentUser } from "@/lib/auth";
+import { getActiveProcedureTypes } from "@/lib/queries";
+import { SectionTitle, Card } from "@/components/ui";
+import { Icon } from "@/components/icon";
+import { SITUATIONS, SITUATION_BY_KEY } from "@/lib/situations";
+import { JourneyWizard } from "@/components/espace/journey-ui";
+import { startProcedure } from "@/lib/actions/cases";
+
+export const dynamic = "force-dynamic";
+
+export default async function NouvelleDemarche({ searchParams }: { searchParams: Promise<{ situation?: string; reprendre?: string; q?: string; erreur?: string }> }) {
+  const user = (await getCurrentUser())!;
+  const sp = await searchParams;
+  let journey: typeof journeys.$inferSelect | null = null;
+  if (sp.reprendre) {
+    const [j] = await db.select().from(journeys).where(and(eq(journeys.id, Number(sp.reprendre)), eq(journeys.userId, user.id))).limit(1);
+    journey = j ?? null;
+  }
+  const situation = journey?.situation ?? sp.situation;
+  const def = situation ? SITUATION_BY_KEY.get(situation) : undefined;
+
+  if (def) {
+    const myProjects = await db.select({ id: projects.id, title: projects.title }).from(projectMembers).innerJoin(projects, eq(projectMembers.projectId, projects.id))
+      .where(and(eq(projectMembers.userId, user.id), eq(projectMembers.role, "organisateur"), eq(projectMembers.status, "accepte"), eq(projects.status, "ouvert")));
+    return (
+      <div className="flex flex-col gap-6">
+        <SectionTitle image={def.image} eyebrow="Nouvelle démarche" title={def.label} description={def.description} />
+        <Link href="/espace/demarches/nouvelle" className="text-sm font-semibold text-emerald-800 underline">← Choisir une autre situation</Link>
+        <Card><JourneyWizard situation={def.key} questions={def.questions} initial={journey?.answers ?? {}} journeyId={journey?.id} projects={myProjects} /></Card>
+        <p className="text-xs text-slate-500">Vos réponses restent privées : elles ne sont visibles ni sur la carte, ni par les participants de vos projets, ni par votre famille ou vos cercles.</p>
+      </div>
+    );
+  }
+
+  const q = (sp.q ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const list = q ? SITUATIONS.filter((s) => `${s.label} ${s.description}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q)) : SITUATIONS;
+  const procedures = await getActiveProcedureTypes();
+  return (
+    <div className="flex flex-col gap-8">
+      <SectionTitle image="/images/hero-campagne.jpg" eyebrow="Nouvelle démarche" title="De quoi avez-vous besoin aujourd'hui ?" description="Choisissez la situation la plus proche. Quelques questions suffisent ; vous pourrez enregistrer et reprendre plus tard." />
+      <form role="search" className="flex max-w-xl gap-2"><label htmlFor="sq" className="sr-only">Chercher une situation</label><input id="sq" name="q" defaultValue={sp.q} placeholder="Ex. naissance, logement, concert, retraite…" className="min-w-0 flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm" /><button className="rounded-lg bg-emerald-800 px-4 text-sm font-bold text-white">Chercher</button></form>
+      <p className="-mt-6 text-xs text-slate-500">La recherche porte sur les mots des situations proposées : elle ne comprend pas librement toutes les demandes. En cas de doute, un conseiller France services peut vous orienter.</p>
+      {list.length === 0 ? <Card><p className="text-sm text-slate-700">Aucune situation ne correspond à « {sp.q} ». Essayez un autre mot, ou rendez-vous dans un <a className="font-semibold text-emerald-800 underline" href="https://www.france-services.gouv.fr" target="_blank" rel="noreferrer">espace France services</a> pour un accompagnement humain.</p></Card> : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {list.map((s) => (
+            <Link key={s.key} href={`/espace/demarches/nouvelle?situation=${s.key}`} className="group flex gap-4 rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm hover:border-emerald-400">
+              <Icon name={s.icon} className="h-8 w-8 shrink-0 text-emerald-600" />
+              <span><span className="block font-bold text-slate-900">{s.label}</span><span className="mt-1 block text-sm text-slate-600">{s.description}</span><span className="mt-2 inline-block text-xs font-semibold text-emerald-800">{s.pilot ? "Parcours complet : artiste, projet, ressources" : "Orientation sourcée et liste d'actions"}</span></span>
+            </Link>
+          ))}
+        </div>
+      )}
+      <details className="rounded-2xl border border-slate-200 bg-white p-5">
+        <summary className="cursor-pointer font-semibold text-slate-800">Déposer un dossier de démonstration (équipe d&apos;accompagnement simulée)</summary>
+        {sp.erreur && <p role="alert" className="mt-3 rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">{sp.erreur}</p>}
+        <div className="mt-4 grid gap-3 md:grid-cols-2">{procedures.map((p) => <form key={p.id} action={startProcedure} className="rounded-xl bg-[#fafaf9] p-4"><input type="hidden" name="procedureTypeId" value={p.id} /><p className="text-sm font-semibold text-slate-900">{p.title}</p><p className="mt-1 text-xs text-slate-600">{p.description}</p><button type="submit" className="mt-3 rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white">Démarrer ce dossier fictif</button></form>)}</div>
+      </details>
+    </div>
+  );
+}

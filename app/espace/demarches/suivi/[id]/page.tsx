@@ -1,0 +1,117 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+import { getJourneyDetail, searchArtists } from "@/lib/journey-queries";
+import { Card, SectionTitle, formatDate, formatDateTime } from "@/components/ui";
+import { ORGANISM_CATEGORY_LABEL, SITUATION_BY_KEY, TASK_STATUS_LABEL } from "@/lib/situations";
+import { AddTask, JourneyStatusButton, OrganizerEngagement, SendToArtist, SummaryEditor, TaskControls } from "@/components/espace/journey-ui";
+import { priceLabel } from "@/lib/lma";
+
+export const dynamic = "force-dynamic";
+
+export default async function SuiviDemarche({ params }: { params: Promise<{ id: string }> }) {
+  const id = Number((await params).id);
+  const user = (await getCurrentUser())!;
+  if (!Number.isSafeInteger(id)) notFound();
+  const d = await getJourneyDetail(id, user.id);
+  if (!d) notFound();
+  const { journey: j, tasks, organisms, project } = d;
+  const def = SITUATION_BY_KEY.get(j.situation)!;
+  const actions = tasks.filter((t) => t.kind === "action");
+  const pieces = tasks.filter((t) => t.kind === "piece");
+  const next = actions.find((t) => !["termine", "effectue_declare"].includes(t.status));
+  const orgBySlug = new Map(organisms.map((o) => [o.slug, o]));
+  const artists = j.situation === "evenement" && j.status === "en_cours" ? await searchArtists(j.answers.discipline ?? "", project ? { lat: Number(project.lat), lng: Number(project.lng) } : null, user.id) : [];
+  const engagedIds = new Set(d.engagements.filter((e) => !["refusee", "annulee"].includes(e.status)).map((e) => e.artistId));
+  const ser = (x: Date | null) => (x ? x.toISOString() : null);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <SectionTitle image={def.image} eyebrow={`Mes démarches · ${def.short}`} title={j.title} description={def.description} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href="/espace/demarches" className="text-sm font-semibold text-emerald-800 underline">← Mes démarches</Link>
+        <div className="flex flex-wrap gap-3"><a href={`/api/demarches/${j.id}/recapitulatif`} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700">Télécharger le récapitulatif</a><JourneyStatusButton journeyId={j.id} status={j.status} /></div>
+      </div>
+      {j.status === "questionnaire" && <Card><p className="text-sm">Le questionnaire n&apos;est pas terminé. <Link className="font-bold text-emerald-800 underline" href={`/espace/demarches/nouvelle?reprendre=${j.id}`}>Reprendre</Link></p></Card>}
+
+      {next && <div className="rounded-2xl bg-emerald-800 p-5 text-white"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">Prochaine action</p><p className="mt-1 text-lg font-semibold">{next.label}</p><p className="text-sm text-white/85">{next.reason}</p></div>}
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          <Card>
+            <h2 className="text-lg font-semibold text-slate-900">Étapes à suivre</h2>
+            <p className="mt-1 text-xs text-slate-500">« Effectué selon vous » est une déclaration de votre part. Aucune étape ne peut être marquée « transmise » ou « confirmée par l&apos;organisme » : aucune connexion officielle n&apos;existe dans cette version.</p>
+            <ol className="mt-4 space-y-4">
+              {actions.map((t, i) => (
+                <li key={t.id} className="rounded-xl border border-slate-200 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-2"><p className="font-semibold text-slate-900">{i + 1}. {t.label}</p><span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">{TASK_STATUS_LABEL[t.status]}</span></div>
+                  {t.frameworkFlag === "cadre_a_verifier" && <p className="mt-2 inline-block rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">Cadre à vérifier</p>}
+                  {t.detail && <p className="mt-2 text-sm text-slate-700">{t.detail}</p>}
+                  <p className="mt-2 text-xs text-slate-500"><strong>Pourquoi cette étape ?</strong> {t.reason}</p>
+                  {t.organismSlugs.length > 0 && <p className="mt-2 text-xs text-slate-600">Interlocuteur(s) : {t.organismSlugs.map((s) => orgBySlug.get(s)?.name ?? s).join(", ")}</p>}
+                  {t.officialUrl && <a href={t.officialUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs font-bold text-emerald-800 underline">Ouvrir le site officiel ↗</a>}
+                  {t.dueAt && <p className="mt-1 text-xs text-slate-600">{t.dueKind === "officielle" ? `Échéance officielle : ${formatDate(t.dueAt)} (source : ${t.dueSource})` : `Rappel personnel : ${formatDate(t.dueAt)}`}</p>}
+                  <TaskControls task={{ id: t.id, status: t.status, dueAt: ser(t.dueAt), dueKind: t.dueKind, documentId: t.documentId, kind: t.kind }} docs={d.myDocs} />
+                </li>
+              ))}
+            </ol>
+            <AddTask journeyId={j.id} />
+          </Card>
+
+          {j.situation === "evenement" && (
+            <Card>
+              <h2 className="text-lg font-semibold text-slate-900">Engager un artiste</h2>
+              <p className="mt-1 text-xs text-slate-500">Demande envoyée → proposition reçue → devis accepté → contrat signé (déclaré) → embauche déclarée. Chaque étape est distincte ; AIME® n&apos;effectue ni signature, ni paiement, ni déclaration.</p>
+              {d.engagements.length > 0 && <div className="mt-4 space-y-3">{d.engagements.map((e) => <OrganizerEngagement key={e.id} artistName={e.artistName} docs={d.myDocs} e={{ id: e.id, status: e.status, proposalMode: e.proposalMode, proposalAmount: e.proposalAmount, proposalFramework: e.proposalFramework, proposalNote: e.proposalNote, requestMessage: e.requestMessage, eventDate: e.eventDate.toISOString() }} />)}</div>}
+              {j.status === "en_cours" && (
+                <div className="mt-5">
+                  <h3 className="text-sm font-bold text-slate-800">Artistes visibles sur la carte {j.answers.discipline && j.answers.discipline !== "autre" ? `· ${j.answers.discipline}` : ""}</h3>
+                  {artists.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucun artiste visible pour l&apos;instant. <Link href="/le-monde-aime?univers=arts" className="font-semibold text-emerald-800 underline">Explorer l&apos;univers Arts sur la carte</Link></p> : (
+                    <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {artists.slice(0, 8).map((a) => (
+                        <li key={a.id} className={`rounded-xl border p-4 ${a.matches ? "border-emerald-200 bg-white" : "border-slate-200 bg-slate-50"}`}>
+                          <p className="font-semibold text-slate-900">{a.name}{a.isDemo ? <span className="ml-2 text-[10px] font-bold uppercase text-slate-500">fictif</span> : null}</p>
+                          <p className="text-xs text-slate-500">{a.disciplines.join(" · ")}{a.distance !== null ? ` · à ~${a.distance} km` : ""}{!a.matches ? " · autre discipline" : ""}</p>
+                          {a.presentation && <p className="mt-1 line-clamp-2 text-sm text-slate-600">{a.presentation}</p>}
+                          {a.services.length > 0 && <p className="mt-1 text-xs text-slate-600">{a.services.map((s) => `${s.title} (${priceLabel({ priceMode: s.priceMode, price: s.price, action: "prestation" })})`).join(" · ")}</p>}
+                          <div className="mt-2 flex flex-wrap items-center gap-3"><Link href={`/le-monde-aime/personnes/${a.id}`} className="text-xs font-semibold text-emerald-800 underline">Voir la fiche</Link>{engagedIds.has(a.id) ? <span className="text-xs font-semibold text-slate-500">Demande en cours</span> : <SendToArtist journeyId={j.id} artistId={a.id} services={a.services.map((s) => ({ id: s.id, title: s.title }))} />}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </Card>
+          )}
+
+          {project && (
+            <Card>
+              <h2 className="text-lg font-semibold text-slate-900">Projet et ressources locales</h2>
+              <p className="mt-1 text-sm text-slate-600">Le projet <Link className="font-semibold text-emerald-800 underline" href={`/le-monde-aime/projets/${project.id}`}>{project.title}</Link> rassemble le programme, les besoins et les contributions confirmées. Les participants y voient l&apos;organisation, jamais votre démarche ni vos documents personnels.</p>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">{[["produits locaux", "terre"], ["mobilier et vaisselle", "terre"], ["décoration", "terre"], ["matériel technique", "arts"], ["transport", "terre"], ["ateliers de transmission", "savoirs"]].map(([t, u]) => <Link key={t} href={`/le-monde-aime?univers=${u}&q=${encodeURIComponent(t.split(" ")[0])}`} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:border-emerald-500">Chercher : {t}</Link>)}</div>
+              <p className="mt-2 text-xs text-slate-500">Chaque réservation est acceptée explicitement par son propriétaire ; les quantités et dates sont vérifiées côté serveur.</p>
+            </Card>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <Card><h2 className="text-lg font-semibold text-slate-900">Ma situation</h2><div className="mt-3"><SummaryEditor journeyId={j.id} summary={j.summary} /></div></Card>
+          <Card>
+            <h2 className="text-lg font-semibold text-slate-900">Pièces à préparer</h2>
+            {pieces.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucune pièce identifiée.</p> : <ul className="mt-3 space-y-3">{pieces.map((t) => <li key={t.id} className="rounded-lg bg-[#fafaf9] p-3 text-sm"><p className="font-semibold">{t.label}</p><p className="text-xs text-slate-500">{t.reason}</p><TaskControls task={{ id: t.id, status: t.status, dueAt: ser(t.dueAt), dueKind: t.dueKind, documentId: t.documentId, kind: t.kind }} docs={d.myDocs} /></li>)}</ul>}
+            <p className="mt-3 text-xs text-slate-500">Relier un document le garde privé. Pour en déposer un nouveau : <Link href="/espace/documents" className="underline">Mes documents</Link>.</p>
+          </Card>
+          <Card>
+            <h2 className="text-lg font-semibold text-slate-900">Organismes utiles</h2>
+            {organisms.length === 0 ? <p className="mt-2 text-sm text-slate-600">—</p> : <ul className="mt-3 space-y-3 text-sm">{organisms.map((o) => <li key={o.id}><a href={o.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-800 underline">{o.name} ↗</a><p className="text-xs text-slate-600">{o.role}</p><p className="text-[11px] text-slate-400">{ORGANISM_CATEGORY_LABEL[o.category]} · {o.contentStatus === "verifie" ? `vérifié le ${formatDate(o.verifiedAt!)}` : o.linkStatus === "verifie" ? `lien vérifié le ${formatDate(o.verifiedAt!)} · description à confirmer` : "à vérifier"} · organisme externe, non partenaire</p></li>)}</ul>}
+          </Card>
+          <Card>
+            <h2 className="text-lg font-semibold text-slate-900">Historique</h2>
+            <ol className="mt-3 space-y-3 border-l-2 border-emerald-100 pl-4 text-sm">{d.events.map((e) => <li key={e.id}><p className="text-slate-700">{e.message}</p><p className="text-xs text-slate-400">{formatDateTime(e.createdAt)}</p></li>)}</ol>
+            <p className="mt-3 text-[11px] text-slate-400">Règles d&apos;orientation version {j.rulesVersion || "—"}.</p>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
