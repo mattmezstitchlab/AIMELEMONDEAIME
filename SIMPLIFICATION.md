@@ -92,6 +92,8 @@ C'est le chantier le plus structurant : à faire en deux temps (d'abord l'interf
 après les chantiers 1 et 3 qui ne demandent que des redirections.
 
 ### 3. Regrouper les espaces du membre (gain : moyen · effort : faible)
+
+> **Exécuté (fin du chantier).** « Mes échanges & projets » était déjà l'unique entrée de regroupement ; restait à retirer « La carte » de la navigation membre (elle reste dans l'en-tête public) et à corriger les renvois « Mes liens » devenus obsolètes. `Mon année` est conservée. La navigation compte donc 6 entrées au lieu de 7.
 Trois endroits racontent la même vie relationnelle : `/espace/echanges` (mes demandes), l'onglet « Mes liens » de la carte
 (projets, cercles, invitations), et `/espace/projets`. **Je garderais un seul « Mes échanges & projets »** dans l'espace,
 la carte ne conservant que « Explorer » et « Publier ». La navigation de l'espace passerait de 7 entrées à 5 :
