@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getSession } from "@/lib/auth";
 import { AppShell, type NavItem } from "@/components/app-shell";
 import { db } from "@/db";
 import { notifications } from "@/db/schema";
@@ -28,7 +28,7 @@ export default async function EspaceLayout({ children }: { children: ReactNode }
   if (!user || user.role !== "membre") redirect("/connexion");
   const unread = await db.select({ id: notifications.id }).from(notifications).where(and(eq(notifications.userId, user.id), eq(notifications.isRead, false)));
   return (
-    <AppShell navItems={NAV} mobileItems={MOBILE} roleLabel="Mon espace AIME®" userName={user.displayName ?? user.fullName} homeHref="/espace" notificationCount={unread.length} officeName={user.profileCity ?? user.city}>
+    <AppShell navItems={NAV} mobileItems={MOBILE} roleLabel="Mon espace AIME®" userName={user.displayName ?? user.fullName} homeHref="/espace" notificationCount={unread.length} officeName={user.profileCity ?? user.city} demo={(await getSession())?.demo === true}>
       {children}
     </AppShell>
   );

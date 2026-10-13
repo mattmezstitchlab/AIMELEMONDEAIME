@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { users, type Role } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { hashPassword, verifyPassword, setSessionCookie, clearSessionCookie } from "@/lib/auth";
+import { hashPassword, verifyPassword, setSessionCookie, DEMO_ACCOUNT_EMAIL } from "@/lib/auth";
 import { loginSchema, registerSchema, parseOrError } from "@/lib/validation";
 import { clientIp, hitRateLimit, clearRateLimit } from "@/lib/rate-limit";
 import { logAudit } from "@/lib/audit";
@@ -116,7 +116,18 @@ export async function registerAction(_prev: ActionResult | null, formData: FormD
   redirect("/espace");
 }
 
-export async function logoutAction() {
-  await clearSessionCookie();
-  redirect("/");
+/**
+ * Connexion en un clic à la visite guidée (chantier 5) : aucun mot de passe,
+ * mais uniquement pour le compte de démonstration explicitement marqué
+ * `isDemo` en base. La session porte le marqueur `demo` : le proxy bloque
+ * alors toutes les écritures (lecture seule dans la vraie interface).
+ */
+export async function loginAsDemo() {
+  const [user] = await db.select().from(users).where(eq(users.email, DEMO_ACCOUNT_EMAIL)).limit(1);
+  if (!user || !user.isDemo || !user.isActive || user.role !== "membre") {
+    redirect("/decouvrir?indisponible=1");
+  }
+  await setSessionCookie({ userId: user.id, role: user.role, fullName: user.fullName, email: user.email, demo: true });
+  await logAudit({ actorId: user.id, action: "connexion_visite_guidee", entityType: "user", entityId: user.id });
+  redirect("/espace");
 }

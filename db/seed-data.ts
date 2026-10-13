@@ -554,6 +554,18 @@ export async function seedDatabase(db: NodePgDatabase) {
     })
     .returning();
 
+  // Compte de visite guidée (voir /decouvrir) : session marquée « demo »,
+  // écritures bloquées par le proxy — lecture seule dans la vraie interface.
+  await db.insert(users).values({
+    email: "demo@aime-demo.fr",
+    passwordHash: pw,
+    role: "membre",
+    fullName: "Visiteur de démonstration",
+    officeId: beauce.id,
+    onboardingCompleted: true,
+    isDemo: true,
+  });
+
   const [lucas] = await db
     .insert(users)
     .values({
@@ -1442,61 +1454,8 @@ export async function seedDatabase(db: NodePgDatabase) {
   console.log("  Membre : jean.dupont@exemple.fr");
   console.log("  Membre : marie.lefevre@exemple.fr");
   console.log("  Membre : paul.martin@exemple.fr");
+  console.log("  Visite guidée (lecture seule, sans mot de passe) : demo@aime-demo.fr");
 
-}
-
-/** Ajoute les exemples Le Monde Aime sans effacer les comptes ou les données existantes. */
-export async function seedCommunityDemoIfEmpty(db: NodePgDatabase) {
-  const [existing] = await db.select({ id: communityListings.id })
-    .from(communityListings).where(eq(communityListings.isDemo, true)).limit(1);
-  if (existing) return false;
-
-  const people = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.role, "membre"));
-  const findUser = (email: string) => people.find((person) => person.email === email)?.id;
-  const jean = findUser("jean.dupont@exemple.fr");
-  const marie = findUser("marie.lefevre@exemple.fr");
-  const paul = findUser("paul.martin@exemple.fr");
-  const lucas = findUser("lucas.moreau@exemple.fr") ?? jean;
-  const amelie = findUser("amelie.roux@exemple.fr") ?? marie;
-  if (!jean || !marie || !paul || !lucas || !amelie || jean === marie) {
-    console.warn("[demo] Comptes membres attendus absents, annonces Le Monde Aime non amorcées.");
-    return false;
-  }
-
-  const [coat, tables, basket, shoes] = await db.insert(communityListings).values([
-    { ownerId: marie, action: "don", category: "besoins_essentiels", title: "Exemple · Manteau d'hiver taille M", description: "Exemple fictif en bon état, lavé et remis en main propre.", condition: "bon_etat", quantity: 2, unit: "manteau", attributes: { size: "M" }, city: "Chartres", lat: "48.45", lng: "1.49", pickupDetails: "Retrait exact à convenir dans la conversation.", isDemo: true },
-    { ownerId: marie, action: "loue", category: "evenementiel", title: "Exemple · Tables pliantes pour un événement", description: "Exemple fictif. Location et caution se conviennent directement.", condition: "bon_etat", quantity: 3, unit: "table", price: "15.00", deposit: "30.00", attributes: { eventDetails: "3 tables · démonstration" }, city: "Chartres", lat: "48.45", lng: "1.49", availableFrom: new Date(Date.now() + 24 * 3600000), availableUntil: new Date(Date.now() + 30 * 86400000), pickupDetails: "Retrait à convenir après accord.", isDemo: true },
-    { ownerId: amelie, action: "vends", category: "produits_locaux", title: "Exemple · Panier de légumes de saison", description: "Offre fictive, retrait à la ferme après confirmation.", condition: "neuf", quantity: 8, unit: "panier", price: "12.00", attributes: { unit: "panier" }, city: "Nantes", lat: "47.24", lng: "-1.53", availableFrom: new Date(Date.now() + 24 * 3600000), pickupDetails: "Retrait convenu en conversation privée.", isDemo: true },
-    { ownerId: paul, action: "don", category: "besoins_essentiels", title: "Exemple · Chaussures de marche pointure 38", description: "Chaussures propres en bon état, annonce fictive.", condition: "bon_etat", quantity: 1, unit: "paire", attributes: { size: "38" }, city: "Chartres", lat: "48.46", lng: "1.47", pickupDetails: "Remise directe à convenir après accord.", isDemo: true },
-  ]).returning();
-
-  const [event] = await db.insert(communityEventPlans).values({
-    ownerId: jean, title: "Exemple fictif · Repas associatif", eventDate: new Date(Date.now() + 8 * 86400000),
-    city: "Chartres", lat: "48.45", lng: "1.49", participants: 30,
-    needs: [{ text: "tables pliantes", quantity: 3, category: "evenementiel" }, { text: "verres", quantity: 30, category: "evenementiel" }, { text: "enceinte", quantity: 1, category: "evenementiel" }],
-  }).returning();
-  const reference = `LMA-DEMO-${Date.now().toString().slice(-8)}`;
-  const [request] = await db.insert(communityRequests).values({
-    reference, listingId: coat.id, requesterId: jean, quantity: 1,
-    message: "Exemple fictif : puis-je passer samedi après-midi ?", eventPlanId: event.id, status: "demandee",
-  }).returning();
-  await db.insert(communityMessages).values({ requestId: request.id, senderId: jean, body: "Conversation de démonstration. Le propriétaire doit encore répondre." });
-  await db.insert(communityRequests).values({
-    reference: `${reference}-R`, listingId: shoes.id, requesterId: lucas, quantity: 1,
-    message: "Exemple fictif : demande test archivée.", status: "terminee",
-    ownerConfirmedAt: new Date(Date.now() - 2 * 86400000), requesterConfirmedAt: new Date(Date.now() - 86400000),
-  });
-  const [trip] = await db.insert(communityTrips).values({
-    ownerId: lucas, startCity: "Chartres", endCity: "Saint-Brieuc", startLat: "48.45", startLng: "1.49",
-    endLat: "48.51", endLng: "-2.77", departureAt: new Date(Date.now() + 6 * 86400000),
-    transportMode: "vélo", capacity: 1, availableCapacity: 1,
-    terms: "Exemple fictif : demande de transport à confirmer par le transporteur.", compensation: "0.00",
-  }).returning();
-  await db.insert(communityTransportRequests).values({
-    tripId: trip.id, requesterId: jean, communityRequestId: request.id,
-    description: "Exemple fictif : un petit panier de légumes.", status: "demandee",
-  });
-  return true;
 }
 
 function specimenCertificate(title: string, name: string, detail: string) {
@@ -1525,11 +1484,4 @@ function eqId(id: number) {
 
 function eqRef(reference: string) {
   return eq(cases.reference, reference);
-}
-
-export async function seedIfEmpty(db: NodePgDatabase) {
-  const existing = await db.select({ id: users.id }).from(users).limit(1);
-  if (existing.length > 0) return false;
-  await seedDatabase(db);
-  return true;
 }

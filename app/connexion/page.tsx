@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AuthSplit } from "@/components/auth-split";
+import { AuthSplit } from "@/components/public-shell";
 import { LoginForm } from "./login-form";
 
 const DEMO = [

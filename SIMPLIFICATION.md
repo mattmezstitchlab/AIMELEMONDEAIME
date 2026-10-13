@@ -109,6 +109,26 @@ le champ de l'accueil en simple déclencheur : on tape son besoin → l'assistan
 On supprime une implémentation entière de recherche par mots-clés, il n'en reste qu'une à maintenir.
 
 ### 5. Simplifier les fondations visibles par l'équipe (gain : moyen · effort : faible)
+
+> **Exécuté le 2026-08-10 (commit à suivre).**
+> - **3 coquilles → 2** : `AuthSplit` est devenue une variante de la coquille publique
+>   (`components/public-shell.tsx`) ; `components/auth-split.tsx` est supprimé, connexion et
+>   inscription importent la variante depuis la coquille publique. `app-shell` reste la coquille
+>   des espaces connectés. Au passage, la déconnexion se fait par un lien GET `/deconnexion`
+>   (l'ancienne action POST `logoutAction` est supprimée).
+> - **Seeds : 4 fichiers → 2, par suppression du code mort.** `seed-aime.ts` et `seed-lma.ts`
+>   n'étaient appelés par rien (ni app, ni scripts) : supprimés, ainsi que les fonctions mortes
+>   `seedCommunityDemoIfEmpty` et `seedIfEmpty` de `seed-data.ts`. Il reste le lanceur `seed.ts`
+>   (garde-fou production) et les données `seed-data.ts`. Validé de bout en bout : migrations +
+>   `db:seed` sur une base jetable (8 utilisateurs, 32 bureaux, dossiers, articles…).
+> - **`/decouvrir` ne rejoue plus l'espace** : la fausse coquille `demo-shell` et ses données
+>   codées en dur sont supprimées. La page connecte en un clic le compte `demo@aime-demo.fr`
+>   (créé par le seed, marqué `isDemo`) dans la **vraie interface**, session marquée `demo`.
+>   La lecture seule est réelle et centrale : le nouveau `proxy.ts` refuse toute écriture
+>   (actions serveur et API) pour ces sessions — vérifié : 403 explicite —, un bandeau
+>   « Visite guidée — lecture seule » s'affiche dans l'espace, et `/deconnexion` permet de sortir.
+
+### 5. Simplifier les fondations visibles par l'équipe (gain : moyen · effort : faible)
 - **3 coquilles → 2** : `auth-split` (connexion/inscription) devient une variante de la coquille publique ; `app-shell` reste pour les espaces connectés.
 - **4 fichiers de seed → 1** : `seed.ts`, `seed-aime.ts`, `seed-lma.ts` et le seed communautaire dans `seed-data.ts` racontent une seule histoire de données de démo.
 - **La démo `/decouvrir`** rejoue l'espace avec une coquille factice (`demo-shell`) qui vieillira séparément de la vraie :

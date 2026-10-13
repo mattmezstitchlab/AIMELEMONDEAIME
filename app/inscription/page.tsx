@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AuthSplit } from "@/components/auth-split";
+import { AuthSplit } from "@/components/public-shell";
 import { RegisterForm } from "./register-form";
 import { db } from "@/db";
 import { offices } from "@/db/schema";

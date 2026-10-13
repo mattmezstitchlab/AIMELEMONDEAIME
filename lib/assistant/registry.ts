@@ -26,7 +26,7 @@ export const ROUTES: RouteEntry[] = [
   { path: "/informations", label: "Informations par thématique", roles: ALL_ROLES, purpose: "Regrouper les articles et guides par sujet : santé, famille, logement, retraite, cotisations, emploi." },
   { path: "/informations", label: "S'informer", roles: ALL_ROLES, purpose: "Rechercher et lire les articles et guides par thématique ou mot-clé ; le détail d'un guide s'ouvre depuis la liste." },
   { path: "/accompagnement", label: "Être accompagné", roles: ALL_ROLES, purpose: "Choisir une situation et retrouver ses interlocuteurs externes, sans transmission automatique." },
-  { path: "/decouvrir", label: "Découvrir Mon espace", roles: ALL_ROLES, purpose: "Voir un aperçu fictif et non interactif de l'espace personnel." },
+  { path: "/decouvrir", label: "Découvrir Mon espace", roles: ALL_ROLES, purpose: "Entrer dans la visite guidée : le vrai espace personnel, avec un compte de démonstration en lecture seule." },
   { path: "/vision", label: "Notre méthode", roles: ALL_ROLES, purpose: "Comprendre ce qui fonctionne, ce qui existe ailleurs et les intégrations encore indisponibles." },
   { path: "/carte", label: "Carte de France", roles: ALL_ROLES, purpose: "Voir les agences, les productions locales, commander sur place ou se rendre disponible." },
   { path: "/le-monde-aime", label: "Le Monde Aime · initiative indépendante", roles: ["visiteur", "membre"], purpose: "Explorer la carte des personnes, offres, besoins, lieux et projets ; publier ; retrouver vos échanges, projets et cercles." },

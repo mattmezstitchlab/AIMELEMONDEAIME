@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { SidebarLink, BottomNavLink } from "@/components/nav-link";
-import { logoutAction } from "@/lib/actions/auth";
 import { Logo } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icon";
 
@@ -16,6 +15,7 @@ export function AppShell({
   notificationCount,
   officeName,
   mobileItems,
+  demo = false,
 }: {
   children: ReactNode;
   navItems: NavItem[];
@@ -25,6 +25,8 @@ export function AppShell({
   notificationCount?: number;
   officeName?: string | null;
   mobileItems?: NavItem[];
+  /** Session de visite guidée : lecture seule, bandeau explicatif affiché. */
+  demo?: boolean;
 }) {
   const initials = userName
     .split(" ")
@@ -60,12 +62,10 @@ export function AppShell({
                 </span>
               )}
             </div>
-            <form action={logoutAction} className="mt-3">
-              <button type="submit" className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-600 hover:bg-white">
-                <Icon name="logout" className="h-4 w-4" />
-                Se déconnecter
-              </button>
-            </form>
+            <Link href="/deconnexion" className="mt-3 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-600 hover:bg-white">
+              <Icon name="logout" className="h-4 w-4" />
+              Se déconnecter
+            </Link>
           </div>
         </aside>
 
@@ -81,15 +81,21 @@ export function AppShell({
                   {notificationCount}
                 </span>
               )}
-              <form action={logoutAction}>
-                <button type="submit" className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-700" aria-label="Se déconnecter">
-                  <Icon name="logout" className="h-4 w-4" />
-                </button>
-              </form>
+              <Link href="/deconnexion" className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-700" aria-label="Se déconnecter">
+                <Icon name="logout" className="h-4 w-4" />
+              </Link>
             </div>
           </header>
           <main id="contenu-principal" className="flex-1 px-4 py-6 pb-28 sm:px-6 md:pb-10 lg:px-10 lg:py-8">
-            <div className="mx-auto flex max-w-6xl flex-col">{children}</div>
+            <div className="mx-auto flex max-w-6xl flex-col">
+              {demo && (
+                <p role="status" className="mb-5 flex flex-wrap items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  <strong>Visite guidée — lecture seule.</strong> Vous parcourez la vraie interface avec un compte de démonstration : les boutons d&apos;action sont inactifs.
+                  <Link href="/deconnexion" className="font-bold underline">Quitter la visite</Link>
+                </p>
+              )}
+              {children}
+            </div>
           </main>
         </div>
       </div>

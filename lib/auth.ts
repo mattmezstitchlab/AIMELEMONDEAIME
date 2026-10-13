@@ -8,6 +8,9 @@ import { eq } from "drizzle-orm";
 import { getAuthSecret } from "@/lib/secret";
 
 const COOKIE_NAME = "msa_session";
+
+/** Adresse du compte de visite guidée (créé par le seed de démonstration). */
+export const DEMO_ACCOUNT_EMAIL = "demo@aime-demo.fr";
 const secret = getAuthSecret();
 
 export type SessionPayload = {
@@ -15,6 +18,8 @@ export type SessionPayload = {
   role: Role;
   fullName: string;
   email: string;
+  /** Session de visite guidée : écritures bloquées par le proxy (lecture seule). */
+  demo?: boolean;
 };
 
 export async function hashPassword(password: string) {
