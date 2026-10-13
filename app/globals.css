@@ -84,11 +84,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 
 .hero-overlay {
-  background: linear-gradient(90deg, rgba(17, 17, 17, 0.84) 0%, rgba(17, 17, 17, 0.48) 46%, rgba(17, 17, 17, 0.12) 100%);
+  background: linear-gradient(90deg, rgba(17, 17, 17, 0.66) 0%, rgba(17, 17, 17, 0.36) 46%, rgba(17, 17, 17, 0.06) 100%);
 }
 
 .hero-overlay-bottom {
-  background: linear-gradient(180deg, rgba(17, 17, 17, 0) 28%, rgba(17, 17, 17, 0.76) 100%);
+  background: linear-gradient(180deg, rgba(17, 17, 17, 0) 28%, rgba(17, 17, 17, 0.58) 100%);
 }
 
 @keyframes hero-zoom {

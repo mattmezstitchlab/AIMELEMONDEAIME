@@ -42,10 +42,10 @@ export function Hero({
   return (
     <section className={`relative isolate flex ${height} items-end overflow-hidden bg-[#0f1a14] md:items-center`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image} alt="" className="animate-hero-zoom absolute inset-0 -z-20 h-full w-full object-cover" />
-      <div className="hero-overlay absolute inset-0 -z-10" />
-      <div className="hero-overlay-bottom absolute inset-0 -z-10 md:hidden" />
-      <div className="animate-fade-up mx-auto w-full max-w-7xl px-6 pb-16 pt-40 md:py-32 lg:px-8">
+      <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
+      <div className="hero-overlay absolute inset-0 z-10" />
+      <div className="hero-overlay-bottom absolute inset-0 z-10 md:hidden" />
+      <div className="animate-fade-up relative z-20 mx-auto w-full max-w-7xl px-6 pb-16 pt-40 md:py-32 lg:px-8">
         <div className="max-w-2xl">
           {eyebrow && (
             <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white backdrop-blur">
@@ -79,9 +79,9 @@ export function SectionTitle({
   return (
     <section className="relative isolate -mx-4 -mt-6 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image} alt="" className="animate-hero-zoom absolute inset-0 -z-20 h-full w-full object-cover" />
-      <div className="hero-overlay absolute inset-0 -z-10" />
-      <div className="animate-fade-up flex min-h-[260px] flex-col justify-end gap-5 px-6 py-8 sm:min-h-[300px] sm:px-10 sm:py-10 md:flex-row md:items-end md:justify-between">
+      <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
+      <div className="hero-overlay absolute inset-0 z-10" />
+      <div className="animate-fade-up relative z-20 flex min-h-[260px] flex-col justify-end gap-5 px-6 py-8 sm:min-h-[300px] sm:px-10 sm:py-10 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
           {eyebrow && <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">{eyebrow}</p>}
           <h1 className="mt-2 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">{title}</h1>

@@ -9,7 +9,7 @@ import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
 import { SITUATIONS } from "@/lib/situations";
 import { OrientationEntry } from "@/components/orientation-entry";
 
-const MOSAIC_TINT = "from-slate-950/85 via-slate-900/25 to-transparent";
+const MOSAIC_TINT = "from-slate-950/70 via-slate-900/20 to-transparent";
 
 const MOSAIC: Array<{ label: string; desc: string; href: string; image: string; icon: IconName }> = [
   { label: "Santé", desc: "Remboursements, arrêts de travail, prévention.", href: "/informations/sante", image: "/images/hero-sante.jpg", icon: "sante" },
@@ -74,11 +74,11 @@ export default async function HomePage() {
           {MOSAIC.map((t) => (
             <Link key={t.label} href={t.href} className="group relative isolate flex aspect-square flex-col justify-end overflow-hidden p-6 focus-visible:z-10 sm:p-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={t.image} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-              <div className={`absolute inset-0 -z-10 bg-gradient-to-t ${MOSAIC_TINT}`} />
-              <span className="mb-auto grid h-11 w-11 place-items-center rounded-xl bg-white/15 text-white backdrop-blur"><Icon name={t.icon} className="h-5 w-5" /></span>
-              <h3 className="text-xl font-bold leading-tight text-white sm:text-3xl">{t.label}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/85 sm:text-base">{t.desc}</p>
+              <img src={t.image} alt="" className="absolute inset-0 z-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+              <div className={`absolute inset-0 z-10 bg-gradient-to-t ${MOSAIC_TINT}`} />
+              <span className="relative z-20 mb-auto grid h-11 w-11 place-items-center rounded-xl bg-white/15 text-white backdrop-blur"><Icon name={t.icon} className="h-5 w-5" /></span>
+              <h3 className="relative z-20 text-xl font-bold leading-tight text-white sm:text-3xl">{t.label}</h3>
+              <p className="relative z-20 mt-2 text-sm leading-relaxed text-white/85 sm:text-base">{t.desc}</p>
             </Link>
           ))}
         </div>
