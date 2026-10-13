@@ -429,7 +429,14 @@ export const SCENARIOS: AssistantScenario[] = [
 ];
 
 /** Suggestions affichées selon la page consultée. */
-export type Suggestion = { label: string; scenarioId?: string; href?: string; kind: "scenario" | "link" };
+export type Suggestion = {
+  label: string;
+  scenarioId?: string;
+  href?: string;
+  kind: "scenario" | "link" | "reponse";
+  /** Questionnaire conversationnel : valeur de la réponse choisie. */
+  answerValue?: string;
+};
 
 export const DEFAULT_SUGGESTIONS: Suggestion[] = [
   { label: "À quoi sert cette page ?", kind: "scenario", scenarioId: "__page__" },

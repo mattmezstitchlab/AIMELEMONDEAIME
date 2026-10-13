@@ -137,7 +137,7 @@ export async function getAssistantSummary(userId: number): Promise<AssistantSumm
       nextTask: j.next ? { id: j.next.id, label: j.next.label, dueKind: j.next.dueKind } : null,
       transmitted: transmittedJourneyIds.has(j.id),
     })),
-    drafts: o.drafts.map((j) => ({ id: j.id, title: j.title, situation: j.situation })),
+    drafts: o.drafts.map((j) => ({ id: j.id, title: j.title, situation: j.situation, answers: j.answers })),
     cases: rows,
     dueTasks: o.dueTasks.map((t) => ({ label: t.label, dueAt: t.dueAt!.toISOString(), official: t.dueKind === "officielle", journeyId: t.journeyId })),
     incoming: o.incomingRequests.length,

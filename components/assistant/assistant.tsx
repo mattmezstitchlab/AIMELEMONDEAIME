@@ -12,12 +12,13 @@ import {
   type Suggestion,
 } from "@/lib/assistant/registry";
 import { findScenario } from "@/lib/assistant/engine";
-import { matchSituation } from "@/lib/assistant/orientation";
+import { matchSituation, normalizeOrientation } from "@/lib/assistant/orientation";
+import { SITUATION_BY_KEY, type Question } from "@/lib/situations";
 import {
   buildAgenda, buildPieces, buildPoint, findCaseAnswer, personalIntent, writeIntent,
   type AssistantAction, type AssistantSummary, type PersonalAnswer,
 } from "@/lib/assistant/personal";
-import { assistantCreateDraft, assistantSetReminder, assistantTransmit } from "@/lib/actions/assistant";
+import { assistantCreateDraft, assistantFinalize, assistantSaveAnswer, assistantSetReminder, assistantTransmit } from "@/lib/actions/assistant";
 import { Icon } from "@/components/icon";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 
@@ -35,6 +36,17 @@ type ActionState = { status: "busy" | "done" | "cancelled" | "error"; message?: 
 
 type Guide = { scenarioId: string; stepIndex: number };
 
+/** Questionnaire conversationnel : état de l'entretien en cours. */
+type Interview = {
+  journeyId: number;
+  situation: string;
+  title: string;
+  index: number;
+  answers: Record<string, string>;
+};
+
+type PendingInterview = { journeyId: number; situation: string; title: string; answers: Record<string, string> };
+
 const OPEN_KEY = "assistant-open";
 
 export function AssistantWidget({ role, userName, summary, canAct = false }: { role: AssistantRole; userName: string | null; summary?: AssistantSummary | null; canAct?: boolean }) {
@@ -46,6 +58,9 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
   const [input, setInput] = useState("");
   const [highlightLabel, setHighlightLabel] = useState<string | null>(null);
   const [actionState, setActionState] = useState<Record<string, ActionState>>({});
+  const [interview, setInterview] = useState<Interview | null>(null);
+  const [pendingInterview, setPendingInterview] = useState<PendingInterview | null>(null);
+  const interviewBusy = useRef(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const threadRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -132,18 +147,34 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
           ? await assistantCreateDraft(action.situation)
           : action.kind === "rappel"
             ? await assistantSetReminder(action.taskId, dateChoice ?? "")
-            : await assistantTransmit(action.journeyId);
+            : action.kind === "finaliser"
+              ? await assistantFinalize(action.journeyId)
+              : await assistantTransmit(action.journeyId);
       if (!result.ok) {
         setActionState((previous) => ({ ...previous, [turn.id]: { status: "error", message: result.error } }));
         return;
       }
       setActionState((previous) => ({ ...previous, [turn.id]: { status: "done" } }));
+      if (action.kind === "creer_brouillon" && result.id) {
+        setPendingInterview({
+          journeyId: result.id,
+          situation: action.situation,
+          title: action.situationLabel,
+          answers: summary?.drafts.find((d) => d.id === result.id)?.answers ?? {},
+        });
+      }
       const chips: Suggestion[] =
         action.kind === "creer_brouillon" && result.id
           ? [
-              { label: "Répondre aux questions", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${result.id}` },
+              { label: "Répondre avec l'assistant, question par question", kind: "scenario", scenarioId: "__entretien__" },
+              { label: "Ouvrir le formulaire", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${result.id}` },
               { label: "Voir Mes démarches", kind: "link", href: "/espace/demarches" },
             ]
+          : action.kind === "finaliser" && result.id
+            ? [
+                { label: "Ouvrir mon plan", kind: "link", href: `/espace/demarches/suivi/${result.id}` },
+                { label: "Mes démarches", kind: "link", href: "/espace/demarches" },
+              ]
           : action.kind === "transmettre" && result.id
             ? [
                 { label: "Ouvrir le dossier créé", kind: "link", href: `/espace/demarches/${result.id}` },
@@ -277,12 +308,197 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
     pushTurn({ from: "assistant", text: "Guide fermé. Vous pouvez continuer à naviguer normalement, tous les menus restent accessibles.", chips: suggestions });
   }
 
+  // ------------------------------------------------------------------
+  // Questionnaire conversationnel : une question à la fois, chaque réponse
+  // enregistrée dans le brouillon, relecture complète avant de préparer
+  // le plan (action « finaliser », confirmée comme les autres).
+  // ------------------------------------------------------------------
+
+  function questionChips(q: Question): Suggestion[] {
+    const chips: Suggestion[] = [];
+    if (q.type === "select") {
+      chips.push(...(q.options ?? []).map(([value, label]) => ({ label, kind: "reponse" as const, answerValue: value })));
+    }
+    if (!q.required) chips.push({ label: "Passer cette question", kind: "reponse", answerValue: "__passer__" });
+    chips.push({ label: "Arrêter là pour l'instant", kind: "scenario", scenarioId: "__stop_entretien__" });
+    return chips;
+  }
+
+  function askQuestion(iv: Interview) {
+    const def = SITUATION_BY_KEY.get(iv.situation);
+    if (!def) return;
+    const q = def.questions[iv.index];
+    const lignes = [`Question ${iv.index + 1} sur ${def.questions.length} — ${q.label}`];
+    if (q.why) lignes.push(`Pourquoi cette question : ${q.why}`);
+    if (q.help) lignes.push(q.help);
+    if (q.type === "date") lignes.push("Écrivez la date au format JJ/MM/AAAA (par exemple 12/10/2026), ou touchez une réponse si je vous en propose.");
+    if (q.type === "number") lignes.push("Écrivez simplement un nombre.");
+    if (q.type === "time") lignes.push("Écrivez l'heure au format HH:MM (par exemple 18:30).");
+    pushTurn({ from: "assistant", text: lignes.join("\n"), chips: questionChips(q) });
+  }
+
+  function startInterview(p: PendingInterview) {
+    const def = SITUATION_BY_KEY.get(p.situation);
+    if (!def) return;
+    const answers = { ...p.answers };
+    const firstOpen = def.questions.findIndex((q) => !answers[q.key]);
+    if (firstOpen === -1) {
+      finishInterview({ journeyId: p.journeyId, situation: p.situation, title: p.title, index: def.questions.length, answers });
+      return;
+    }
+    const iv: Interview = { journeyId: p.journeyId, situation: p.situation, title: p.title, index: firstOpen, answers };
+    setInterview(iv);
+    pushTurn({
+      from: "assistant",
+      text: `Remplissons « ${p.title} » ensemble, une question à la fois. Chaque réponse est enregistrée dans votre brouillon : vous pouvez arrêter quand vous voulez et reprendre plus tard, ici ou dans le formulaire.${firstOpen > 0 ? " Je reprends là où vous vous étiez arrêté." : ""} À la fin, je vous relirai tout avant de préparer quoi que ce soit.`,
+    });
+    askQuestion(iv);
+  }
+
+  function finishInterview(iv: Interview) {
+    const def = SITUATION_BY_KEY.get(iv.situation);
+    setInterview(null);
+    if (!def) return;
+    const lignes = ["Voici vos réponses — relisez-les avant que je prépare le plan :"];
+    for (const q of def.questions) {
+      const value = iv.answers[q.key];
+      if (!value) {
+        if (q.required) lignes.push(`• ${q.label} (sans réponse — le formulaire vous la redemandera)`);
+        continue;
+      }
+      const shown = q.type === "select" ? (q.options?.find(([v]) => v === value)?.[1] ?? value)
+        : q.type === "date" ? new Date(`${value}T12:00:00`).toLocaleDateString("fr-FR")
+        : value;
+      lignes.push(`• ${q.label} : ${shown}`);
+    }
+    lignes.push("Une réponse à corriger ? Ouvrez le formulaire, tout y est déjà rempli. Si tout est juste, confirmez la préparation du plan ci-dessous.");
+    pushTurn({
+      from: "assistant",
+      text: lignes.join("\n"),
+      action: { kind: "finaliser", journeyId: iv.journeyId, title: iv.title, evenement: iv.situation === "evenement" },
+      chips: [{ label: "Ouvrir le formulaire pour corriger", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${iv.journeyId}` }],
+    });
+  }
+
+  function stopInterview() {
+    if (!interview) return;
+    const title = interview.title;
+    const journeyId = interview.journeyId;
+    setInterview(null);
+    pushTurn({
+      from: "assistant",
+      text: `On s'arrête là. Vos réponses sont enregistrées dans le brouillon « ${title} » : vous reprendrez quand vous voulez, ici ou dans le formulaire.`,
+      chips: [
+        { label: "Ouvrir le formulaire", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${journeyId}` },
+        { label: "Mes démarches", kind: "link", href: "/espace/demarches" },
+      ],
+    });
+    router.refresh();
+  }
+
+  async function answerQuestion(rawValue: string, echoed: boolean, display?: string) {
+    if (!interview || interviewBusy.current) return;
+    const def = SITUATION_BY_KEY.get(interview.situation);
+    if (!def) return;
+    const q = def.questions[interview.index];
+    if (!echoed) pushTurn({ from: "user", text: display ?? rawValue });
+
+    if (rawValue === "__passer__") {
+      advanceInterview(interview, interview.answers);
+      return;
+    }
+
+    // Normalisation selon le type de question — jamais d'interprétation libre.
+    let saved: string | null = null;
+    if (q.type === "select") {
+      const typed = normalizeOrientation(rawValue);
+      const found = (q.options ?? []).find(([v]) => v === rawValue)
+        ?? (q.options ?? []).find(([, label]) => normalizeOrientation(label) === typed)
+        ?? (q.options ?? []).find(([, label]) => typed.length > 2 && normalizeOrientation(label).startsWith(typed));
+      if (found) saved = found[0];
+    } else if (q.type === "date") {
+      const iso = rawValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      const fr = rawValue.match(/^(\d{1,2})[/.](\d{1,2})[/.](\d{4})$/);
+      const candidate = iso ? rawValue : fr ? `${fr[3]}-${fr[2].padStart(2, "0")}-${fr[1].padStart(2, "0")}` : null;
+      if (candidate) {
+        const parsed = new Date(`${candidate}T12:00:00`);
+        if (!Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(candidate)) saved = candidate;
+      }
+    } else if (q.type === "number") {
+      const n = Number(rawValue.replace(",", "."));
+      if (Number.isFinite(n) && n >= 0) saved = String(n);
+    } else if (q.type === "time") {
+      const t = rawValue.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+      if (t) saved = `${t[1].padStart(2, "0")}:${t[2]}`;
+    } else {
+      const clean = rawValue.trim();
+      if (clean) saved = clean.slice(0, 600);
+      else if (!q.required) saved = null;
+    }
+
+    if (saved === null) {
+      // (Le cas « passer » est déjà reparti plus haut ; une réponse vide à une
+      // question facultative vaut aussi « passer ».)
+      if (!q.required && !rawValue.trim()) { advanceInterview(interview, interview.answers); return; }
+      pushTurn({
+        from: "assistant",
+        text: q.type === "select"
+          ? "Je n'ai pas reconnu ce choix. Touchez l'une des réponses proposées ci-dessous, ou écrivez-la exactement."
+          : q.type === "date"
+            ? "Je n'ai pas compris cette date. Écrivez-la au format JJ/MM/AAAA (par exemple 12/10/2026)."
+            : "Je n'ai pas compris. Pouvez-vous reformuler en quelques mots ?",
+      });
+      askQuestion(interview);
+      return;
+    }
+
+    interviewBusy.current = true;
+    try {
+      const result = await assistantSaveAnswer(interview.journeyId, q.key, saved as string);
+      if (!result.ok) {
+        pushTurn({ from: "assistant", text: `Je n'ai pas pu enregistrer cette réponse (${result.error}). Votre brouillon reste en l'état ; nous pouvons réessayer, ou continuer dans le formulaire.` });
+        askQuestion(interview);
+        return;
+      }
+    } catch {
+      pushTurn({ from: "assistant", text: "Je n'ai pas pu enregistrer cette réponse. Votre brouillon reste en l'état ; nous pouvons réessayer, ou continuer dans le formulaire." });
+      askQuestion(interview);
+      return;
+    } finally {
+      interviewBusy.current = false;
+    }
+    advanceInterview(interview, { ...interview.answers, [q.key]: saved as string });
+  }
+
+  function advanceInterview(iv: Interview, answers: Record<string, string>) {
+    const def = SITUATION_BY_KEY.get(iv.situation);
+    if (!def) return;
+    let next = iv.index + 1;
+    while (next < def.questions.length && answers[def.questions[next].key]) next++;
+    if (next >= def.questions.length) {
+      finishInterview({ ...iv, answers, index: def.questions.length });
+      return;
+    }
+    const updated: Interview = { ...iv, answers, index: next };
+    setInterview(updated);
+    askQuestion(updated);
+  }
+
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = input.trim();
     if (!value) return;
     setInput("");
     pushTurn({ from: "user", text: value });
+
+    // Questionnaire conversationnel en cours : la saisie vaut réponse
+    // (quelques mots d'arrêt permettent d'en sortir proprement).
+    if (interview) {
+      const normalized = normalizeOrientation(value);
+      if (["stop", "arreter", "annuler", "plus tard", "pause", "j arrete", "on arrete"].includes(normalized)) stopInterview();
+      else void answerQuestion(value, true);
+      return;
+    }
 
     // Intentions transverses
     const lowered = value.toLowerCase();
@@ -368,11 +584,13 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
         }
         const existingDraft = summary.drafts.find((d) => d.situation === situation.key);
         if (existingDraft) {
+          setPendingInterview({ journeyId: existingDraft.id, situation: situation.key, title: situation.label, answers: existingDraft.answers });
           pushTurn({
             from: "assistant",
-            text: `Vous aviez déjà commencé « ${situation.label} » : votre brouillon vous attend, rien à recréer.`,
+            text: `Vous aviez déjà commencé « ${situation.label} » : votre brouillon vous attend, rien à recréer. Je peux vous poser les questions une à une, ici même.`,
             chips: [
-              { label: "Reprendre le brouillon", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${existingDraft.id}` },
+              { label: "Répondre avec l'assistant, question par question", kind: "scenario", scenarioId: "__entretien__" },
+              { label: "Ouvrir le formulaire", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${existingDraft.id}` },
               { label: "Comprendre ce parcours", kind: "link", href: `/accompagnement?besoin=${encodeURIComponent(situation.key)}` },
             ],
           });
@@ -432,6 +650,18 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
   }
 
   function handleSuggestion(suggestion: Suggestion) {
+    if (suggestion.kind === "reponse") {
+      void answerQuestion(suggestion.answerValue ?? "", false, suggestion.label);
+      return;
+    }
+    if (suggestion.scenarioId === "__entretien__") {
+      if (pendingInterview) startInterview(pendingInterview);
+      return;
+    }
+    if (suggestion.scenarioId === "__stop_entretien__") {
+      stopInterview();
+      return;
+    }
     if (suggestion.kind === "link" && suggestion.href) {
       router.push(suggestion.href);
       pushTurn({ from: "assistant", text: `J'ouvre la page « ${suggestion.label} ».` });
@@ -529,6 +759,16 @@ export function AssistantWidget({ role, userName, summary, canAct = false }: { r
               <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(1))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "En cours…" : "Demain"}</button>
               <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(3))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>Dans 3 jours</button>
               <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(7))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>Dans 1 semaine</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
+            </div>
+          </>
+        )}
+        {action.kind === "finaliser" && (
+          <>
+            <p className="text-sm font-semibold text-emerald-950">Préparer le plan « {action.title} » à partir de ces réponses ?</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Je génère vos étapes et vos pièces depuis les réponses relues ci-dessus.{action.evenement ? " Un projet d'événement sera créé dans votre espace, comme depuis le formulaire." : ""} Aucune transmission à votre bureau : ce sera une autre étape, seulement si vous la demandez.</p>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "Préparation…" : "Oui, préparer mon plan"}</button>
               <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
             </div>
           </>

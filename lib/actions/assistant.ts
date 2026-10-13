@@ -23,7 +23,7 @@ import { journeys } from "@/db/schema";
 import { AuthError, getSession, requireRole } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { SITUATION_BY_KEY } from "@/lib/situations";
-import { saveJourneyDraft, setTaskReminder, transmitJourneyCore } from "@/lib/actions/journeys";
+import { finalizeJourney, saveJourneyDraft, setTaskReminder, transmitJourneyCore } from "@/lib/actions/journeys";
 
 export type AResult = { ok: true; message: string; id?: number } | { ok: false; error: string };
 
@@ -101,6 +101,63 @@ export async function assistantTransmit(journeyId: number): Promise<AResult> {
         ? `Ce parcours avait déjà été transmis : voici son dossier ${result.reference}.`
         : `Parcours transmis à votre bureau d'accompagnement — dossier ${result.reference}. Le suivi continue dans le dossier ; votre bureau pourra vous demander des pièces, et vous serez prévenu·e ici.`,
       id: result.caseId,
+    };
+  } catch (e) {
+    return refuse(e);
+  }
+}
+
+/**
+ * Questionnaire conversationnel : enregistre UNE réponse dans le brouillon
+ * du membre (fusion côté serveur, propriété revérifiée). Le journal d'audit
+ * trace la clé de la question — jamais sa valeur, qui peut être personnelle.
+ */
+export async function assistantSaveAnswer(journeyId: number, key: string, value: string): Promise<AResult> {
+  try {
+    const user = await membreActif();
+    if (!Number.isSafeInteger(journeyId) || !key || value.length > 600) {
+      return { ok: false, error: "Réponse invalide." };
+    }
+    const [j] = await db
+      .select({ id: journeys.id, situation: journeys.situation, status: journeys.status })
+      .from(journeys)
+      .where(and(eq(journeys.id, journeyId), eq(journeys.userId, user.id)))
+      .limit(1);
+    if (!j) return { ok: false, error: "Brouillon introuvable." };
+    if (j.status !== "questionnaire") return { ok: false, error: "Ce questionnaire est déjà terminé." };
+    const result = await saveJourneyDraft(j.situation, { [key]: value }, journeyId);
+    if (!result.ok) return result;
+    await logAudit({ actorId: user.id, action: "assistant_reponse_questionnaire", entityType: "journey", entityId: journeyId, metadata: { via: VIA, question: key } });
+    return { ok: true, message: "Réponse enregistrée." };
+  } catch (e) {
+    return refuse(e);
+  }
+}
+
+/**
+ * Après la relecture complète dans la conversation : prépare le plan du
+ * parcours (étapes et pièces issues des règles). Pour un événement, un
+ * projet est créé, comme depuis le formulaire. Aucune transmission au
+ * bureau n'est faite ici — elle reste une action séparée et confirmée.
+ */
+export async function assistantFinalize(journeyId: number): Promise<AResult> {
+  try {
+    const user = await membreActif();
+    if (!Number.isSafeInteger(journeyId)) return { ok: false, error: "Parcours invalide." };
+    const [j] = await db
+      .select({ id: journeys.id, situation: journeys.situation, status: journeys.status })
+      .from(journeys)
+      .where(and(eq(journeys.id, journeyId), eq(journeys.userId, user.id)))
+      .limit(1);
+    if (!j) return { ok: false, error: "Brouillon introuvable." };
+    if (j.status !== "questionnaire") return { ok: false, error: "Le plan de ce parcours est déjà préparé." };
+    const result = await finalizeJourney(journeyId, j.situation === "evenement" ? "new" : "");
+    if (!result.ok) return result;
+    await logAudit({ actorId: user.id, action: "assistant_finalisation_questionnaire", entityType: "journey", entityId: journeyId, metadata: { via: VIA, situation: j.situation } });
+    return {
+      ok: true,
+      message: `Votre plan est prêt : vos étapes et vos pièces sont préparées à partir des réponses relues ensemble. Rien n'a été transmis — quand vous le souhaiterez, vous pourrez transmettre ce parcours à votre bureau, ici ou depuis la page de suivi.`,
+      id: journeyId,
     };
   } catch (e) {
     return refuse(e);

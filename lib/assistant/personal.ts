@@ -18,7 +18,7 @@ export type AssistantSummary = {
     /** Vrai quand le parcours a déjà été transmis au bureau (dossier créé). */
     transmitted: boolean;
   }[];
-  drafts: { id: number; title: string; situation: string }[];
+  drafts: { id: number; title: string; situation: string; answers: Record<string, string> }[];
   cases: { id: number; reference: string; title: string; status: string }[];
   dueTasks: { label: string; dueAt: string; official: boolean; journeyId: number }[];
   incoming: number;
@@ -36,7 +36,8 @@ export type AssistantSummary = {
 export type AssistantAction =
   | { kind: "creer_brouillon"; situation: string; situationLabel: string }
   | { kind: "rappel"; taskId: number; journeyId: number; taskLabel: string }
-  | { kind: "transmettre"; journeyId: number; title: string };
+  | { kind: "transmettre"; journeyId: number; title: string }
+  | { kind: "finaliser"; journeyId: number; title: string; evenement: boolean };
 
 export type PersonalAnswer = { text: string; chips: Suggestion[] };
 
