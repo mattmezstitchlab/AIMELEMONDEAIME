@@ -89,6 +89,29 @@ export const THEME_META: Record<string, { image: string; icon: "sante" | "famill
   cotisations: { image: "/images/hero-cotisations.jpg", icon: "cotisations", desc: "Calcul, échéances et régularisations.", tagline: "Comprendre et anticiper vos cotisations, simplement." },
 };
 
+/** Code couleur des familles : une couleur, un sens (voir CHARTE-VISUELLE.md). */
+export type ColorFamily = "demarche" | "terre" | "arts" | "savoirs" | "encre";
+
+export const COLOR_FAMILY_LABELS: Record<ColorFamily, string> = {
+  demarche: "Démarches et droits",
+  terre: "Terre et quotidien",
+  arts: "Arts et rencontres",
+  savoirs: "Savoirs et générations",
+  encre: "Information générale",
+};
+
+/** Famille de couleur de chaque thématique d'information. */
+export const THEME_TONE: Record<string, ColorFamily> = {
+  famille: "demarche",
+  sante: "demarche",
+  argent: "demarche",
+  logement: "demarche",
+  retraite: "demarche",
+  emploi: "demarche",
+  cotisations: "demarche",
+  mariage: "arts",
+};
+
 export const CASE_EVENT_LABELS: Record<string, string> = {
   creation: "Dossier créé",
   soumission: "Dossier envoyé",

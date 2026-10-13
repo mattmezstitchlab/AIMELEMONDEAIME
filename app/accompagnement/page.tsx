@@ -17,7 +17,7 @@ export default async function Accompagnement({ searchParams }: { searchParams: P
   const cats = Object.keys(ORGANISM_CATEGORY_LABEL);
   return (
     <PublicPage>
-      <Hero image="/images/hero-conseiller.jpg" eyebrow="AIME® · Accompagnement" title="Vous expliquez votre situation." subtitle="AIME® vous aide à trouver les personnes, les ressources et les démarches pour avancer — dans un seul espace, sans recommencer votre histoire à chaque étape."
+      <Hero tone="demarche" image="/images/hero-conseiller.jpg" eyebrow="AIME® · Accompagnement" title="Vous expliquez votre situation." subtitle="AIME® vous aide à trouver les personnes, les ressources et les démarches pour avancer — dans un seul espace, sans recommencer votre histoire à chaque étape."
         actions={<><LinkButton href="/espace/demarches/nouvelle">Commencer une démarche <Icon name="arrow" className="h-4 w-4" /></LinkButton><LinkButton href="#organismes" variant="ghost">Les organismes de référence</LinkButton></>} />
       {selected && (
         <section className="border-b border-slate-200 bg-[#fafaf9]">

@@ -1,16 +1,22 @@
 @import "tailwindcss";
 
 /*
- * AIME® — design system encre, papier et couleurs sémantiques de carte.
- * Les anciennes classes « emerald » restent pour compatibilité des composants,
- * mais leur palette est neutre. La conformité RGAA/WCAG nécessite encore un audit humain.
+ * AIME® — système typographique et code couleur (voir CHARTE-VISUELLE.md).
+ * Principes : grille, typographie dominante, peu de couleurs, chaque couleur a un sens fixe.
+ * Chaque couleur de famille est testée WCAG : texte blanc sur bleu/vert/vermillon (≥ 5,8:1),
+ * texte encre sur ocre (8,6:1). La couleur n'est jamais le seul support d'information.
  */
 @theme {
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  /* Palette monochrome « encre » (référence : Linear / Notion / Stripe).
-     Les boutons et actions primaires passent en noir profond ; la couleur est
-     réservée aux états et aux marqueurs de la carte (primaires Bauhaus). */
+  /* Code couleur des familles (une couleur = un sens). */
+  --color-demarche: #1f4e8c; /* démarches, droits, administration */
+  --color-terre: #2f6b3e;    /* terre & quotidien : producteurs, dons, prêts, jardins */
+  --color-arts: #b8381f;     /* arts & rencontres : artistes, ateliers, événements */
+  --color-savoirs: #e9b038;  /* savoirs & générations : transmission, mémoire (texte encre) */
+  --color-encre: #1d1d1f;    /* texte, bandeaux neutres, actions principales */
+
+  /* Palette neutre historique (compatibilité des composants existants). */
   --color-emerald-50: #fafaf9;
   --color-emerald-100: #f0f0ee;
   --color-emerald-200: #e2e2df;

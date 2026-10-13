@@ -58,10 +58,18 @@ export default async function HomePage() {
     <PublicPage>
       <Hero
         size="xl"
+        tone="encre"
         image="/images/hero-accueil.jpg"
         eyebrow="AIME® · Le Monde Aime"
         title={<>La terre, les arts<br />et les générations.</>}
         subtitle="Trouvez près de vous de quoi vivre, créer et transmettre. Dites votre situation : AIME® vous oriente vers les personnes, les ressources et les démarches pour avancer."
+        footer={
+          <div className="grid h-3 grid-cols-3 overflow-hidden rounded-full" aria-hidden="true">
+            <span className="bg-terre" />
+            <span className="bg-arts" />
+            <span className="bg-savoirs" />
+          </div>
+        }
       >
         <div className="mt-8 max-w-xl"><OrientationEntry variant="hero" /></div>
         <p className="mt-5 text-sm text-white/75">

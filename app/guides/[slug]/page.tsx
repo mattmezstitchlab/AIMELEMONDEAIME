@@ -7,7 +7,7 @@ import { Icon } from "@/components/icon";
 import { db } from "@/db";
 import { articles } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
+import { ARTICLE_CATEGORY_LABELS, THEME_META, THEME_TONE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +27,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
     <PublicPage>
       <Hero
         size="md"
+        tone={THEME_TONE[article.category] ?? "encre"}
         image={THEME_META[article.category]?.image ?? "/images/hero-campagne.jpg"}
         eyebrow={`${ARTICLE_CATEGORY_LABELS[article.category] ?? article.category} · ${article.kind === "guide" ? "Guide pratique" : "Article"}`}
         title={article.title}

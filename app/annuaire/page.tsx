@@ -18,7 +18,7 @@ export default async function AnnuairePage({ searchParams }: { searchParams: Pro
 
   return (
     <PublicPage>
-      <Hero image="/images/hero-conseiller.jpg" eyebrow="Points d'accueil AIME® · démonstration" title="Un point d'accueil près de chez vous" subtitle="Lieux fictifs de démonstration. Pour les organismes officiels (MSA, CAF, CPAM…), consultez la page Accompagnement.">
+      <Hero tone="terre" image="/images/hero-conseiller.jpg" eyebrow="Points d'accueil AIME® · démonstration" title="Un point d'accueil près de chez vous" subtitle="Lieux fictifs de démonstration. Pour les organismes officiels (MSA, CAF, CPAM…), consultez la page Accompagnement.">
         <form role="search" className="mt-9 flex max-w-xl overflow-hidden rounded-lg bg-white shadow-xl">
           <label htmlFor="q" className="sr-only">Ville, code postal ou région</label>
           <div className="flex flex-1 items-center gap-2 px-4">

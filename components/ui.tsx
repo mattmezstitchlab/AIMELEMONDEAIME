@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CASE_STATUS_LABELS, CASE_STATUS_STYLES } from "@/lib/constants";
+import { CASE_STATUS_LABELS, CASE_STATUS_STYLES, type ColorFamily } from "@/lib/constants";
 import { Icon } from "@/components/icon";
 
 export function Logo({ light = false, size = "md" }: { light?: boolean; size?: "sm" | "md" }) {
@@ -20,44 +20,65 @@ export function Logo({ light = false, size = "md" }: { light?: boolean; size?: "
   );
 }
 
-/** Grand visuel immersif plein écran pour les pages publiques. */
+const TONE_CLASSES: Record<ColorFamily, { band: string; eyebrow: string; sub: string }> = {
+  demarche: { band: "bg-demarche text-white", eyebrow: "text-white/85", sub: "text-white/90" },
+  terre: { band: "bg-terre text-white", eyebrow: "text-white/85", sub: "text-white/90" },
+  arts: { band: "bg-arts text-white", eyebrow: "text-white/85", sub: "text-white/90" },
+  savoirs: { band: "bg-savoirs text-encre", eyebrow: "text-encre/80", sub: "text-encre/85" },
+  encre: { band: "bg-encre text-white", eyebrow: "text-white/70", sub: "text-white/85" },
+};
+
+/**
+ * Héros typographique : la typographie domine, la couleur porte la famille (code couleur),
+ * l'image est une colonne de la grille et non un fond. Alignement à gauche, grille de 12 colonnes.
+ */
 export function Hero({
   image,
+  tone = "encre",
   eyebrow,
   title,
   subtitle,
   actions,
+  footer,
   size = "lg",
   children,
 }: {
-  image: string;
+  image?: string;
+  tone?: ColorFamily;
   eyebrow?: string;
   title: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
+  footer?: ReactNode;
   size?: "xl" | "lg" | "md";
   children?: ReactNode;
 }) {
-  const height = size === "xl" ? "min-h-[92vh]" : size === "lg" ? "min-h-[72vh]" : "min-h-[52vh]";
+  const t = TONE_CLASSES[tone];
+  const padding = size === "xl" ? "pb-16 pt-28 md:pb-24 md:pt-36" : size === "lg" ? "pb-14 pt-24 md:pb-20 md:pt-28" : "pb-12 pt-20 md:pb-16 md:pt-24";
   return (
-    <section className={`relative isolate flex ${height} items-end overflow-hidden bg-[#0f1a14] md:items-center`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
-      <div className="hero-overlay absolute inset-0 z-10" />
-      <div className="hero-overlay-bottom absolute inset-0 z-10 md:hidden" />
-      <div className="animate-fade-up relative z-20 mx-auto w-full max-w-7xl px-6 pb-16 pt-40 md:py-32 lg:px-8">
-        <div className="max-w-2xl">
-          {eyebrow && (
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white backdrop-blur">
-              {eyebrow}
-            </p>
-          )}
-          <h1 className="text-4xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-6xl">{title}</h1>
-          {subtitle && <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/85 sm:text-xl">{subtitle}</p>}
-          {actions && <div className="mt-9 flex flex-wrap gap-3">{actions}</div>}
-          {children}
+    <section className={`relative isolate overflow-hidden ${t.band}`}>
+      <div className={`animate-fade-up relative mx-auto grid w-full max-w-7xl gap-12 px-6 lg:grid-cols-12 lg:gap-10 lg:px-8 ${padding}`}>
+        <div className={`flex flex-col justify-between gap-10 ${image ? "lg:col-span-7" : "lg:col-span-12"}`}>
+          <div>
+            {eyebrow && (
+              <p className={`flex items-center gap-3 border-t border-current pt-4 text-xs font-semibold uppercase tracking-[0.16em] ${t.eyebrow}`}>
+                {eyebrow}
+              </p>
+            )}
+            <h1 className="mt-8 text-[clamp(2.75rem,7vw,6.25rem)] font-bold leading-[0.95] tracking-[-0.035em]">{title}</h1>
+            {subtitle && <p className={`mt-8 max-w-xl text-lg leading-relaxed sm:text-xl ${t.sub}`}>{subtitle}</p>}
+            {actions && <div className="mt-9 flex flex-wrap gap-3">{actions}</div>}
+            {children}
+          </div>
         </div>
+        {image && (
+          <div className="lg:col-span-5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt="" className="animate-hero-zoom aspect-[4/5] w-full rounded-2xl object-cover" />
+          </div>
+        )}
       </div>
+      {footer && <div className="relative mx-auto w-full max-w-7xl px-6 pb-10 lg:px-8">{footer}</div>}
     </section>
   );
 }

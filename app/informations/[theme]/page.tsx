@@ -7,7 +7,7 @@ import { Icon } from "@/components/icon";
 import { db } from "@/db";
 import { articles } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
-import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
+import { ARTICLE_CATEGORY_LABELS, THEME_META, THEME_TONE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +30,7 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
   return (
     <PublicPage>
       <Hero
+        tone={THEME_TONE[theme] ?? "encre"}
         image={meta.image}
         eyebrow="Information par thématique"
         title={label}
