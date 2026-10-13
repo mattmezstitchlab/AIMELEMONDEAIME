@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, like, sql } from "drizzle-orm";
 import {
   offices,
+  organisms,
   users,
   procedureTypes,
   cases,
@@ -44,6 +45,8 @@ import {
   journeys,
   type FormFieldDef,
 } from "./schema";
+import { defaultUniverses } from "../lib/lma";
+import { ORGANISMS_SEED, RULES_VERSION, SITUATION_BY_KEY } from "../lib/situations";
 
 export async function seedDatabase(db: NodePgDatabase) {
 
@@ -60,7 +63,7 @@ export async function seedDatabase(db: NodePgDatabase) {
     profile_photos, local_orders, local_products, local_points,
     worker_availabilities, audit_logs, notifications, messages,
     appointments, payments, documents, case_events, cases,
-    procedure_types, articles, users, offices
+    procedure_types, articles, organisms, users, offices
     RESTART IDENTITY CASCADE`);
 
   console.log("Création des bureaux locaux…");
@@ -1462,6 +1465,11 @@ export async function seedDatabase(db: NodePgDatabase) {
     { actorId: admin.id, action: "initialisation_demo", entityType: "system", metadata: { info: "Jeu de données de démonstration initialisé." } },
   ]);
 
+  console.log("Ajout de l'annuaire des organismes et des exemples Le Monde Aime…");
+  await seedLmaDemoIfEmpty(db);
+  await seedAimeIfEmpty(db);
+  await seedCommunityDemoIfEmpty(db);
+
   console.log("Terminé. Comptes de démonstration (mot de passe : Demo1234!) :");
   console.log("  Administrateur : admin@aime-demo.fr");
   console.log("  Gestionnaire Beauce : agent.beauce@aime-demo.fr");
@@ -1471,6 +1479,239 @@ export async function seedDatabase(db: NodePgDatabase) {
   console.log("  Membre : paul.martin@exemple.fr");
   console.log("  Visite guidée (lecture seule, sans mot de passe) : demo@aime-demo.fr");
 
+}
+
+
+const DAY = 86_400_000;
+
+// ---------------------------------------------------------------------------
+// Démonstrations réintégrées au seed principal (chantier 5, réparation) :
+// ces contenus vivaient dans d'anciens fichiers jamais appelés, donc
+// absents de toute base créée par `npm run db:seed`.
+// ---------------------------------------------------------------------------
+
+/** Contrôle des liens effectué le 2026-10-11 (réponse HTTP 200). 403/000 = non joignable depuis l'environnement : à vérifier. */
+const LINK_OK = new Set(["msa", "caf", "mairie", "ccas", "france-travail", "mission-locale", "cap-emploi", "guichet-unique", "france-travail-spectacle", "guso", "audiens", "afdas", "thalie-sante", "assurance-retraite", "agirc-arrco", "info-retraite", "action-logement", "adil", "mdph", "personnes-agees", "mon-compte-formation", "crous", "impots", "france-titres", "point-justice", "france-services", "mes-droits-sociaux"]);
+const CHECKED_AT = new Date("2026-10-11T12:00:00Z");
+
+/** Migrations de marque non destructives (aucune ligne supprimée). */
+async function rebrandData(db: NodePgDatabase) {
+  await db.execute(sql`update users set email = replace(email, '@msa-demo.fr', '@aime-demo.fr') where email like '%@msa-demo.fr'`);
+  await db.execute(sql`update cases set reference = replace(reference, 'MSA-', 'DOS-') where reference like 'MSA-%'`);
+  await db.execute(sql`update messages set body = replace(replace(replace(body, 'bureau MSA', 'équipe d''accompagnement'), 'caisse MSA', 'équipe d''accompagnement'), 'MSA-20', 'DOS-20'), subject = replace(coalesce(subject,''), 'bureau MSA', 'équipe d''accompagnement')`);
+  await db.execute(sql`update case_events set message = replace(replace(replace(message, 'bureau MSA', 'équipe d''accompagnement'), 'caisse MSA', 'équipe d''accompagnement'), 'MSA-20', 'DOS-20')`);
+  await db.execute(sql`update notifications set title = replace(replace(title, 'bureau MSA', 'équipe d''accompagnement'), 'caisse MSA', 'équipe d''accompagnement'), body = replace(replace(replace(body, 'bureau MSA', 'équipe d''accompagnement'), 'caisse MSA', 'équipe d''accompagnement'), 'MSA-20', 'DOS-20')`);
+}
+
+
+export async function seedAimeIfEmpty(db: NodePgDatabase) {
+  const [any] = await db.select({ id: organisms.id }).from(organisms).limit(1);
+  if (!any) {
+    await db.insert(organisms).values(ORGANISMS_SEED.map((o) => ({
+      slug: o.slug, name: o.name, category: o.category, role: o.role, audience: o.audience, url: o.url,
+      source: o.contentSource ?? o.url,
+      linkStatus: LINK_OK.has(o.slug) ? "verifie" : "a_verifier",
+      contentStatus: o.contentSource ? "verifie" : "a_verifier",
+      verifiedAt: LINK_OK.has(o.slug) ? CHECKED_AT : null,
+    })));
+  }
+  const [demo] = await db.select({ id: journeys.id }).from(journeys).where(eq(journeys.isDemo, true)).limit(1);
+  if (demo) return false;
+  const jean = (await db.select({ id: users.id }).from(users).where(eq(users.email, "jean.dupont@exemple.fr")).limit(1))[0]?.id;
+  const tom = (await db.select({ id: users.id }).from(users).where(eq(users.email, "tom.leroy@exemple.fr")).limit(1))[0]?.id;
+  const [project] = await db.select().from(projects).where(and(like(projects.title, "Exemple · Fête d'été%"))).limit(1);
+  if (!jean || !project) return false;
+  const answers = { event_type: "village", organizer_nature: "entreprise", date: project.startsAt.toISOString().slice(0, 10), horaires: "11 h – 23 h", lieu: project.city, acces: "public", public: "80", buvette: "oui", discipline: "Musique", budget: "600", technique: "Grange couverte, 2 prises" };
+  const def = SITUATION_BY_KEY.get("evenement")!;
+  const rules = def.build(answers);
+  const [j] = await db.insert(journeys).values({
+    userId: jean, situation: "evenement", title: `Événement à ${project.city} (exemple fictif)`, answers, status: "en_cours", projectId: project.id, rulesVersion: RULES_VERSION, isDemo: true,
+    summary: "Exemple fictif : fête d'été à la ferme, ouverte au public, environ 80 personnes, buvette, recherche d'un musicien.",
+  }).returning({ id: journeys.id });
+  await db.insert(journeyTasks).values(rules.map((r, i) => ({ journeyId: j.id, kind: r.kind, label: r.label, detail: r.detail ?? "", reason: r.reason, organismSlugs: r.organisms ?? [], officialUrl: r.officialUrl ?? null, frameworkFlag: r.frameworkFlag ?? null, sortOrder: i, status: i === 0 ? ("pret" as const) : ("a_preparer" as const) })));
+  await db.insert(journeyEvents).values([{ journeyId: j.id, actorId: jean, message: "Démarche commencée (exemple fictif)." }, { journeyId: j.id, actorId: jean, message: `Plan préparé avec les règles ${RULES_VERSION}. Projet relié.` }]);
+  if (tom) await db.insert(artistEngagements).values({ journeyId: j.id, projectId: project.id, organizerId: jean, artistId: tom, eventDate: project.startsAt, requestMessage: "Exemple fictif : concert acoustique en fin de journée, dans la grange.", isDemo: true });
+  return true;
+}
+
+/** Met à niveau les anciennes annonces (univers et type de publication) sans rien supprimer. */
+async function normalizeLegacyListings(db: NodePgDatabase) {
+  const rows = await db.select({ id: communityListings.id, category: communityListings.category, action: communityListings.action, universes: communityListings.universes })
+    .from(communityListings);
+  for (const row of rows) {
+    if (row.universes.length === 0) {
+      await db.update(communityListings).set({ universes: defaultUniverses(row.category), publicationType: row.action === "cherche" ? "besoin" : "proposition" }).where(eq(communityListings.id, row.id));
+    }
+  }
+}
+
+/** Ajoute les profils, annonces, projet et cercle de démonstration (tous marqués fictifs). */
+export async function seedLmaDemoIfEmpty(db: NodePgDatabase) {
+  await normalizeLegacyListings(db);
+  const [already] = await db.select({ id: users.id }).from(users).where(eq(users.email, "tom.leroy@exemple.fr")).limit(1);
+  if (already) return false;
+
+  const members = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.role, "membre"));
+  const byEmail = (email: string) => members.find((m) => m.email === email)?.id;
+  const jean = byEmail("jean.dupont@exemple.fr");
+  const marie = byEmail("marie.lefevre@exemple.fr");
+  const paul = byEmail("paul.martin@exemple.fr");
+  const lucas = byEmail("lucas.moreau@exemple.fr");
+  const amelie = byEmail("amelie.roux@exemple.fr");
+  if (!jean || !marie || !paul) { console.warn("[demo] Comptes membres de base absents : démonstration Le Monde Aime ignorée."); return false; }
+
+  const pw = await bcrypt.hash("Demo1234!", 10);
+  const base = { passwordHash: pw, role: "membre" as const, onboardingCompleted: true, isDemo: true, profileVisible: true, birthDate: "1985-05-14" };
+  const [tom, odette, veillees] = await db.insert(users).values([
+    { ...base, email: "tom.leroy@exemple.fr", fullName: "Tom Leroy", displayName: "Tom, musicien", bio: "Guitariste et accordéoniste, j'anime bals, veillées et fêtes de village. Fiche fictive de démonstration.", activities: ["Musicien", "Technicien son", "Parent"], universes: ["arts"], offersText: "Concerts acoustiques, sonorisation légère", needsText: "Un lieu pour répéter", transmitText: "L'accordéon", profileCity: "Chartres", profileLat: "48.44", profileLng: "1.52", travelRadiusKm: 60, availabilityNote: "Week-ends et soirées d'été" } as never,
+    { ...base, email: "odette.lambert@exemple.fr", fullName: "Odette Lambert", displayName: "Odette", bio: "Couturière à la retraite, j'aime transmettre les gestes simples pour réparer et créer. Fiche fictive de démonstration.", activities: ["Couturière", "Grand-mère", "Bénévole"], universes: ["savoirs"], offersText: "Ateliers couture, retouches", transmitText: "La couture et la réparation de vêtements", profileCity: "Chartres", profileLat: "48.47", profileLng: "1.46", travelRadiusKm: 20, availabilityNote: "Mercredis après-midi" } as never,
+    { ...base, email: "veillees@exemple.fr", fullName: "Association Les Veillées de Beauce", displayName: "Association Les Veillées de Beauce", bio: "Association locale fictive : veillées, contes et ateliers entre générations.", activities: ["Association", "Animation culturelle"], universes: ["arts", "savoirs"], offersText: "Salle pour répéter, ateliers intergénérationnels", needsText: "Bénévoles pour l'été", transmitText: "Contes et recettes de la Beauce", profileCity: "Chartres", profileLat: "48.41", profileLng: "1.55", travelRadiusKm: 30, availabilityNote: "Week-ends" } as never,
+  ]).returning({ id: users.id });
+
+  // Profils des comptes de démonstration existants (uniquement s'ils n'ont pas encore de nom d'affichage).
+  const enrich = async (id: number | undefined, set: Partial<typeof users.$inferInsert>) => {
+    if (!id) return;
+    await db.update(users).set({ isDemo: true, ...set }).where(and(eq(users.id, id), isNull(users.displayName)));
+  };
+  await enrich(jean, { displayName: "Ferme des Blés — Jean", bio: "Agriculteur en Beauce : farine à la meule, accueil à la ferme et fête d'été. Fiche fictive.", activities: ["Agriculteur", "Parent", "Bénévole"], universes: ["terre", "savoirs"], offersText: "Farine, huile de colza, accueil à la ferme", needsText: "Une sono pour la fête", transmitText: "Le travail du blé", profileVisible: true, profileCity: "Chartres", profileLat: "48.45", profileLng: "1.50", travelRadiusKm: 30, availabilityNote: "Soirées et week-ends" });
+  await enrich(marie, { displayName: "Ferme des Herbages — Marie", bio: "Exploitante en Bretagne : légumes, œufs et pain au levain. Fiche fictive.", activities: ["Exploitante", "Boulangère"], universes: ["terre"], offersText: "Légumes, œufs, pain", profileVisible: true, profileCity: "Saint-Brieuc", profileLat: "48.51", profileLng: "-2.76", travelRadiusKm: 30 });
+  await enrich(paul, { displayName: "Paul", bio: "Retraité jardinier et conteur. Fiche fictive.", activities: ["Retraité", "Jardinier", "Conteur"], universes: ["savoirs", "terre"], transmitText: "Le greffage des arbres fruitiers et les contes", profileVisible: true, profileCity: "Chartres", profileLat: "48.46", profileLng: "1.47", travelRadiusKm: 15 });
+  await enrich(lucas, { displayName: "Lucas", bio: "Profil volontairement non affiché sur la carte (exemple de discrétion).", activities: ["Étudiant", "Coup de main à vélo"], profileVisible: false });
+  await enrich(amelie, { displayName: "Amélie — maraîchage", bio: "Maraîchère près de Nantes. Fiche fictive.", activities: ["Maraîchère"], universes: ["terre"], offersText: "Paniers de légumes, miel", profileVisible: true, profileCity: "Nantes", profileLat: "47.24", profileLng: "-1.53" });
+
+  await db.insert(artistProfiles).values({
+    userId: tom.id, disciplines: ["Musique", "Son et lumière"],
+    presentation: "Duo acoustique guitare et accordéon : répertoire populaire, bals et veillées. (Fiche fictive de démonstration)",
+    zoneNote: "Eure-et-Loir et départements voisins", availabilityNote: "Week-ends et soirées d'été, réservation un mois à l'avance",
+    techSheet: "Durée : 2 × 45 minutes.\nBesoins : 2 prises électriques, 3 m × 2 m d'espace couvert.\nSon : sonorisation légère fournie jusqu'à 80 personnes ; au-delà, prévoir une sono complémentaire.\nInstallation : 1 heure.",
+  });
+
+  const soon = new Date(Date.now() + 3 * DAY);
+  const until = new Date(Date.now() + 45 * DAY);
+  const mk = (ownerId: number, v: Partial<typeof communityListings.$inferInsert> & { title: string; description: string; category: typeof communityListings.$inferInsert["category"]; action: typeof communityListings.$inferInsert["action"]; city: string; lat: string; lng: string }) =>
+    ({ condition: "sans_objet", quantity: 1, unit: "pièce", attributes: {}, pickupDetails: "À convenir après accord", isDemo: true, ownerId, ...v }) as typeof communityListings.$inferInsert;
+  const [lConcert, lCouture, lAtelier] = await db.insert(communityListings).values([
+    mk(tom.id, { action: "prestation", category: "arts_rencontres", title: "Exemple · Concert acoustique pour fête ou veillée", description: "Duo guitare et accordéon, 2 × 45 minutes, sonorisation légère comprise. Tarif défini sur devis selon le lieu et la durée.", priceMode: "devis", universes: ["arts"], unit: "prestation", city: "Chartres", lat: "48.44", lng: "1.52", availableFrom: soon, availableUntil: until }),
+    mk(odette.id, { action: "transmission", category: "savoirs_transmission", title: "Exemple · Atelier couture : réparer et retoucher ses vêtements", description: "Séance conviviale pour apprendre les gestes de base. Matériel fourni, tous âges accompagnés d'un adulte.", priceMode: "gratuit", universes: ["savoirs"], quantity: 6, unit: "place", city: "Chartres", lat: "48.47", lng: "1.46", availableFrom: soon, availableUntil: until }),
+    mk(veillees.id, { action: "transmission", category: "savoirs_transmission", title: "Exemple · Atelier intergénérationnel : contes et recettes de la Beauce", description: "Un après-midi pour partager récits, recettes et chansons entre générations. Les enfants viennent accompagnés de leurs responsables.", priceMode: "gratuit", universes: ["savoirs", "arts"], quantity: 12, unit: "place", city: "Chartres", lat: "48.41", lng: "1.55", availableFrom: soon, availableUntil: until }),
+  ]).returning();
+  await db.insert(communityListings).values([
+    mk(veillees.id, { action: "pret", category: "lieux_espaces", title: "Exemple · Salle des fêtes prêtée pour répéter", description: "Salle de 60 m² disponible en semaine pour les groupes de musique ou de théâtre. Prêt gratuit, remise en état à la fin.", priceMode: "gratuit", universes: ["arts"], city: "Chartres", lat: "48.41", lng: "1.55", availableFrom: soon, availableUntil: until }),
+    mk(jean, { action: "vends", category: "produits_locaux", title: "Exemple · Farine paysanne T65 (sachet 2 kg)", description: "Blé de la ferme moulu à la meule de pierre. Retrait à la ferme.", condition: "neuf", priceMode: "prix", price: "4.80", quantity: 25, unit: "sachet", universes: ["terre"], city: "Chartres", lat: "48.45", lng: "1.50" }),
+    mk(jean, { action: "cherche", category: "evenementiel", title: "Exemple · Je cherche une sono pour la fête d'été à la ferme", description: "Enceinte et micro pour environ 80 personnes, un samedi de l'été. Sans budget fixé : à discuter.", publicationType: "besoin", priceMode: "prix", universes: ["arts", "terre"], city: "Chartres", lat: "48.45", lng: "1.50" }),
+    mk(tom.id, { action: "cherche", category: "lieux_espaces", title: "Exemple · Nous cherchons un lieu pour répéter", description: "Petit groupe de musique, répétitions le soir, environ 10 personnes.", publicationType: "besoin", priceMode: "prix", universes: ["arts"], city: "Chartres", lat: "48.44", lng: "1.52" }),
+  ]);
+
+  // ---- Projet partagé : fête d'été à la ferme
+  const [project] = await db.insert(projects).values({
+    ownerId: jean, title: "Exemple · Fête d'été à la ferme des Blés",
+    intention: "Réunir producteurs, musiciens, associations et voisins autour d'une journée à la ferme : repas, concert, atelier entre générations. Projet fictif de démonstration.",
+    city: "Chartres", lat: "48.45", lng: "1.50", startsAt: new Date(Date.now() + 20 * DAY), endsAt: new Date(Date.now() + 20 * DAY + 9 * 3_600_000),
+    universes: ["terre", "arts", "savoirs"], isDemo: true,
+    program: [{ time: "11 h", label: "Accueil et visite de la ferme" }, { time: "13 h", label: "Repas partagé avec les produits locaux" }, { time: "15 h", label: "Atelier couture et contes entre générations" }, { time: "18 h", label: "Concert dans la grange" }],
+  }).returning();
+  await db.insert(projectMembers).values([
+    { projectId: project.id, userId: jean, role: "organisateur", status: "accepte" },
+    { projectId: project.id, userId: tom.id, role: "participant", status: "accepte" },
+    { projectId: project.id, userId: odette.id, role: "participant", status: "accepte" },
+    { projectId: project.id, userId: veillees.id, role: "participant", status: "demande" },
+  ]);
+  const [needTables, needMusic, needAtelier] = await db.insert(projectNeeds).values([
+    { projectId: project.id, text: "tables pliantes", quantity: 3, category: "evenementiel" },
+    { projectId: project.id, text: "musicien pour le concert", quantity: 1, category: "arts_rencontres" },
+    { projectId: project.id, text: "atelier couture", quantity: 1, category: "savoirs_transmission" },
+    { projectId: project.id, text: "pain et légumes pour le repas", quantity: 20, category: "produits_locaux" },
+    { projectId: project.id, text: "sono", quantity: 1, category: "evenementiel" },
+  ]).returning();
+
+  const [tablesListing] = await db.select().from(communityListings).where(and(eq(communityListings.ownerId, marie), eq(communityListings.action, "loue"))).limit(1);
+  const start = new Date(Date.now() + 20 * DAY);
+  const end = new Date(Date.now() + 20 * DAY + 9 * 3_600_000);
+  const reqs: Array<{ need: number; listing: number; qty: number; status: "demandee" | "reservee"; message: string; period?: boolean }> = [
+    { need: needMusic.id, listing: lConcert.id, qty: 1, status: "reservee", message: "Exemple fictif : concert de la fête d'été, confirmé par Tom." },
+    { need: needAtelier.id, listing: lCouture.id, qty: 1, status: "demandee", message: "Exemple fictif : pourriez-vous animer l'atelier couture ?" },
+  ];
+  if (tablesListing) reqs.unshift({ need: needTables.id, listing: tablesListing.id, qty: 3, status: "demandee", message: "Exemple fictif : 3 tables pour le repas partagé.", period: true });
+  let n = 1;
+  for (const r of reqs) {
+    const [created] = await db.insert(communityRequests).values({
+      reference: `LMA-DEMO-P${Date.now().toString().slice(-6)}${n++}`, listingId: r.listing, requesterId: jean, quantity: r.qty, message: r.message,
+      startsAt: r.period ? start : null, endsAt: r.period ? end : null, projectId: project.id, projectNeedId: r.need, status: r.status,
+      ownerConfirmedAt: r.status === "reservee" ? new Date() : null,
+    }).returning({ id: communityRequests.id });
+    await db.update(projectNeeds).set({ requestId: created.id }).where(eq(projectNeeds.id, r.need));
+  }
+  void lAtelier;
+
+  // ---- Cercle privé familial
+  const [circle] = await db.insert(circles).values({ ownerId: jean, name: "Exemple · Famille Dupont — recettes et souvenirs", kind: "famille", description: "Cercle privé fictif : recettes, photos et récits de famille.", isDemo: true }).returning();
+  await db.insert(circleMembers).values([
+    { circleId: circle.id, userId: jean, role: "responsable", status: "accepte" },
+    { circleId: circle.id, userId: paul, role: "membre", status: "accepte" },
+    { circleId: circle.id, userId: marie, role: "membre", status: "invite" },
+  ]);
+  await db.insert(circlePosts).values([
+    { circleId: circle.id, authorId: jean, kind: "recette", title: "La tarte aux pommes de grand-mère", body: "Recette familiale fictive : pâte sablée, pommes de la ferme, un soupçon de cannelle. (Reste privée au cercle.)", visibility: "prive", isDemo: true },
+    { circleId: circle.id, authorId: jean, kind: "photo", title: "Album privé du mariage", body: "Contenu privé fictif : jamais visible sur la carte ni dans la recherche.", visibility: "prive", isDemo: true },
+    { circleId: circle.id, authorId: paul, kind: "recit", title: "Souvenir d'une moisson d'autrefois", body: "Récit fictif publié par son auteur : « On finissait la journée sous le noyer, avec le pain encore chaud et les histoires du village. »", visibility: "publie", isDemo: true },
+  ]);
+
+  void inArray;
+  return true;
+}
+
+/** Ajoute les exemples Le Monde Aime sans effacer les comptes ou les données existantes. */
+export async function seedCommunityDemoIfEmpty(db: NodePgDatabase) {
+  const [existing] = await db.select({ id: communityListings.id })
+    .from(communityListings).where(eq(communityListings.isDemo, true)).limit(1);
+  if (existing) return false;
+
+  const people = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.role, "membre"));
+  const findUser = (email: string) => people.find((person) => person.email === email)?.id;
+  const jean = findUser("jean.dupont@exemple.fr");
+  const marie = findUser("marie.lefevre@exemple.fr");
+  const paul = findUser("paul.martin@exemple.fr");
+  const lucas = findUser("lucas.moreau@exemple.fr") ?? jean;
+  const amelie = findUser("amelie.roux@exemple.fr") ?? marie;
+  if (!jean || !marie || !paul || !lucas || !amelie || jean === marie) {
+    console.warn("[demo] Comptes membres attendus absents, annonces Le Monde Aime non amorcées.");
+    return false;
+  }
+
+  const [coat, tables, basket, shoes] = await db.insert(communityListings).values([
+    { ownerId: marie, action: "don", category: "besoins_essentiels", title: "Exemple · Manteau d'hiver taille M", description: "Exemple fictif en bon état, lavé et remis en main propre.", condition: "bon_etat", quantity: 2, unit: "manteau", attributes: { size: "M" }, city: "Chartres", lat: "48.45", lng: "1.49", pickupDetails: "Retrait exact à convenir dans la conversation.", isDemo: true },
+    { ownerId: marie, action: "loue", category: "evenementiel", title: "Exemple · Tables pliantes pour un événement", description: "Exemple fictif. Location et caution se conviennent directement.", condition: "bon_etat", quantity: 3, unit: "table", price: "15.00", deposit: "30.00", attributes: { eventDetails: "3 tables · démonstration" }, city: "Chartres", lat: "48.45", lng: "1.49", availableFrom: new Date(Date.now() + 24 * 3600000), availableUntil: new Date(Date.now() + 30 * 86400000), pickupDetails: "Retrait à convenir après accord.", isDemo: true },
+    { ownerId: amelie, action: "vends", category: "produits_locaux", title: "Exemple · Panier de légumes de saison", description: "Offre fictive, retrait à la ferme après confirmation.", condition: "neuf", quantity: 8, unit: "panier", price: "12.00", attributes: { unit: "panier" }, city: "Nantes", lat: "47.24", lng: "-1.53", availableFrom: new Date(Date.now() + 24 * 3600000), pickupDetails: "Retrait convenu en conversation privée.", isDemo: true },
+    { ownerId: paul, action: "don", category: "besoins_essentiels", title: "Exemple · Chaussures de marche pointure 38", description: "Chaussures propres en bon état, annonce fictive.", condition: "bon_etat", quantity: 1, unit: "paire", attributes: { size: "38" }, city: "Chartres", lat: "48.46", lng: "1.47", pickupDetails: "Remise directe à convenir après accord.", isDemo: true },
+  ]).returning();
+
+  const [event] = await db.insert(communityEventPlans).values({
+    ownerId: jean, title: "Exemple fictif · Repas associatif", eventDate: new Date(Date.now() + 8 * 86400000),
+    city: "Chartres", lat: "48.45", lng: "1.49", participants: 30,
+    needs: [{ text: "tables pliantes", quantity: 3, category: "evenementiel" }, { text: "verres", quantity: 30, category: "evenementiel" }, { text: "enceinte", quantity: 1, category: "evenementiel" }],
+  }).returning();
+  const reference = `LMA-DEMO-${Date.now().toString().slice(-8)}`;
+  const [request] = await db.insert(communityRequests).values({
+    reference, listingId: coat.id, requesterId: jean, quantity: 1,
+    message: "Exemple fictif : puis-je passer samedi après-midi ?", eventPlanId: event.id, status: "demandee",
+  }).returning();
+  await db.insert(communityMessages).values({ requestId: request.id, senderId: jean, body: "Conversation de démonstration. Le propriétaire doit encore répondre." });
+  await db.insert(communityRequests).values({
+    reference: `${reference}-R`, listingId: shoes.id, requesterId: lucas, quantity: 1,
+    message: "Exemple fictif : demande test archivée.", status: "terminee",
+    ownerConfirmedAt: new Date(Date.now() - 2 * 86400000), requesterConfirmedAt: new Date(Date.now() - 86400000),
+  });
+  const [trip] = await db.insert(communityTrips).values({
+    ownerId: lucas, startCity: "Chartres", endCity: "Saint-Brieuc", startLat: "48.45", startLng: "1.49",
+    endLat: "48.51", endLng: "-2.77", departureAt: new Date(Date.now() + 6 * 86400000),
+    transportMode: "vélo", capacity: 1, availableCapacity: 1,
+    terms: "Exemple fictif : demande de transport à confirmer par le transporteur.", compensation: "0.00",
+  }).returning();
+  await db.insert(communityTransportRequests).values({
+    tripId: trip.id, requesterId: jean, communityRequestId: request.id,
+    description: "Exemple fictif : un petit panier de légumes.", status: "demandee",
+  });
+  return true;
 }
 
 function specimenCertificate(title: string, name: string, detail: string) {
