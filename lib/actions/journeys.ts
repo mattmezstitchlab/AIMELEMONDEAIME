@@ -405,6 +405,7 @@ const SITUATION_PROCEDURE_SLUG: Record<string, string> = {
   sante: "declaration-arret-travail",
   recruteur: "embauche-salarie-agricole",
   mariage: "declarer-naissance-ou-mariage",
+  paiement: "difficultes-paiement",
 };
 
 export type TransmitJourneyResult =

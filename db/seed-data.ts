@@ -749,6 +749,20 @@ export async function seedDatabase(db: NodePgDatabase) {
         ],
       },
       {
+        slug: "difficultes-paiement",
+        title: "Difficultés de paiement : être accompagné pour s'en sortir",
+        description: "Factures, loyer, crédits, impôts : votre bureau reprend votre parcours, vos étapes et vos pièces, et vous aide à contacter les bons interlocuteurs. Aucune aide ni décision n'est prise par l'application : chaque organisme décide pour ce qui le concerne.",
+        category: "parcours",
+        kind: "parcours",
+        requiredDocuments: ["Dernier avis d'imposition", "Justificatifs de revenus des trois derniers mois", "Factures, échéances et relances concernées"],
+        fields: [
+          { name: "nature", label: "Ce qui devient difficile à payer", type: "select", options: ["Loyer ou logement", "Factures (énergie, eau, téléphone)", "Courses et quotidien", "Crédit ou dettes", "Impôts et charges", "Plusieurs à la fois", "Autre"], required: true },
+          { name: "depuis", label: "Depuis quand ?", type: "select", options: ["Moins d'un mois", "Quelques mois", "Plus de six mois"] },
+          { name: "relances", label: "Relances ou procédure en cours", type: "select", options: ["Non", "Oui, sans procédure", "Oui, une procédure est engagée"] },
+          { name: "attente", label: "Ce que vous attendez de votre bureau", type: "textarea" },
+        ],
+      },
+      {
         // Procédure d'accueil des parcours transmis (chantier 2, temps 2) :
         // quand un membre transmet son parcours guidé à son bureau, il
         // « devient » un dossier de ce type (sauf correspondance nommée).

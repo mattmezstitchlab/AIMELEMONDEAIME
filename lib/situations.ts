@@ -3,7 +3,7 @@
  * Chaque situation : questions progressives → étapes expliquées, pièces, organismes et liens officiels.
  * Les règles sont versionnées et datées ; elles n'attribuent aucun droit et ne valident aucun dossier.
  */
-export const RULES_VERSION = "2026.10-i";
+export const RULES_VERSION = "2026.10-j";
 export const RULES_REVIEWED_AT = "2026-10-13";
 // 2026.10-c : parcours Santé, échéances officielles calculées dans les règles.
 // 2026.10-d : parcours Famille, Proche et Quotidien épaissis au même niveau.
@@ -57,7 +57,7 @@ export type Situation = {
   label: string;
   short: string;
   description: string;
-  icon: "emploi" | "search" | "music" | "famille" | "logement" | "entraide" | "heart" | "retraite" | "sante";
+  icon: "emploi" | "search" | "music" | "famille" | "logement" | "entraide" | "heart" | "retraite" | "sante" | "paiements";
   image: string;
   pilot?: boolean;
   questions: Question[];
@@ -204,6 +204,101 @@ export const SITUATIONS: Situation[] = [
       t.push({ kind: "piece", label: "Livret de famille (remis par la mairie le jour du mariage)", reason: "Il vous sera demandé par presque tous les organismes ensuite : photographiez-le dès le retour." });
       t.push({ kind: "action", label: "Remercier les invités et les proches qui ont aidé", detail: "La rubrique Remerciements du projet reprend les foyers confirmés, à cocher au fil de vos envois, avec des modèles de mots à copier : cartes, messages ou appels, ce sont vos remerciements, envoyés par vous.", reason: "Un remerciement parti dans les semaines qui suivent se remarque ; un an après, il s'excuse.", due: repere(21) });
       t.push({ kind: "action", label: "Après le mariage : enchaîner avec le parcours « Ma famille change »", detail: "Nom d'usage, impôts, organismes à prévenir : ce parcours prend le relais pour l'administratif d'après-mariage, sans tout ressaisir.", reason: "Le mariage change votre situation auprès de presque tous les organismes." });
+      return t;
+    },
+  },
+  {
+    key: "paiement",
+    label: "Je n'arrive pas à payer",
+    short: "Difficultés de paiement",
+    description: "Factures, loyer, crédits, impôts : faire le point sans attendre que ça s'aggrave, limiter les frais qui s'ajoutent, et contacter les bons interlocuteurs. Aucun montant ni décision ne sont promis : chaque organisme décide pour ce qui le concerne.",
+    icon: "paiements",
+    image: "/images/hero-difficultes.jpg",
+    questions: [
+      { key: "quoi", label: "Qu'est-ce qui devient difficile à payer ?", type: "select", required: true, why: "Chaque difficulté a ses interlocuteurs et ses leviers : on commence par celle qui vous pèse le plus.", options: [["loyer", "Le loyer ou les charges du logement"], ["factures", "Les factures (énergie, eau, téléphone, assurances)"], ["quotidien", "Les courses et le quotidien"], ["credit", "Un crédit ou des dettes"], ["impots", "Les impôts ou des cotisations"], ["plusieurs", "Plusieurs choses à la fois"], ["autre", "Autre chose"]] },
+      { key: "depuis", label: "Depuis quand ces difficultés durent-elles ?", type: "select", options: [["moins_dun_mois", "Moins d'un mois"], ["quelques_mois", "Quelques mois"], ["plus_six_mois", "Plus de six mois"]] },
+      { key: "evenement", label: "Un événement a-t-il déclenché ces difficultés ?", type: "select", why: "Un changement récent — emploi, santé, séparation — ouvre souvent des droits à réexaminer en même temps.", options: [["perte_emploi", "Perte d'emploi ou fin de contrat"], ["baisse_revenus", "Baisse de revenus"], ["separation", "Séparation"], ["maladie", "Maladie ou arrêt de travail"], ["depense", "Grosse dépense imprévue"], ["rien", "Rien de précis, ça s'est accumulé"], ["ne_sais_pas", "Je ne sais pas"]] },
+      { key: "relances", label: "Avez-vous reçu des relances, ou un document d'un commissaire de justice (huissier) ?", type: "select", required: true, why: "S'il y a une procédure en cours, certaines réponses ont des délais courts : on commence par là.", options: [["non", "Non, pas encore"], ["oui_sans_procedure", "Oui, des relances, mais pas de procédure"], ["oui_procedure", "Oui, une procédure est engagée (huissier, commandement, saisie…)"]] },
+      { key: "aides", label: "Avez-vous déjà demandé de l'aide pour ces paiements (CCAS, CAF, banque, fournisseur…) ?", type: "select", options: [["non", "Non, pas encore"], ["en_cours", "Oui, j'attends une réponse"], ["sans_reponse", "Oui, mais sans réponse"], ["refuse", "Oui, et ça a été refusé"]] },
+    ],
+    build: (a) => {
+      const t: TaskRule[] = [];
+      // --- D'abord, éviter que ça s'aggrave ---
+      if (a.relances === "oui_procedure") {
+        t.push({ kind: "action", label: "Ne laisser aucun document officiel sans réponse", detail: "Gardez chaque document reçu, même ouvert tard, et notez les dates qu'il contient. Pour comprendre ce qu'il vous demande et dans quel délai réagir, un point-justice vous conseille gratuitement ; vous pouvez aussi transmettre ce parcours à votre bureau pour être accompagné.", reason: "Sur une procédure, les délais pour réagir sont courts, et le silence aggrave presque toujours la situation.", organisms: ["point-justice"], due: { days: 2 } });
+      }
+      t.push({ kind: "action", label: "Faire le point complet : ce qui rentre, ce qui doit sortir, ce qui est déjà en retard", detail: "Notez sur une page, sans vous juger : les revenus du mois, les dépenses fixes, les dettes et les retards. C'est ce document qui servira partout — bailleur, fournisseur, CCAS, banque.", reason: "On ne peut demander un délai ou une aide qu'avec des chiffres clairs ; c'est aussi ce qui rend la situation moins floue.", due: { days: 3 } });
+      if (a.relances === "oui_sans_procedure") {
+        t.push({ kind: "action", label: "Répondre aux relances par écrit, même simplement pour demander un délai", detail: "Un courrier ou un courriel dont vous gardez la copie vaut mieux qu'un silence : proposez une date ou un échelonnement réaliste, plutôt que de promettre ce que vous ne pourrez pas tenir.", reason: "Beaucoup de procédures naissent d'une absence de réponse, pas d'un refus de payer." });
+      }
+      // --- Les droits qu'on ne réclame pas ---
+      t.push({ kind: "action", label: "Vérifier les aides que vous ne percevez peut-être pas", detail: "Le simulateur officiel « Mes droits sociaux » donne une estimation des aides auxquelles votre foyer peut prétendre : beaucoup de difficultés commencent par un droit non réclamé. L'estimation n'est pas une décision : chaque organisme instruit ensuite votre demande.", reason: "Avant de couper dans l'essentiel, autant vérifier ce à quoi vous avez peut-être déjà droit.", organisms: ["mes-droits-sociaux", "caf"], due: { days: 7 } });
+      // --- Selon ce qui pèse le plus ---
+      if (a.quoi === "loyer") {
+        t.push({ kind: "action", label: "Contacter votre bailleur dès maintenant, avant que le retard ne s'installe", detail: "Expliquez la situation et demandez par écrit un échéancier réaliste pour le loyer en retard. Un bailleur prévenu tôt a plus de marge qu'un bailleur qui découvre trois impayés.", reason: "Le logement est la dépense à protéger en premier : c'est là que les conséquences vont le plus loin." });
+        t.push({ kind: "action", label: "Vérifier votre aide au logement et signaler tout changement de situation", detail: "Un revenu qui baisse, un emploi perdu, une séparation : ces changements se signalent à la CAF, ils peuvent modifier votre aide au logement. La décision lui appartient ; le signalement, lui, ne doit pas attendre.", organisms: ["caf"] , reason: "Un changement signalé tôt évite les trop-perçus qu'il faut ensuite rembourser." });
+        t.push({ kind: "action", label: "Demander conseil gratuitement à l'ADIL de votre département", detail: "L'ADIL informe gratuitement sur les rapports locatifs, les impayés et les démarches amiables, sans prendre parti ni décider à votre place.", organisms: ["adil"] , reason: "Un conseil gratuit et neutre vaut mieux qu'un conseil intéressé quand il s'agit de votre toit." });
+        t.push({ kind: "action", label: "Si vous êtes salarié, regarder aussi du côté d'Action Logement", detail: "Action Logement propose, selon les situations, des aides et des garanties liées au logement pour les salariés. Les conditions se vérifient auprès d'eux, pas ici.", organisms: ["action-logement"] , reason: "Beaucoup de salariés ignorent ces aides parce qu'elles ne se déclenchent jamais toutes seules." });
+      }
+      if (a.quoi === "factures") {
+        t.push({ kind: "action", label: "Appeler chaque fournisseur pour demander un échelonnement avant que la facture ne gonfle", detail: "Énergie, eau, téléphone, assurances : la plupart des fournisseurs peuvent proposer un échéancier si on les appelle avant la coupure, la réduction ou les frais. Demandez aussi si votre chèque énergie a bien été pris en compte.", reason: "Un échéancier demandé tôt coûte presque toujours moins cher qu'une coupure suivie d'une remise en service." });
+        t.push({ kind: "action", label: "Demander au CCAS de votre commune quelles aides ponctuelles existent", detail: "Le CCAS peut instruire des aides locales et, selon les départements, des aides du fonds de solidarité pour les factures d'énergie ou d'eau. Il connaît aussi les associations du secteur.", organisms: ["ccas"] , reason: "Ces aides existent, mais elles se demandent : elles ne se déclenchent jamais toutes seules." });
+      }
+      if (a.quoi === "quotidien") {
+        t.push({ kind: "action", label: "Passer au CCAS de votre commune, la porte d'entrée des aides de proximité", detail: "Aides facultatives, aide alimentaire, orientation vers les associations locales : le CCAS regarde votre situation dans son ensemble et ne décide jamais à votre place de ce que vous devez demander.", organisms: ["ccas"] , reason: "C'est souvent là que les aides les plus rapides se débloquent, avant les grands dossiers." });
+        t.push({ kind: "action", label: "Regarder les entraides près de chez vous sur la carte Le Monde Aime", detail: "Don de nourriture ou de vêtements, produits locaux à petit prix, coups de main : la carte recense ce que vos voisins proposent — y jeter un œil ne coûte rien et peut débloquer le quotidien.", reason: "Pendant que les dossiers avancent, le quotidien, lui, ne peut pas attendre." });
+      }
+      if (a.quoi === "credit") {
+        t.push({ kind: "action", label: "Lister tous les crédits et toutes les dettes, avec leurs montants et leurs dates", detail: "Crédits, découverts, dettes envers des proches ou des organismes : tout sur la même page, même ce qui fait un peu honte. Personne ne vous jugera sur ce document, il sert à voir clair.", reason: "On ne traite bien que ce qu'on a mis à plat ; les dettes oubliées sont celles qui reviennent le plus cher." });
+        t.push({ kind: "action", label: "Ne pas souscrire un nouveau crédit pour rembourser les anciens", detail: "C'est le réflexe le plus coûteux : il transforme une difficulté passagère en dette durable. Les solutions ci-dessous existent précisément pour éviter cette spirale.", reason: "Chaque nouveau crédit pris dans l'urgence réduit la marge du mois suivant." });
+        t.push({ kind: "action", label: "Se renseigner sur la commission de surendettement, via un point-justice", detail: "Quand les dettes dépassent durablement ce qu'on peut rembourser, la commission de surendettement de la Banque de France peut être saisie — le dépôt d'un dossier est gratuit. Un point-justice vous aide gratuitement à comprendre si c'est votre situation et par où commencer.", organisms: ["point-justice"] , reason: "C'est la voie prévue quand rembourser est devenu impossible ; elle protège plus qu'elle ne sanctionne." });
+        t.push({ kind: "action", label: "Parler à votre banque des frais et du découvert, chiffres en main", detail: "Avec votre point complet, demandez ce qui peut être revu : frais d'incident, autorisation et coût du découvert, dates de prélèvement. La banque décide, mais elle négocie mieux avec un client qui vient avant l'incident qu'après." , reason: "Les frais d'incident sont une des rares dépenses qui se négocient encore." });
+      }
+      if (a.quoi === "impots") {
+        t.push({ kind: "action", label: "Demander un délai de paiement ou un échéancier aux impôts, par écrit", detail: "Depuis votre espace en ligne ou auprès de votre centre des finances publiques, expliquez la difficulté et proposez un rythme réaliste. Des remises gracieuses existent pour les situations les plus tendues ; dans tous les cas, la décision appartient à l'administration.", reason: "Un impôt qu'on signale impossible à payer tout de suite se traite ; un impôt qu'on ignore se majore.", organisms: ["impots"] });
+        t.push({ kind: "action", label: "Regarder si vos prélèvements mensuels correspondent encore à vos revenus", detail: "Si vos revenus ont baissé, le montant prélevé chaque mois peut parfois être ajusté pour ne pas avancer une trésorerie que vous n'avez pas. Vérifiez sur votre espace avant de subir l'année entière." , reason: "Payer chaque mois pour des revenus révolus coûte une trésorerie que vous n'avez plus." });
+      }
+      if (a.quoi === "plusieurs") {
+        t.push({ kind: "action", label: "Classer ce qui est en retard par ordre d'urgence", detail: "Le logement et l'énergie d'abord — ce sont eux qui protègent le reste —, puis les impôts et les crédits, puis ce qui peut attendre quelques semaines. Un seul ordre, écrit, vaut mieux que tout en tête.", reason: "Quand tout pèse en même temps, ce n'est pas le montant le plus gros qui est le plus urgent : c'est celui dont les conséquences arrivent les premières." });
+        t.push({ kind: "action", label: "Passer au CCAS pour un regard d'ensemble sur vos droits et aides locales", detail: "Quand plusieurs difficultés se cumulent, un interlocuteur qui voit l'ensemble évite les demandes en double et les oublis entre deux guichets.", organisms: ["ccas"] , reason: "Quand tout se cumule, multiplier les guichets fait perdre des aides en route." });
+      }
+      if (a.quoi === "autre") {
+        t.push({ kind: "action", label: "Commencer par le CCAS de votre commune ou un France Services", detail: "Ce sont les deux portes d'entrée qui savent orienter vers le bon interlocuteur quand la difficulté ne rentre pas dans une case. Venez avec votre point complet, il fera gagner du temps à tout le monde.", organisms: ["ccas", "france-services"] , reason: "Mieux vaut une bonne orientation en une visite que trois mauvais guichets en un mois." });
+      }
+      // --- L'événement déclencheur a ses propres droits ---
+      if (a.evenement === "perte_emploi" || a.evenement === "baisse_revenus") {
+        t.push({ kind: "action", label: "Signaler le changement de revenus à la CAF sans attendre", detail: "Perte d'emploi ou revenus en baisse : le signalement peut faire réexaminer vos prestations et votre aide au logement. Là encore, la CAF décide ; le retard de signalement, lui, ne joue jamais en votre faveur.", organisms: ["caf"] , reason: "Les prestations suivent votre situation réelle — à condition qu'elle soit connue." });
+      }
+      if (a.evenement === "perte_emploi") {
+        t.push({ kind: "action", label: "Vérifier votre inscription et vos allocations auprès de France Travail", detail: "Si ce n'est pas déjà fait, l'inscription et l'actualisation conditionnent l'ouverture et le maintien des allocations. Le parcours « Je cherche un emploi » de votre espace peut ensuite prendre le relais.", organisms: ["france-travail"] , reason: "Les droits au chômage ne se devinent pas : ils s'ouvrent et se maintiennent par l'actualisation." });
+      }
+      if (a.evenement === "separation") {
+        t.push({ kind: "action", label: "Signaler la séparation et regarder ce qu'elle change à vos prestations", detail: "Une séparation modifie le foyer pris en compte pour beaucoup d'aides. Le parcours « Ma famille change » de votre espace prépare ce signalement proprement.", organisms: ["caf"] , reason: "Un foyer qui change, ce sont des droits qui changent — dans les deux sens." });
+      }
+      if (a.evenement === "maladie") {
+        t.push({ kind: "action", label: "Ne pas renoncer aux soins, et vérifier la complémentaire santé solidaire", detail: "Selon vos ressources, la complémentaire santé solidaire peut réduire fortement ce que la santé vous coûte ; l'Assurance Maladie instruit la demande. Différer des soins coûte souvent plus cher, en santé et en argent.", organisms: ["assurance-maladie"] , reason: "Renoncer aux soins transforme souvent une difficulté d'argent en difficulté de santé durable." });
+      }
+      // --- Les demandes déjà faites ---
+      if (a.aides === "non") {
+        t.push({ kind: "action", label: "Faire un premier rendez-vous d'aide : CCAS ou France Services", detail: "Un seul rendez-vous suffit souvent à ouvrir les bonnes portes : aides locales, droits à vérifier, interlocuteur pour chaque dette. Vous pouvez aussi transmettre ce parcours à votre bureau AIME® pour ne pas y aller seul.", organisms: ["ccas", "france-services"] , reason: "La plupart des aides locales commencent par cette conversation, pas par un formulaire." });
+      }
+      if (a.aides === "en_cours") {
+        t.push({ kind: "action", label: "Noter qui vous avez contacté, quand, et ce qui vous a été répondu", detail: "Un simple carnet de bord — service, date, nom, réponse — évite de raconter dix fois la même histoire et prouve vos démarches si on vous les demande." , reason: "Les organismes croient les dates écrites bien plus que les souvenirs." });
+      }
+      if (a.aides === "sans_reponse") {
+        t.push({ kind: "action", label: "Relancer par écrit la demande restée sans réponse", detail: "Un courrier ou un courriel poli, daté, rappelant la première demande : il réactive le dossier et laisse une trace. Au-delà, votre bureau ou un France Services peut vous aider à comprendre où ça bloque.", organisms: ["france-services"] , reason: "Une demande relancée proprement par écrit ne peut pas passer pour une demande jamais faite." });
+      }
+      if (a.aides === "refuse") {
+        t.push({ kind: "action", label: "Demander les raisons du refus et regarder les voies de recours", detail: "Une décision de refus doit être motivée, et elle indique comment la contester et dans quel délai. Un point-justice vous aide gratuitement à relire cette décision avant de décider quoi faire.", organisms: ["point-justice"] , reason: "Un refus n'est pas toujours une fin ; encore faut-il le relire avant que le délai de recours ne passe." });
+      }
+      // --- Les pièces qui serviront partout ---
+      t.push({ kind: "piece", label: "Dernier avis d'imposition", reason: "Presque toutes les aides et tous les échéanciers regardent vos ressources à travers lui." });
+      t.push({ kind: "piece", label: "Justificatifs de revenus des trois derniers mois", reason: "Fiches de paie, allocations, pension : c'est la photo de départ de toutes les instructions." });
+      t.push({ kind: "piece", label: "Factures, échéances et relances reçues", reason: "Tout garder, même ouvert tard : les dates écrites dessus comptent plus que les souvenirs." });
+      if (a.quoi === "loyer") t.push({ kind: "piece", label: "Bail de location et dernières quittances de loyer", reason: "Le bailleur, l'ADIL et les aides au logement partiront de ces montants et de ces dates." });
+      if (a.quoi === "credit") t.push({ kind: "piece", label: "Contrats et tableaux d'amortissement des crédits en cours", reason: "Taux, mensualités, durées restantes : c'est la matière première d'un éventuel dossier de surendettement." });
+      if (a.quoi === "impots") t.push({ kind: "piece", label: "Avis et échéanciers d'impôts déjà reçus", reason: "Ils disent exactement ce qui est dû, ce qui a été payé et ce qui peut être échelonné." });
+      t.push({ kind: "action", label: "Refaire un point d'étape dans un mois", detail: "Ce qui a été obtenu, ce qui attend encore, ce qui s'est aggravé ou apaisé : un rendez-vous d'une demi-heure avec votre page de point complet, à jour.", reason: "Ces situations se dénouent rarement en une semaine ; c'est le suivi régulier qui évite d'y replonger.", due: { days: 30 } });
       return t;
     },
   },

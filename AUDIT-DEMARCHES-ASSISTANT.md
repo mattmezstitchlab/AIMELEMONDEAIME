@@ -533,3 +533,55 @@ Vérifié : 12 pages guides en 200, fond en base (24 contenus), tsc et
 build propres, démonstration mariage intacte après réensemencement.
 Restant au carnet : parcours « je n'arrive pas à payer » (à reconfirmer
 avant tout chantier).
+
+## 6nonies. Parcours « Je n'arrive pas à payer » — 17e situation (2026-10-13)
+
+**Demande** : ouvrir le parcours des difficultés de paiement, le sujet où une
+application peut le plus facilement faire du mal (promettre une aide, inventer
+un délai, décourager d'agir). Traitement : même rigueur que pour le reste, et
+lignes rouges doublées.
+
+**La situation** (clé `paiement`, insérée dans le bloc « vie quotidienne »
+avant « activité », visuel `hero-difficultes.jpg` généré — table de cuisine,
+factures et carnet, lumière du jour : la dignité plutôt que la misère).
+5 questions : ce qui devient difficile (loyer / factures / quotidien / crédit /
+impôts / plusieurs / autre, requis), depuis quand, l'événement déclencheur, les
+relances ou la procédure en cours (requis), les aides déjà demandées.
+
+**Les plans** — ordre volontairement défensif : (1) si une procédure est
+engagée, la première action traite les documents officiels (point-justice,
+**rappel personnel J+2**, aucun délai légal chiffré : seuls les textes en
+contiennent) ; (2) le point complet rentrées/sorties/retards (J+3), base de
+tous les interlocuteurs ; (3) réponse écrite aux relances ; (4) vérification
+des droits non réclamés (mes-droits-sociaux + CAF, J+7) ; (5) branches par
+nature : bailleur avant l'installation du retard, aide au logement, ADIL,
+Action Logement salarié ; fournisseurs et échéanciers, chèque énergie, FSL via
+CCAS ; entraide de la carte pour le quotidien ; crédit : liste complète,
+interdiction nommée du nouveau crédit pour rembourser, commission de
+surendettement de la Banque de France présentée **en texte** (elle n'est pas
+un slug du référentiel des 31 organismes — rien d'inventé, renvoi au
+point-justice gratuit), banque et frais ; impôts : délai/échéancier/remise
+gracieuse, « la décision appartient à l'administration » ; cumul : triage
+logement-énergie d'abord ; (6) branches de l'événement (CAF, France Travail,
+parcours Famille en séparation, complémentaire santé solidaire en maladie) ;
+(7) branches des aides déjà tentées (relance écrite, recours point-justice,
+rendez-vous CCAS/France Services) ; (8) pièces (avis d'imposition, revenus,
+factures et relances, + bail / contrats de crédit / avis d'impôts selon le
+cas) ; (9) point d'étape J+30. Aucune échéance `official`, aucun montant,
+aucun droit présenté comme acquis ; chaque tâche explique son pourquoi.
+
+**Orientation et bureau** : lexique `paiement` dans l'assistant (« je
+n'arrive plus a payer », « dettes », « surendettement »…) — le match-phrase
+(12+ points) fait gagner « payer mon loyer » contre le parcours logement,
+sans voler « chercher un logement » (comportement faible pré-existant
+vérifié inchangé par `git stash`) ; type de démarche bureau
+`difficultes-paiement` (catégorie `parcours`, champs nature/depuis/relances/
+attente, pièces du plan) créé au seed et dans `SITUATION_PROCEDURE_SLUG`.
+
+**Vérifié** : profils de 6 combinaisons en test pur (invariants : zéro
+échéance officielle, zéro organisme hors référentiel, ≥ 3 pièces, raison
+partout) ; matérialisation en base d'aperçu d'un parcours « loyer +
+procédure + perte d'emploi » : 15 tâches, tâche urgente en tête, rappels
+personnels calculés (J+2 → 15/10), page de suivi rendue ; tuile présente dans
+le questionnaire ; build de production ; typecheck et ESLint verts. Règles
+`2026.10-j`.
