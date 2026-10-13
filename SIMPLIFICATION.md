@@ -52,6 +52,20 @@ les guides devenant un filtre de cette même page, et je redirigerais le reste :
 L'accueil passerait de 12 tuiles mosaïque à 6 thématiques + 3 univers carte, ce qui rend aussi la page d'accueil plus courte.
 
 ### 2. Unifier les deux systèmes de « démarches » (gain : élevé · effort : moyen à élevé)
+
+> **Temps 1 (façade unique) exécuté le 2026-08-10 (commit à suivre).** Le membre ne voit plus qu'un
+> seul objet « démarche » : `/espace/demarches` fusionne parcours guidés et dossiers dans **une seule
+> liste triée par date de mise à jour**, avec le même design de carte, un vocabulaire membre unifié
+> (« Parcours guidé » / « Dossier suivi par l'équipe » ; « Questionnaire à terminer », « Pièce manquante
+> à fournir », « En cours d'instruction »…) et une barre de progression pour les parcours. L'assistant
+> de création est unique lui aussi : l'entrée par la situation reste la porte principale, et les
+> démarches de bureau — auparavant reléguées dans un bloc replié « dossier de démonstration » — sont
+> présentées dans le même flux, filtrables par la même recherche. Les deux pages de détail gardent
+> leurs routes (aucun lien cassé, back-office inchangé) mais partagent le même fil d'Ariane.
+> Vérifié sur le build de production avec les deux familles de données réelles.
+> **Reste le temps 2 (fusion des données)** : faire « devenir » dossier un parcours transmis à un
+> bureau (lien `journeys → cases`, reprise des tâches et des pièces), au lieu de deux objets parallèles.
+
 C'est le doublon le plus coûteux. Deux modèles cohabitent et s'affichent **mélangés dans la même liste** `/espace/demarches` :
 les `cases` (dossiers formels instruits par le back-office : statuts, pièces, affectation) et les `journeys`
 (parcours guidés par situation : tâches, rappels, engagements d'artistes). Même la création est double :

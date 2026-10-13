@@ -32,7 +32,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       <Link href="/espace/demarches" className="text-sm font-medium text-emerald-800 hover:underline">← Mes démarches</Link>
       <SectionTitle
         image={THEME_META[procedureType?.category ?? ""]?.image ?? "/images/hero-campagne.jpg"}
-        eyebrow={`Dossier ${item.reference}`}
+        eyebrow={`Mes démarches · Dossier ${item.reference}`}
         title={item.title}
         description={procedureType?.description}
         actions={<StatusBadge status={item.status} onDark />}

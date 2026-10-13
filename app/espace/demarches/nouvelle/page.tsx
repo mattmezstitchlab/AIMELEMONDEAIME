@@ -39,14 +39,20 @@ export default async function NouvelleDemarche({ searchParams }: { searchParams:
     );
   }
 
-  const q = (sp.q ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const list = q ? SITUATIONS.filter((s) => `${s.label} ${s.description}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q)) : SITUATIONS;
-  const procedures = await getActiveProcedureTypes();
+  const normalize = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const q = normalize(sp.q ?? "");
+  const list = q ? SITUATIONS.filter((s) => normalize(`${s.label} ${s.description}`).includes(q)) : SITUATIONS;
+  const allProcedures = await getActiveProcedureTypes();
+  const procedures = q ? allProcedures.filter((p) => normalize(`${p.title} ${p.description}`).includes(q)) : allProcedures;
   return (
     <div className="flex flex-col gap-8">
-      <SectionTitle image="/images/hero-campagne.jpg" eyebrow="Nouvelle démarche" title="De quoi avez-vous besoin aujourd'hui ?" description="Choisissez la situation la plus proche. Quelques questions suffisent ; vous pourrez enregistrer et reprendre plus tard." />
+      <SectionTitle image="/images/hero-campagne.jpg" eyebrow="Nouvelle démarche" title="De quoi avez-vous besoin aujourd'hui ?" description="Un parcours guidé pour préparer vous-même, ou un dossier suivi par un bureau : tout commence ici. Quelques questions suffisent ; vous pourrez enregistrer et reprendre plus tard." />
       <form role="search" className="flex max-w-xl gap-2"><label htmlFor="sq" className="sr-only">Chercher une situation</label><input id="sq" name="q" defaultValue={sp.q} placeholder="Ex. naissance, logement, concert, retraite…" className="min-w-0 flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm" /><button className="rounded-lg bg-emerald-800 px-4 text-sm font-bold text-white">Chercher</button></form>
       <p className="-mt-6 text-xs text-slate-500">La recherche porte sur les mots des situations proposées : elle ne comprend pas librement toutes les demandes. En cas de doute, un conseiller France services peut vous orienter.</p>
+      {sp.erreur && <p role="alert" className="-mb-2 rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">{sp.erreur}</p>}
+      <section>
+        <h2 className="mb-3 text-lg font-bold text-slate-900">Moments de vie — parcours guidés</h2>
+        <p className="-mt-2 mb-4 text-sm text-slate-600">Vous préparez vous-même, pas à pas : questions, étapes, pièces et rappels. Rien n&apos;est transmis sans votre accord.</p>
       {list.length === 0 ? <Card><p className="text-sm text-slate-700">Aucune situation ne correspond à « {sp.q} ». Essayez un autre mot, ou rendez-vous dans un <a className="font-semibold text-emerald-800 underline" href="https://www.france-services.gouv.fr" target="_blank" rel="noreferrer">espace France services</a> pour un accompagnement humain.</p></Card> : (
         <div className="grid gap-4 md:grid-cols-2">
           {list.map((s) => (
@@ -57,11 +63,21 @@ export default async function NouvelleDemarche({ searchParams }: { searchParams:
           ))}
         </div>
       )}
-      <details className="rounded-2xl border border-slate-200 bg-white p-5">
-        <summary className="cursor-pointer font-semibold text-slate-800">Déposer un dossier de démonstration (équipe d&apos;accompagnement simulée)</summary>
-        {sp.erreur && <p role="alert" className="mt-3 rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">{sp.erreur}</p>}
-        <div className="mt-4 grid gap-3 md:grid-cols-2">{procedures.map((p) => <form key={p.id} action={startProcedure} className="rounded-xl bg-[#fafaf9] p-4"><input type="hidden" name="procedureTypeId" value={p.id} /><p className="text-sm font-semibold text-slate-900">{p.title}</p><p className="mt-1 text-xs text-slate-600">{p.description}</p><button type="submit" className="mt-3 rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white">Démarrer ce dossier fictif</button></form>)}</div>
-      </details>
+      </section>
+      {procedures.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-lg font-bold text-slate-900">Démarches suivies par un bureau</h2>
+          <p className="-mt-2 mb-4 text-sm text-slate-600">Vous remplissez un dossier, puis vous le transmettez à l&apos;équipe d&apos;accompagnement qui l&apos;instruit et vous répond ici même. Dans cette version, l&apos;équipe est simulée : aucun organisme réel n&apos;est destinataire.</p>
+          <div className="grid gap-4 md:grid-cols-2">{procedures.map((p) => (
+            <form key={p.id} action={startProcedure} className="group flex gap-4 rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm hover:border-emerald-400">
+              <input type="hidden" name="procedureTypeId" value={p.id} />
+              <Icon name="building" className="h-8 w-8 shrink-0 text-emerald-600" />
+              <span><span className="block font-bold text-slate-900">{p.title}</span><span className="mt-1 block text-sm text-slate-600">{p.description}</span>
+              <button type="submit" className="mt-3 rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white">Commencer ce dossier</button></span>
+            </form>
+          ))}</div>
+        </section>
+      )}
     </div>
   );
 }

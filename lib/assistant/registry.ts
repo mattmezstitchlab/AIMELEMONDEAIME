@@ -35,7 +35,7 @@ export const ROUTES: RouteEntry[] = [
   { path: "/inscription", label: "Créer mon espace", roles: ALL_ROLES, purpose: "Créer un espace de démonstration en quelques informations." },
 
   { path: "/espace", label: "Accueil de l'espace adhérent", roles: ["membre"], purpose: "Voir sa situation, son bureau, ses échéances et son activité récente." },
-  { path: "/espace/demarches", label: "Mes démarches", roles: ["membre"], purpose: "Suivre ses dossiers, leurs statuts et leur historique." },
+  { path: "/espace/demarches", label: "Mes démarches", roles: ["membre"], purpose: "Retrouver toutes ses démarches au même endroit : parcours guidés et dossiers suivis par l'équipe, leurs statuts et leur historique." },
   { path: "/espace/demarches/nouvelle", label: "Nouvelle démarche", roles: ["membre"], purpose: "Choisir un moment de vie, répondre pas à pas et reprendre un brouillon sauvegardé." },
   { path: "/espace/demarches/suivi", label: "Suivi d'une démarche", roles: ["membre"], purpose: "Voir les actions et pièces à préparer, les sources officielles et les rappels personnels." },
   { path: "/espace/profil", label: "Mon profil", roles: ["membre"], purpose: "Renseigner ses activités, ses disponibilités et la confidentialité de sa présence sur la carte." },
