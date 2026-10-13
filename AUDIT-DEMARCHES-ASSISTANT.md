@@ -698,3 +698,40 @@ comptées par mois, source dans la réponse) et du pont agenda ; en aperçu :
 page année inchangée après extraction (compte Jean), anniversaire visible
 en visite guidée, charge utile de l'assistant peuplée des événements de
 Jean ; build de production, typecheck et ESLint verts.
+
+## 6terdecies. Visite guidée : le compte de démonstration enfin vivant (2026-10-13)
+
+**Demande** : passe de vérification complète de la visite guidée, comme un
+visiteur — et correction de ce qui cloche.
+
+**Le crawl** : pages publiques et membre parcourues avec le compte de visite
+(200 partout, aucun NaN ni erreur dans les corps) et 55 liens internes
+uniques testés : aucun lien mort. Pièges de mesure documentés : le gabarit
+« page n'existe pas » est embarqué dans le payload RSC de **chaque** page
+(faux positifs si on le cherche dans le HTML brut — il faut le titre
+visible) ; le 500 ponctuel de `/deconnexion` sous charge concurrente ne se
+reproduit pas en séquentiel (307 correct, avec et sans session — fragilité
+connue de la base d'aperçu, pas un bug).
+
+**Le vrai problème** : le compte de visite guidée était **vide** — zéro
+parcours, dossier, rendez-vous, projet, document. La page `/decouvrir`
+promettait des « données fictives à parcourir » dans la vraie interface ; le
+visiteur ne trouvait que des états vides, et l'assistant lui répondait qu'il
+n'avait rien. Corrigé par `seedVisiteGuideeIfEmpty` (idempotent, appelé avec
+les autres blocs de démonstration, données explicitement fictives et datées
+par rapport au jour du seed) : un parcours « difficultés de paiement »
+(quelques étapes faites, les suivantes datées), transmis au bureau —
+dossier `DOS-…` « pièce manquante » demandant l'avis d'imposition, avec fil
+d'événements des deux côtés ; un rendez-vous confirmé à 9 jours ; un
+document d'exemple marqué fictif ; et un parcours mariage complet avec son
+projet (Camille et Simon, samedi dans ~8 mois) : 5 foyers d'invités, 2
+tables placées, 4 postes de budget, enveloppe, déroulé du jour J. L'année
+de la visite montre alors rappels d'octobre, échéance officielle des bans
+et anniversaire en mai ; l'assistant a de vraies choses à raconter.
+
+**Vérifié** : en base d'aperçu (fixture équivalente, sans raz), le parcours
+visiteur couvre /espace (bannière prochaine action, pièce attendue),
+/espace/annee, les suivis des deux parcours, la page dossier, le projet
+mariage (invités, tables, budget) et sa page jour J en tant qu'organisatrice,
+les documents et les échanges (rendez-vous confirmé) ; charges utiles de
+l'assistant peuplées. Typecheck et ESLint verts sur le seed.

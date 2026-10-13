@@ -43,10 +43,14 @@ import {
   journeyEvents,
   journeyTasks,
   journeys,
+  weddingSettings,
+  weddingGuests,
+  weddingTables,
+  weddingBudgetItems,
   type FormFieldDef,
 } from "./schema";
 import { defaultUniverses } from "../lib/lma";
-import { ORGANISMS_SEED, RULES_VERSION, SITUATION_BY_KEY } from "../lib/situations";
+import { ORGANISMS_SEED, RULES_VERSION, SITUATION_BY_KEY, computeDueAt } from "../lib/situations";
 
 export async function seedDatabase(db: NodePgDatabase) {
 
@@ -1636,6 +1640,7 @@ export async function seedDatabase(db: NodePgDatabase) {
   await seedLmaDemoIfEmpty(db);
   await seedAimeIfEmpty(db);
   await seedCommunityDemoIfEmpty(db);
+  await seedVisiteGuideeIfEmpty(db);
   // Normalisation de marque : les données historiques du seed utilisent
   // encore d'anciens préfixes (MSA-) et libellés, convertis ici en DOS- /
   // « équipe d'accompagnement » comme le fait l'application.
@@ -1702,6 +1707,126 @@ export async function seedAimeIfEmpty(db: NodePgDatabase) {
   await db.insert(journeyTasks).values(rules.map((r, i) => ({ journeyId: j.id, kind: r.kind, label: r.label, detail: r.detail ?? "", reason: r.reason, organismSlugs: r.organisms ?? [], officialUrl: r.officialUrl ?? null, frameworkFlag: r.frameworkFlag ?? null, sortOrder: i, status: i === 0 ? ("pret" as const) : ("a_preparer" as const) })));
   await db.insert(journeyEvents).values([{ journeyId: j.id, actorId: jean, message: "Démarche commencée (exemple fictif)." }, { journeyId: j.id, actorId: jean, message: `Plan préparé avec les règles ${RULES_VERSION}. Projet relié.` }]);
   if (tom) await db.insert(artistEngagements).values({ journeyId: j.id, projectId: project.id, organizerId: jean, artistId: tom, eventDate: project.startsAt, requestMessage: "Exemple fictif : concert acoustique en fin de journée, dans la grange.", isDemo: true });
+  return true;
+}
+
+/**
+ * Visite guidée : le compte de démonstration doit montrer un espace vivant,
+ * pas une coquille vide. Données entièrement fictives, datées par rapport au
+ * jour du seed pour rester fraîches : un parcours « difficultés de paiement »
+ * transmis au bureau (dossier avec pièce attendue + rendez-vous confirmé), un
+ * parcours mariage avec son projet, ses invités, son budget et ses tables,
+ * et un document d'exemple. Idempotent : ne fait rien si le compte a déjà
+ * des parcours.
+ */
+export async function seedVisiteGuideeIfEmpty(db: NodePgDatabase) {
+  const [demo] = await db.select({ id: users.id }).from(users).where(eq(users.email, "demo@aime-demo.fr")).limit(1);
+  if (!demo) return false;
+  const [deja] = await db.select({ id: journeys.id }).from(journeys).where(eq(journeys.userId, demo.id)).limit(1);
+  if (deja) return false;
+  const [agent] = await db.select({ id: users.id, officeId: users.officeId }).from(users).where(eq(users.email, "agent.beauce@aime-demo.fr")).limit(1);
+  const [procDifficultes] = await db.select({ id: procedureTypes.id }).from(procedureTypes).where(eq(procedureTypes.slug, "difficultes-paiement")).limit(1);
+  const now = new Date();
+
+  // --- Parcours « Difficultés de paiement » (factures), quelques étapes déjà faites
+  const defPaiement = SITUATION_BY_KEY.get("paiement")!;
+  const repPaiement: Record<string, string> = { quoi: "factures", depuis: "quelques_mois", evenement: "baisse_revenus", relances: "oui_sans_procedure", aides: "non" };
+  const reglesPaiement = defPaiement.build(repPaiement);
+  const [jp] = await db.insert(journeys).values({
+    userId: demo.id, situation: "paiement", title: defPaiement.short, answers: repPaiement, status: "en_cours",
+    rulesVersion: RULES_VERSION, isDemo: true,
+    summary: "Démonstration fictive : des factures d'énergie et de téléphone devenues difficiles à payer après une baisse de revenus.",
+  }).returning({ id: journeys.id });
+  await db.insert(journeyTasks).values(reglesPaiement.map((r, i) => ({
+    journeyId: jp.id, kind: r.kind, label: r.label, detail: r.detail ?? "", reason: r.reason,
+    organismSlugs: r.organisms ?? [], officialUrl: r.officialUrl ?? null, frameworkFlag: r.frameworkFlag ?? null,
+    dueAt: computeDueAt(r, repPaiement, now), dueKind: r.due ? (r.due.official ? "officielle" as const : "personnelle" as const) : null, dueSource: r.due?.source ?? null,
+    sortOrder: i, status: (i === 0 ? "termine" : "a_preparer") as "termine" | "a_preparer",
+  })));
+  await db.insert(journeyEvents).values([
+    { journeyId: jp.id, actorId: demo.id, message: "Démarche commencée (visite guidée, exemple fictif)." },
+    { journeyId: jp.id, actorId: demo.id, message: `Plan préparé avec les règles ${RULES_VERSION}.` },
+  ]);
+
+  // --- Le même parcours, devenu dossier au bureau (pièce attendue) + rendez-vous confirmé
+  if (procDifficultes) {
+    const [dossier] = await db.insert(cases).values({
+      reference: "MSA-2026-900101",
+      memberId: demo.id, procedureTypeId: procDifficultes.id, journeyId: jp.id,
+      officeId: agent?.officeId ?? null, assignedCaseworkerId: agent?.id ?? null,
+      status: "piece_manquante", title: "Difficultés de paiement : être accompagné pour s'en sortir",
+      data: { nature: "Factures (énergie, eau, téléphone)", depuis: "Quelques mois", relances: "Oui, sans procédure", attente: "Être aidé à demander des échéanciers et à vérifier mes droits." },
+      requestedDocuments: ["Dernier avis d'imposition"], submittedAt: now,
+    }).returning({ id: cases.id });
+    await db.insert(caseEvents).values([
+      { caseId: dossier.id, actorId: demo.id, type: "creation", message: "Parcours transmis à votre bureau depuis « Mon espace » (visite guidée, exemple fictif)." },
+      { caseId: dossier.id, actorId: agent?.id ?? null, type: "changement_statut", message: "Votre bureau a bien reçu votre parcours. Pour instruire les demandes d'échéanciers, il attend votre dernier avis d'imposition : déposez-le dans le dossier quand vous l'avez." },
+    ]);
+    const rdv = new Date(now.getTime() + 9 * DAY);
+    rdv.setHours(10, 30, 0, 0);
+    await db.insert(appointments).values({
+      memberId: demo.id, officeId: agent?.officeId ?? null, caseworkerId: agent?.id ?? null, caseId: dossier.id,
+      reason: "Faire le point sur les factures et les aides possibles", requestedSlot: rdv, status: "confirmee",
+      notes: "Rendez-vous de démonstration (fictif).",
+    });
+  }
+
+  // --- Un document d'exemple, fictif et marqué comme tel
+  const contenuDoc = "Document fictif de la visite guidée — aucune valeur, aucun document réel.\n\nAvis d'imposition 2025 (exemple)\nFoyer : visiteur de démonstration AIME®\nCe fichier sert uniquement à montrer l'espace « Mes documents » pendant la visite.";
+  await db.insert(documents).values({
+    ownerId: demo.id, category: "revenus", filename: "avis-imposition-2025-fictif.txt", mimeType: "text/plain",
+    sizeBytes: Buffer.byteLength(contenuDoc), content: Buffer.from(contenuDoc), uploadedById: demo.id,
+  });
+
+  // --- Parcours mariage + projet complet (invités, budget, plan de table)
+  const dateMariage = new Date(now.getTime() + 240 * DAY);
+  while (dateMariage.getDay() !== 6) dateMariage.setDate(dateMariage.getDate() + 1);
+  dateMariage.setHours(12, 0, 0, 0);
+  const defMariage = SITUATION_BY_KEY.get("mariage")!;
+  const repMariage: Record<string, string> = { date: dateMariage.toISOString().slice(0, 10), lieu: "Vendôme", invites: "85", ceremonie: "laique", contrat: "non", salle: "salle_communale", repas: "traiteur", musique: "groupe", photo: "pro", budget: "12000" };
+  const [projet] = await db.insert(projects).values({
+    ownerId: demo.id, title: "Mariage à Vendôme (démonstration)", intention: "Mariage fictif de la visite guidée : cérémonie laïque dans un jardin, une centaine de proches, des prestataires du coin.",
+    city: "Vendôme", lat: "47.79", lng: "1.07", startsAt: dateMariage, endsAt: null, universes: ["arts"],
+    program: [{ time: "15 h", label: "Cérémonie laïque dans le jardin" }, { time: "16 h", label: "Vin d'honneur" }, { time: "19 h", label: "Dîner et soirée dansante" }],
+    status: "ouvert", isDemo: true,
+  }).returning({ id: projects.id });
+  await db.insert(projectMembers).values({ projectId: projet.id, userId: demo.id, role: "organisateur", status: "accepte" });
+  // Les fiances de la démo : Camille et Simon
+  const [jm] = await db.insert(journeys).values({
+    userId: demo.id, situation: "mariage", title: "Mariage à Vendôme", answers: repMariage, status: "en_cours",
+    projectId: projet.id, rulesVersion: RULES_VERSION, isDemo: true,
+    summary: "Démonstration fictive : le mariage de Camille et Simon, préparé ici de la mairie aux remerciements.",
+  }).returning({ id: journeys.id });
+  const reglesMariage = defMariage.build(repMariage);
+  await db.insert(journeyTasks).values(reglesMariage.map((r, i) => ({
+    journeyId: jm.id, kind: r.kind, label: r.label, detail: r.detail ?? "", reason: r.reason,
+    organismSlugs: r.organisms ?? [], officialUrl: r.officialUrl ?? null, frameworkFlag: r.frameworkFlag ?? null,
+    dueAt: computeDueAt(r, repMariage, now), dueKind: r.due ? (r.due.official ? "officielle" as const : "personnelle" as const) : null, dueSource: r.due?.source ?? null,
+    sortOrder: i, status: (i === 0 ? "termine" : i === 1 ? "pret" : "a_preparer") as "termine" | "pret" | "a_preparer",
+  })));
+  await db.insert(journeyEvents).values([
+    { journeyId: jm.id, actorId: demo.id, message: "Démarche commencée (visite guidée, exemple fictif)." },
+    { journeyId: jm.id, actorId: demo.id, message: `Plan préparé avec les règles ${RULES_VERSION}. Projet relié.` },
+  ]);
+  await db.insert(weddingSettings).values({ projectId: projet.id, envelopeCents: 1200000 });
+  const [tableHonneur, tableAmis] = await db.insert(weddingTables).values([
+    { projectId: projet.id, name: "Table d'honneur", capacity: 8 },
+    { projectId: projet.id, name: "Amis de longue date", capacity: 10 },
+  ]).returning({ id: weddingTables.id });
+  await db.insert(weddingGuests).values([
+    { projectId: projet.id, name: "Famille Rochefort — les parents de Camille", persons: 4, groupe: "famille", status: "confirme", note: "", tableId: tableHonneur.id },
+    { projectId: projet.id, name: "Famille Aubry — les parents de Simon", persons: 3, groupe: "famille", status: "confirme", note: "1 enfant", tableId: tableHonneur.id },
+    { projectId: projet.id, name: "Les amis de la fac", persons: 6, groupe: "amis", status: "invite", note: "", tableId: tableAmis.id },
+    { projectId: projet.id, name: "Collègues de Simon", persons: 5, groupe: "travail", status: "peut_etre", note: "" },
+    { projectId: projet.id, name: "Cousins éloignés", persons: 4, groupe: "famille", status: "a_inviter", note: "Adresses à retrouver" },
+  ]);
+  await db.insert(weddingBudgetItems).values([
+    { projectId: projet.id, label: "Salle des fêtes de Vendôme — location", category: "lieu", estimatedCents: 60000, actualCents: 60000, settled: true },
+    { projectId: projet.id, label: "Traiteur — menu pour 85 convives (devis)", category: "repas", estimatedCents: 420000, actualCents: null, settled: false },
+    { projectId: projet.id, label: "Groupe de musique — devis demandé", category: "musique", estimatedCents: 110000, actualCents: null, settled: false },
+    { projectId: projet.id, label: "Photographe — reportage journée", category: "photo", estimatedCents: 140000, actualCents: null, settled: false },
+  ]);
+  console.log("Visite guidée : espace de démonstration peuplé (parcours paiement + dossier + mariage).");
   return true;
 }
 
