@@ -807,3 +807,34 @@ les branches (accident, reprise, maladie professionnelle, handicap, soins).
 **Vérifié** : insertion ciblée sans raz (38 contenus, 7 santé), page
 thématique et 5 guides en 200 avec renvois aux parcours, accueil ouvert sur
 le fonds ; typecheck et ESLint verts.
+
+## 6sedecies. Fonds éditorial « Préparer ma retraite » (2026-10-13)
+
+**Demande** : le quatrième pilier des moments de vie — la retraite — raconté
+en public avec la méthode des fonds précédents : parcours relu, socle
+sourcé uniquement, ce sujet étant celui où les estimations fantaisistes
+font le plus de dégâts. Catégorie `retraite` existante : insert dédié au
+seed (42 contenus en base, accueil ouvert sur ce fonds), aucun code modifié.
+
+**Les 4 contenus** : `releve-de-carriere-verifier-tot` (le document unique
+inter-régimes sur Info Retraite, les périodes qui manquent presque toujours,
+des corrections à faire des années avant le départ) ;
+`retraite-de-base-complementaire-qui-paye-quoi` (les deux étages en deux
+logiques — durée d'assurance et revenus pour la base Assurance retraite ou
+MSA, points Agirc-Arrco pour la complémentaire des salariés du privé — et
+pourquoi « une estimation n'est jamais une promesse ») ;
+`carrieres-mixtes-retraite` (saisonnier, exploitant, salarié, indépendant :
+chaque période compte quelque part, chaque caisse confirme sa part,
+l'utilisateur fait la jonction par sa vérification) ;
+`demander-sa-retraite-une-seule-demande` (la demande en ligne inter-régimes
+que le parcours propose à moins d'un an du départ, pièces listées au fil de
+la demande, choix de la date en connaissance de cause, estimations tenues
+pour des ordres de grandeur).
+
+**Discipline** : aucun montant, aucun âge légal, aucun taux de remplacement,
+aucune durée chiffrée ajoutée ; les deux articles retraite du seed
+d'origine (étapes agricoles, cumul emploi-retraite) ne sont pas dupliqués.
+
+**Vérifié** : insertion ciblée sans raz (42 contenus, 6 retraite), page
+thématique et 4 guides en 200 avec renvois au parcours, accueil ouvert sur
+le fonds ; typecheck et ESLint verts.

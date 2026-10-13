@@ -1382,6 +1382,46 @@ export async function seedDatabase(db: NodePgDatabase) {
     },
   ]);
 
+  console.log("Création du fonds retraite : 4 guides et articles publics…");
+  await db.insert(articles).values([
+    {
+      slug: "releve-de-carriere-verifier-tot",
+      title: "Relevé de carrière : le vérifier des années avant de partir",
+      category: "retraite",
+      audience: "Actifs et futurs retraités",
+      summary: "Un seul document rassemble toute votre carrière, tous régimes confondus — et il contient presque toujours quelque chose à corriger.",
+      content: "Votre retraite se calculera sur ce que les caisses savent de votre carrière. La première démarche utile n'est donc pas de demander sa retraite : c'est de vérifier ce qu'elles en savent.\n\nLe relevé de carrière, accessible via Info Retraite, rassemble vos périodes d'activité dans tous vos régimes — salariat, agriculture, indépendance. C'est le seul endroit où votre vie professionnelle apparaît entière, et c'est là que se voient les oublis : un emploi saisonnier jamais transmis, une période travaillée à l'étranger, un changement de statut mal enchaîné, des années d'exploitation agricole incomplètes.\n\nCes corrections prennent du temps — recherches de justificatifs, échanges avec les caisses. Faites-les des années avant le départ envisagé, pas dans les derniers mois : le plus tôt est le mieux, et en tout cas bien avant l'année du départ. Chaque période régularisée compte pour le calcul ; chaque période manquante peut le diminuer ou retarder l'instruction.\n\nGardez vos justificatifs au fil de la vie active : bulletins de salaire, attestations d'employeurs, documents d'exploitation. Le jour où une période est contestée, ce sont eux qui parlent.\n\nDans votre espace AIME®, le parcours « Je prépare ma retraite » commence par cette vérification du relevé, puis oriente vers la MSA pour la part agricole et vers l'Assurance retraite pour le régime général, selon votre carrière.",
+      kind: "guide",
+    },
+    {
+      slug: "retraite-de-base-complementaire-qui-paye-quoi",
+      title: "Retraite de base et complémentaire : qui paie quoi ?",
+      category: "retraite",
+      audience: "Salariés et futurs retraités",
+      summary: "Deux étages, deux logiques, parfois deux caisses : comprendre la structure avant de croire une estimation.",
+      content: "Une retraite de salarié tient en deux étages, versés séparément, selon deux logiques différentes. Comprendre cette structure évite la plupart des malentendus.\n\nLe premier étage est la retraite de base : elle dépend de votre durée d'assurance (les périodes validées au fil de la carrière) et de vos revenus d'activité. Elle est gérée par l'Assurance retraite pour les salariés du régime général, et par la MSA pour les salariés et exploitants agricoles.\n\nLe deuxième étage est la retraite complémentaire. Pour les salariés du secteur privé, c'est l'Agirc-Arrco : elle fonctionne par points, accumulés tout au long de la carrière et convertis en pension au départ. Deux carrières au même salaire final peuvent donc donner des retraites différentes — c'est l'ensemble du parcours qui compte, pas la dernière feuille de paie.\n\nConséquence pratique : une estimation lue sur un simulateur n'est jamais une promesse. Elle dépend des périodes connues des caisses (d'où l'importance du relevé de carrière à jour), des règles en vigueur au moment du départ, et de vos choix d'âge. Les caisses calculent et décident ; un simulateur donne un ordre de grandeur.\n\nDans votre espace AIME®, le parcours « Je prépare ma retraite » vous oriente vers le bon interlocuteur pour chaque étage — Info Retraite pour la vue d'ensemble, votre caisse de base, et l'Agirc-Arrco pour la complémentaire.",
+      kind: "article",
+    },
+    {
+      slug: "carrieres-mixtes-retraite",
+      title: "Carrières mixtes : quand une vie de travail tient en plusieurs régimes",
+      category: "retraite",
+      audience: "Exploitants, salariés, carrières variées",
+      summary: "Saisonnier agricole, salariat, indépendance : chaque période compte quelque part, à condition de vérifier qu'elle y figure.",
+      content: "À la campagne, les carrières droites sont l'exception : quelques saisons comme salarié agricole, des années d'exploitation, une parenthèse salariée ailleurs, parfois une activité indépendante en plus. Bonne nouvelle : aucune de ces périodes n'est perdue par principe. Chacune compte dans un régime — à condition qu'elle y soit correctement enregistrée.\n\nLe point de départ reste le relevé de carrière inter-régimes, sur Info Retraite : c'est lui qui montre, régime par régime, ce qui est connu de votre parcours. Parcourez-le période par période, surtout aux jonctions — changement de statut, passage de salarié à exploitant, années partagées entre plusieurs activités.\n\nEnsuite, chaque caisse confirme sa part : la MSA pour tout ce qui relève de l'agricole (salarié comme exploitant), l'Assurance retraite pour le salariat du régime général, l'Agirc-Arrco pour la complémentaire des périodes salariées du privé. Ne supposez jamais qu'une caisse « voit » ce que l'autre détient : c'est votre vérification qui fait la jonction.\n\nAu moment du départ, la demande en ligne inter-régimes transmet votre dossier aux caisses concernées pour les retraites de base et complémentaires : une seule démarche, mais elle s'appuie sur ce que chaque régime connaît déjà de vous. D'où, encore une fois, l'intérêt de corriger le relevé tôt.\n\nDans votre espace AIME®, le parcours « Je prépare ma retraite » tient compte des carrières en partie agricoles et vous oriente vers chaque interlocuteur pour sa part.",
+      kind: "guide",
+    },
+    {
+      slug: "demander-sa-retraite-une-seule-demande",
+      title: "Demander sa retraite : une seule demande pour presque tous les régimes",
+      category: "retraite",
+      audience: "Futurs retraités",
+      summary: "Quand le départ approche, la demande en ligne transmet votre dossier aux caisses concernées — à préparer sans se presser.",
+      content: "Le jour où le départ approche, la démarche est plus simple qu'on l'imagine : la demande de retraite en ligne, via le service inter-régimes, transmet votre dossier aux caisses concernées par votre carrière — retraites de base et complémentaires. Une seule demande, au lieu d'un courrier par régime.\n\nElle se prépare sans se presser. Le parcours AIME® vous la propose lorsque votre départ est à moins d'un an : c'est le moment de vérifier une dernière fois votre relevé de carrière, de rassembler les justificatifs que le service vous listera au fil de la demande (identité, carrière, situation de famille, dernier avis d'imposition le plus souvent), et de choisir votre date de départ en connaissance de cause.\n\nCar c'est bien un choix : l'âge et la date de départ influent sur le calcul, et les règles applicables sont celles en vigueur au moment où vous partez. Les estimations obtenues avant la demande donnent un ordre de grandeur ; seule l'instruction des caisses aboutit à une décision et à un montant.\n\nUne fois la demande déposée, suivez son avancement auprès de chaque caisse et conservez les notifications reçues : ce sont elles qui font foi en cas de question. Si votre carrière comprend une part agricole, la MSA confirme sa part comme les autres régimes.\n\nDans votre espace AIME®, le parcours « Je prépare ma retraite » vous amène à cette demande dans l'ordre : relevé vérifié d'abord, interlocuteurs identifiés, demande unique ensuite.",
+      kind: "guide",
+    },
+  ]);
+
   console.log("Création de la carte : production locale et disponibilités…");
 
   // Points de production / présence déposés par des adhérents (données fictives).
