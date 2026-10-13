@@ -10,7 +10,7 @@ import {
 import { AuthError, requireRole } from "@/lib/auth";
 import { createNotification } from "@/lib/queries";
 import { logAudit } from "@/lib/audit";
-import { RULES_VERSION, SITUATION_BY_KEY } from "@/lib/situations";
+import { RULES_VERSION, SITUATION_BY_KEY, computeDueAt } from "@/lib/situations";
 import { generateCaseReference } from "@/lib/reference";
 import { redirect } from "next/navigation";
 
@@ -104,11 +104,15 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
     const rules = def.build(j.answers);
     await db.transaction(async (tx) => {
       if (rules.length) {
-        await tx.insert(journeyTasks).values(rules.map((r, i) => ({
-          journeyId: j.id, kind: r.kind, label: r.label, detail: r.detail ?? "", reason: r.reason, organismSlugs: r.organisms ?? [],
-          officialUrl: r.officialUrl ?? null, frameworkFlag: r.frameworkFlag ?? null, sortOrder: i,
-          ...(r.kind === "action" && i === 0 && projectId ? { status: "pret" as const } : {}),
-        })));
+        await tx.insert(journeyTasks).values(rules.map((r, i) => {
+          const dueAt = computeDueAt(r, j.answers);
+          return {
+            journeyId: j.id, kind: r.kind, label: r.label, detail: r.detail ?? "", reason: r.reason, organismSlugs: r.organisms ?? [],
+            officialUrl: r.officialUrl ?? null, frameworkFlag: r.frameworkFlag ?? null, sortOrder: i,
+            dueAt, dueKind: dueAt ? (r.due?.official ? "officielle" : "personnel") : null, dueSource: dueAt && r.due?.official ? (r.due.source ?? null) : null,
+            ...(r.kind === "action" && i === 0 && projectId ? { status: "pret" as const } : {}),
+          };
+        }));
       }
       const summary = def.questions.filter((q) => j.answers[q.key]).map((q) => `${q.label} ${q.options?.find(([v]) => v === j.answers[q.key])?.[1] ?? j.answers[q.key]}`).join("\n");
       await tx.update(journeys).set({ status: "en_cours", projectId, summary, rulesVersion: RULES_VERSION, title: j.situation === "evenement" ? `Événement à ${j.answers.lieu}` : def.short, updatedAt: new Date() }).where(eq(journeys.id, j.id));
@@ -396,6 +400,7 @@ const SITUATION_PROCEDURE_SLUG: Record<string, string> = {
   famille: "changement-situation-familiale",
   logement: "demande-aide-logement",
   retraite: "demande-retraite-agricole",
+  sante: "declaration-arret-travail",
 };
 
 /**

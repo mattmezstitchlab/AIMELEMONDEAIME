@@ -183,6 +183,28 @@ une trace au journal d'audit (déjà en place) :
 
 ---
 
+## 5bis. P1 démarches (partie 1) — exécuté le 2026-08-10 (commit à suivre)
+
+- **Parcours Santé créé** (`sante`) au niveau du parcours pilote : 5 questions
+  discriminantes (statut, cause, date de début, avis signé, durée prévisible),
+  tâches conditionnelles (caisse selon le régime, volet employeur pour les
+  salariés, déclarations accident du travail / maladie professionnelle,
+  préparation de la reprise), correspondance avec la procédure bureau existante
+  « Déclarer un arrêt de travail » pour la transmission, mots-clés de
+  l'assistant. Règles métier testées directement (9 tâches et 3 échéances
+  pour un accident de salarié agricole, 4 tâches pour un indépendant malade).
+- **Échéances officielles générées par les règles** : `TaskRule.due`
+  (délai sourcé, jamais inventé) matérialisé à la préparation du plan par
+  `computeDueAt` — pour la santé, les transmissions à 48 heures depuis la
+  date de début. Les autres parcours pourront suivre le même patron.
+- **Notifications d'échéances de parcours** : à la visite de l'espace, toute
+  échéance à moins de 7 jours (ou dépassée) produit une notification unique
+  (anti-doublon vérifié : une seule notification après deux visites).
+  Règles versionnées en `2026.10-c`.
+
+Restent en P1 : épaissir `famille`, `proche`, `quotidien` ; trous de couverture
+(invalidité pour soi, transmission/cessation, réversion, recruteur).
+
 ## 6. Niveau 1 de l'assistant — exécuté le 2026-08-10 (commit à suivre)
 
 Le niveau 1 est en place, sans aucune écriture :

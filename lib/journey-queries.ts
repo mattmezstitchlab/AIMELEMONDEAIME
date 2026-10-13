@@ -2,7 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, inArray, isNull, ne, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
-  artistEngagements, artistProfiles, cases, communityListings, communityRequests, documentShares, documents, journeyEvents, journeyTasks, journeys,
+  artistEngagements, artistProfiles, cases, communityListings, communityRequests, documentShares, documents, journeyEvents, journeyTasks, journeys, notifications,
   organisms, projectDocuments, projectMembers, projects, users,
 } from "@/db/schema";
 import { distanceKm } from "@/lib/lma";
@@ -137,4 +137,35 @@ export async function getAssistantSummary(userId: number): Promise<AssistantSumm
     incoming: o.incomingRequests.length,
     engagements: o.engagementsToAnswer.length,
   };
+}
+
+/**
+ * Notifications d'échéances de parcours : à la première visite de l'espace où
+ * une échéance (officielle ou rappel personnel) tombe dans les 7 prochains
+ * jours — ou est dépassée — le membre reçoit une notification. Anti-doublon
+ * sans migration : titre + corps (qui contient la date) + lien identiques ne
+ * sont créés qu'une fois ; si l'échéance change, la nouvelle date produit un
+ * nouveau corps, donc une nouvelle notification.
+ */
+export async function ensureDeadlineNotifications(userId: number): Promise<number> {
+  const soon = new Date(Date.now() + 7 * 86400000);
+  const rows = await db
+    .select({ t: journeyTasks, title: journeys.title })
+    .from(journeyTasks)
+    .innerJoin(journeys, eq(journeyTasks.journeyId, journeys.id))
+    .where(and(eq(journeys.userId, userId), eq(journeys.status, "en_cours")));
+  const due = rows.filter((r) => r.t.dueAt && r.t.dueAt <= soon && !["termine", "effectue_declare"].includes(r.t.status));
+  let created = 0;
+  for (const r of due) {
+    const date = r.t.dueAt!.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    const title = `Échéance : ${r.t.label}`;
+    const body = `${date} — parcours « ${r.title} »${r.t.dueKind === "officielle" ? ` (échéance officielle — source : ${r.t.dueSource ?? "site officiel"})` : " (rappel personnel)"}.`;
+    const link = `/espace/demarches/suivi/${r.t.journeyId}`;
+    const [existing] = await db.select({ id: notifications.id }).from(notifications)
+      .where(and(eq(notifications.userId, userId), eq(notifications.title, title), eq(notifications.body, body), eq(notifications.link, link))).limit(1);
+    if (existing) continue;
+    await db.insert(notifications).values({ userId, title, body, link });
+    created++;
+  }
+  return created;
 }

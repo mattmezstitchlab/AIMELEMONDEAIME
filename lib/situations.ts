@@ -3,8 +3,9 @@
  * Chaque situation : questions progressives → étapes expliquées, pièces, organismes et liens officiels.
  * Les règles sont versionnées et datées ; elles n'attribuent aucun droit et ne valident aucun dossier.
  */
-export const RULES_VERSION = "2026.10-b";
+export const RULES_VERSION = "2026.10-c";
 export const RULES_REVIEWED_AT = "2026-10-13";
+// 2026.10-c : parcours Santé, échéances officielles calculées dans les règles.
 
 export type Question = {
   key: string;
@@ -24,14 +25,36 @@ export type TaskRule = {
   organisms?: string[];
   officialUrl?: string;
   frameworkFlag?: "cadre_a_verifier" | "guso_probable";
+  /**
+   * Échéance calculée à la préparation du plan : `days` jours après la date
+   * de la réponse `from` (question de type date), ou après le jour de
+   * préparation. `official` exige une `source` — jamais d'échéance inventée.
+   */
+  due?: { days: number; from?: string; official?: boolean; source?: string };
 };
+
+/** Calcule l'échéance concrète d'une tâche (fonction pure, testable). */
+export function computeDueAt(rule: TaskRule, answers: Record<string, string>, now = new Date()): Date | null {
+  if (!rule.due) return null;
+  let base = now;
+  if (rule.due.from) {
+    const raw = answers[rule.due.from];
+    if (!raw) return null;
+    const parsed = new Date(`${raw}T12:00:00`);
+    if (Number.isNaN(parsed.getTime())) return null;
+    base = parsed;
+  }
+  const due = new Date(base);
+  due.setDate(due.getDate() + rule.due.days);
+  return due;
+}
 
 export type Situation = {
   key: string;
   label: string;
   short: string;
   description: string;
-  icon: "emploi" | "search" | "music" | "famille" | "logement" | "entraide" | "heart" | "retraite";
+  icon: "emploi" | "search" | "music" | "famille" | "logement" | "entraide" | "heart" | "retraite" | "sante";
   image: string;
   pilot?: boolean;
   questions: Question[];
@@ -215,6 +238,47 @@ export const SITUATIONS: Situation[] = [
       { kind: "action", label: "Créer un cercle privé familial pour organiser l'aide", reason: "Partager agenda, nouvelles et tâches entre proches, sans exposer de documents administratifs." },
       { kind: "piece", label: "Coordonnées des professionnels qui interviennent", reason: "Utile pour coordonner l'aide. Aucune donnée médicale n'est stockée dans AIME®." },
     ],
+  },
+  {
+    key: "sante",
+    label: "Je suis malade ou en arrêt de travail",
+    short: "Santé et arrêt de travail",
+    description: "Maladie, accident du travail ou hospitalisation : les déclarations à faire, leurs délais et les pièces à réunir, sans décider ni promettre d'indemnisation à votre place.",
+    icon: "sante",
+    image: "/images/hero-sante.jpg",
+    questions: [
+      { key: "statut", label: "Quelle est votre situation professionnelle ?", type: "select", required: true, options: [["salarie_agricole", "Salarié·e agricole"], ["exploitant", "Exploitant·e agricole"], ["salarie_general", "Salarié·e hors régime agricole"], ["independant", "Indépendant·e, artisan, commerçant·e"], ["autre", "Autre ou je ne sais pas"]] },
+      { key: "cause", label: "Que se passe-t-il ?", type: "select", required: true, options: [["maladie", "Une maladie"], ["accident_travail", "Un accident du travail ou de trajet"], ["maladie_pro", "Une maladie que je relie à mon travail"], ["hospitalisation", "Une hospitalisation"], ["autre", "Autre chose"]] },
+      { key: "debut", label: "Date de début de l'arrêt (ou de l'accident)", type: "date", required: true, why: "Les délais de déclaration courent à partir de cette date : c'est elle qui fixe vos échéances." },
+      { key: "avis", label: "Avez-vous déjà un avis d'arrêt signé par un médecin ?", type: "select", required: true, options: [["oui", "Oui"], ["non", "Non"], ["en_cours", "C'est en cours"]] },
+      { key: "duree", label: "Pensez-vous être arrêté·e plus de 30 jours ?", type: "select", options: [["non", "Non"], ["oui", "Oui"], ["inconnu", "Je ne sais pas encore"]], why: "Un arrêt long change la préparation de la reprise (visite médicale, risque d'inaptitude)." },
+    ],
+    build: (a) => {
+      const agricole = a.statut === "salarie_agricole" || a.statut === "exploitant";
+      const caisse = agricole ? "msa" : "assurance-maladie";
+      const salarie = a.statut === "salarie_agricole" || a.statut === "salarie_general";
+      const due48h = { days: 2, from: "debut", official: true, source: "service-public.fr — transmission de l'avis d'arrêt sous 48 heures" } as const;
+      const t: TaskRule[] = [];
+      if (a.avis !== "oui") t.push({ kind: "action", label: "Consulter un médecin pour obtenir l'avis d'arrêt de travail", detail: "Chaque prolongation doit être signée avant la fin de l'arrêt en cours.", reason: "Sans avis signé, aucune déclaration n'est possible.", organisms: [caisse] });
+      t.push({ kind: "action", label: `Envoyer l'avis d'arrêt à ${agricole ? "la MSA" : "votre caisse d'assurance maladie"} dans les 48 heures`, reason: "Le délai de transmission conditionne la prise en charge de l'arrêt : il court dès la signature de l'avis.", organisms: [caisse], officialUrl: "https://www.service-public.fr", due: due48h });
+      if (salarie) t.push({ kind: "action", label: "Transmettre le volet employeur à votre employeur dans les 48 heures", reason: "Votre employeur complète ensuite l'attestation de salaire, indispensable au calcul des indemnités journalières par la caisse.", organisms: [caisse], officialUrl: "https://www.service-public.fr", due: due48h });
+      if (a.cause === "accident_travail") {
+        t.push({ kind: "action", label: "Vérifier que votre employeur a déclaré l'accident à la caisse sous 48 heures", detail: "C'est à l'employeur de déclarer ; demandez-lui la feuille d'accident du travail, qui évite l'avance de frais pour les soins liés à l'accident.", reason: "Sans déclaration de l'employeur, les soins risquent d'être traités comme une maladie ordinaire.", organisms: [caisse], officialUrl: "https://www.service-public.fr", due: due48h });
+        t.push({ kind: "piece", label: "Certificat médical d'accident du travail", reason: "Le médecin le remplit en décrivant les lésions constatées : gardez l'original accessible." });
+      }
+      if (a.cause === "maladie_pro") {
+        t.push({ kind: "action", label: "Déclarer la maladie professionnelle auprès de votre caisse", detail: "La déclaration s'appuie sur un certificat médical initial décrivant la maladie et le travail exercé ; les délais et tableaux de reconnaissance sont vérifiés par la caisse.", reason: "La reconnaissance en maladie professionnelle ouvre des droits spécifiques : c'est la caisse qui instruit, pas AIME®.", organisms: [caisse], officialUrl: "https://www.service-public.fr", frameworkFlag: "cadre_a_verifier" });
+        t.push({ kind: "piece", label: "Certificat médical initial (maladie suspectée)", reason: "Il relie la maladie à l'activité exercée : demandez au médecin de le préciser." });
+      }
+      t.push({ kind: "piece", label: "Avis d'arrêt de travail (tous les volets)", reason: "Le document de départ de toutes les transmissions : photographiez-le avant de l'envoyer." });
+      if (salarie) t.push({ kind: "piece", label: "Attestation de salaire complétée par l'employeur", reason: "Elle sert au calcul des indemnités journalières par la caisse ; relancez poliment l'employeur si elle tarde." });
+      if (a.duree === "oui" || a.duree === "inconnu") {
+        t.push({ kind: "action", label: "Anticiper la reprise : visite de pré-reprise ou de reprise avec la médecine du travail", detail: "Après un arrêt long, une visite de reprise est en principe organisée à l'initiative de l'employeur ; la visite de pré-reprise peut préparer un retour adapté.", reason: "Préparer la reprise tôt évite les reprises impossibles et les arrêts qui se répètent.", organisms: ["france-services"] });
+        t.push({ kind: "action", label: "Si la reprise au même poste semble impossible : se renseigner sur l'inaptitude, l'invalidité et la MDPH", detail: "Le médecin du travail statue sur l'aptitude ; la caisse instruit l'invalidité ; la MDPH évalue les compensations du handicap. AIME® oriente, ces organismes décident.", reason: "Mieux vaut ouvrir ces questions pendant l'arrêt qu'au pied du mur.", organisms: [caisse, "mdph"], officialUrl: "https://www.service-public.fr", frameworkFlag: "cadre_a_verifier" });
+      }
+      t.push({ kind: "action", label: `Suivre vos remboursements et vos droits sur le site de ${agricole ? "la MSA" : "l'Assurance Maladie (ameli)"}`, reason: "Vous y vérifiez ce qui est pris en charge, sans qu'AIME® décide ni ne calcule de montant.", organisms: [caisse], officialUrl: agricole ? "https://www.msa.fr" : "https://www.ameli.fr" });
+      return t;
+    },
   },
   {
     key: "retraite",

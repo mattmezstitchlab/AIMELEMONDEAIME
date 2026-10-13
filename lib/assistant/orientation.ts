@@ -5,6 +5,7 @@ export const INTENT_KEYWORDS: Record<string, string[]> = {
   evenement: ["organiser une fete", "mariage", "engager un artiste", "trouver musicien", "concert", "reception", "fete du village", "sono pour un evenement"],
   activite: ["creer mon activite", "monter mon entreprise", "micro entreprise", "devenir independant", "developper ma ferme", "statut professionnel", "devenir artisan"],
   emploi: ["chercher un emploi", "recherche de travail", "formation", "apprentissage", "reconversion", "chercher un stage", "retrouver du travail"],
+  sante: ["arret de travail", "arret maladie", "je suis malade", "maladie professionnelle", "accident du travail", "accident de trajet", "avis d'arret", "prolongation d'arret", "hospitalise", "je suis en arret"],
   famille: ["naissance", "adoption", "mariage civil", "pacs", "separation", "divorce", "enfant", "changement familial"],
   logement: ["chercher un logement", "loyer", "aide au logement", "trouver une location", "bail", "logement social", "mal loge"],
   quotidien: ["besoin essentiel", "faire mes courses", "aide quotidienne", "transport de proximite", "don de vetements", "coup de main", "accompagnement quotidien"],
