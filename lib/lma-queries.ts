@@ -64,7 +64,7 @@ export async function getExplorerExtras() {
   return { people, projects: projectsOut, stories };
 }
 
-/** Vue « Mes liens » : projets, cercles, invitations et demandes de participation à traiter. */
+/** Vue « Mes échanges & projets » : projets, cercles, invitations et demandes de participation à traiter. */
 export async function getMyLinks(userId: number) {
   const myProjects = await db.select({
     id: projects.id, title: projects.title, city: projects.city, startsAt: projects.startsAt, status: projects.status,

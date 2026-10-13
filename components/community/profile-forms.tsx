@@ -103,7 +103,7 @@ export function ArtistForm({ data }: { data: ArtistData }) {
 
 import { decideCommunityRequest } from "@/lib/actions/community";
 
-/** Réponse rapide à une demande de prestation (la conversation complète reste dans « Mes liens »). */
+/** Réponse rapide à une demande de prestation (la conversation complète reste dans « Mes échanges & projets »). */
 export function ArtistRequestActions({ requestId, status }: { requestId: number; status: string }) {
   const [fb, setFb] = useState<Fb>(null);
   const [pending, start] = useTransition();

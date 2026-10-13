@@ -30,7 +30,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     <PublicPage solidHeader>
       <div className="bg-[#fafaf9]">
         <div className="mx-auto max-w-5xl space-y-5 px-4 py-8 sm:px-6">
-          <Link href="/espace" className="text-sm font-semibold text-emerald-800 underline">← Mes liens</Link>
+          <Link href="/espace/echanges" className="text-sm font-semibold text-emerald-800 underline">← Mes échanges & projets</Link>
           <header className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-800">Projet</span>
@@ -51,7 +51,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
           <Section title="Besoins et contributions" hint="Chaque contribution est acceptée explicitement par son propriétaire. Seul un propriétaire peut confirmer sa ressource.">
             <NeedsPanel projectId={id} needs={detail.needs} suggestions={detail.suggestions} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} startsAt={project.startsAt} endsAt={project.endsAt} />
-            {viewer.isOrganizer && <p className="mt-3 text-xs text-slate-500">Les réponses des propriétaires arrivent dans <Link className="underline" href="/espace">Mes liens → Échanges</Link>.</p>}
+            {viewer.isOrganizer && <p className="mt-3 text-xs text-slate-500">Les réponses des propriétaires arrivent dans <Link className="underline" href="/espace/echanges">Mes échanges & projets</Link>.</p>}
           </Section>
 
           <Section title="Programme"><ProgramEditor projectId={id} program={project.program} editable={viewer.isOrganizer} /></Section>

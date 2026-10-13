@@ -14,7 +14,6 @@ const NAV: NavItem[] = [
   { href: "/espace/echanges", label: "Mes échanges & projets", icon: "echanges" },
   { href: "/espace/documents", label: "Mes documents", icon: "documents" },
   { href: "/espace/profil", label: "Mon profil", icon: "user" },
-  { href: "/le-monde-aime", label: "La carte", icon: "pin" },
 ];
 
 const MOBILE: NavItem[] = [
