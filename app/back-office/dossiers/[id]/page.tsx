@@ -10,6 +10,7 @@ import { AssignButton } from "./assign-button";
 import { DocumentUploader } from "@/components/document-uploader";
 import { CaseMessageForm } from "@/components/case-message-form";
 import { caseworkerReply } from "@/lib/actions/cases";
+import { RemindButton } from "../remind-button";
 
 export const metadata: Metadata = { title: "Dossier — Back-office AIME®" };
 
@@ -104,6 +105,13 @@ export default async function CaseworkerCaseDetail({ params }: { params: Promise
             <h2 className="text-lg font-semibold text-slate-900">Gérer le dossier</h2>
             <div className="mt-3">
               <div data-assistant-id="case-status-form"><StatusForm caseId={item.id} currentStatus={item.status} currentRequested={item.requestedDocuments} /></div>
+              {item.status === "piece_manquante" && (
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <p className="text-sm text-slate-600">Le membre doit fournir : {item.requestedDocuments.length ? item.requestedDocuments.join(", ") : "une pièce demandée"}.</p>
+                  <div className="mt-2"><RemindButton caseId={item.id} /></div>
+                  <p className="mt-1 text-xs text-slate-400">Une relance tous les 7 jours au maximum.</p>
+                </div>
+              )}
             </div>
           </Card>
 

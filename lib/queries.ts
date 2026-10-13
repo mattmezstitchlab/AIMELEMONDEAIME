@@ -130,6 +130,8 @@ export async function getOfficeCases(officeId: number | null, filters?: { status
       memberName: users.fullName,
       assignedCaseworkerId: cases.assignedCaseworkerId,
       officeId: cases.officeId,
+      requestedDocuments: cases.requestedDocuments,
+      submittedAt: cases.submittedAt,
     })
     .from(cases)
     .innerJoin(users, eq(cases.memberId, users.id));

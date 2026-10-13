@@ -62,4 +62,5 @@ export const CASE_EVENT_LABELS: Record<string, string> = {
   message: "Message",
   document_ajoute: "Document ajouté",
   affectation: "Dossier affecté",
+  relance: "Relance envoyée",
 };

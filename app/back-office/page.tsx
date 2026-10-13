@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getOfficeCases, getOfficeById } from "@/lib/queries";
-import { Card, SectionTitle, StatusBadge, EmptyState, formatDate } from "@/components/ui";
+import { Card, SectionTitle, StatusBadge, EmptyState, formatDate, daysSince } from "@/components/ui";
+import { RemindButton } from "./dossiers/remind-button";
 
 export const metadata: Metadata = { title: "Back-office — AIME®" };
 
@@ -16,6 +17,16 @@ export default async function BackOfficeDashboard() {
 
   const toTriage = allCases.filter((c) => c.status === "envoyee");
   const mine = allCases.filter((c) => c.assignedCaseworkerId === user.id && (c.status === "en_cours" || c.status === "piece_manquante"));
+  // File prioritaire : qui est bloqué, depuis quand. D'abord les membres
+  // dont on attend une pièce, puis les dossiers à affecter, puis les
+  // dossiers sans mouvement depuis 14 jours ou plus.
+  const rank: Record<string, number> = { piece_manquante: 0, envoyee: 1, en_cours: 2 };
+  const prioritaires = allCases
+    .filter((c) => c.status === "piece_manquante" || c.status === "envoyee" || (c.status === "en_cours" && daysSince(c.updatedAt) >= 14))
+    .map((c) => ({ ...c, attente: daysSince(c.updatedAt) }))
+    .sort((a, b) => (rank[a.status] - rank[b.status]) || b.attente - a.attente)
+    .slice(0, 8);
+
   const counts = {
     envoyee: allCases.filter((c) => c.status === "envoyee").length,
     en_cours: allCases.filter((c) => c.status === "en_cours").length,
@@ -42,6 +53,37 @@ export default async function BackOfficeDashboard() {
           </Card>
         ))}
       </div>
+
+      <Card>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-900">File prioritaire — qui est bloqué, depuis quand</h2>
+          <Link href="/back-office/dossiers" className="text-sm font-semibold text-emerald-800 hover:underline">Tous les dossiers →</Link>
+        </div>
+        <p className="mt-1 text-xs text-slate-500">
+          Dans l&apos;ordre : les membres dont vous attendez une pièce, les dossiers à affecter, puis les dossiers sans mouvement depuis 14 jours.
+          L&apos;ancienneté se mesure depuis le dernier mouvement du dossier.
+        </p>
+        {prioritaires.length === 0 ? (
+          <div className="mt-3"><EmptyState title="Aucun dossier bloqué" /></div>
+        ) : (
+          <ul className="mt-3 flex flex-col gap-2">
+            {prioritaires.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 text-sm hover:border-emerald-300">
+                <span className="min-w-0 flex-1">
+                  <Link href={`/back-office/dossiers/${c.id}`} className="font-semibold text-emerald-800 hover:underline">{c.reference}</Link>
+                  <span className="text-slate-700"> — {c.memberName}</span>
+                  <span className="block truncate text-xs text-slate-500">{c.title}</span>
+                </span>
+                <span className={`text-xs font-semibold ${c.attente >= 14 ? "text-red-700" : c.attente >= 7 ? "text-amber-700" : "text-slate-500"}`}>
+                  sans mouvement depuis {c.attente} j
+                </span>
+                <StatusBadge status={c.status} />
+                {c.status === "piece_manquante" && <RemindButton caseId={c.id} compact />}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

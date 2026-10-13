@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { cases, caseEvents, procedureTypes, users, notifications } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { requireUser, requireRole } from "@/lib/auth";
 import { generateCaseReference } from "@/lib/reference";
 import { logAudit } from "@/lib/audit";
@@ -285,3 +285,47 @@ export async function caseworkerReply(caseId: number, message: string): Promise<
 // linkDocumentEvent vit dans "@/lib/case-events" (module serveur interne) :
 // ne jamais exporter d'helper sans contrôle d'accès depuis un fichier "use server",
 // chaque export devient un endpoint Server Action publiquement invocable.
+
+/**
+ * Relance en un clic : le bureau rappelle au membre la pièce attendue.
+ * Anti-spam : une seule relance par dossier et par période de 7 jours.
+ * La relance est tracée dans l'historique du dossier et au journal d'audit.
+ */
+export async function remindMissingDocuments(caseId: number): Promise<ActionResult> {
+  try {
+    const user = await requireRole(["gestionnaire", "administrateur"]);
+    const { item } = await assertCaseAccess(caseId);
+    if (item.status !== "piece_manquante") return { ok: false, error: "Ce dossier n'attend pas de pièce du membre." };
+
+    const [last] = await db
+      .select({ createdAt: caseEvents.createdAt })
+      .from(caseEvents)
+      .where(and(eq(caseEvents.caseId, caseId), eq(caseEvents.type, "relance")))
+      .orderBy(desc(caseEvents.createdAt))
+      .limit(1);
+    if (last && Date.now() - +new Date(last.createdAt) < 7 * 86400000) {
+      return { ok: false, error: "Une relance a déjà été envoyée il y a moins de 7 jours." };
+    }
+
+    const docs = item.requestedDocuments?.length ? item.requestedDocuments.join(", ") : "la pièce demandée";
+    await db.insert(caseEvents).values({
+      caseId,
+      actorId: user.id,
+      type: "relance",
+      message: `Relance envoyée au membre : pièce(s) toujours attendue(s) — ${docs}.`,
+    });
+    await db.insert(notifications).values({
+      userId: item.memberId,
+      title: "Votre bureau attend une pièce de votre part",
+      body: `Pour votre dossier ${item.reference} : ${docs}. Ouvrez le dossier pour voir le détail et répondre.`,
+      link: `/espace/demarches/${caseId}`,
+    });
+    await logAudit({ actorId: user.id, action: "relance_dossier", entityType: "case", entityId: caseId, metadata: { pieces: docs } });
+    revalidatePath("/back-office/dossiers");
+    revalidatePath(`/back-office/dossiers/${caseId}`);
+    revalidatePath(`/espace/demarches/${caseId}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erreur inattendue." };
+  }
+}

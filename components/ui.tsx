@@ -190,6 +190,12 @@ export function formatDateTime(value: Date | string) {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
+/** Jours entiers écoulés depuis une date (ancienneté d'un dossier, d'une attente…). */
+export function daysSince(value: Date | string) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86400000));
+}
+
 export function formatAmount(value: string | number) {
   const amount = typeof value === "string" ? Number(value) : value;
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(amount);

@@ -299,6 +299,37 @@ SIMPLIFICATION.md) : l'exécution navigateur d'un POST ne se simule pas en
 curl contre PGlite — le code suit le motif éprouvé des formulaires, avec
 double revérification serveur.
 
+## 6ter. Suite recommandée — exécutée le 2026-08-10 (commits à suivre)
+
+Les deux directions validées après la clôture du niveau 2 sont en place :
+
+**Questionnaire conversationnel avec relecture (assistant).** Après la
+création du brouillon (ou sa reprise), l'assistant propose « Répondre avec
+l'assistant, question par question » : il pose chaque question dans la
+conversation (choix touchables pour les listes, formats guidés et vérifiés
+pour les dates, heures et nombres — aucune interprétation libre), enregistre
+chaque réponse dans le brouillon au fur et à mesure (`assistantSaveAnswer`,
+journal d'audit sur la clé de la question, jamais sa valeur), permet
+d'arrêter et de reprendre plus tard là où l'on s'était arrêté, puis **relit
+l'ensemble des réponses** avant de proposer la préparation du plan
+(`assistantFinalize`, carte de confirmation comme les autres écritures).
+Aucune transmission au bureau n'en découle : elle reste une action séparée.
+Vérifié : les 64 questions des 15 parcours sont toutes d'un type géré par
+l'entretien ; `canAct` confirmé vrai pour un membre, faux pour la visite
+guidée (qui ne verra jamais ces propositions).
+
+**Poste de travail du bureau (gestionnaire).** Le tableau de bord ouvre sur
+une **file prioritaire** — « qui est bloqué, depuis quand » : pièces
+manquantes en attente du membre d'abord, dossiers à affecter ensuite,
+dossiers sans mouvement depuis 14 jours enfin (ancienneté mesurée depuis
+le dernier mouvement, libellé honnête). La **relance pièce manquante en
+un clic** (`remindMissingDocuments`) notifie le membre avec la liste des
+pièces, trace l'événement « Relance envoyée » dans l'historique et au
+journal d'audit, et refuse toute seconde relance avant 7 jours. La liste
+des dossiers affiche l'attente par dossier et le même bouton ; la page
+détail le propose dans la carte de gestion. Vérifié sur le dossier réel
+DOS-2026-100245 : bouton et bloc de relance rendus aux trois endroits.
+
 Restent ouverts : le fonds éditorial (12 contenus publics) en continu, et
 les revues périodiques des règles et des liens d'organismes (section 3).
 
