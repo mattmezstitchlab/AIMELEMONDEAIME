@@ -18,6 +18,7 @@ import { createNotification } from "@/lib/queries";
 import { logAudit } from "@/lib/audit";
 import { DOCUMENT_TYPES, readUpload } from "@/lib/uploads";
 import { LISTING_CATEGORIES } from "@/lib/lma";
+import { communeLabel, pointFromCommune } from "@/lib/point";
 
 export type ProjectResult = { ok: true; message: string; id?: number } | { ok: false; error: string };
 
@@ -56,8 +57,12 @@ export async function createProject(form: FormData): Promise<ProjectResult> {
     const title = str(form, "title");
     const intention = str(form, "intention").slice(0, 800);
     const city = str(form, "city");
-    const lat = num(form, "lat");
-    const lng = num(form, "lng");
+    const postalCode = str(form, "postalCode");
+    const explicitLat = num(form, "lat");
+    const explicitLng = num(form, "lng");
+    const resolved = inFrance(explicitLat, explicitLng)
+      ? { lat: explicitLat, lng: explicitLng }
+      : pointFromCommune(city, postalCode);
     const startsAt = new Date(str(form, "startsAt"));
     const endsRaw = str(form, "endsAt");
     const endsAt = endsRaw ? new Date(endsRaw) : null;
@@ -65,12 +70,12 @@ export async function createProject(form: FormData): Promise<ProjectResult> {
     if (title.length < 4 || title.length > 140) return { ok: false, error: "Le titre du projet doit contenir entre 4 et 140 caractères." };
     if (intention.length < 10) return { ok: false, error: "Décrivez en quelques mots l'intention du projet." };
     if (city.length < 2) return { ok: false, error: "Indiquez la commune." };
-    if (!inFrance(lat, lng)) return { ok: false, error: "Choisissez un lieu approximatif sur la carte." };
+    if (!resolved) return { ok: false, error: "Indiquez la commune et un code postal de France métropolitaine (01000 à 95999)." };
     if (Number.isNaN(startsAt.getTime())) return { ok: false, error: "Indiquez la date de début." };
     if (endsAt && (Number.isNaN(endsAt.getTime()) || endsAt < startsAt)) return { ok: false, error: "La date de fin doit suivre la date de début." };
     const created = await db.transaction(async (tx) => {
       const [project] = await tx.insert(projects).values({
-        ownerId: user.id, title, intention, city, lat: round2(lat), lng: round2(lng), startsAt, endsAt,
+        ownerId: user.id, title, intention, city: communeLabel(city, postalCode), lat: round2(resolved.lat), lng: round2(resolved.lng), startsAt, endsAt,
         universes: universes.length ? universes : ["terre"],
       }).returning({ id: projects.id });
       await tx.insert(projectMembers).values({ projectId: project.id, userId: user.id, role: "organisateur", status: "accepte" });

@@ -24,16 +24,28 @@ export default async function WeddingRsvpPage({ params }: { params: Promise<{ to
 
   return (
     <PublicPage solidHeader>
-      <main className="min-h-[70vh] bg-[#fafaf9] px-4 py-10 sm:px-6">
+      <main className="min-h-[70vh] bg-canvas px-5 py-12 text-ink-2 sm:px-8">
         <div className="mx-auto max-w-2xl">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-rose-700">Réponse à une invitation</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">Bonjour {invite.guestName}</h1>
-          <p className="mt-3 text-slate-700">Votre foyer est invité à <strong>{invite.projectTitle}</strong>, le {displayDate(invite.weddingDate)} à {invite.city}.</p>
-          <p className="mt-2 text-sm text-slate-600">Cette page ne donne accès qu&apos;à la réponse de votre foyer. Les autres invités, les notes d&apos;organisation, le budget et les documents ne sont pas visibles ici.</p>
-          <div className="mt-6">
+          <p className="eyebrow">
+            <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
+            Réponse à une invitation
+          </p>
+          <h1 className="mt-4 text-3xl leading-tight text-ink sm:text-4xl">Bonjour {invite.guestName}</h1>
+          <p className="mt-4 text-base leading-relaxed text-ink-2">
+            Votre foyer est invité à <strong>{invite.projectTitle}</strong>, le {displayDate(invite.weddingDate)} à {invite.city}.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-ink-3">
+            Cette page ne donne accès qu’à la réponse de votre foyer. Les autres invités, les notes d’organisation, le budget et les
+            documents ne sont pas visibles ici.
+          </p>
+
+          <div className="mt-8 rounded-card bg-canvas p-6 shadow-rested ring-1 ring-line sm:p-7">
             <WeddingRsvpForm token={token} status={invite.status} persons={invite.persons} />
           </div>
-          <p className="mt-4 text-center text-xs text-slate-500">Lien personnel à ne pas transférer · AIME® n&apos;envoie pas de courriel ni de relance en votre nom.</p>
+
+          <p className="mt-5 text-center text-xs leading-relaxed text-ink-4">
+            Lien personnel à ne pas transférer · AIME® n’envoie pas de courriel ni de relance en votre nom.
+          </p>
         </div>
       </main>
     </PublicPage>

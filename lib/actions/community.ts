@@ -22,6 +22,7 @@ import { AuthError, requireRole, requireUser } from "@/lib/auth";
 import { createNotification } from "@/lib/queries";
 import { projectMembers, projectNeeds, universeEnum } from "@/db/schema";
 import { defaultUniverses } from "@/lib/lma";
+import { communeLabel, pointFromCommune } from "@/lib/point";
 import { logAudit } from "@/lib/audit";
 
 export type CommunityResult = { ok: true; message: string; id?: number } | { ok: false; error: string };
@@ -38,6 +39,19 @@ function boundedPoint(lat: number, lng: number) {
   return Number.isFinite(lat) && Number.isFinite(lng) && lat >= 41 && lat <= 51.5 && lng >= -5.5 && lng <= 9.8;
 }
 function approx(value: number) { return Number(value.toFixed(2)); }
+/**
+ * Point d'une publication : un point précis s'il est transmis explicitement
+ * (affinage ultérieur), sinon il est déduit de la commune et du code postal.
+ * Sans carte, c'est la seule source de coordonnées ; le résultat reste borné
+ * à la France métropolitaine.
+ */
+function resolvedPoint(form: FormData, communeField = "city", postalField = "postalCode") {
+  const explicitLat = numberValue(form, "lat");
+  const explicitLng = numberValue(form, "lng");
+  if (boundedPoint(explicitLat, explicitLng)) return { lat: explicitLat, lng: explicitLng };
+  return pointFromCommune(value(form, communeField), value(form, postalField));
+}
+const POINT_ERROR = "Indiquez la commune et un code postal de France métropolitaine (01000 à 95999).";
 function normalizeValue(value: string) { return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr").trim(); }
 function safeId(id: number) { return Number.isSafeInteger(id) && id > 0; }
 const reservationPath = "/le-monde-aime";
@@ -68,8 +82,7 @@ export async function createCommunityListing(form: FormData): Promise<CommunityR
     const depositValue = value(form, "deposit");
     let price = priceValue === "" ? null : numberValue(form, "price");
     const deposit = depositValue === "" ? null : numberValue(form, "deposit");
-    const lat = numberValue(form, "lat");
-    const lng = numberValue(form, "lng");
+    const postalCode = value(form, "postalCode");
     const availableFromRaw = value(form, "availableFrom");
     const availableUntilRaw = value(form, "availableUntil");
     const pickupDetails = value(form, "pickupDetails").slice(0, 240) || "Retrait à convenir sur place";
@@ -86,9 +99,11 @@ export async function createCommunityListing(form: FormData): Promise<CommunityR
     if (category === "trajets_livraisons") return { ok: false, error: "Pour un trajet, choisissez « Publier un trajet » dans le formulaire dédié." };
     if (title.length < 4 || title.length > 140) return { ok: false, error: "Le titre doit contenir entre 4 et 140 caractères." };
     if (description.length < 8 || description.length > 600) return { ok: false, error: "La description doit contenir entre 8 et 600 caractères." };
-    if (city.length < 2 || city.length > 120) return { ok: false, error: "Indiquez une commune valide." };
+    if (city.length < 2 || city.length > 100) return { ok: false, error: "Indiquez une commune valide." };
+    if (!postalCode) return { ok: false, error: POINT_ERROR };
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 999) return { ok: false, error: "La quantité doit être comprise entre 1 et 999." };
-    if (!boundedPoint(lat, lng)) return { ok: false, error: "Choisissez un point approximatif en France métropolitaine." };
+    const point = resolvedPoint(form);
+    if (!point || !boundedPoint(point.lat, point.lng)) return { ok: false, error: POINT_ERROR };
     if (price !== null && (!Number.isFinite(price) || price < 0 || price > 99999)) return { ok: false, error: "Le prix doit être compris entre 0 et 99 999 €." };
     if (deposit !== null && (!Number.isFinite(deposit) || deposit < 0 || deposit > 99999)) return { ok: false, error: "La caution doit être comprise entre 0 et 99 999 €." };
     let priceMode = value(form, "priceMode") || (action === "don" || action === "pret" || action === "transmission" ? "gratuit" : "prix");
@@ -130,9 +145,9 @@ export async function createCommunityListing(form: FormData): Promise<CommunityR
       price: price === null ? null : price.toFixed(2),
       deposit: deposit === null ? null : deposit.toFixed(2),
       attributes,
-      city,
-      lat: approx(lat).toFixed(2),
-      lng: approx(lng).toFixed(2),
+      city: communeLabel(city, postalCode),
+      lat: approx(point.lat).toFixed(2),
+      lng: approx(point.lng).toFixed(2),
       availableFrom,
       availableUntil,
       pickupDetails,
@@ -144,7 +159,7 @@ export async function createCommunityListing(form: FormData): Promise<CommunityR
       status: "publiee",
     }).returning({ id: communityListings.id });
 
-    await notifyMatchingSearches({ listingId: listing.id, category: category as CommunityCategory, title, city, lat: approx(lat), lng: approx(lng), attributes });
+    await notifyMatchingSearches({ listingId: listing.id, category: category as CommunityCategory, title, city: communeLabel(city, postalCode), lat: approx(point.lat), lng: approx(point.lng), attributes });
     await logAudit({ actorId: user.id, action: "publication_annonce_communautaire", entityType: "community_listing", entityId: String(listing.id) });
     revalidatePath(reservationPath);
     revalidatePath("/carte");
@@ -397,17 +412,21 @@ export async function createCommunityTrip(form: FormData): Promise<CommunityResu
     const terms = value(form, "terms").slice(0, 400);
     const compensationRaw = value(form, "compensation");
     const compensation = compensationRaw ? numberValue(form, "compensation") : null;
-    const startLat = numberValue(form, "startLat"), startLng = numberValue(form, "startLng");
-    const endLat = numberValue(form, "endLat"), endLng = numberValue(form, "endLng");
+    const startPoint = resolvedPoint(form, "startCity", "startPostalCode");
+    const endPoint = resolvedPoint(form, "endCity", "endPostalCode");
     const departureAt = new Date(departureRaw);
     if (startCity.length < 2 || endCity.length < 2 || Number.isNaN(departureAt.getTime()) || departureAt < new Date()) return { ok: false, error: "Indiquez deux communes et une date future valide." };
-    if (!boundedPoint(startLat, startLng) || !boundedPoint(endLat, endLng)) return { ok: false, error: "Les points de départ et d'arrivée doivent être en France métropolitaine." };
+    if (!value(form, "startPostalCode") || !value(form, "endPostalCode")) return { ok: false, error: POINT_ERROR };
+    if (!startPoint || !endPoint || !boundedPoint(startPoint.lat, startPoint.lng) || !boundedPoint(endPoint.lat, endPoint.lng)) return { ok: false, error: POINT_ERROR };
     if (!Number.isInteger(capacity) || capacity < 1 || capacity > 50) return { ok: false, error: "Indiquez une capacité entre 1 et 50 objets ou paniers." };
     if (!["vélo", "voiture", "utilitaire", "à pied", "autre"].includes(mode)) return { ok: false, error: "Choisissez un moyen de transport." };
     if (compensation !== null && (!Number.isFinite(compensation) || compensation < 0 || compensation > 500)) return { ok: false, error: "Participation éventuelle invalide." };
     const [trip] = await db.insert(communityTrips).values({
-      ownerId: user.id, startCity, endCity, startLat: approx(startLat).toFixed(2), startLng: approx(startLng).toFixed(2),
-      endLat: approx(endLat).toFixed(2), endLng: approx(endLng).toFixed(2), departureAt, transportMode: mode,
+      ownerId: user.id,
+      startCity: communeLabel(startCity, value(form, "startPostalCode")),
+      endCity: communeLabel(endCity, value(form, "endPostalCode")),
+      startLat: approx(startPoint.lat).toFixed(2), startLng: approx(startPoint.lng).toFixed(2),
+      endLat: approx(endPoint.lat).toFixed(2), endLng: approx(endPoint.lng).toFixed(2), departureAt, transportMode: mode,
       capacity, availableCapacity: capacity, terms, compensation: compensation === null ? null : compensation.toFixed(2),
     }).returning({ id: communityTrips.id });
     await logAudit({ actorId: user.id, action: "publication_trajet", entityType: "community_trip", entityId: String(trip.id) });
@@ -515,14 +534,15 @@ export async function createCommunityEventPlan(form: FormData): Promise<Communit
     const city = value(form, "city");
     const eventAt = new Date(value(form, "eventDate"));
     const participants = Math.floor(numberValue(form, "participants"));
-    const lat = numberValue(form, "lat"), lng = numberValue(form, "lng");
+    const eventPoint = resolvedPoint(form);
     let needs: Array<{ text: string; quantity: number; category: string }>;
     try { needs = JSON.parse(value(form, "needs")); } catch { return { ok: false, error: "Liste des besoins invalide." }; }
     if (title.length < 4 || title.length > 140 || city.length < 2 || Number.isNaN(eventAt.getTime()) || eventAt < new Date()) return { ok: false, error: "Indiquez un nom, une commune et une date future." };
-    if (!boundedPoint(lat, lng) || !Number.isInteger(participants) || participants < 1 || participants > 5000) return { ok: false, error: "Vérifiez le lieu et le nombre de participants." };
+    if (!eventPoint || !boundedPoint(eventPoint.lat, eventPoint.lng) || !Number.isInteger(participants) || participants < 1 || participants > 5000) return { ok: false, error: "Vérifiez la commune et le nombre de participants." };
     if (!Array.isArray(needs) || needs.length < 1 || needs.length > 20 || needs.some((n) => !n.text || n.text.length > 100 || !Number.isInteger(n.quantity) || n.quantity < 1)) return { ok: false, error: "Ajoutez de 1 à 20 besoins et leurs quantités." };
     const [event] = await db.insert(communityEventPlans).values({
-      ownerId: user.id, title, city, eventDate: eventAt, participants, lat: approx(lat).toFixed(2), lng: approx(lng).toFixed(2), needs,
+      ownerId: user.id, title, city: communeLabel(city, value(form, "postalCode")), eventDate: eventAt, participants,
+      lat: approx(eventPoint.lat).toFixed(2), lng: approx(eventPoint.lng).toFixed(2), needs,
     }).returning({ id: communityEventPlans.id });
     await logAudit({ actorId: user.id, action: "preparation_evenement", entityType: "community_event", entityId: String(event.id) });
     revalidatePath(reservationPath);
@@ -544,13 +564,15 @@ export async function saveCommunitySearch(form: FormData): Promise<CommunityResu
     const size = value(form, "size").slice(0, 30);
     const centerLatRaw = value(form, "centerLat");
     const centerLngRaw = value(form, "centerLng");
-    const centerLat = centerLatRaw ? numberValue(form, "centerLat") : NaN;
-    const centerLng = centerLngRaw ? numberValue(form, "centerLng") : NaN;
+    const searchPoint = centerLatRaw && centerLngRaw ? null : resolvedPoint(form);
+    const centerLat = centerLatRaw ? numberValue(form, "centerLat") : searchPoint?.lat ?? NaN;
+    const centerLng = centerLngRaw ? numberValue(form, "centerLng") : searchPoint?.lng ?? NaN;
     if (category && !communityCategoryEnum.includes(category as CommunityCategory)) return { ok: false, error: "Catégorie invalide." };
     if (!Number.isInteger(radius) || radius < 1 || radius > 200) return { ok: false, error: "Le rayon doit être entre 1 et 200 km." };
     if ((centerLatRaw || centerLngRaw) && (!boundedPoint(centerLat, centerLng))) return { ok: false, error: "Centre de recherche invalide." };
     const [search] = await db.insert(communitySavedSearches).values({
-      userId: user.id, category: category ? category as CommunityCategory : null, city,
+      userId: user.id, category: category ? category as CommunityCategory : null,
+      city: value(form, "postalCode") ? communeLabel(city, value(form, "postalCode")) : city,
       centerLat: Number.isFinite(centerLat) ? approx(centerLat).toFixed(2) : null,
       centerLng: Number.isFinite(centerLng) ? approx(centerLng).toFixed(2) : null,
       radiusKm: radius,

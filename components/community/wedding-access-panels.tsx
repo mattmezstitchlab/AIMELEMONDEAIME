@@ -13,8 +13,8 @@ import {
 import type { WeddingAccessLinkSummary } from "@/lib/wedding-queries";
 import type { WeddingAccessRole } from "@/db/schema";
 
-const button = "rounded-lg px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
-const input = "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900";
+const button = "rounded-control px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
+const input = "rounded-control ring-1 ring-line bg-canvas px-3 py-2 text-sm text-ink";
 
 type Feedback = { ok: boolean; text: string } | null;
 
@@ -30,13 +30,13 @@ function LinkField({ value, label, id }: { value: string; label: string; id: str
     }
   }
   return (
-    <div className="mt-3 rounded-lg border border-emerald-200 bg-white p-3">
-      <label className="block text-xs font-semibold text-slate-700" htmlFor={id}>{label}</label>
+    <div className="mt-3 rounded-control border ring-line bg-canvas p-3">
+      <label className="block text-xs font-semibold text-ink-2" htmlFor={id}>{label}</label>
       <div className="mt-1 flex flex-wrap gap-2">
         <input id={id} readOnly value={value} onFocus={(event) => event.currentTarget.select()} className={`${input} min-w-0 flex-1 text-xs`} />
-        <button type="button" onClick={() => void copy()} className={`${button} bg-emerald-800 text-white hover:bg-emerald-900`}>{copied ? "Copié ✓" : "Copier le lien"}</button>
+        <button type="button" onClick={() => void copy()} className={`${button} bg-ink text-canvas hover:bg-ink-2`}>{copied ? "Copié ✓" : "Copier le lien"}</button>
       </div>
-      <p className="mt-2 text-[11px] text-slate-500">Ce lien secret s&apos;affiche une seule fois ici. Si vous le perdez, créez-en un nouveau : l&apos;ancien lien RSVP sera invalidé pour ce foyer.</p>
+      <p className="mt-2 text-[11px] text-ink-3">Ce lien secret s&apos;affiche une seule fois ici. Si vous le perdez, créez-en un nouveau : l&apos;ancien lien RSVP sera invalidé pour ce foyer.</p>
     </div>
   );
 }
@@ -82,19 +82,19 @@ export function WeddingRsvpLinkButton({ guestId, guestName, expiresAt, active, c
 
   if (!canCreate && !(canRevoke && active)) return null;
   return (
-    <div className="mt-3 border-t border-slate-100 pt-2">
-      <button type="button" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)} className="text-xs font-semibold text-emerald-800 underline">
+    <div className="mt-3 border-t border-line pt-2">
+      <button type="button" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)} className="text-xs font-semibold text-ink underline">
         {expanded ? "Fermer les options RSVP" : active ? "Gérer le lien RSVP" : "Créer un lien RSVP individuel"}
       </button>
       {expanded && (
-        <div className="mt-2 rounded-lg bg-slate-50 p-3">
-          <p className="text-xs text-slate-600">Le foyer « {guestName} » pourra uniquement consulter et modifier sa propre réponse. Aucun nom des autres invités, note, budget ou document n&apos;est partagé.</p>
-          {active && <p className="mt-2 text-xs font-semibold text-emerald-800">Un lien est actif jusqu&apos;au {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(expiresAt!)}. Le lien secret existant n&apos;est pas récupérable après sa création.</p>}
+        <div className="mt-2 rounded-control bg-muted p-3">
+          <p className="text-xs text-ink-3">Le foyer « {guestName} » pourra uniquement consulter et modifier sa propre réponse. Aucun nom des autres invités, note, budget ou document n&apos;est partagé.</p>
+          {active && <p className="mt-2 text-xs font-semibold text-ink">Un lien est actif jusqu&apos;au {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(expiresAt!)}. Le lien secret existant n&apos;est pas récupérable après sa création.</p>}
           <div className="mt-3 flex flex-wrap gap-2">
-            {canCreate && <button type="button" disabled={pending} onClick={create} className={`${button} bg-emerald-800 text-white hover:bg-emerald-900`}>{pending ? "Création…" : active ? "Renouveler et copier le lien" : "Créer et copier le lien"}</button>}
-            {active && canRevoke && <button type="button" disabled={pending} onClick={revoke} className={`${button} border border-rose-300 bg-white text-rose-800`}>{pending ? "…" : "Révoquer"}</button>}
+            {canCreate && <button type="button" disabled={pending} onClick={create} className={`${button} bg-ink text-canvas hover:bg-ink-2`}>{pending ? "Création…" : active ? "Renouveler et copier le lien" : "Créer et copier le lien"}</button>}
+            {active && canRevoke && <button type="button" disabled={pending} onClick={revoke} className={`${button} border border-line bg-canvas text-ink`}>{pending ? "…" : "Révoquer"}</button>}
           </div>
-          {feedback && <p role={feedback.ok ? "status" : "alert"} className={`mt-2 text-xs ${feedback.ok ? "text-emerald-800" : "text-rose-700"}`}>{feedback.text}</p>}
+          {feedback && <p role={feedback.ok ? "status" : "alert"} className={`mt-2 text-xs ${feedback.ok ? "text-ink" : "text-ink-2"}`}>{feedback.text}</p>}
           {url && <LinkField id={`rsvp-link-${guestId}`} value={url} label={`Lien RSVP de ${guestName}`} />}
         </div>
       )}
@@ -148,7 +148,7 @@ export function WeddingAccessLinksPanel({ projectId, links, open }: {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+      <div className="rounded-card border border-line bg-muted p-4 text-sm text-ink">
         <p className="font-bold">Partage ciblé, sans compte — et sans ouvrir l&apos;espace personnel</p>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-relaxed">
           <li>Coordination : consulter les foyers et modifier les réponses RSVP et le programme, dans ce seul mariage.</li>
@@ -159,19 +159,19 @@ export function WeddingAccessLinksPanel({ projectId, links, open }: {
       </div>
 
       {open ? (
-        <div className="rounded-xl bg-slate-50 p-4">
-          <h3 className="text-sm font-bold text-slate-900">Créer un accès pour un proche</h3>
+        <div className="rounded-card bg-muted p-4">
+          <h3 className="text-sm font-bold text-ink">Créer un accès pour un proche</h3>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="text-xs font-semibold text-slate-700">Accès
+            <label className="text-xs font-semibold text-ink-2">Accès
               <select value={role} onChange={(event) => setRole(event.target.value as WeddingAccessRole)} className={`${input} mt-1 block w-full`}>
                 <option value="coordination">Coordination (programme + réponses)</option>
                 <option value="temoin">Témoin (lecture seule)</option>
               </select>
             </label>
-            <label className="text-xs font-semibold text-slate-700">Nom repère (facultatif)
+            <label className="text-xs font-semibold text-ink-2">Nom repère (facultatif)
               <input value={label} onChange={(event) => setLabel(event.target.value)} maxLength={80} placeholder="Ex. Camille — témoin" className={`${input} mt-1 block w-full`} />
             </label>
-            <label className="text-xs font-semibold text-slate-700 sm:col-span-2">Le lien expire dans
+            <label className="text-xs font-semibold text-ink-2 sm:col-span-2">Le lien expire dans
               <select value={duration} onChange={(event) => setDuration(Number(event.target.value))} className={`${input} mt-1 block w-full sm:max-w-xs`}>
                 <option value={7}>7 jours</option>
                 <option value={30}>30 jours</option>
@@ -179,26 +179,26 @@ export function WeddingAccessLinksPanel({ projectId, links, open }: {
               </select>
             </label>
           </div>
-          <button type="button" disabled={pending} onClick={create} className={`${button} mt-3 bg-emerald-800 text-white hover:bg-emerald-900`}>{pending ? "Création…" : "Créer le lien secret"}</button>
-          {feedback && <p role={feedback.ok ? "status" : "alert"} className={`mt-2 text-xs ${feedback.ok ? "text-emerald-800" : "text-rose-700"}`}>{feedback.text}</p>}
+          <button type="button" disabled={pending} onClick={create} className={`${button} mt-3 bg-ink text-canvas hover:bg-ink-2`}>{pending ? "Création…" : "Créer le lien secret"}</button>
+          {feedback && <p role={feedback.ok ? "status" : "alert"} className={`mt-2 text-xs ${feedback.ok ? "text-ink" : "text-ink-2"}`}>{feedback.text}</p>}
           {url && <LinkField id={`access-link-${projectId}`} value={url} label="Lien secret pour le proche" />}
         </div>
-      ) : <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">Le projet est fermé : aucun nouveau lien ne peut être créé.</p>}
+      ) : <p className="rounded-control bg-muted p-3 text-xs text-ink-3">Le projet est fermé : aucun nouveau lien ne peut être créé.</p>}
 
       <div>
-        <h3 className="text-sm font-bold text-slate-900">Liens créés</h3>
-        {links.length === 0 ? <p className="mt-2 text-xs text-slate-500">Aucun lien pour le moment.</p> : (
+        <h3 className="text-sm font-bold text-ink">Liens créés</h3>
+        {links.length === 0 ? <p className="mt-2 text-xs text-ink-3">Aucun lien pour le moment.</p> : (
           <ul className="mt-2 space-y-2">
             {links.map((link) => {
               const inactive = !link.active;
               return (
-                <li key={link.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-3">
+                <li key={link.id} className="flex flex-wrap items-center justify-between gap-3 rounded-control ring-1 ring-line bg-canvas p-3">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">{link.label} <span className="text-xs font-normal text-slate-500">· {roleDescription(link.role)}</span></p>
-                    <p className="text-xs text-slate-500">Expire le {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(link.expiresAt)}</p>
-                    <p className={`mt-1 text-[11px] font-bold ${inactive ? "text-slate-500" : "text-emerald-800"}`}>{link.revokedAt ? "Révoqué" : link.active ? "Actif" : "Expiré"}</p>
+                    <p className="text-sm font-semibold text-ink">{link.label} <span className="text-xs font-normal text-ink-3">· {roleDescription(link.role)}</span></p>
+                    <p className="text-xs text-ink-3">Expire le {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(link.expiresAt)}</p>
+                    <p className={`mt-1 text-[11px] font-bold ${inactive ? "text-ink-3" : "text-ink"}`}>{link.revokedAt ? "Révoqué" : link.active ? "Actif" : "Expiré"}</p>
                   </div>
-                  {!inactive && <button type="button" disabled={pending} onClick={() => revoke(link.id, link.label)} className={`${button} border border-rose-300 bg-white text-rose-800`}>Révoquer</button>}
+                  {!inactive && <button type="button" disabled={pending} onClick={() => revoke(link.id, link.label)} className={`${button} border border-line bg-canvas text-ink`}>Révoquer</button>}
                 </li>
               );
             })}

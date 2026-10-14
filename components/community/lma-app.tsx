@@ -1,17 +1,27 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FranceMap, type MapPin, type MapPinKind } from "@/components/carte/france-map";
 import { Icon } from "@/components/icon";
 import {
-  AgencyCard, LegacyPointCard, ListingCard, TripCard, clusterPins, dateText, distanceKm, normalizeText, priceLabel,
+  AgencyCard, CircuitSummaryCard, ListingCard, TripCard, dateText, distanceKm, normalizeText, priceLabel,
   type Agency, type CommunityData, type Listing, type ServicePin, type Trip,
 } from "@/components/community/community-app";
 import { PublishListingForm, SavedSearchForm, TripForm } from "@/components/community/forms";
-import { ProjectForm, ReportContent } from "@/components/community/project-panels";
+import { ProjectForm } from "@/components/community/project-panels";
 import { UNIVERSES, UNIVERSE_LABEL, defaultUniverses } from "@/lib/lma";
+
+/*
+ * Le Monde Aime, sans carte.
+ *
+ * La carte interactive a été retirée : tout se parcourt en listes, filtrées par
+ * univers, type, commune, mot-clé, distance et date. Le point de chaque
+ * publication existe toujours en base (il vient de la commune et du code
+ * postal), mais il ne sert plus qu'à calculer les distances : rien à toucher,
+ * rien à placer. Publier se fait par formulaire, avec deux champs : commune et
+ * code postal.
+ */
 
 export type Person = { id: number; name: string; bio: string | null; activities: string[]; universes: string[]; offersText: string | null; needsText: string | null; transmitText: string | null; travelRadiusKm: number; availabilityNote: string | null; city: string | null; lat: number; lng: number; isDemo: boolean; hasPhoto: boolean };
 export type ProjectPin = { id: number; title: string; intention: string; city: string; lat: number; lng: number; startsAt: Date | string; endsAt: Date | string | null; universes: string[]; isDemo: boolean; organizerName: string; participants: number; needsTotal: number; needsConfirmed: number };
@@ -23,66 +33,58 @@ export type LmaData = {
   mine: CommunityData["mine"]; user: { id: number; role: string } | null;
 };
 
-/* Légende Bauhaus, alignée sur les marqueurs de la carte. */
-const LEGEND: Array<[string, string]> = [
-  ["bg-violet-600", "Personnes"],
-  ["bg-orange-600", "Offres"],
-  ["bg-blue-600", "Besoins"],
-  ["bg-slate-400", "Lieux"],
-  ["bg-yellow-400", "Projets"],
-  ["bg-pink-500", "Trajets"],
-  ["bg-slate-600", "Structures externes"],
-];
-
 type Tab = "explorer" | "publier";
 type ItemType = "offre" | "besoin" | "projet" | "personne" | "trajet" | "service";
 type Item = {
-  key: string; kind: MapPinKind; type: ItemType; universes: string[]; lat: number; lng: number; city: string; name: string; subtitle: string; badge?: string;
-  free: boolean; from: Date | null; to: Date | null; text: string; render: (highlighted: boolean) => ReactNode;
+  key: string; type: ItemType; universes: string[]; lat: number; lng: number; city: string; name: string; detail: string; badge?: string;
+  free: boolean; from: Date | null; to: Date | null; text: string; render: () => ReactNode;
 };
 
 const TYPE_OPTIONS: Array<[string, string]> = [["tout", "Toutes les publications"], ["offre", "Propositions"], ["besoin", "Besoins"], ["projet", "Projets"], ["personne", "Personnes"], ["trajet", "Trajets"]];
 const toDate = (v: Date | string | null) => (v ? new Date(v) : null);
 
-function PersonCard({ p, highlighted }: { p: Person; highlighted: boolean }) {
+const chip = "inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink";
+const cardShell = "animate-fade-up rounded-card bg-canvas p-5 ring-1 ring-line shadow-rested";
+
+function PersonCard({ p }: { p: Person }) {
   return (
-    <article className={`rounded-2xl border bg-white p-4 ${highlighted ? "border-emerald-700 ring-2 ring-emerald-100" : "border-black/[0.06] shadow-sm"}`}>
+    <article className={cardShell}>
       <div className="flex gap-3">
         {p.hasPhoto ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
-            <img src={`/api/profil/${p.id}/photo`} alt="" className="h-14 w-14 rounded-full object-cover" loading="lazy" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- photo d’API dynamique, dimensions inconnues */}
+            <img src={`/api/profil/${p.id}/photo`} alt="" className="h-14 w-14 rounded-full object-cover ring-1 ring-line" loading="lazy" />
           </>
-        ) : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-violet-100 text-lg font-bold text-violet-900" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>}
+        ) : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-muted text-lg font-bold text-ink" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>}
         <div className="min-w-0">
-          <span className="inline-flex rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-800">Personne{p.isDemo ? " · profil fictif" : ""}</span>
-          <h3 className="mt-1 text-base font-bold text-slate-900">{p.name}</h3>
-          <p className="text-xs text-slate-500">{p.city ?? "France"} · zone d&apos;environ {p.travelRadiusKm} km · position approximative</p>
+          <span className={chip}>Personne{p.isDemo ? " · profil fictif" : ""}</span>
+          <h3 className="mt-1 text-base font-bold text-ink">{p.name}</h3>
+          <p className="text-xs text-ink-3">{p.city ?? "France"} · zone d&apos;environ {p.travelRadiusKm} km · position approximative</p>
         </div>
       </div>
-      <div className="mt-2 flex flex-wrap gap-1.5">{p.activities.slice(0, 5).map((a) => <span key={a} className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">{a}</span>)}</div>
-      {p.bio && <p className="mt-2 line-clamp-3 text-sm text-slate-600">{p.bio}</p>}
-      <ul className="mt-2 space-y-0.5 text-xs text-slate-600">
+      <div className="mt-3 flex flex-wrap gap-1.5">{p.activities.slice(0, 5).map((a) => <span key={a} className="rounded-full ring-1 ring-line px-2.5 py-1 text-xs font-semibold text-ink-2">{a}</span>)}</div>
+      {p.bio && <p className="mt-2 line-clamp-3 text-sm text-ink-2">{p.bio}</p>}
+      <ul className="mt-2 space-y-0.5 text-xs text-ink-2">
         {p.offersText && <li><strong>Propose :</strong> {p.offersText}</li>}
         {p.needsText && <li><strong>Recherche :</strong> {p.needsText}</li>}
         {p.transmitText && <li><strong>Transmet :</strong> {p.transmitText}</li>}
         {p.availabilityNote && <li><strong>Disponible :</strong> {p.availabilityNote}</li>}
       </ul>
-      <Link href={`/le-monde-aime/personnes/${p.id}`} className="mt-3 inline-block rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-900">Voir la fiche</Link>
+      <Link href={`/le-monde-aime/personnes/${p.id}`} className="mt-4 inline-flex h-10 items-center rounded-full bg-ink px-4 text-xs font-semibold text-canvas">Voir la fiche</Link>
     </article>
   );
 }
 
-function ProjectCard({ p, highlighted }: { p: ProjectPin; highlighted: boolean }) {
+function ProjectCard({ p }: { p: ProjectPin }) {
   return (
-    <article className={`rounded-2xl border bg-white p-4 ${highlighted ? "border-emerald-700 ring-2 ring-emerald-100" : "border-black/[0.06] shadow-sm"}`}>
-      <span className="inline-flex rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-800">Projet{p.isDemo ? " · exemple fictif" : ""}</span>
-      <h3 className="mt-2 text-base font-bold text-slate-900">{p.title}</h3>
-      <p className="mt-1 line-clamp-3 text-sm text-slate-600">{p.intention}</p>
-      <p className="mt-2 text-xs text-slate-500"><Icon name="pin" className="mr-1 inline h-3.5 w-3.5" />{p.city} · position approximative · {dateText(p.startsAt)}</p>
-      <p className="text-xs text-slate-500">Organisé par {p.organizerName} · {p.participants} participant(s) · {p.needsConfirmed}/{p.needsTotal} besoin(s) confirmé(s)</p>
-      <div className="mt-2 flex flex-wrap gap-1.5">{p.universes.map((u) => <span key={u} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">{UNIVERSE_LABEL[u]}</span>)}</div>
-      <Link href={`/le-monde-aime/projets/${p.id}`} className="mt-3 inline-block rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-900">Voir le projet</Link>
+    <article className={cardShell}>
+      <span className={chip}>Projet{p.isDemo ? " · exemple fictif" : ""}</span>
+      <h3 className="mt-2 text-base font-bold text-ink">{p.title}</h3>
+      <p className="mt-1 line-clamp-3 text-sm text-ink-2">{p.intention}</p>
+      <p className="mt-2 text-xs text-ink-3"><Icon name="pin" className="mr-1 inline h-3.5 w-3.5" />{p.city} · position approximative · {dateText(p.startsAt)}</p>
+      <p className="text-xs text-ink-3">Organisé par {p.organizerName} · {p.participants} participant(s) · {p.needsConfirmed}/{p.needsTotal} besoin(s) confirmé(s)</p>
+      <div className="mt-3 flex flex-wrap gap-1.5">{p.universes.map((u) => <span key={u} className="rounded-full ring-1 ring-line px-2.5 py-1 text-[11px] font-semibold text-ink-2">{UNIVERSE_LABEL[u]}</span>)}</div>
+      <Link href={`/le-monde-aime/projets/${p.id}`} className="mt-4 inline-flex h-10 items-center rounded-full bg-ink px-4 text-xs font-semibold text-canvas">Voir le projet</Link>
     </article>
   );
 }
@@ -102,14 +104,10 @@ export function CommunityApp({ data }: { data: LmaData }) {
   const [dateFilter, setDateFilter] = useState("");
   const [city, setCity] = useState("");
   const [keyword, setKeyword] = useState(params.get("q") ?? "");
-  const [radius, setRadius] = useState(40);
+  const [radius, setRadius] = useState(60);
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
-  const [selection, setSelection] = useState<string | null>(null);
-  const [clusterSelection, setClusterSelection] = useState<string[]>([]);
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Synchronisation URL → filtres : ajustement d'état pendant le rendu
-  // (patron recommandé par React plutôt qu'un setState dans un effet).
+  // Synchronisation URL → filtres (patron React : ajustement pendant le rendu).
   const paramsKey = params.toString();
   const [syncedParamsKey, setSyncedParamsKey] = useState(paramsKey);
   if (paramsKey !== syncedParamsKey) {
@@ -122,60 +120,69 @@ export function CommunityApp({ data }: { data: LmaData }) {
 
   const [pubType, setPubType] = useState<"proposition" | "besoin" | "projet">("proposition");
   const [pubSub, setPubSub] = useState<"annonce" | "trajet">("annonce");
-  const [pubCoords, setPubCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [tripEnd, setTripEnd] = useState<{ lat: number; lng: number } | null>(null);
-  const [pickEnd, setPickEnd] = useState(false);
 
   const goTab = (key: Tab) => router.push(key === "explorer" ? "/le-monde-aime" : `/le-monde-aime?onglet=${key}`, { scroll: false });
   const requests = useMemo(() => mine?.requests ?? [], [mine]);
 
-  // ---- Éléments de la carte : personnes, offres, besoins, lieux, projets, trajets, services externes
+  // ---- Tout ce qui se publie, mis à plat pour la liste
   const items = useMemo<Item[]>(() => {
     const out: Item[] = [];
     for (const l of data.listings) {
       const isNeed = l.publicationType === "besoin";
       out.push({
-        key: `listing:${l.id}`, kind: isNeed ? "besoin" : l.category === "lieux_espaces" ? "lieu" : "offre", type: isNeed ? "besoin" : "offre",
-        universes: l.universes.length ? l.universes : defaultUniverses(l.category), lat: l.lat, lng: l.lng, city: l.city, name: l.title, subtitle: `${l.city} · ${l.ownerName}`,
+        key: `listing:${l.id}`, type: isNeed ? "besoin" : "offre", universes: l.universes.length ? l.universes : defaultUniverses(l.category),
+        lat: l.lat, lng: l.lng, city: l.city, name: l.title, detail: `${l.city} · ${l.ownerName}`,
         badge: priceLabel(l) || undefined, free: priceLabel(l) === "Gratuit", from: toDate(l.availableFrom), to: toDate(l.availableUntil),
         text: `${l.title} ${l.description} ${Object.values(l.attributes).join(" ")} ${l.city} ${l.ownerName}`,
-        render: (h) => <ListingCard item={l} userId={user?.id ?? null} canRequest={isMember} highlighted={h} />,
+        render: () => <ListingCard item={l} userId={user?.id ?? null} canRequest={isMember} />,
       });
     }
     for (const t of data.trips) {
       out.push({
-        key: `trip:${t.id}`, kind: "disponible", type: "trajet", universes: ["terre"], lat: t.startLat, lng: t.startLng, city: t.startCity, name: `${t.startCity} → ${t.endCity}`,
-        subtitle: dateText(t.departureAt), badge: t.transportMode, free: !t.compensation || Number(t.compensation) <= 0, from: toDate(t.departureAt), to: toDate(t.departureAt),
+        key: `trip:${t.id}`, type: "trajet", universes: ["terre"], lat: t.startLat, lng: t.startLng, city: t.startCity, name: `${t.startCity} → ${t.endCity}`,
+        detail: dateText(t.departureAt), badge: t.transportMode, free: !t.compensation || Number(t.compensation) <= 0, from: toDate(t.departureAt), to: toDate(t.departureAt),
         text: `${t.startCity} ${t.endCity} trajet livraison ${t.transportMode} ${t.terms}`,
         render: () => <TripCard trip={t} userId={user?.id ?? null} canRequest={isMember} linkedRequests={requests} />,
       });
     }
     for (const p of data.servicePins) {
+      // Fiches des circuits : producteurs, associations, artisans et savoir-faire.
+      const kind = p.kind ?? "producteur";
+      const badge = kind === "association" ? "Association" : kind === "artisan" ? "Artisan" : "Producteur";
+      const mots = kind === "association"
+        ? "association collectif atelier adhésion prêt salle matériel entraide"
+        : kind === "artisan"
+          ? "artisan atelier réparation couture vélo menuiserie savoir-faire"
+          : "producteur ferme produits locaux terre";
       out.push({
-        key: `legacy:${p.id}`, kind: "producteur", type: "offre", universes: ["terre"], lat: p.lat, lng: p.lng, city: p.city, name: p.name, subtitle: p.city, badge: "Producteur",
-        free: false, from: null, to: null, text: `${p.name} ${p.city} producteur ferme produits locaux`, render: () => <LegacyPointCard point={p} />,
+        key: `circuit:${p.id}`, type: "offre", universes: kind === "artisan" ? ["savoirs", "terre"] : ["terre"],
+        lat: p.lat, lng: p.lng, city: p.city, name: p.name, detail: p.city, badge,
+        free: false, from: null, to: null,
+        text: `${p.name} ${p.city} ${mots}`,
+        render: () => <CircuitSummaryCard point={p} />,
       });
     }
     for (const p of data.people) {
       out.push({
-        key: `person:${p.id}`, kind: "personne", type: "personne", universes: p.universes, lat: p.lat, lng: p.lng, city: p.city ?? "", name: p.name, subtitle: p.activities.slice(0, 2).join(", "),
+        key: `person:${p.id}`, type: "personne", universes: p.universes, lat: p.lat, lng: p.lng, city: p.city ?? "", name: p.name, detail: p.activities.slice(0, 2).join(", "),
         badge: "Personne", free: false, from: null, to: null,
         text: `${p.name} ${p.bio ?? ""} ${p.activities.join(" ")} ${p.offersText ?? ""} ${p.needsText ?? ""} ${p.transmitText ?? ""} ${p.city ?? ""}`,
-        render: (h) => <PersonCard p={p} highlighted={h} />,
+        render: () => <PersonCard p={p} />,
       });
     }
     for (const p of data.projects) {
       out.push({
-        key: `project:${p.id}`, kind: "projet", type: "projet", universes: p.universes, lat: p.lat, lng: p.lng, city: p.city, name: p.title, subtitle: `${p.city} · ${dateText(p.startsAt)}`, badge: "Projet",
+        key: `project:${p.id}`, type: "projet", universes: p.universes, lat: p.lat, lng: p.lng, city: p.city, name: p.title, detail: `${p.city} · ${dateText(p.startsAt)}`, badge: "Projet",
         free: false, from: toDate(p.startsAt), to: toDate(p.endsAt) ?? toDate(p.startsAt), text: `${p.title} ${p.intention} ${p.city} ${p.organizerName}`,
-        render: (h) => <ProjectCard p={p} highlighted={h} />,
+        render: () => <ProjectCard p={p} />,
       });
     }
     for (const a of data.agencies) {
       if (a.lat === null || a.lng === null) continue;
       out.push({
-        key: `agency:${a.id}`, kind: "agence", type: "service", universes: [], lat: a.lat, lng: a.lng, city: a.city, name: a.name, subtitle: `${a.city} · structure externe`, badge: "Externe",
-        free: false, from: null, to: null, text: `${a.name} ${a.city} ${a.postalCode} ${a.region} service accompagnement msa`, render: () => <AgencyCard agency={a} />,
+        key: `agency:${a.id}`, type: "service", universes: [], lat: a.lat, lng: a.lng, city: a.city, name: a.name, detail: `${a.city} · structure externe`, badge: "Externe",
+        free: false, from: null, to: null, text: `${a.name} ${a.city} ${a.postalCode} ${a.region} service accompagnement`,
+        render: () => <AgencyCard agency={a} />,
       });
     }
     return out;
@@ -184,7 +191,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
   const cityOrigin = useMemo(() => {
     const term = normalizeText(city.trim());
     if (!term) return null;
-    const hit = items.find((i) => normalizeText(i.city) === term);
+    const hit = items.find((i) => normalizeText(i.city).startsWith(term));
     return hit ? { lat: hit.lat, lng: hit.lng } : null;
   }, [city, items]);
   const origin = cityOrigin ?? center;
@@ -201,196 +208,152 @@ export function CommunityApp({ data }: { data: LmaData }) {
       if (freeOnly && !i.free) return false;
       if (day && dayEnd) { if ((i.from && i.from > dayEnd) || (i.to && i.to < day)) return false; }
       if (kw && !normalizeText(i.text).includes(kw)) return false;
-      if (term) { if (cityOrigin) { if (distanceKm(cityOrigin, i) > radius) return false; } else if (!normalizeText(`${i.city} ${i.name}`).includes(term)) return false; }
+      if (term) { if (cityOrigin) { if (distanceKm(cityOrigin, i) > radius) return false; } else if (!normalizeText(i.city).includes(term)) return false; }
       else if (center && distanceKm(center, i) > radius) return false;
       return true;
     });
   }, [items, universe, type, freeOnly, dateFilter, keyword, city, cityOrigin, center, radius]);
 
-  const rawPins = useMemo<MapPin[]>(() => filtered.map((i) => ({ id: i.key, kind: i.kind, name: i.name, subtitle: i.subtitle, lat: i.lat, lng: i.lng, badge: i.badge })), [filtered]);
-  const pins = useMemo(() => clusterPins(rawPins), [rawPins]);
-  const clusterItems = clusterSelection.length ? items.filter((i) => clusterSelection.includes(i.key)) : [];
-
-  function locate(apply: (c: { lat: number; lng: number }) => void) {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition((pos) => apply({ lat: pos.coords.latitude, lng: pos.coords.longitude }), () => window.alert("La géolocalisation n'a pas été autorisée. Vous pouvez saisir une commune ou toucher la carte."), { timeout: 8000 });
+  function locate() {
+    if (!navigator.geolocation) { window.alert("Votre navigateur ne propose pas la géolocalisation. Indiquez une commune."); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setCity(""); },
+      () => window.alert("La géolocalisation n’a pas été autorisée. Indiquez simplement une commune."),
+      { timeout: 8000 },
+    );
   }
-  function selectPin(pin: MapPin) {
-    if (pin.id.startsWith("cluster:")) {
-      const key = pin.id.slice(8);
-      setSelection(null);
-      setClusterSelection(rawPins.filter((p) => `${Math.floor(p.lat / 0.58)}:${Math.floor(p.lng / 0.58)}` === key).map((p) => p.id));
-      return;
-    }
-    setClusterSelection([]);
-    setSelection((current) => (current === pin.id ? null : pin.id));
-  }
-  const selectedItem = selection ? items.find((i) => i.key === selection) ?? null : null;
   const hasFilters = Boolean(center || city || keyword || dateFilter || freeOnly || type !== "tout" || universe !== "tout");
-  function resetFilters() { setCenter(null); setCity(""); setKeyword(""); setDateFilter(""); setFreeOnly(false); setType("tout"); setUniverse("tout"); setClusterSelection([]); setSelection(null); }
+  function resetFilters() { setCenter(null); setCity(""); setKeyword(""); setDateFilter(""); setFreeOnly(false); setType("tout"); setUniverse("tout"); }
 
-  const selectCls = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm";
-  const publishPins = useMemo<MapPin[]>(() => [pubCoords && { id: "me", kind: "offre" as const, name: "Départ / lieu", subtitle: "", lat: pubCoords.lat, lng: pubCoords.lng }, tripEnd && pubSub === "trajet" && { id: "end", kind: "lieu" as const, name: "Destination", subtitle: "", lat: tripEnd.lat, lng: tripEnd.lng }].filter(Boolean) as MapPin[], [pubCoords, tripEnd, pubSub]);
+  const fieldCls = "mt-1 w-full rounded-control ring-1 ring-line bg-canvas px-3 py-2 text-sm text-ink placeholder:text-ink-4";
+  const fieldLabel = "block text-xs font-semibold text-ink-2";
 
   return (
-    <div className="bg-white">
-      <div className="mx-auto max-w-[1400px] px-4 pt-6 sm:px-6 sm:pt-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Le Monde Aime · carte</p>
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+    <div className="bg-canvas">
+      <div className="mx-auto max-w-[1200px] px-4 pt-4 sm:px-6">
+        <p className="nav-tiny text-ink-3">Le Monde Aime</p>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
           <div className="max-w-2xl">
-            <h1 className="text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">Tout ce qui compte près de vous, sur une seule carte.</h1>
-            <p className="mt-2 max-w-xl text-sm text-slate-600 sm:text-base">Personnes, productions locales, artistes, besoins, lieux et projets. Initiative indépendante : aucun paiement en ligne, aucune réservation sans accord explicite.</p>
+            <h1 className="text-[2rem] leading-[1.05] tracking-[-0.03em] text-ink sm:text-[2.4rem]">Tout ce qui s’échange près de vous, en listes claires.</h1>
+            <p className="mt-3 text-[15px] leading-relaxed text-ink-2">Personnes, productions locales, artistes, besoins, projets et trajets. Initiative indépendante : aucun paiement en ligne, aucune réservation sans accord explicite. Rien à placer sur une carte : votre commune et son code postal suffisent.</p>
           </div>
-          <nav aria-label="Sections Le Monde Aime" className="inline-flex gap-1 rounded-xl bg-slate-100 p-1">
+          <nav aria-label="Sections Le Monde Aime" className="inline-flex gap-1 rounded-full ring-1 ring-line p-1">
             {([["explorer", "Explorer", "search"], ["publier", "Publier", "filePlus"]] as const).map(([key, text, icon]) => (
-              <button key={key} type="button" onClick={() => goTab(key)} aria-current={tab === key ? "page" : undefined} className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition ${tab === key ? "bg-white text-emerald-900 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}><Icon name={icon} className="h-4 w-4" />{text}</button>
+              <button key={key} type="button" onClick={() => goTab(key)} aria-current={tab === key ? "page" : undefined} className={`flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold transition ${tab === key ? "bg-ink text-canvas" : "text-ink-2 hover:text-ink"}`}><Icon name={icon} className="h-4 w-4" />{text}</button>
             ))}
-            {/* Mes échanges & projets vivent désormais dans l'espace membre (une seule porte). */}
-            <Link href="/espace/echanges" className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-slate-600 transition hover:text-slate-900"><Icon name="heart" className="h-4 w-4" />Mes échanges &amp; projets</Link>
+            <Link href="/espace/echanges" className="flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink-2 transition hover:text-ink"><Icon name="heart" className="h-4 w-4" />Mes échanges</Link>
           </nav>
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1400px] px-4 pt-5 sm:px-6">
+      <div className="mx-auto max-w-[1200px] px-4 pt-6 sm:px-6">
         {tab === "explorer" && (
           <>
-            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="group" aria-label="Univers" data-assistant-id="lma-filters">
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="group" aria-label="Univers" data-assistant-id="lma-filters">
               {[{ key: "tout", label: "Tout" }, ...UNIVERSES.map((u) => ({ key: u.key as string, label: u.label })), { key: "services", label: "Structures externes" }].map((u) => (
-                <button key={u.key} type="button" aria-pressed={universe === u.key} onClick={() => { setUniverse(u.key); setClusterSelection([]); setSelection(null); }} className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition ${universe === u.key ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-emerald-500"}`}>{u.label}</button>
+                <button key={u.key} type="button" aria-pressed={universe === u.key} onClick={() => setUniverse(u.key)} className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${universe === u.key ? "bg-ink text-canvas" : "ring-1 ring-line text-ink-2 hover:text-ink"}`}>{u.label}</button>
               ))}
             </div>
 
-            {/* Carte en total fond d'écran : filtres en panneau latéral, fiche en surcouche. */}
-            <section data-assistant-id="lma-map" aria-labelledby="lma-map-title" className="relative overflow-hidden bg-[#F6F1E8]">
-              <h2 id="lma-map-title" className="sr-only">Carte des personnes, offres, besoins, lieux, projets et trajets</h2>
-
-              <div className="relative h-[calc(100dvh-215px)] min-h-[460px] w-full lg:h-[calc(100dvh-160px)]">
-                <FranceMap fill pins={pins} selectedId={selection} onSelect={selectPin} onPickLocation={(c) => { setCenter(c); setCity(""); setFiltersOpen(false); }} />
-
-                {/* Bouton filtres (mobile uniquement) */}
-                <div className="absolute left-3 top-3 z-30 lg:hidden">
-                  <button type="button" onClick={() => setFiltersOpen((v) => !v)} aria-expanded={filtersOpen} aria-controls="lma-filters-panel"
-                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-xl">
-                    <Icon name="filter" className="h-4 w-4" />
-                    Filtrer{hasFilters && <span className="grid h-5 w-5 place-items-center rounded-full bg-orange-500 text-[11px] font-bold text-white" aria-hidden="true">•</span>}
-                  </button>
+            <section aria-labelledby="lma-filters-title" className="rounded-card bg-muted p-5">
+              <h2 id="lma-filters-title" className="text-sm font-bold text-ink">Affiner</h2>
+              <form role="search" onSubmit={(e) => e.preventDefault()} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <label className={fieldLabel} htmlFor="f-kw">Que cherchez-vous ?</label>
+                  <input id="f-kw" value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="légumes, concert, couture…" className={fieldCls} />
                 </div>
-
-                {/* Panneau filtres : latéral en continu sur desktop, tiroir sur mobile */}
-                <div id="lma-filters-panel" className={`${filtersOpen ? "block" : "hidden"} absolute inset-x-3 top-16 z-20 max-h-[55dvh] overflow-y-auto rounded-2xl bg-white/95 p-4 shadow-2xl ring-1 ring-black/[0.08] backdrop-blur lg:block lg:inset-x-auto lg:left-5 lg:top-5 lg:max-h-[calc(100%-2.5rem)] lg:w-[330px]`}>
-                  <div className="mb-3 flex items-center justify-between">
-                    <p className="text-sm font-bold text-slate-900">Filtres</p>
-                    <button type="button" onClick={() => setFiltersOpen(false)} className="text-sm font-bold text-slate-500 lg:hidden">Voir la carte</button>
-                  </div>
-                  <form role="search" onSubmit={(e) => e.preventDefault()} className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600" htmlFor="f-kw">Que cherchez-vous ?</label>
-                      <input id="f-kw" value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="légumes, concert, couture…" className={selectCls} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div><label className="block text-xs font-semibold text-slate-600" htmlFor="f-city">Commune</label><input id="f-city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Chartres" className={selectCls} /></div>
-                      <div><label className="block text-xs font-semibold text-slate-600" htmlFor="f-type">Publication</label><select id="f-type" value={type} onChange={(e) => setType(e.target.value)} className={selectCls}>{TYPE_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></div>
-                    </div>
-                    <div className="grid grid-cols-2 items-end gap-2">
-                      <div><label className="block text-xs font-semibold text-slate-600" htmlFor="f-date">Date</label><input id="f-date" type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className={selectCls} /></div>
-                      <label className="flex items-center gap-2 pb-2.5 text-sm font-semibold text-slate-700"><input type="checkbox" checked={freeOnly} onChange={(e) => setFreeOnly(e.target.checked)} className="h-4 w-4 accent-orange-600" />Gratuit</label>
-                    </div>
-                    <div>
-                      <label htmlFor="f-radius" className="flex justify-between text-xs font-semibold text-slate-600"><span>{origin ? "Rayon autour du point" : "Rayon (commune ou carte)"}</span><span>{radius} km</span></label>
-                      <input id="f-radius" type="range" min={5} max={200} step={5} value={radius} onChange={(e) => setRadius(Number(e.target.value))} className="mt-2 w-full accent-orange-600" />
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <button type="button" onClick={() => locate(setCenter)} className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">Me localiser</button>
-                      {hasFilters && <button type="button" onClick={resetFilters} className="text-xs font-bold text-emerald-700 underline">Réinitialiser</button>}
-                    </div>
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 border-t border-slate-200 pt-3 text-[11px] text-slate-600" aria-label="Légende">
-                      {LEGEND.map(([c, t]) => <span key={t} className="flex items-center gap-1.5"><span className={`h-2.5 w-2.5 shrink-0 rounded-full ${c}`} aria-hidden="true" />{t}</span>)}
-                    </div>
-                  </form>
+                <div>
+                  <label className={fieldLabel} htmlFor="f-city">Commune</label>
+                  <input id="f-city" value={city} onChange={(e) => { setCity(e.target.value); setCenter(null); }} placeholder="Chartres" className={fieldCls} />
                 </div>
-
-                {/* Fiche de détail en surcouche */}
-                {(selectedItem || clusterItems.length > 0) && (
-                  <aside data-assistant-id="lma-detail" aria-label={selectedItem ? "Détail de la sélection" : "Éléments du secteur sélectionné"} className="absolute inset-x-3 bottom-3 z-20 max-h-[52dvh] overflow-y-auto rounded-2xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl ring-1 ring-black/[0.08] lg:inset-x-auto lg:bottom-5 lg:right-5 lg:top-5 lg:z-30 lg:max-h-none lg:w-[360px] lg:pb-4">
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                        {selectedItem ? selectedItem.subtitle : `${clusterItems.length} élément(s) dans ce secteur`}
-                      </p>
-                      <button type="button" onClick={() => { setSelection(null); setClusterSelection([]); }} className="rounded-lg px-3 py-1.5 text-sm font-bold text-slate-500 hover:bg-slate-100">Fermer ✕</button>
-                    </div>
-                    {selectedItem ? selectedItem.render(true) : (
-                      <ul className="space-y-2">
-                        {clusterItems.map((i) => (
-                          <li key={i.key}>
-                            <button type="button" onClick={() => { setClusterSelection([]); setSelection(i.key); }} className="flex w-full items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3 text-left transition hover:bg-orange-50">
-                              <span className="min-w-0">
-                                <span className="block truncate text-sm font-bold text-slate-900">{i.name}</span>
-                                <span className="block truncate text-xs text-slate-500">{i.subtitle}</span>
-                              </span>
-                              <span className="shrink-0 text-xs font-bold text-emerald-700">Voir →</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </aside>
-                )}
-              </div>
+                <div>
+                  <label className={fieldLabel} htmlFor="f-type">Publication</label>
+                  <select id="f-type" value={type} onChange={(e) => setType(e.target.value)} className={fieldCls}>{TYPE_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+                </div>
+                <div>
+                  <label className={fieldLabel} htmlFor="f-date">Date</label>
+                  <input id="f-date" type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className={fieldCls} />
+                </div>
+                <div className="lg:col-span-2">
+                  <label htmlFor="f-radius" className="flex justify-between text-xs font-semibold text-ink-2"><span>{origin ? "Distance autour du point" : "Distance (commune ou position)"}</span><span>{radius} km</span></label>
+                  <input id="f-radius" type="range" min={5} max={200} step={5} value={radius} onChange={(e) => setRadius(Number(e.target.value))} className="mt-3 w-full accent-ink" />
+                </div>
+                <div className="flex flex-wrap items-end gap-3 lg:col-span-2">
+                  <label className="flex items-center gap-2 pb-1 text-sm font-semibold text-ink-2"><input type="checkbox" checked={freeOnly} onChange={(e) => setFreeOnly(e.target.checked)} className="h-4 w-4 accent-ink" />Gratuit</label>
+                  <button type="button" onClick={locate} className="h-10 rounded-full ring-1 ring-line px-4 text-xs font-semibold text-ink-2">Autour de moi</button>
+                  {hasFilters && <button type="button" onClick={resetFilters} className="text-xs font-semibold text-ink underline">Réinitialiser</button>}
+                </div>
+              </form>
             </section>
-            <div className="bg-[#F6F1E8] pb-4">
-              <p className="px-4 text-center text-[11px] text-slate-600 lg:px-5">
-                {filtered.length} résultat(s) · touchez la carte pour fixer le centre · les marqueurs proches se regroupent au dézoom
-              </p>
-            </div>
-            <details className="border-t border-slate-200 bg-white px-4 py-3 text-sm sm:px-6">
-              <summary className="min-h-10 cursor-pointer font-semibold text-slate-800">Explorer les {filtered.length} résultats sans utiliser la carte</summary>
-              <p className="mt-2 text-xs text-slate-600">Alternative accessible : choisissez un résultat pour ouvrir sa fiche sur la même carte.</p>
-              <ul className="mt-3 max-h-72 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200">
-                {filtered.map((item) => (
-                  <li key={item.key}>
-                    <button type="button" onClick={() => { setClusterSelection([]); setSelection(item.key); document.getElementById("lma-map-title")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex min-h-11 w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-slate-50">
-                      <span className="min-w-0"><span className="block truncate font-semibold text-slate-900">{item.name}</span><span className="block truncate text-xs text-slate-600">{item.subtitle}</span></span>
-                      <span className="shrink-0 text-xs font-semibold text-slate-700">Voir la fiche →</span>
-                    </button>
-                  </li>
-                ))}
+
+            <p className="mt-5 text-sm text-ink-3" aria-live="polite">{filtered.length} publication(s) affichée(s){(city || center) ? ` · dans un rayon de ${radius} km` : ""} · positions approximatives, déduites de la commune.</p>
+
+            {filtered.length === 0 ? (
+              <section className="mt-4 rounded-card bg-muted p-8 text-center">
+                <p className="text-sm text-ink-2">Aucune publication ne correspond à ces filtres pour l’instant.</p>
+                {hasFilters && <button type="button" onClick={resetFilters} className="mt-3 text-sm font-semibold text-ink underline">Voir toutes les publications</button>}
+              </section>
+            ) : (
+              <ul className="mt-4 grid gap-4 lg:grid-cols-2">
+                {filtered.map((item) => <li key={item.key}>{item.render()}</li>)}
               </ul>
-            </details>
+            )}
+
+            <section className="mt-8 border-t border-line pt-6">
+              <h2 className="text-lg leading-tight tracking-[-0.02em] text-ink">Être prévenu</h2>
+              <p className="mt-1 text-sm text-ink-2">Enregistrez une recherche : vous recevrez une notification dans votre espace dès qu’une publication correspond.</p>
+              <div className="mt-4 max-w-2xl"><SavedSearchForm /></div>
+            </section>
           </>
         )}
 
         {tab === "publier" && (
-          <section className="mx-auto max-w-4xl">
-            <div className="rounded-3xl border border-black/[0.06] bg-white p-5 shadow-sm sm:p-8">
-              <h1 className="text-3xl font-bold text-slate-900">Que souhaitez-vous publier ?</h1>
-              <p className="mt-2 text-sm text-slate-600">Votre position publique reste approximative. L&apos;adresse précise n&apos;est partagée qu&apos;avec les personnes concernées, après accord.</p>
-              {!user ? <div className="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Connectez-vous pour publier. <Link href="/connexion" className="font-bold underline">Se connecter</Link> · <Link href="/inscription" className="font-bold underline">Créer un compte</Link></div>
-              : !isMember ? <div className="mt-6 rounded-xl bg-slate-100 p-4 text-sm text-slate-700">La publication est réservée aux comptes membres.</div> : (
+          <section className="mx-auto max-w-3xl">
+            <div className="rounded-panel bg-canvas ring-1 ring-line p-6 shadow-rested sm:p-8">
+              <h1 className="text-[1.9rem] leading-tight tracking-[-0.02em] text-ink">Que souhaitez-vous publier ?</h1>
+              <p className="mt-2 text-sm text-ink-2">Indiquez la commune et le code postal : le point est déduit automatiquement, il reste approximatif. L&apos;adresse précise n&apos;est partagée qu&apos;avec les personnes concernées, après accord.</p>
+              <p className="mt-2 text-sm text-ink-2">
+                Ici, c&apos;est le voisinage : une annonce ponctuelle, une recherche, un projet. Pour ce qui se répète — vendre
+                régulièrement, proposer un trajet, un logement, un savoir-faire ou ce qu&apos;on transmet — les{" "}
+                <Link href="/circuits" className="font-semibold text-ink underline">sept circuits</Link> ont leur cadre, avec le
+                même point approximatif et le même accord entre les personnes.
+              </p>
+              {!user ? <div className="mt-6 rounded-card bg-muted p-4 text-sm text-ink-2">Les comptes ouvrent bientôt : en attendant, tout le public reste consultable. <Link href="/mon-espace" className="font-bold text-ink underline">Mon espace</Link></div>
+              : !isMember ? <div className="mt-6 rounded-card bg-muted p-4 text-sm text-ink-2">La publication est réservée aux comptes membres.</div> : (
                 <>
                   <div className="mt-6 grid gap-3 sm:grid-cols-3" role="group" aria-label="Type de publication">
                     {([["proposition", "Une proposition", "Je donne, je prête, je loue, je vends, je propose une prestation, je transmets."], ["besoin", "Un besoin", "Je cherche une sono, je voudrais apprendre à coudre…"], ["projet", "Un projet", "Organisons une fête, créons un jardin partagé…"]] as const).map(([k, t, d]) => (
-                      <button key={k} type="button" onClick={() => setPubType(k)} aria-pressed={pubType === k} className={`rounded-2xl border p-4 text-left ${pubType === k ? "border-emerald-700 bg-emerald-50 ring-1 ring-emerald-700" : "border-slate-200 hover:border-slate-400"}`}><span className="block text-base font-bold text-slate-900">{t}</span><span className="mt-1 block text-xs text-slate-600">{d}</span></button>
+                      <button key={k} type="button" onClick={() => setPubType(k)} aria-pressed={pubType === k} className={`rounded-card ring-1 p-4 text-left transition ${pubType === k ? "bg-muted ring-ink" : "ring-line hover:ring-ink-3"}`}><span className="block text-base font-bold text-ink">{t}</span><span className="mt-1 block text-xs text-ink-3">{d}</span></button>
                     ))}
                   </div>
                   {pubType === "proposition" && (
-                    <div className="mt-4 flex gap-2"><button type="button" onClick={() => setPubSub("annonce")} className={`rounded-full px-4 py-2 text-sm font-bold ${pubSub === "annonce" ? "bg-emerald-800 text-white" : "bg-slate-100 text-slate-700"}`}>Objet, produit, service ou savoir</button><button type="button" onClick={() => setPubSub("trajet")} className={`rounded-full px-4 py-2 text-sm font-bold ${pubSub === "trajet" ? "bg-emerald-800 text-white" : "bg-slate-100 text-slate-700"}`}>Un trajet</button></div>
+                    <div className="mt-4 flex gap-2"><button type="button" onClick={() => setPubSub("annonce")} className={`h-10 rounded-full px-4 text-sm font-semibold ${pubSub === "annonce" ? "bg-ink text-canvas" : "ring-1 ring-line text-ink-2"}`}>Objet, produit, service ou savoir</button><button type="button" onClick={() => setPubSub("trajet")} className={`h-10 rounded-full px-4 text-sm font-semibold ${pubSub === "trajet" ? "bg-ink text-canvas" : "ring-1 ring-line text-ink-2"}`}>Un trajet</button></div>
                   )}
-                  <div className="mt-6 rounded-xl bg-slate-50 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-bold text-slate-800">{pubSub === "trajet" && pubType === "proposition" ? "Départ puis destination" : "Où ? Touchez la carte à hauteur de la commune"}</p><button type="button" onClick={() => locate(setPubCoords)} className="text-xs font-semibold text-emerald-800 underline">Me localiser (facultatif)</button></div>
-                    <p className="mt-1 text-xs text-slate-500">{pubCoords ? `Point retenu : ${pubCoords.lat.toFixed(2)}, ${pubCoords.lng.toFixed(2)} (approximatif)` : "Aucun point choisi."}</p>
-                    <div className="mx-auto mt-3 max-w-md"><FranceMap pins={publishPins} selectedId={null} onSelect={() => {}} onPickLocation={(c) => { if (pubType === "proposition" && pubSub === "trajet" && pickEnd) setTripEnd(c); else setPubCoords(c); }} canPlacePin /></div>
-                  </div>
-                  <div className="mt-6" data-assistant-id={pubType === "projet" ? "lma-project-form" : pubSub === "trajet" && pubType === "proposition" ? "lma-trip-form" : "lma-listing-form"}>
-                    {pubType === "projet" ? <ProjectForm coords={pubCoords} />
-                      : pubType === "proposition" && pubSub === "trajet" ? <TripForm coords={pubCoords} destination={tripEnd} pickDestination={pickEnd} onPickDestination={setPickEnd} onCreated={() => setTimeout(() => router.push("/espace/echanges"), 1200)} />
-                      : <PublishListingForm key={pubType} type={pubType} coords={pubCoords} onPublished={() => setTimeout(() => router.push("/espace/echanges"), 1200)} />}
+                  <div className="mt-7" data-assistant-id={pubType === "projet" ? "lma-project-form" : pubSub === "trajet" && pubType === "proposition" ? "lma-trip-form" : "lma-listing-form"}>
+                    {pubType === "projet" ? <ProjectForm />
+                      : pubType === "proposition" && pubSub === "trajet" ? <TripForm onCreated={() => setTimeout(() => router.push("/espace/echanges"), 1200)} />
+                      : <PublishListingForm key={pubType} type={pubType} onPublished={() => setTimeout(() => router.push("/espace/echanges"), 1200)} />}
                   </div>
                 </>
               )}
             </div>
+            {data.stories.length > 0 && (
+              <div className="mt-6 rounded-card bg-muted p-5">
+                <h2 className="text-sm font-bold text-ink">Derniers récits publiés</h2>
+                <ul className="mt-3 space-y-3">
+                  {data.stories.slice(0, 3).map((s) => (
+                    <li key={s.id} className="border-b border-line pb-3 last:border-b-0 last:pb-0">
+                      <strong className="text-sm text-ink">{s.title}</strong>
+                      <p className="mt-1 line-clamp-2 text-xs text-ink-2">{s.body}</p>
+                      <span className="mt-1 block text-[11px] text-ink-4">{s.authorName} · {dateText(s.createdAt)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <p className="mt-6 text-xs text-ink-3">Un contenu vous semble inapproprié ? Chaque fiche publiée porte un lien de signalement, étudié par l’équipe.</p>
           </section>
         )}
-
       </div>
     </div>
   );

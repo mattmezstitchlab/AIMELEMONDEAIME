@@ -28,7 +28,7 @@ export type AssistantSummary = {
 
 /**
  * Assistant niveau 2 : actions d'écriture que l'assistant peut PROPOSER.
- * Elles ne sont jamais exécutées sans un clic explicite sur la carte de
+ * Elles ne sont jamais exécutées sans un clic explicite sur la fenêtre de
  * confirmation (voir le widget), et chacune repasse par les actions serveur
  * existantes, qui revérifient les droits. Lignes rouges inchangées : aucune
  * décision de droit, aucun montant, aucun envoi à un organisme extérieur —
@@ -99,7 +99,7 @@ export function buildAgenda(summary: AssistantSummary): PersonalAnswer {
     chips.push(...summary.dueTasks.slice(0, 2).map((t) => link(`Étape : ${court(t.label)}`, `/espace/demarches/suivi/${t.journeyId}`)));
   }
   if (summary.incoming > 0) {
-    lines.push(`Demandes reçues sur la carte : ${summary.incoming} à traiter.`);
+    lines.push(`Demandes d’entraide reçues : ${summary.incoming} à traiter.`);
     chips.push(link("Voir mes échanges & projets", "/espace/echanges"));
   }
   if (summary.engagements > 0) {

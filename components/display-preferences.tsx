@@ -3,6 +3,12 @@
 import { useEffect, useState } from "react";
 import { Accessibility } from "lucide-react";
 
+/*
+ * Préférences d’affichage : taille du texte, contraste, animations.
+ * Les valeurs sont posées sur <html> (data-*) et lues par app/globals.css.
+ * Cookie de première partie uniquement — aucune donnée de parcours.
+ */
+
 type Prefs = { text: "normal" | "grand"; contrast: "standard" | "renforce"; motion: "auto" | "reduit" };
 const DEFAULT: Prefs = { text: "normal", contrast: "standard", motion: "auto" };
 const COOKIE = "aime_display";
@@ -15,7 +21,11 @@ function applyDataset(prefs: Prefs) {
 }
 
 function persistPreferences(prefs: Prefs) {
-  document.cookie = `${COOKIE}=${encodeURIComponent(JSON.stringify(prefs))};path=/;max-age=31536000;samesite=lax`;
+  try {
+    document.cookie = `${COOKIE}=${encodeURIComponent(JSON.stringify(prefs))}; path=/; max-age=31536000; samesite=lax`;
+  } catch {
+    /* Stockage indisponible : les préférences restent valables pour la page. */
+  }
 }
 
 /** Lecture unique du cookie, en initialisation paresseuse (pas de setState dans un effet). */
@@ -33,8 +43,64 @@ function readStoredPrefs(): Prefs {
   } catch { /* Cookie invalide : valeurs par défaut. */ return DEFAULT; }
 }
 
-/** Préférences de présentation seulement : cookie de première partie, aucune donnée de parcours. */
-export function DisplayPreferences({ mode = "footer" }: { mode?: "footer" | "sidebar" | "mobile" }) {
+/** Choix binaire présenté comme une paire de pastilles (style Cal.com). */
+function Choice<Value extends string>({
+  legend,
+  name,
+  value,
+  options,
+  onChange,
+  onDark,
+}: {
+  legend: string;
+  name: string;
+  value: Value;
+  options: ReadonlyArray<readonly [Value, string]>;
+  onChange: (value: Value) => void;
+  onDark?: boolean;
+}) {
+  return (
+    <fieldset>
+      <legend className={`text-xs font-medium ${onDark ? "text-canvas/60" : "text-ink-3"}`}>{legend}</legend>
+      <div className={`mt-2 inline-flex rounded-control p-0.5 ${onDark ? "bg-canvas/10" : "bg-muted"}`}>
+        {options.map(([optionValue, label]) => {
+          const active = value === optionValue;
+          return (
+            <label
+              key={optionValue}
+              className={`cursor-pointer rounded-[6px] px-2.5 py-1.5 text-xs font-medium transition ${
+                active
+                  ? onDark
+                    ? "bg-canvas text-ink"
+                    : "bg-canvas text-ink shadow-rested"
+                  : onDark
+                    ? "text-canvas/60 hover:text-canvas"
+                    : "text-ink-3 hover:text-ink"
+              }`}
+            >
+              <input
+                type="radio"
+                name={name}
+                checked={active}
+                onChange={() => onChange(optionValue)}
+                className="sr-only"
+              />
+              {label}
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+export function DisplayPreferences({
+  mode = "footer",
+  onDark = false,
+}: {
+  mode?: "footer" | "sidebar" | "mobile";
+  onDark?: boolean;
+}) {
   const [prefs, setPrefs] = useState<Prefs>(readStoredPrefs);
   useEffect(() => { applyDataset(prefs); }, [prefs]);
   function change<Key extends keyof Prefs>(key: Key, value: Prefs[Key]) {
@@ -42,32 +108,31 @@ export function DisplayPreferences({ mode = "footer" }: { mode?: "footer" | "sid
     setPrefs(next);
     persistPreferences(next);
   }
+
   const popover = mode === "mobile";
+  const summaryTone = onDark
+    ? "text-canvas/70 hover:bg-canvas/10 hover:text-canvas"
+    : "text-ink-2 hover:bg-muted hover:text-ink";
+
   return (
-    <details className={popover ? "relative" : "mx-auto max-w-sm text-left"}>
-      <summary className={`flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg font-semibold text-slate-700 hover:bg-slate-100 [&::-webkit-details-marker]:hidden ${popover ? "px-2 text-xs" : "px-3 text-sm"}`}>
-        <Accessibility className="h-5 w-5" aria-hidden="true" />Préférences d&apos;affichage
+    <details className={popover ? "relative" : "relative"}>
+      <summary
+        className={`flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-control px-3 text-sm font-medium transition [&::-webkit-details-marker]:hidden ${summaryTone}`}
+      >
+        <Accessibility className="h-4 w-4" aria-hidden="true" />
+        Préférences d&apos;affichage
       </summary>
-      <div className={`${popover ? "absolute right-0 top-12 z-50 w-72 shadow-xl" : "mt-2"} rounded-xl border border-slate-200 bg-white p-4 text-sm`}>
-        <p className="text-xs leading-relaxed text-slate-600">Ces réglages restent sur cet appareil. Ils ne modifient ni vos données ni vos démarches.</p>
-        <fieldset className="mt-4">
-          <legend className="text-xs font-bold text-slate-900">Taille du texte</legend>
-          <div className="mt-2 flex gap-3">
-            {([ ["normal", "Normale"], ["grand", "Grande"] ] as const).map(([value, label]) => <label key={value} className="flex min-h-10 cursor-pointer items-center gap-2 text-xs font-medium"><input type="radio" name={`text-${mode}`} checked={prefs.text === value} onChange={() => change("text", value)} className="h-4 w-4 accent-slate-900" />{label}</label>)}
-          </div>
-        </fieldset>
-        <fieldset className="mt-3">
-          <legend className="text-xs font-bold text-slate-900">Contraste</legend>
-          <div className="mt-2 flex gap-3">
-            {([ ["standard", "Standard"], ["renforce", "Renforcé"] ] as const).map(([value, label]) => <label key={value} className="flex min-h-10 cursor-pointer items-center gap-2 text-xs font-medium"><input type="radio" name={`contrast-${mode}`} checked={prefs.contrast === value} onChange={() => change("contrast", value)} className="h-4 w-4 accent-slate-900" />{label}</label>)}
-          </div>
-        </fieldset>
-        <fieldset className="mt-3">
-          <legend className="text-xs font-bold text-slate-900">Animations</legend>
-          <div className="mt-2 flex gap-3">
-            {([ ["auto", "Système"], ["reduit", "Réduites"] ] as const).map(([value, label]) => <label key={value} className="flex min-h-10 cursor-pointer items-center gap-2 text-xs font-medium"><input type="radio" name={`motion-${mode}`} checked={prefs.motion === value} onChange={() => change("motion", value)} className="h-4 w-4 accent-slate-900" />{label}</label>)}
-          </div>
-        </fieldset>
+      <div
+        className={`${popover ? "absolute right-0 top-12 z-50 w-72" : "absolute bottom-[calc(100%+0.6rem)] left-0 z-50 w-72"} rounded-card bg-canvas p-5 text-sm text-ink shadow-lifted ring-1 ring-line`}
+      >
+        <p className="text-xs leading-relaxed text-ink-3">
+          Ces réglages restent sur cet appareil. Ils ne modifient ni vos données ni vos démarches.
+        </p>
+        <div className="mt-4 space-y-3">
+          <Choice legend="Taille du texte" name={`text-${mode}`} value={prefs.text} onChange={(v) => change("text", v)} options={[["normal", "Normale"], ["grand", "Grande"]] as const} />
+          <Choice legend="Contraste" name={`contrast-${mode}`} value={prefs.contrast} onChange={(v) => change("contrast", v)} options={[["standard", "Standard"], ["renforce", "Renforcé"]] as const} />
+          <Choice legend="Animations" name={`motion-${mode}`} value={prefs.motion} onChange={(v) => change("motion", v)} options={[["auto", "Système"], ["reduit", "Réduites"]] as const} />
+        </div>
       </div>
     </details>
   );

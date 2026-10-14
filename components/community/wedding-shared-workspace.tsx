@@ -11,8 +11,8 @@ type SharedGuest = { id: number; name: string; persons: number; status: string; 
 type SharedTable = { id: number; name: string; capacity: number | null };
 
 type Feedback = { ok: boolean; text: string } | null;
-const button = "rounded-lg px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
-const input = "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900";
+const button = "rounded-control px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
+const input = "w-full rounded-control ring-1 ring-line bg-canvas px-3 py-2 text-sm text-ink";
 
 function fmtDate(value: string) {
   if (!value) return "Date à confirmer";
@@ -72,44 +72,44 @@ export function WeddingSharedWorkspace({
     : "Témoin — programme et plan de table, lecture seule";
 
   return (
-    <main className="min-h-[70vh] bg-[#fafaf9] px-4 py-8 sm:px-6">
+    <main className="min-h-[70vh] bg-subtle px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-4xl space-y-5">
-        <header className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+        <header className="rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-700">Espace mariage partagé</p>
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">{projectTitle}</h1>
-              <p className="mt-2 text-sm text-slate-600">{fmtDate(weddingDate)} · {city}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink-2">Espace mariage partagé</p>
+              <h1 className="mt-2 text-3xl font-bold text-ink">{projectTitle}</h1>
+              <p className="mt-2 text-sm text-ink-3">{fmtDate(weddingDate)} · {city}</p>
             </div>
             <form action={leaveWeddingAccess}>
-              <button type="submit" className={`${button} border border-slate-300 bg-white text-slate-700`}>Quitter cet accès</button>
+              <button type="submit" className={`${button} ring-1 ring-line bg-canvas text-ink-2`}>Quitter cet accès</button>
             </form>
           </div>
-          <div className="mt-4 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-950">
+          <div className="mt-4 rounded-card bg-muted p-3 text-xs text-ink">
             <p className="font-bold">Votre rôle : {roleText}</p>
             <p className="mt-1">Accès limité à ce mariage, jusqu&apos;au {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(expiresAt)}. Les documents, messages privés, budget, notes d&apos;invités et espaces personnels ne sont pas partagés.</p>
           </div>
         </header>
 
-        <section className="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-bold text-slate-900">Déroulé</h2>
-          <p className="mt-1 text-xs text-slate-500">Horaires et étapes partagés avec les personnes qui organisent.</p>
-          {program.length === 0 && <p className="mt-4 text-sm text-slate-500">Aucune étape ajoutée pour le moment.</p>}
+        <section className="rounded-card bg-canvas ring-1 ring-line p-5 shadow-rested">
+          <h2 className="text-lg font-bold text-ink">Déroulé</h2>
+          <p className="mt-1 text-xs text-ink-3">Horaires et étapes partagés avec les personnes qui organisent.</p>
+          {program.length === 0 && <p className="mt-4 text-sm text-ink-3">Aucune étape ajoutée pour le moment.</p>}
           <ol className="mt-3 space-y-2">
             {program.map((item, index) => (
-              <li key={index} className="grid gap-2 rounded-lg bg-slate-50 p-3 sm:grid-cols-[130px_1fr_auto]">
+              <li key={index} className="grid gap-2 rounded-control bg-muted p-3 sm:grid-cols-[130px_1fr_auto]">
                 {isCoordinator && canEdit ? (
                   <>
                     <label className="sr-only" htmlFor={`shared-time-${index}`}>Heure de l&apos;étape {index + 1}</label>
                     <input id={`shared-time-${index}`} value={item.time} onChange={(event) => setProgram((previous) => previous.map((row, i) => i === index ? { ...row, time: event.target.value } : row))} placeholder="Heure" maxLength={30} className={input} />
                     <label className="sr-only" htmlFor={`shared-label-${index}`}>Étape {index + 1}</label>
                     <input id={`shared-label-${index}`} value={item.label} onChange={(event) => setProgram((previous) => previous.map((row, i) => i === index ? { ...row, label: event.target.value } : row))} placeholder="Ex. Cérémonie" maxLength={160} className={input} />
-                    <button type="button" onClick={() => setProgram((previous) => previous.filter((_, i) => i !== index))} className="text-xs font-semibold text-rose-700 underline">Retirer</button>
+                    <button type="button" onClick={() => setProgram((previous) => previous.filter((_, i) => i !== index))} className="text-xs font-semibold text-ink-2 underline">Retirer</button>
                   </>
                 ) : (
                   <>
-                    <time className="font-bold text-slate-800">{item.time || "—"}</time>
-                    <span className="text-sm text-slate-700">{item.label}</span>
+                    <time className="font-bold text-ink-2">{item.time || "—"}</time>
+                    <span className="text-sm text-ink-2">{item.label}</span>
                   </>
                 )}
               </li>
@@ -117,57 +117,57 @@ export function WeddingSharedWorkspace({
           </ol>
           {isCoordinator && canEdit && (
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" disabled={pending || program.length >= 25} onClick={() => setProgram((previous) => [...previous, { time: "", label: "" }])} className={`${button} border border-slate-300 bg-white text-slate-700`}>Ajouter une étape</button>
-              <button type="button" disabled={pending} onClick={saveProgram} className={`${button} bg-emerald-800 text-white hover:bg-emerald-900`}>{pending ? "Enregistrement…" : "Enregistrer le déroulé"}</button>
+              <button type="button" disabled={pending || program.length >= 25} onClick={() => setProgram((previous) => [...previous, { time: "", label: "" }])} className={`${button} ring-1 ring-line bg-canvas text-ink-2`}>Ajouter une étape</button>
+              <button type="button" disabled={pending} onClick={saveProgram} className={`${button} bg-ink text-canvas hover:bg-ink-2`}>{pending ? "Enregistrement…" : "Enregistrer le déroulé"}</button>
             </div>
           )}
         </section>
 
         {isCoordinator ? (
-          <section className="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-900">Réponses des foyers</h2>
-            <p className="mt-1 text-xs text-slate-500">Vous pouvez mettre à jour le statut d&apos;une réponse. Les notes privées et coordonnées ne sont jamais montrées à travers ce lien.</p>
-            {guests.length === 0 ? <p className="mt-4 text-sm text-slate-500">Aucun foyer sur la liste pour le moment.</p> : (
+          <section className="rounded-card bg-canvas ring-1 ring-line p-5 shadow-rested">
+            <h2 className="text-lg font-bold text-ink">Réponses des foyers</h2>
+            <p className="mt-1 text-xs text-ink-3">Vous pouvez mettre à jour le statut d&apos;une réponse. Les notes privées et coordonnées ne sont jamais montrées à travers ce lien.</p>
+            {guests.length === 0 ? <p className="mt-4 text-sm text-ink-3">Aucun foyer sur la liste pour le moment.</p> : (
               <ul className="mt-3 space-y-2">
                 {guests.map((guest) => (
-                  <li key={guest.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
-                    <span className="text-sm font-semibold text-slate-800">{guest.name} <span className="font-normal text-slate-500">· {guest.persons} personne(s)</span></span>
+                  <li key={guest.id} className="flex flex-wrap items-center justify-between gap-3 rounded-control ring-1 ring-line p-3">
+                    <span className="text-sm font-semibold text-ink-2">{guest.name} <span className="font-normal text-ink-3">· {guest.persons} personne(s)</span></span>
                     {canEdit ? (
-                      <label className="text-xs font-semibold text-slate-600">Réponse
-                        <select value={guest.status} disabled={pending} onChange={(event) => updateGuest(guest.id, event.target.value)} className="ml-2 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800">
+                      <label className="text-xs font-semibold text-ink-3">Réponse
+                        <select value={guest.status} disabled={pending} onChange={(event) => updateGuest(guest.id, event.target.value)} className="ml-2 rounded-control ring-1 ring-line bg-canvas px-2 py-1.5 text-xs text-ink-2">
                           {guest.status === "a_inviter" && <option value="a_inviter" disabled>À inviter</option>}
                           {GUEST_STATUSES.filter((status) => status.value !== "a_inviter").map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
                         </select>
                       </label>
-                    ) : <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{guestStatusLabel(guest.status)}</span>}
+                    ) : <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-ink-2">{guestStatusLabel(guest.status)}</span>}
                   </li>
                 ))}
               </ul>
             )}
-            {!canEdit && <p className="mt-3 text-xs text-slate-500">Projet fermé : les réponses ne peuvent plus être modifiées.</p>}
+            {!canEdit && <p className="mt-3 text-xs text-ink-3">Projet fermé : les réponses ne peuvent plus être modifiées.</p>}
           </section>
         ) : (
-          <section className="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-900">Plan de table</h2>
-            <p className="mt-1 text-xs text-slate-500">Seuls les foyers confirmés et placés apparaissent ici. Aucune note personnelle n&apos;est partagée.</p>
-            {tables.length === 0 ? <p className="mt-4 text-sm text-slate-500">Le plan de table n&apos;est pas encore préparé.</p> : (
+          <section className="rounded-card bg-canvas ring-1 ring-line p-5 shadow-rested">
+            <h2 className="text-lg font-bold text-ink">Plan de table</h2>
+            <p className="mt-1 text-xs text-ink-3">Seuls les foyers confirmés et placés apparaissent ici. Aucune note personnelle n&apos;est partagée.</p>
+            {tables.length === 0 ? <p className="mt-4 text-sm text-ink-3">Le plan de table n&apos;est pas encore préparé.</p> : (
               <ul className="mt-3 grid gap-3 sm:grid-cols-2">
                 {tables.map((table) => (
-                  <li key={table.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <h3 className="font-bold text-slate-900">{table.name}{table.capacity ? <span className="ml-2 text-xs font-normal text-slate-500">· {table.capacity} places</span> : null}</h3>
+                  <li key={table.id} className="rounded-card ring-1 ring-line bg-muted p-4">
+                    <h3 className="font-bold text-ink">{table.name}{table.capacity ? <span className="ml-2 text-xs font-normal text-ink-3">· {table.capacity} places</span> : null}</h3>
                     {assigned(table.id).length ? (
-                      <ul className="mt-2 space-y-1 text-sm text-slate-700">{assigned(table.id).map((guest) => <li key={guest.id}>{guest.name} · {guest.persons} personne(s)</li>)}</ul>
-                    ) : <p className="mt-2 text-xs text-slate-500">Aucun foyer confirmé affecté.</p>}
+                      <ul className="mt-2 space-y-1 text-sm text-ink-2">{assigned(table.id).map((guest) => <li key={guest.id}>{guest.name} · {guest.persons} personne(s)</li>)}</ul>
+                    ) : <p className="mt-2 text-xs text-ink-3">Aucun foyer confirmé affecté.</p>}
                   </li>
                 ))}
               </ul>
             )}
-            {unassignedCount > 0 && <p className="mt-3 text-xs text-slate-600">{unassignedCount} foyer(s) confirmé(s) restent à placer. Les personnes qui organisent peuvent encore ajuster le plan.</p>}
+            {unassignedCount > 0 && <p className="mt-3 text-xs text-ink-3">{unassignedCount} foyer(s) confirmé(s) restent à placer. Les personnes qui organisent peuvent encore ajuster le plan.</p>}
           </section>
         )}
 
-        {feedback && <p role={feedback.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-sm ${feedback.ok ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"}`}>{feedback.text}</p>}
-        <p className="text-center text-xs text-slate-500">Un accès révocable et limité — sans compte AIME®.</p>
+        {feedback && <p role={feedback.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-sm ${feedback.ok ? "bg-muted text-ink" : "bg-muted text-ink"}`}>{feedback.text}</p>}
+        <p className="text-center text-xs text-ink-3">Un accès révocable et limité — sans compte AIME®.</p>
       </div>
     </main>
   );

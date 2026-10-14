@@ -10,10 +10,10 @@
     "check": "npm run typecheck && npm run lint && npm run build",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx db/seed.ts"
+    "db:seed": "tsx db/seed.ts",
+    "test": "tsx --test lib/*.test.ts"
   },
   "dependencies": {
-    "@paper-design/shaders-react": "^0.0.81",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "dotenv": "17.3.1",

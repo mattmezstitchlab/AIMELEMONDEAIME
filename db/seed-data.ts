@@ -1531,7 +1531,7 @@ export async function seedDatabase(db: NodePgDatabase) {
         kind: "producteur",
         name: "Ferme des Herbages — Marie Lefèvre",
         description:
-          "Légumes de saison, œufs fermiers et pain au levain. Retrait sur place le vendredi après-midi et le samedi matin.",
+          "Fiche fictive de démonstration. Légumes de saison, œufs fermiers et pain au levain. Retrait sur place le vendredi après-midi et le samedi matin.",
         city: "Saint-Brieuc",
         lat: "48.5211",
         lng: "-2.7489",
@@ -1542,7 +1542,7 @@ export async function seedDatabase(db: NodePgDatabase) {
         kind: "producteur",
         name: "Les Champs d'Amélie — maraîchage",
         description:
-          "Paniers de légumes, fraises de Plougastel et miel de nos ruches. Vente directe à la ferme tous les samedis.",
+          "Fiche fictive de démonstration. Paniers de légumes, fraises de Plougastel et miel de nos ruches. Vente directe à la ferme tous les samedis.",
         city: "Nantes",
         lat: "47.2411",
         lng: "-1.5312",
@@ -1553,7 +1553,7 @@ export async function seedDatabase(db: NodePgDatabase) {
         kind: "producteur",
         name: "Les Blés de Jean — céréales & farine",
         description:
-          "Farine paysanne moulue à la meule de pierre et huile de colza. Point de dépôt à l'entrée de l'exploitation.",
+          "Fiche fictive de démonstration. Farine paysanne moulue à la meule de pierre et huile de colza. Point de dépôt à l'entrée de l'exploitation.",
         city: "Chartres",
         lat: "48.4522",
         lng: "1.5012",
@@ -1564,7 +1564,7 @@ export async function seedDatabase(db: NodePgDatabase) {
         kind: "presence",
         name: "Point d'échange du Verger — Paul Martin",
         description:
-          "Je rends service aux voisins : dépôt de colis, coup de main au potager et conduite pour les rendez-vous.",
+          "Fiche fictive de démonstration. Je rends service aux voisins : dépôt de colis, coup de main au potager et conduite pour les rendez-vous.",
         city: "Chartres",
         lat: "48.4601",
         lng: "1.4721",
@@ -1575,16 +1575,49 @@ export async function seedDatabase(db: NodePgDatabase) {
         kind: "presence",
         name: "Accueil à la ferme — Anne-Laure",
         description:
-          "Présence régulière sur le marché de Saint-Brieuc le samedi matin, stand de producteurs locaux.",
+          "Fiche fictive de démonstration. Présence régulière sur le marché de Saint-Brieuc le samedi matin, stand de producteurs locaux.",
         city: "Saint-Brieuc",
         lat: "48.5089",
         lng: "-2.7601",
         phone: "06 23 45 67 89",
       },
+      {
+        ownerId: paul.id,
+        kind: "association",
+        name: "Les Jardins du Verger — association de quartier",
+        description:
+          "Quinze voisins, un terrain derrière le verger et un local prêté par la mairie. Fiche fictive de démonstration : on s'y retrouve le samedi, on prête du matériel et on monte la fête du quartier.",
+        city: "Chartres",
+        lat: "48.4604",
+        lng: "1.4728",
+        phone: "06 34 56 78 90",
+      },
+      {
+        ownerId: lucas.id,
+        kind: "artisan",
+        name: "Le Garage du Pont — vélos et petites mécaniques",
+        description:
+          "Fiche fictive de démonstration. Réparation de vélos, freins, chaînes, éclairage, et petits dépannages mécaniques. On dépose, on reprend quand c'est prêt, on explique ce qui a été fait.",
+        city: "Chartres",
+        lat: "48.4432",
+        lng: "1.4897",
+        phone: "06 45 67 89 01",
+      },
+      {
+        ownerId: amelie.id,
+        kind: "association",
+        name: "Les Jardins partagés du canal — collectif de quartier",
+        description:
+          "Un terrain prêté par la ville, quinze parcelles et un cabanon d'outils. Fiche fictive de démonstration : on y vient le samedi matin.",
+        city: "Nantes",
+        lat: "47.2295",
+        lng: "-1.5512",
+        phone: "06 56 78 90 12",
+      },
     ])
     .returning();
 
-  const [ptMarie, ptAmelie, ptJean, ptPaul, ptAnne] = points;
+  const [ptMarie, ptAmelie, ptJean, ptPaul, ptAnne, ptGarage, ptVeillees, ptJardin] = points;
 
   await db.insert(localProducts).values([
     {
@@ -1659,6 +1692,89 @@ export async function seedDatabase(db: NodePgDatabase) {
       unit: "la bouteille",
       stock: 18,
     },
+    // Ce que proposent les artisans (circuit « artisans »).
+    {
+      pointId: ptGarage.id,
+      name: "Réparation d'un vélo — freins, chaîne, éclairage",
+      description: "Diagnostic, réglages et pièces courantes. On vous dit ce qui a été fait et ce qui viendra plus tard.",
+      category: "Vélo",
+      price: "25.00",
+      unit: "la réparation",
+      stock: 6,
+    },
+    {
+      pointId: ptGarage.id,
+      name: "Révision complète avant l'été",
+      description: "Démontage, nettoyage, graissage, réglage des dérailleurs et contrôle des roues.",
+      category: "Vélo",
+      price: "60.00",
+      unit: "le vélo",
+      stock: 4,
+    },
+    {
+      pointId: ptGarage.id,
+      name: "Petit dépannage mécanique à domicile",
+      description: "Porte qui frotte, charnière, machine à laver qui marche mal : un coup d'œil avant d'acheter du neuf.",
+      category: "Petites mécaniques",
+      price: "20.00",
+      unit: "le déplacement",
+      stock: 8,
+    },
+    // Ce que proposent les associations et collectifs (circuit « associations »).
+    {
+      pointId: ptVeillees.id,
+      name: "Adhésion annuelle — ateliers du quartier",
+      description: "Un an d'ateliers et de fêtes du quartier, la lettre du trimestre, un mot d'invitation pour vos proches.",
+      category: "Adhésion",
+      price: "15.00",
+      unit: "l'année",
+      stock: 60,
+    },
+    {
+      pointId: ptVeillees.id,
+      name: "Atelier intergénérationnel du samedi",
+      description: "Deux heures ensemble : mémoire du quartier, cuisine du jardin, un peu de bricolage.",
+      category: "Atelier",
+      price: "0.00",
+      unit: "la séance",
+      stock: 20,
+    },
+    {
+      pointId: ptVeillees.id,
+      name: "Prêt de la salle et du barnum pour une fête",
+      description: "La salle du bas, chauffée, et le grand barnum du local : tables et bancs compris.",
+      category: "Prêt de salle",
+      price: "10.00",
+      unit: "la demi-journée",
+      stock: 12,
+    },
+    {
+      pointId: ptJardin.id,
+      name: "Parcelle au potager partagé",
+      description: "Une parcelle de 30 m², l'eau et les outils en commun, l'entretien des allées à tour de rôle.",
+      category: "Jardin",
+      price: "25.00",
+      unit: "l'année",
+      stock: 14,
+    },
+    {
+      pointId: ptJardin.id,
+      name: "Prêt de matériel de jardinage",
+      description: "Bêche, grelinette, brouette : prêt au cabanon, à rendre au samedi suivant.",
+      category: "Prêt de matériel",
+      price: "0.00",
+      unit: "le prêt",
+      stock: 8,
+    },
+    {
+      pointId: ptJardin.id,
+      name: "Atelier semis et boutures",
+      description: "On sème ensemble, on repart avec ses godets. Ouvert aux enfants accompagnés.",
+      category: "Atelier",
+      price: "5.00",
+      unit: "la séance",
+      stock: 25,
+    },
   ]).returning();
 
   const products = await db
@@ -1696,6 +1812,36 @@ export async function seedDatabase(db: NodePgDatabase) {
       status: "recuperee",
       pickupAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       note: "Déposé au point de retrait.",
+    },
+    {
+      reference: "LOC-DEMO-2026-0004",
+      productId: productByName.get("Adhésion annuelle — ateliers du quartier")!.id,
+      pointId: ptVeillees.id,
+      buyerId: marie.id,
+      quantity: 1,
+      status: "commandee",
+      pickupAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      note: "Je peux aider à monter la fête du quartier.",
+    },
+    {
+      reference: "LOC-DEMO-2026-0006",
+      productId: productByName.get("Réparation d'un vélo — freins, chaîne, éclairage")!.id,
+      pointId: ptGarage.id,
+      buyerId: paul.id,
+      quantity: 1,
+      status: "commandee",
+      pickupAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+      note: "Les freins grincent depuis l'hiver.",
+    },
+    {
+      reference: "LOC-DEMO-2026-0005",
+      productId: productByName.get("Parcelle au potager partagé")!.id,
+      pointId: ptJardin.id,
+      buyerId: lucas.id,
+      quantity: 1,
+      status: "prete",
+      pickupAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      note: "Disponible le samedi matin.",
     },
   ]);
 
@@ -2111,6 +2257,52 @@ export async function seedLmaDemoIfEmpty(db: NodePgDatabase) {
   await enrich(lucas, { displayName: "Lucas", bio: "Profil volontairement non affiché sur la carte (exemple de discrétion).", activities: ["Étudiant", "Coup de main à vélo"], profileVisible: false });
   await enrich(amelie, { displayName: "Amélie — maraîchage", bio: "Maraîchère près de Nantes. Fiche fictive.", activities: ["Maraîchère"], universes: ["terre"], offersText: "Paniers de légumes, miel", profileVisible: true, profileCity: "Nantes", profileLat: "47.24", profileLng: "-1.53" });
 
+  // Fiches de circuit qui ont besoin d'un compte de démonstration créé ici :
+  // l'atelier de couture d'Odette, qui complète les artisans.
+  const [ptCouture] = await db
+    .insert(localPoints)
+    .values({
+      ownerId: odette.id,
+      kind: "artisan",
+      name: "L'Atelier d'Odette — couture et réparation",
+      description:
+        "Fiche fictive de démonstration. Ourlets, fermetures, boutons, retouches et réparations : on apporte le vêtement, on repart avec, souvent le jour même.",
+      city: "Chartres",
+      lat: "48.4701",
+      lng: "1.4612",
+      phone: "06 12 90 34 56",
+    })
+    .returning();
+  await db.insert(localProducts).values([
+    {
+      pointId: ptCouture.id,
+      name: "Ourlet ou retouche simple",
+      description: "Pantalon, robe, rideau : l'ourlet est repris à la machine, à la bonne longueur.",
+      category: "Couture",
+      price: "12.00",
+      unit: "la retouche",
+      stock: 10,
+    },
+    {
+      pointId: ptCouture.id,
+      name: "Réparation de vêtement — fermeture, boutons, doublure",
+      description: "On répare plutôt que de jeter. Devis de rien du tout, dit avant de commencer.",
+      category: "Couture",
+      price: "10.00",
+      unit: "la réparation",
+      stock: 12,
+    },
+    {
+      pointId: ptCouture.id,
+      name: "Atelier couture — apprendre les gestes de base",
+      description: "Deux heures avec vos mains et une machine : coudre un bouton, poser une fermeture, reprendre un ourlet.",
+      category: "Atelier",
+      price: "5.00",
+      unit: "la séance",
+      stock: 6,
+    },
+  ]);
+
   await db.insert(artistProfiles).values({
     userId: tom.id, disciplines: ["Musique", "Son et lumière"],
     presentation: "Duo acoustique guitare et accordéon : répertoire populaire, bals et veillées. (Fiche fictive de démonstration)",
@@ -2132,6 +2324,10 @@ export async function seedLmaDemoIfEmpty(db: NodePgDatabase) {
     mk(jean, { action: "vends", category: "produits_locaux", title: "Exemple · Farine paysanne T65 (sachet 2 kg)", description: "Blé de la ferme moulu à la meule de pierre. Retrait à la ferme.", condition: "neuf", priceMode: "prix", price: "4.80", quantity: 25, unit: "sachet", universes: ["terre"], city: "Chartres", lat: "48.45", lng: "1.50" }),
     mk(jean, { action: "cherche", category: "evenementiel", title: "Exemple · Je cherche une sono pour la fête d'été à la ferme", description: "Enceinte et micro pour environ 80 personnes, un samedi de l'été. Sans budget fixé : à discuter.", publicationType: "besoin", priceMode: "prix", universes: ["arts", "terre"], city: "Chartres", lat: "48.45", lng: "1.50" }),
     mk(tom.id, { action: "cherche", category: "lieux_espaces", title: "Exemple · Nous cherchons un lieu pour répéter", description: "Petit groupe de musique, répétitions le soir, environ 10 personnes.", publicationType: "besoin", priceMode: "prix", universes: ["arts"], city: "Chartres", lat: "48.44", lng: "1.52" }),
+    // Logements et hébergement (circuit « logements »).
+    mk(paul, { action: "loue", category: "logements", title: "Exemple · Chambre meublée chez l'habitant", description: "Chambre de 12 m² avec salle d'eau, dans une maison calme près du centre. Charges comprises, cuisine partagée. Fiche fictive de démonstration.", priceMode: "prix", price: "380.00", quantity: 1, unit: "le mois", universes: ["terre"], city: "Chartres", lat: "48.46", lng: "1.47", availableFrom: soon, availableUntil: until }),
+    mk(marie, { action: "loue", category: "logements", title: "Exemple · Gîte à la ferme, semaine ou week-end", description: "Ancienne grange aménagée, 4 personnes, cuisine et terrasse. Fiche fictive de démonstration : le tarif se confirme selon la saison.", priceMode: "prix", price: "260.00", quantity: 1, unit: "la semaine", universes: ["terre"], city: "Saint-Brieuc", lat: "48.52", lng: "-2.75", availableFrom: soon, availableUntil: until }),
+    mk(amelie ?? marie, { action: "loue", category: "logements", title: "Exemple · Colocation : une chambre à prendre", description: "Maison partagée à trois, jardin, chambre libre au premier étage. Fiche fictive de démonstration.", priceMode: "prix", price: "420.00", quantity: 1, unit: "le mois", universes: ["terre"], city: "Nantes", lat: "47.24", lng: "-1.53", availableFrom: soon, availableUntil: until }),
   ]);
 
   // ---- Projet partagé : fête d'été à la ferme
@@ -2243,6 +2439,30 @@ export async function seedCommunityDemoIfEmpty(db: NodePgDatabase) {
     tripId: trip.id, requesterId: jean, communityRequestId: request.id,
     description: "Exemple fictif : un petit panier de légumes.", status: "demandee",
   });
+
+  // Trajets de démonstration pour le circuit « transports ».
+  await db.insert(communityTrips).values([
+    {
+      ownerId: marie,
+      startCity: "Saint-Brieuc",
+      endCity: "Chartres",
+      startLat: "48.51", startLng: "-2.77", endLat: "48.45", endLng: "1.49",
+      departureAt: new Date(Date.now() + 9 * 86400000),
+      transportMode: "voiture", capacity: 3, availableCapacity: 2,
+      terms: "Exemple fictif : retour vers la Beauce, deux places et un peu de coffre.",
+      compensation: "5.00",
+    },
+    {
+      ownerId: amelie ?? marie,
+      startCity: "Nantes",
+      endCity: "Chartres",
+      startLat: "47.24", startLng: "-1.53", endLat: "48.45", endLng: "1.49",
+      departureAt: new Date(Date.now() + 12 * 86400000),
+      transportMode: "utilitaire", capacity: 6, availableCapacity: 4,
+      terms: "Exemple fictif : tournée de livraison, on partage les frais au prorata.",
+      compensation: "8.00",
+    },
+  ]);
   return true;
 }
 

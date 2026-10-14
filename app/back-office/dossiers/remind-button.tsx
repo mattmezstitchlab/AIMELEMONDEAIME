@@ -25,12 +25,12 @@ export function RemindButton({ caseId, compact = false }: { caseId: number; comp
       setState({ kind: "done" });
       router.refresh();
     } catch {
-      setState({ kind: "error", message: "La relance n'a pas abouti." });
+      setState({ kind: "error", message: "La relance n’a pas abouti." });
     }
   }
 
   if (state.kind === "done") {
-    return <span className="text-xs font-semibold text-emerald-700">Relance envoyée ✓</span>;
+    return <span className="text-xs font-semibold text-ink-2">Relance envoyée ✓</span>;
   }
 
   return (
@@ -39,11 +39,11 @@ export function RemindButton({ caseId, compact = false }: { caseId: number; comp
         type="button"
         onClick={() => void onClick()}
         disabled={state.kind === "busy"}
-        className={`rounded-lg bg-emerald-800 font-semibold text-white transition hover:bg-emerald-900 disabled:opacity-50 ${compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs"}`}
+        className={`rounded-control bg-ink font-semibold text-canvas transition hover:bg-ink-2 disabled:opacity-50 ${compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs"}`}
       >
         {state.kind === "busy" ? "Envoi…" : "Relancer le membre"}
       </button>
-      {state.kind === "error" && <span className="text-xs font-medium text-red-700">{state.message}</span>}
+      {state.kind === "error" && <span className="text-xs font-medium text-ink-2">{state.message}</span>}
     </span>
   );
 }

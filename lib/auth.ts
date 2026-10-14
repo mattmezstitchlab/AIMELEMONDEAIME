@@ -6,6 +6,8 @@ import { db } from "@/db";
 import { users, type Role } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getAuthSecret } from "@/lib/secret";
+import { redirect } from "next/navigation";
+import { AUTH_ENABLED, loginHref } from "@/lib/auth-mode";
 
 const COOKIE_NAME = "msa_session";
 
@@ -56,6 +58,10 @@ export async function clearSessionCookie() {
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
+  // Comptes désactivés : plus aucune session n'est reconnue, y compris un
+  // cookie encore présent dans un navigateur (révocation immédiate). La visite
+  // guidée, qui ne demande aucun identifiant, est le seul cas ouvert.
+  if (!AUTH_ENABLED && !(await getDemoSession())) return null;
   const store = await cookies();
   const token = store.get(COOKIE_NAME)?.value;
   if (!token) return null;
@@ -64,6 +70,22 @@ export async function getSession(): Promise<SessionPayload | null> {
     return payload as unknown as SessionPayload;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Session de visite guidée, reconnue même quand les comptes sont fermés : la
+ * visite ne crée pas de compte et n'ouvre que la lecture (voir proxy.ts).
+ */
+async function getDemoSession(): Promise<boolean> {
+  try {
+    const store = await cookies();
+    const token = store.get(COOKIE_NAME)?.value;
+    if (!token) return false;
+    const { payload } = await jwtVerify(token, secret);
+    return payload.demo === true;
+  } catch {
+    return false;
   }
 }
 
@@ -98,3 +120,31 @@ export async function requireRole(roles: Role[]) {
 }
 
 export class AuthError extends Error {}
+
+
+/**
+ * Variante de `getCurrentUser` pour les pages : elle ne rend jamais `null`.
+ *
+ * Les layouts et les pages se rendent en parallèle dans App Router : le
+ * `redirect()` du layout n’empêche pas la page de s’exécuter. Les pages qui
+ * affichent des données personnelles passent donc par ici — la redirection est
+ * posée au plus près de la donnée, et le code reste correct que
+ * l’authentification soit active ou non.
+ */
+export async function requireUserPage() {
+  const user = await getCurrentUser();
+  if (!user) redirect(loginHref());
+  return user;
+}
+
+/**
+ * Variante de `requireRole` pour les pages : la redirection remplace
+ * l’exception. Indispensable ici, car une page se rend en parallèle de son
+ * layout : sans ce contrôle au niveau de la page, une page d’administration
+ * pourrait lire la base avant que le layout n’ait redirigé.
+ */
+export async function requireRolePage(roles: Role[]) {
+  const user = await getCurrentUser();
+  if (!user || !roles.includes(user.role as Role)) redirect(loginHref());
+  return user;
+}

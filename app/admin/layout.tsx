@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { AppShell, type NavItem } from "@/components/app-shell";
+import { AUTH_ENABLED, loginHref } from "@/lib/auth-mode";
 
 const NAV: NavItem[] = [
   { href: "/admin", label: "Tableau de bord", icon: "dashboard", exact: true },
@@ -14,9 +15,10 @@ const NAV: NavItem[] = [
 ];
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
+  if (!AUTH_ENABLED) redirect(loginHref());
   const user = await getCurrentUser();
   if (!user || user.role !== "administrateur") {
-    redirect("/connexion");
+    redirect(loginHref());
   }
 
   return (

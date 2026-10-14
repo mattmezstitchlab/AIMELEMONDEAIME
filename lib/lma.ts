@@ -46,6 +46,7 @@ export const LISTING_CATEGORIES: Array<{ value: string; label: string; universes
   { value: "arts_rencontres", label: "Concerts, ateliers, prestations artistiques", universes: ["arts"] },
   { value: "lieux_espaces", label: "Lieux et espaces (répétition, salle, jardin)", universes: ["arts", "terre"] },
   { value: "savoirs_transmission", label: "Savoir-faire et transmission", universes: ["savoirs"] },
+  { value: "logements", label: "Logements et hébergement (chambre, gîte, colocation)", universes: ["terre"] },
 ];
 
 export function defaultUniverses(category: string): UniverseKey[] {

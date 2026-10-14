@@ -20,7 +20,7 @@ export function AssignButton({ caseId }: { caseId: number }) {
         })
       }
     >
-      {isPending ? "Affectation…" : "M'affecter ce dossier"}
+      {isPending ? "Affectation…" : "M’affecter ce dossier"}
     </SecondaryButton>
   );
 }

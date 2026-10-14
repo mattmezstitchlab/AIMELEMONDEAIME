@@ -17,13 +17,21 @@ export const metadata: Metadata = {
 function Unavailable() {
   return (
     <PublicPage solidHeader>
-      <main className="min-h-[65vh] bg-[#fafaf9] px-4 py-10 sm:px-6">
-        <div className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Accès temporaire</p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900">Cet accès n&apos;est plus disponible</h1>
-          <p className="mt-2 text-sm text-slate-600">Le lien a expiré, a été révoqué ou ne correspond pas à cette session. Contactez les personnes qui organisent le mariage pour recevoir une nouvelle invitation.</p>
-          <form action={leaveWeddingAccess} className="mt-5">
-            <button type="submit" className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Effacer cet accès de cet appareil</button>
+      <main className="grid min-h-[65vh] place-items-center bg-subtle px-5 py-12 sm:px-8">
+        <div className="w-full max-w-xl rounded-panel bg-canvas p-7 shadow-rested ring-1 ring-line">
+          <p className="eyebrow">Accès temporaire</p>
+          <h1 className="mt-3 text-2xl text-ink">Cet accès n’est plus disponible</h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink-3">
+            Le lien a expiré, a été révoqué ou ne correspond pas à cette session. Contactez les personnes qui organisent le mariage pour
+            recevoir une nouvelle invitation.
+          </p>
+          <form action={leaveWeddingAccess} className="mt-6">
+            <button
+              type="submit"
+              className="inline-flex h-10 items-center rounded-control bg-canvas px-4 text-sm font-medium text-ink-2 ring-1 ring-line transition hover:bg-subtle hover:text-ink"
+            >
+              Effacer cet accès de cet appareil
+            </button>
           </form>
         </div>
       </main>

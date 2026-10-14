@@ -6,6 +6,7 @@ import { AppShell, type NavItem } from "@/components/app-shell";
 import { db } from "@/db";
 import { notifications } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
+import { AUTH_ENABLED, loginHref } from "@/lib/auth-mode";
 
 const NAV: NavItem[] = [
   { href: "/espace", label: "Mon aperçu", icon: "home", exact: true },
@@ -14,23 +15,25 @@ const NAV: NavItem[] = [
   { href: "/espace/echanges", label: "Mes échanges & projets", icon: "echanges" },
   { href: "/espace/documents", label: "Mes documents", icon: "documents" },
   { href: "/espace/profil", label: "Mon profil", icon: "user" },
-  { href: "/le-monde-aime", label: "La carte", icon: "pin" },
+  { href: "/le-monde-aime", label: "Entraide et transmission", icon: "pin" },
 ];
 
 const MOBILE: NavItem[] = [
   { href: "/espace", label: "Mon espace", icon: "home", exact: true },
   { href: "/espace/demarches", label: "Démarches", icon: "demarches" },
   { href: "/espace/annee", label: "Année", icon: "calendar" },
-  { href: "/le-monde-aime", label: "Carte", icon: "pin" },
+  { href: "/le-monde-aime", label: "Entraide", icon: "pin" },
   { href: "/le-monde-aime?onglet=publier", label: "Publier", icon: "filePlus" },
   { href: "/espace/echanges", label: "Échanges", icon: "echanges" },
 ];
 
 export default async function EspaceLayout({ children }: { children: ReactNode }) {
+  // Comptes fermés : aucune requête n’est tentée, la porte unique répond.
+  if (!AUTH_ENABLED) redirect(loginHref());
   const user = await getCurrentUser();
-  if (!user || user.role !== "membre") redirect("/connexion");
+  if (!user || user.role !== "membre") redirect(loginHref());
   // Échéances de parcours proches : créer les notifications manquantes avant
-  // de compter les non-lues (ne doit jamais empêcher l'affichage de l'espace).
+  // de compter les non-lues (ne doit jamais empêcher l’affichage de l’espace).
   await ensureDeadlineNotifications(user.id).catch(() => 0);
   const unread = await db.select({ id: notifications.id }).from(notifications).where(and(eq(notifications.userId, user.id), eq(notifications.isRead, false)));
   return (

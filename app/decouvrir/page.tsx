@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { PublicPage } from "@/components/public-shell";
-import { Card, LinkButton } from "@/components/ui";
+import { PublicPage, PageColumn } from "@/components/public-shell";
+import { HeroCard, LinkRow, Panel, TileHeading } from "@/components/marketing/tiles";
 import { Icon } from "@/components/icon";
+import { Card, LinkButton, Notice } from "@/components/ui";
+import { BudgetMock, GuestListMock, WeddingDossierMock } from "@/components/marketing/mocks";
 import { loginAsDemo } from "@/lib/actions/auth";
+import { isDatabaseConfigured } from "@/db";
 
 export const metadata: Metadata = {
   title: "Découvrir Mon espace (visite guidée) — AIME®",
@@ -10,61 +13,106 @@ export const metadata: Metadata = {
 };
 
 const POINTS = [
-  { icon: "demarches", title: "Mes démarches", text: "Parcours guidés et dossiers suivis par l'équipe, réunis dans une seule liste." },
-  { icon: "echanges", title: "Mes échanges & projets", text: "Demandes sur la carte, projets, cercles privés et messages de votre bureau." },
+  { icon: "demarches", title: "Mes démarches", text: "Parcours guidés et dossiers suivis par l’équipe, réunis dans une seule liste." },
+  { icon: "echanges", title: "Mes échanges et projets", text: "Demandes d’entraide, projets, cercles privés et messages de votre bureau." },
   { icon: "documents", title: "Mes documents", text: "Vos pièces au même endroit, avec leurs partages contrôlés." },
   { icon: "user", title: "Mon profil", text: "Ce que vous proposez, cherchez ou transmettez près de chez vous." },
 ] as const;
 
 export default async function DecouvrirPage({ searchParams }: { searchParams: Promise<{ indisponible?: string }> }) {
   const sp = await searchParams;
+  const available = isDatabaseConfigured;
+
   return (
-    <PublicPage solidHeader>
-      <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-14">
-        <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Visite guidée</p>
-          <h1 className="mt-2 text-4xl font-bold leading-tight text-slate-900">Découvrez Mon espace, le vrai — en lecture seule.</h1>
-          <p className="mt-4 text-lg leading-relaxed text-slate-600">
-            Plus d&apos;aperçu recopié : ce bouton vous connecte à un <strong>compte de démonstration</strong> dans
-            l&apos;interface réelle. Vous pouvez tout parcourir ; les actions d&apos;écriture sont désactivées,
-            et les données affichées sont fictives.
-          </p>
+    <PublicPage>
+      <PageColumn className="flex flex-col gap-5 pt-4 sm:pt-6">
+        <HeroCard
+          eyebrow="Visite guidée · sans identifiant"
+          title="L’espace réel, en lecture seule."
+          subtitle="La visite ouvre un compte de démonstration dans l’interface réelle : vous parcourez tout, les écritures sont désactivées et les données affichées sont fictives."
+          image={{ src: "/images/hero-espace-portrait.webp", type: "image/webp" }}
+        />
+
+        <div className="action-row flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[1.6rem] leading-tight tracking-[-0.02em] text-ink" style={{ fontFamily: "var(--font-display)" }}>
+              Entrer dans la visite
+            </p>
+            <p className="mt-1 text-sm text-ink-3">Sans inscription ni mot de passe. Quittez à tout moment par « Se déconnecter ».</p>
+          </div>
+          <form action={loginAsDemo}>
+            <button
+              type="submit"
+              disabled={!available}
+              className="inline-flex h-12 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-canvas transition hover:opacity-90 disabled:opacity-40"
+            >
+              Commencer
+              <Icon name="arrow" className="h-4 w-4" />
+            </button>
+          </form>
         </div>
 
         {sp.indisponible && (
-          <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-            La visite guidée n&apos;est pas disponible : la base de données n&apos;est peut-être pas configurée ou le compte de démonstration n&apos;y a pas été créé.
-            Vous pouvez <a href="/inscription" className="font-bold underline">créer un compte</a> si la base est activée.
-          </p>
+          <Notice tone="warning">
+            La visite guidée n’est pas disponible : la base de données n’est peut-être pas configurée ou le compte de démonstration n’y a pas
+            été créé.
+          </Notice>
+        )}
+        {!available && !sp.indisponible && (
+          <Notice tone="warning">
+            La visite sera disponible dès que la base de données du site sera configurée.
+          </Notice>
         )}
 
-        <Card className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-          <div className="flex-1">
-            <p className="font-bold text-slate-900">Entrer dans la visite</p>
-            <p className="mt-1 text-sm text-slate-600">Sans inscription ni mot de passe. Quittez à tout moment par « Se déconnecter ».</p>
+        <Panel label="Aperçu" detail="Invités et réponses">
+          <div className="w-full">
+            <GuestListMock />
           </div>
-          <form action={loginAsDemo}>
-            <button type="submit" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-emerald-800 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-900">
-              Commencer la visite <Icon name="arrow" className="h-4 w-4" />
-            </button>
-          </form>
-        </Card>
+        </Panel>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {POINTS.map((p) => (
-            <Card key={p.title}>
-              <Icon name={p.icon} className="h-7 w-7 text-emerald-700" />
-              <p className="mt-2 font-bold text-slate-900">{p.title}</p>
-              <p className="mt-1 text-sm text-slate-600">{p.text}</p>
-            </Card>
-          ))}
+        <section className="mt-2">
+          <TileHeading>Ce que vous verrez dans l’espace.</TileHeading>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {POINTS.map((point) => (
+              <Card key={point.title} className="bg-subtle shadow-none ring-line-soft">
+                <span className="grid h-10 w-10 place-items-center rounded-control bg-muted">
+                  <Icon name={point.icon} className="h-5 w-5 text-ink" />
+                </span>
+                <p className="mt-4 text-[15px] text-ink">{point.title}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-3">{point.text}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+          <Panel label="Dossier civil" detail="Suivi">
+            <div className="w-full">
+              <WeddingDossierMock />
+            </div>
+          </Panel>
+          <Panel label="Budget estimé" detail="Par poste">
+            <div className="w-full">
+              <BudgetMock />
+            </div>
+          </Panel>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <LinkButton href="/inscription" variant="ghost">Créer mon compte gratuitement</LinkButton>
-          <LinkButton href="/connexion" variant="ghost">J&apos;ai déjà un compte</LinkButton>
-        </div>
-      </div>
+        <section className="mt-6">
+          <TileHeading>Et maintenant ?</TileHeading>
+          <div className="mt-3">
+            <LinkRow href="/accompagnement?besoin=mariage" title="Commencer un parcours mariage" meta="Démarches civiles, fête, après-union" />
+            <LinkRow href="/mon-espace" title="Ce que contiendra Mon espace" meta="Les comptes sont en préparation" />
+            <LinkRow href="/vision" title="Notre méthode et nos limites" meta="Ce qui fonctionne, ce qui reste à construire" />
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <LinkButton href="/accompagnement?besoin=mariage">
+              Ouvrir le parcours mariage
+              <Icon name="arrow" className="h-4 w-4" />
+            </LinkButton>
+          </div>
+        </section>
+      </PageColumn>
     </PublicPage>
   );
 }

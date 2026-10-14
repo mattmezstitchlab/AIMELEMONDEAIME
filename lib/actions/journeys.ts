@@ -13,6 +13,7 @@ import { logAudit } from "@/lib/audit";
 import { RULES_VERSION, SITUATION_BY_KEY, computeDueAt } from "@/lib/situations";
 import { generateCaseReference } from "@/lib/reference";
 import { redirect } from "next/navigation";
+import { loginHref } from "@/lib/auth-mode";
 
 export type JResult = { ok: true; message: string; id?: number } | { ok: false; error: string };
 const fail = (e: unknown, msg: string): JResult => (e instanceof AuthError ? { ok: false, error: "Connectez-vous avec un compte membre." } : { ok: false, error: msg });
@@ -496,7 +497,7 @@ export async function transmitJourneyToBureau(formData: FormData) {
   try {
     user = await requireRole(["membre"]);
   } catch {
-    redirect("/connexion");
+    redirect(loginHref());
   }
 
   const result = await transmitJourneyCore(journeyId, user!);

@@ -141,41 +141,10 @@ export async function getOfficeCases(officeId: number | null, filters?: { status
 }
 
 // ---------------------------------------------------------------------------
-// Carte de France : agences, production locale, disponibilités
+// Circuits : fiches de proximité (producteurs, associations) et coups de main
 // ---------------------------------------------------------------------------
 
-export type MapOffice = {
-  id: number;
-  name: string;
-  city: string;
-  postalCode: string;
-  address: string;
-  phone: string;
-  hours: string;
-  region: string;
-  lat: string | null;
-  lng: string | null;
-};
-
-export async function getMapOffices(): Promise<MapOffice[]> {
-  return db
-    .select({
-      id: offices.id,
-      name: offices.name,
-      city: offices.city,
-      postalCode: offices.postalCode,
-      address: offices.address,
-      phone: offices.phone,
-      hours: offices.hours,
-      region: offices.region,
-      lat: offices.lat,
-      lng: offices.lng,
-    })
-    .from(offices)
-    .orderBy(offices.region, offices.city);
-}
-
-export async function getMapLocalPoints() {
+export async function getLocalStructures() {
   const points = await db.select().from(localPoints).where(eq(localPoints.isActive, true)).orderBy(localPoints.createdAt);
   if (points.length === 0) return [];
   const ownerIds = Array.from(new Set(points.map((p) => p.ownerId)));
@@ -189,7 +158,7 @@ export async function getMapLocalPoints() {
   }));
 }
 
-export async function getMapAvailabilities() {
+export async function getAvailableHands() {
   const rows = await db
     .select()
     .from(workerAvailabilities)
@@ -197,12 +166,15 @@ export async function getMapAvailabilities() {
     .orderBy(workerAvailabilities.createdAt);
   if (rows.length === 0) return [];
   const ids = Array.from(new Set(rows.map((r) => r.userId)));
-  const people = await db.select({ id: users.id, fullName: users.fullName, situation: users.situation }).from(users).where(inArray(users.id, ids));
+  const people = await db
+    .select({ id: users.id, displayName: users.displayName, fullName: users.fullName, situation: users.situation, profileVisible: users.profileVisible })
+    .from(users)
+    .where(inArray(users.id, ids));
   const map = new Map(people.map((p) => [p.id, p]));
-  return rows.map((row) => ({ ...row, user: map.get(row.userId) ?? null }));
+  return rows.map((row) => ({ ...row, person: map.get(row.userId) ?? null }));
 }
 
-export async function getMemberLocalData(memberId: number) {
+export async function getMemberCircuitData(memberId: number) {
   const myPoints = await db.select().from(localPoints).where(eq(localPoints.ownerId, memberId)).orderBy(localPoints.createdAt);
   const pointIds = myPoints.map((p) => p.id);
   const products = pointIds.length
@@ -212,7 +184,7 @@ export async function getMemberLocalData(memberId: number) {
     ? await db.select({ id: localProducts.id }).from(localProducts).where(inArray(localProducts.pointId, pointIds))
     : [];
 
-  // Commandes passées par le membre
+  // Réservations passées par le membre (le retrait se fait sur place)
   const purchases = await db
     .select({
       id: localOrders.id,
@@ -233,7 +205,7 @@ export async function getMemberLocalData(memberId: number) {
     .where(eq(localOrders.buyerId, memberId))
     .orderBy(desc(localOrders.createdAt));
 
-  // Commandes reçues sur les points du membre
+  // Réservations reçues sur les fiches du membre
   const sales = pointIds.length
     ? await db
         .select({

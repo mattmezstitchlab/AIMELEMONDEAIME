@@ -22,6 +22,45 @@ import { distanceKm, needStatusFromRequest } from "@/lib/lma";
 const firstName = (full: string) => full.split(" ")[0];
 const publicName = (display: string | null, full: string) => display ?? firstName(full);
 
+/**
+ * Les personnes qui acceptent de transmettre, et seulement elles.
+ *
+ * Un circuit a besoin de cette liste courte : profil public, commune située, et
+ * un mot sur ce qui est transmis. Rien d'autre ne sort d'ici.
+ */
+export async function getTransmitters() {
+  const rows = await db.select({
+    id: users.id,
+    displayName: users.displayName,
+    fullName: users.fullName,
+    bio: users.bio,
+    activities: users.activities,
+    universes: users.universes,
+    transmitText: users.transmitText,
+    availabilityNote: users.availabilityNote,
+    city: users.profileCity,
+    isDemo: users.isDemo,
+  }).from(users).where(and(
+    eq(users.profileVisible, true),
+    eq(users.isActive, true),
+    eq(users.role, "membre"),
+    isNotNull(users.transmitText),
+    isNotNull(users.profileLat),
+    isNotNull(users.profileLng),
+  ));
+
+  const ids = rows.map((row) => row.id);
+  const photos = ids.length
+    ? await db.select({ id: profilePhotos.userId }).from(profilePhotos).where(inArray(profilePhotos.userId, ids))
+    : [];
+
+  return rows.map(({ displayName, fullName, ...person }) => ({
+    ...person,
+    name: publicName(displayName, fullName),
+    hasPhoto: photos.some((photo) => photo.id === person.id),
+  }));
+}
+
 /** Données publiques de la carte : personnes visibles volontairement, projets ouverts, récits publiés. */
 export async function getExplorerExtras() {
   const peopleRows = await db.select({

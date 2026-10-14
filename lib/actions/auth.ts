@@ -4,6 +4,7 @@ import { db, isDatabaseConfigured } from "@/db";
 import { users, type Role } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { hashPassword, verifyPassword, setSessionCookie, DEMO_ACCOUNT_EMAIL } from "@/lib/auth";
+import { AUTH_ENABLED, AUTH_DISABLED_NOTICE } from "@/lib/auth-mode";
 import { loginSchema, registerSchema, parseOrError } from "@/lib/validation";
 import { clientIp, hitRateLimit, clearRateLimit } from "@/lib/rate-limit";
 import { logAudit } from "@/lib/audit";
@@ -26,6 +27,7 @@ function safeDestination(value: FormDataEntryValue | null, role: Role): string {
 }
 
 export async function loginAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  if (!AUTH_ENABLED) return { ok: false, error: AUTH_DISABLED_NOTICE };
   if (!isDatabaseConfigured) return { ok: false, error: "Connexion indisponible : la base de données du site n'est pas configurée." };
   const parsed = parseOrError(loginSchema, {
     email: String(formData.get("email") || ""),
@@ -61,6 +63,7 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
 }
 
 export async function registerAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  if (!AUTH_ENABLED) return { ok: false, error: AUTH_DISABLED_NOTICE };
   if (!isDatabaseConfigured) return { ok: false, error: "Inscription indisponible : la base de données du site n'est pas configurée." };
   const raw = {
     fullName: String(formData.get("fullName") || ""),

@@ -1,67 +1,78 @@
 import Link from "next/link";
-import { PublicPage } from "@/components/public-shell";
-import { Hero, LinkButton, Tag } from "@/components/ui";
+import { PublicPage, PageColumn } from "@/components/public-shell";
+import { HeroCard, ActionRow, Panel, LinkRow, TileHeading } from "@/components/marketing/tiles";
 import { Icon } from "@/components/icon";
+import { LinkButton } from "@/components/ui";
+import { BudgetMock, GuestListMock, RolesMock, WeddingDossierMock, TimelineMock, ChecklistMock, TransmissionsMock } from "@/components/marketing/mocks";
 import { db, isDatabaseConfigured } from "@/db";
 import { articles } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
-import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
+import { ARTICLE_CATEGORY_LABELS } from "@/lib/constants";
+import { openCircuits } from "@/lib/circuits";
 
 export const dynamic = "force-dynamic";
 
 type ArticleRow = typeof articles.$inferSelect;
 
-const PROJECT_FEATURES = [
-  {
-    icon: "users" as const,
-    title: "Invités et RSVP",
-    text: "Suivez les réponses foyer par foyer. Chaque lien RSVP est limité au foyer concerné, temporaire et révocable.",
-  },
-  {
-    icon: "shield" as const,
-    title: "Proches organisateurs",
-    text: "Donnez à chaque proche un accès limité au projet et au rôle confié, avec un lien temporaire que vous pouvez révoquer.",
-  },
-  {
-    icon: "calendar" as const,
-    title: "Budget et jour J",
-    text: "Rassemblez les devis, le programme, les contributions et le plan de table ; retrouvez une page du jour J à consulter ou imprimer.",
-  },
+/*
+ * Page d'accueil : le récit d'abord, la mécanique ensuite.
+ *
+ * L'idée tient en trois temps. Les familles se sont éclatées, les liens se sont
+ * distendus, et ce qui se transmettait de génération en génération s'est perdu.
+ * On commence par le mariage parce que c'est le moment où deux histoires se
+ * rejoignent, où l'on voit précisément ce qu'on veut se passer — un nom, une
+ * maison, une terre, un savoir-faire. AIME® prend les choses en main : le
+ * dossier civil, les proches, la fête, puis ce qui se transmet autour.
+ */
+
+/** Les trois engagements qui tiennent toute la page — et rien de plus. */
+const PROMISES = [
+  "Prototype indépendant : aucun organisme, aucune administration ne décide ici.",
+  "Vos données restent les vôtres : rien n’est transmis sans votre accord.",
+  "Les démarches officielles se font en mairie ; AIME® donne des repères, jamais de décision.",
 ];
 
-const PHASES = [
+const STEPS = [
   {
     number: "01",
-    icon: "calendar" as const,
-    title: "D’abord, les démarches à la mairie",
-    text: "Date, commune, dossier civil, pièces et délais : vérifiez les modalités directement auprès de votre mairie.",
-    href: "/accompagnement?besoin=mariage",
-    linkLabel: "Commencer le parcours",
+    title: "Le dossier civil, d’abord",
+    text: "Date, commune, pièces, témoins, publication des bans : un fil unique pour ne rien relancer.",
+    mock: <WeddingDossierMock />,
   },
   {
     number: "02",
-    icon: "heart" as const,
-    title: "La fête, si vous en souhaitez une",
-    text: "En parallèle du civil, choisissez librement ce qui vous convient : lieu, repas, musique, photos ou aucune réception.",
-    href: "#projet-mariage",
-    linkLabel: "Voir les options facultatives",
+    title: "La fête, si vous en voulez une",
+    text: "Réception, repas, musique, photos — ou rien du tout. Aucune option n’est obligatoire.",
+    mock: <GuestListMock />,
   },
   {
     number: "03",
-    icon: "users" as const,
     title: "Le jour J et les proches",
-    text: "Si vous le souhaitez, coordonnez invités, réponses, programme, budget et coups de main dans un projet partagé.",
-    href: "#projet-mariage",
-    linkLabel: "Découvrir l’espace de préparation",
+    text: "Rôles limités pour la coordination et les témoins, révocables à tout moment.",
+    mock: <RolesMock />,
   },
-  {
-    number: "04",
-    icon: "refresh" as const,
-    title: "Après l’union",
-    text: "Retrouvez les repères utiles après le mariage, à adapter à votre situation et à vérifier auprès des organismes concernés.",
-    href: "/informations/mariage",
-    linkLabel: "Voir les guides mariage",
-  },
+];
+
+/** Ce qui se perd quand une famille se sépare — la raison d’être du reste. */
+const FRACTURES = [
+  "Des fermes s’arrêtent faute de repreneur identifié.",
+  "Des ateliers ferment avec des gestes que personne n’a appris.",
+  "Des aînés ont quelque chose à passer, et plus personne à qui le passer.",
+];
+
+const WEDDING_GUIDES_FALLBACK = [
+  { href: "/informations/mariage", title: "Se marier : par où commencer", meta: "Guide pratique · dossier civil" },
+  { href: "/accompagnement?besoin=mariage", title: "Témoins, pièces et délais", meta: "Repères à vérifier en mairie" },
+  { href: "/informations/famille", title: "Après l’union : les démarches", meta: "Livret de famille, organismes à prévenir" },
+];
+
+const THEMES = [
+  { href: "/le-monde-aime?univers=savoirs", title: "Transmettre un savoir-faire", meta: "Ce qui cherche à être repris ou appris" },
+  { href: "/le-monde-aime?univers=terre", title: "Terre et quotidien", meta: "Producteurs, dons, prêts, trajets" },
+  { href: "/le-monde-aime?univers=arts", title: "Arts et rencontres", meta: "Ateliers, concerts, lieux de répétition" },
+  { href: "/informations/famille", title: "Famille et naissance", meta: "Allocations, mariage, Pacs" },
+  { href: "/informations/retraite", title: "Retraite et transmission", meta: "Relevé, demande, repreneur" },
+  { href: "/informations/argent", title: "Argent et difficultés", meta: "Factures, loyer, crédits" },
 ];
 
 async function getWeddingGuides(): Promise<ArticleRow[]> {
@@ -72,33 +83,10 @@ async function getWeddingGuides(): Promise<ArticleRow[]> {
       .from(articles)
       .where(and(eq(articles.category, "mariage"), eq(articles.isPublished, true)))
       .orderBy(desc(articles.publishedAt))
-      .limit(3);
+      .limit(4);
   } catch {
     return [];
   }
-}
-
-function ArticleCard({ article }: { article: ArticleRow }) {
-  return (
-    <Link href={`/guides/${article.slug}`} className="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.05] transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="h-44 overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={THEME_META[article.category]?.image ?? "/images/hero-mariage.jpg"}
-          alt=""
-          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-        />
-      </div>
-      <div className="p-6">
-        <Tag>{article.kind === "guide" ? "Guide pratique" : ARTICLE_CATEGORY_LABELS[article.category] ?? "Mariage"}</Tag>
-        <h3 className="mt-4 text-lg font-bold leading-snug text-slate-900">{article.title}</h3>
-        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600">{article.summary}</p>
-        <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
-          Lire le guide<Icon name="arrow" className="h-4 w-4 transition group-hover:translate-x-1" />
-        </span>
-      </div>
-    </Link>
-  );
 }
 
 export default async function HomePage() {
@@ -106,122 +94,204 @@ export default async function HomePage() {
 
   return (
     <PublicPage>
-      <Hero
-        size="xl"
-        image="/images/hero-mariage.jpg"
-        gradient="wedding"
-        eyebrow="AIME® · MARIAGE"
-        title={<>Votre mariage,<br />étape par étape.</>}
-        subtitle="D’abord les démarches civiles. Puis, si vous le souhaitez, la fête et sa coordination. Enfin, les repères après l’union."
-        actions={
-          <>
-            <LinkButton href="/accompagnement?besoin=mariage">
-              Commencer le parcours mariage<Icon name="arrow" className="h-4 w-4" />
-            </LinkButton>
-            <LinkButton href="#etapes-mariage" variant="ghost">Voir les étapes</LinkButton>
-          </>
-        }
-      >
-        <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/80">
-          Cérémonie civile seule ou journée de fête : vous choisissez les étapes qui vous concernent. AIME® ne transmet rien à une mairie et n’effectue aucune réservation ni paiement.
-        </p>
-      </Hero>
+      <PageColumn className="flex flex-col gap-4 pt-4 sm:gap-5 sm:pt-6">
+        <HeroCard
+          title="Le fil s’était perdu. On le reprend."
+          subtitle="Les familles se sont éclatées, les transmissions se sont arrêtées, les campagnes se sont vidées. AIME® prend les choses en main — et tout commence par un mariage, le moment où deux histoires décident de ce qu’elles se passent."
+          image={{ src: "/images/hero-mariage-portrait.webp", type: "image/webp" }}
+        />
 
-      <section id="etapes-mariage" className="bg-white scroll-mt-20">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-600">Le parcours mariage, dans l’ordre</p>
-            <h2 className="mt-3 text-3xl font-bold leading-tight text-[#1d1d1f] sm:text-4xl">Du dossier civil aux suites de l’union.</h2>
-            <p className="mt-4 text-base leading-relaxed text-slate-600">
-              Commencez par la mairie, ajoutez seulement les options de fête qui vous correspondent, puis retrouvez les repères pour le jour J et l’après-mariage.
+        <ActionRow
+          title="Commencer par mon mariage"
+          hint="Dossier civil, invités, budget, jour J — puis ce qui se transmet"
+          href="/accompagnement?besoin=mariage"
+          label="Commencer"
+        />
+
+        <ActionRow
+          title="Créer un espace privé"
+          hint="Votre dossier, vos proches, vos échanges. Les comptes ouvrent bientôt."
+          href="/mon-espace"
+          label="Ouvrir"
+        />
+
+        <ul className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+          {PROMISES.map((promise) => (
+            <li key={promise} className="flex items-start gap-2.5 rounded-card bg-subtle p-4 ring-1 ring-line-soft">
+              <Icon name="check" className="mt-0.5 h-4 w-4 shrink-0 text-ink" />
+              <p className="text-[13px] leading-relaxed text-ink-2">{promise}</p>
+            </li>
+          ))}
+        </ul>
+
+        <section className="mt-8">
+          <TileHeading>Pourquoi commencer par un mariage.</TileHeading>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <p className="text-sm leading-relaxed text-ink-2">
+              Parce que c’est le seul moment où une famille décide de ce qu’elle devient. Deux histoires se rejoignent, deux
+              territoires aussi : un nom, une maison, parfois une exploitation, et des savoir-faire qui attendent d’être repris.
+            </p>
+            <p className="text-sm leading-relaxed text-ink-3">
+              Commencez par la mairie. La fête, les prestataires et les services autour ne sont jamais des conditions pour avancer.
             </p>
           </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {PHASES.map((phase) => (
-              <Link key={phase.number} href={phase.href} className="group rounded-2xl bg-[#fafaf9] p-6 transition hover:bg-white hover:shadow-lg hover:ring-1 hover:ring-slate-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold tracking-[0.16em] text-slate-500">ÉTAPE {phase.number}</span>
-                  <Icon name={phase.icon} className="h-6 w-6 text-slate-700" />
-                </div>
-                <h3 className="mt-5 text-xl font-bold text-slate-900">{phase.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{phase.text}</p>
-                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  {phase.linkLabel}<Icon name="arrow" className="h-4 w-4 transition group-hover:translate-x-1" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="projet-mariage" className="scroll-mt-20 bg-[#fafaf9]">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="max-w-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-600">Votre espace de préparation</p>
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[#1d1d1f] sm:text-4xl">Tout au même endroit, chacun·e à sa juste place.</h2>
-              <p className="mt-4 text-base leading-relaxed text-slate-600">
-                Si vous préparez une fête, le projet partagé aide à coordonner les invités et les proches, du premier RSVP au jour J. La cérémonie civile seule reste un parcours complet.
-              </p>
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+          {STEPS.map((step, index) => (
+            <Panel key={step.number} label={step.title} detail={step.number} wide={index === 0}>
+              <div className="w-full">{step.mock}</div>
+            </Panel>
+          ))}
+          <Panel label="Après l’union" detail="04">
+            <div className="w-full px-1 py-2">
+              <ChecklistMock
+                items={[
+                  { label: "Livret de famille remis", done: true },
+                  { label: "Organismes à prévenir" },
+                  { label: "Changement de nom, si souhaité" },
+                  { label: "Ce qui se transmet, à décider ensemble" },
+                ]}
+              />
             </div>
-            <LinkButton href="/accompagnement?besoin=mariage">
-              Préparer mon mariage<Icon name="arrow" className="h-4 w-4" />
+          </Panel>
+        </div>
+
+        <section className="mt-10 rounded-card bg-subtle p-6 ring-1 ring-line-soft sm:p-8">
+          <TileHeading>Ce qui se perd quand les familles se séparent.</TileHeading>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-2">
+            Ce ne sont pas seulement des liens qui se cassent. Ce sont des transmissions qui n’ont pas lieu : des fermes sans
+            repreneur, des ateliers qui ferment, des gestes que personne n’a appris, des aînés qui ne trouvent plus à qui passer
+            le relais. En France, un tiers des exploitants agricoles n’ont pas identifié de repreneur dans les trois ans qui
+            précèdent leur retraite.
+          </p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-3">
+            {FRACTURES.map((line) => (
+              <li key={line} className="rounded-card bg-canvas p-4 text-[13px] leading-relaxed text-ink-2 ring-1 ring-line">
+                {line}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <LinkButton href="/le-monde-aime?univers=savoirs">
+              Explorer les transmissions
+              <Icon name="arrow" className="h-4 w-4" />
+            </LinkButton>
+            <LinkButton href="/vision" variant="secondary">
+              Notre méthode
             </LinkButton>
           </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {PROJECT_FEATURES.map((feature) => (
-              <article key={feature.title} className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-                <Icon name={feature.icon} className="h-7 w-7 text-slate-700" />
-                <h3 className="mt-4 text-lg font-bold text-slate-900">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{feature.text}</p>
-              </article>
-            ))}
-          </div>
-          <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-slate-500">
-            <Icon name="lock" className="mt-0.5 h-4 w-4 shrink-0" />
-            Vos réponses au parcours et vos documents personnels restent privés : les invités et les proches organisateurs n’y ont pas accès. AIME® ne réserve, ne paie et ne transmet rien à votre place.
+        </section>
+
+        <section className="mt-8">
+          <TileHeading>Ce qu’on remet en circulation.</TileHeading>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-3">
+            Tout se parcourt en listes claires, commune par commune : ce qui cherche à être repris, appris, prêté ou donné. Pas
+            de carte à déplacer, pas d’adresse à publier — votre commune suffit.
           </p>
-        </div>
-      </section>
+        </section>
 
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-16 text-center lg:px-8 lg:py-20">
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-600">À votre rythme</p>
-          <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-bold leading-tight text-[#1d1d1f] sm:text-4xl">Commencez par la prochaine étape, pas par tout le reste.</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600">Le parcours garde le fil du dossier civil, des options de fête que vous choisissez et des repères après l’union.</p>
-          <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <LinkButton href="/accompagnement?besoin=mariage">Commencer le parcours mariage<Icon name="arrow" className="h-4 w-4" /></LinkButton>
-            <LinkButton href="/informations/mariage" variant="ghost">Lire les guides mariage</LinkButton>
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+          <Panel label="Transmissions en cours" detail="Communes voisines">
+            <TransmissionsMock />
+          </Panel>
+          <Panel label="Budget et contributions" detail="Suivi par poste">
+            <div className="w-full">
+              <BudgetMock />
+            </div>
+          </Panel>
         </div>
-      </section>
 
-      {weddingGuides.length > 0 && (
-        <section className="bg-[#fafaf9]">
-          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="flex flex-wrap items-end justify-between gap-6">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-600">Pour aller plus loin</p>
-                <h2 className="mt-3 text-3xl font-bold text-[#1d1d1f] sm:text-4xl">Guides pratiques pour le mariage.</h2>
-              </div>
-              <Link href="/informations/mariage" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 underline underline-offset-4">
-                Tous les guides<Icon name="arrow" className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="mt-9 grid gap-6 md:grid-cols-3">
-              {weddingGuides.map((article) => <ArticleCard key={article.id} article={article} />)}
-            </div>
+        <ActionRow
+          title="Se relier autour de soi"
+          hint="Propositions, besoins, trajets, projets et personnes"
+          href="/le-monde-aime"
+          label="Explorer"
+        />
+
+        <section className="mt-8">
+          <TileHeading>Le rétroplanning.</TileHeading>
+          <div className="mt-4 rounded-card bg-subtle p-6 ring-1 ring-line-soft">
+            <TimelineMock />
           </div>
         </section>
-      )}
 
-      <section className="border-t border-black/[0.06] bg-white">
-        <div className="mx-auto max-w-4xl px-6 py-12 text-center">
-          <p className="text-xs leading-relaxed text-slate-500">
-            AIME® est un prototype indépendant. Les démarches officielles dépendent notamment de votre situation et de votre mairie ; vérifiez toujours les informations auprès des sources officielles. AIME® n’est affilié à aucun organisme et n’effectue aucune réservation, déclaration ou transaction.
+        <section className="mt-8">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <TileHeading>Guides pratiques.</TileHeading>
+            <Link href="/informations" className="nav-tiny text-ink-3 transition hover:text-ink">
+              Tous les guides
+            </Link>
+          </div>
+          <div className="mt-3">
+            {weddingGuides.length > 0
+              ? weddingGuides.map((article) => (
+                  <LinkRow
+                    key={article.id}
+                    href={`/guides/${article.slug}`}
+                    title={article.title}
+                    meta={`${article.kind === "guide" ? "Guide pratique" : "Article"} · ${ARTICLE_CATEGORY_LABELS[article.category] ?? "Mariage"}`}
+                  />
+                ))
+              : WEDDING_GUIDES_FALLBACK.map((guide) => (
+                  <LinkRow key={guide.title} href={guide.href} title={guide.title} meta={guide.meta} />
+                ))}
+          </div>
+        </section>
+
+        <section className="mt-8">
+          <TileHeading>Par sujet de vie.</TileHeading>
+          <div className="mt-3">
+            {THEMES.map((theme) => (
+              <LinkRow key={theme.title} href={theme.href} title={theme.title} meta={theme.meta} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-8">
+          <TileHeading>Les circuits.</TileHeading>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-3">
+            Une ferme, un atelier, une association, un logement, un trajet, une mémoire à transmettre : chaque circuit
+            cadre un type de fiche, avec ses mots, ses règles et son tableau. Partout la même règle : votre commune suffit, aucune adresse n&apos;est publiée, et rien
+            ne se conclut sans l&apos;accord des personnes.
           </p>
-        </div>
-      </section>
+          <div className="mt-3">
+            {openCircuits().map((circuit) => (
+              <LinkRow key={circuit.key} href={`/circuits/${circuit.key}`} title={circuit.label} meta={circuit.tagline} />
+            ))}
+            <LinkRow href="/circuits" title="Tous les circuits" meta="Les sept, ce qu’ils ouvrent, et la règle commune : votre commune suffit, rien ne se conclut sans accord." />
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-card bg-subtle p-7 text-center ring-1 ring-line-soft sm:p-10">
+          <h2 className="text-[2rem] leading-tight tracking-[-0.02em] text-ink">Commencez par un mariage. Le reste suivra.</h2>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-3">
+            Le parcours garde le fil du dossier civil, des proches, de la fête si vous en voulez une — et de ce que vous décidez
+            de transmettre.
+          </p>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-ink-3">
+            Autour du mariage, les circuits prennent le relais : les{" "}
+            <Link href="/circuits/producteurs" className="underline">producteurs</Link> pour le repas, les{" "}
+            <Link href="/circuits/artisans" className="underline">artisans</Link> pour les retouches et les réparations, les{" "}
+            <Link href="/circuits/logements" className="underline">logements</Link> et les{" "}
+            <Link href="/circuits/transports" className="underline">trajets</Link> pour les invités qui viennent de loin — puis la{" "}
+            <Link href="/circuits/transmission" className="underline">transmission</Link> pour ce qui se passe après.
+          </p>
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
+            <LinkButton href="/accompagnement?besoin=mariage" size="lg">
+              Commencer le parcours mariage
+              <Icon name="arrow" className="h-4 w-4" />
+            </LinkButton>
+            <LinkButton href="/informations/mariage" variant="secondary" size="lg">
+              Lire les guides mariage
+            </LinkButton>
+          </div>
+          <p className="mt-6 text-sm text-ink-3">
+            Envie de voir d’abord tout ce qu’on peut faire ici ?{" "}
+            <Link href="/le-tour" className="font-semibold text-ink underline">Le tour du site, en cinq temps</Link>.
+          </p>
+        </section>
+      </PageColumn>
     </PublicPage>
   );
 }

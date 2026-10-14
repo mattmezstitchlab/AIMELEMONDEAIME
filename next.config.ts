@@ -1,9 +1,25 @@
 import type { NextConfig } from "next";
 
+/**
+ * Cadres autorisés à afficher le site dans une iframe.
+ *
+ * Par défaut : uniquement notre propre origine (`'self'`), ce qui est la
+ * politique attendue en production. Pour une prévisualisation hébergée dans un
+ * cadre tiers (recette, environnement de démonstration), on peut lister les
+ * origines autorisées dans `PREVIEW_FRAME_ANCESTORS` — la politique stricte
+ * reste appliquée si la variable est vide.
+ */
+const previewFrameAncestors = (process.env.PREVIEW_FRAME_ANCESTORS ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const frameAncestors = ["'self'", ...previewFrameAncestors].join(" ");
+
 /** En-têtes de sécurité appliqués à toutes les réponses. */
-const SECURITY_HEADERS = [
+const SECURITY_HEADERS: Array<{ key: string; value: string }> = [
   { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  ...(previewFrameAncestors.length === 0 ? [{ key: "X-Frame-Options", value: "SAMEORIGIN" }] : []),
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
   {
@@ -15,7 +31,7 @@ const SECURITY_HEADERS = [
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
       "connect-src 'self'",
-      "frame-ancestors 'self'",
+      `frame-ancestors ${frameAncestors}`,
       "base-uri 'self'",
       "form-action 'self'",
     ].join("; "),
@@ -39,7 +55,7 @@ const nextConfig: NextConfig = {
       { source: "/le-monde-aime/profil", destination: "/espace/profil", permanent: false },
       { source: "/le-monde-aime", has: [{ type: "query", key: "onglet", value: "liens" }], destination: "/espace/echanges", permanent: false },
       { source: "/espace/projets", destination: "/espace/echanges", permanent: false },
-      // Simplification « une porte par besoin » : anciennes portes d'information → /informations et la carte.
+      // Simplification « une porte par besoin » : anciennes portes d'information → /informations et Le Monde Aime.
       { source: "/s-informer", destination: "/informations", permanent: true },
       { source: "/guides", destination: "/informations?vue=guides", permanent: true },
       { source: "/univers/terre", destination: "/le-monde-aime?univers=terre", permanent: true },

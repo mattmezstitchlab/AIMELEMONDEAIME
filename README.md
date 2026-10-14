@@ -1,10 +1,96 @@
 # AIME® — Le Monde Aime
 
-« La terre, les arts et les générations. » Plateforme indépendante qui réunit informations du quotidien,
-accompagnement des démarches, et mise en relation locale (personnes, producteurs, artistes, associations).
+« Le fil s'était perdu. On le reprend. » Plateforme indépendante qui réunit les informations du quotidien,
+l'accompagnement des démarches — à commencer par le mariage — et la mise en relation locale (personnes,
+producteurs, artistes, associations, transmissions entre générations).
 **Prototype — non affilié à un organisme public.**
 
 Stack : Next.js 16 (App Router, Server Actions) · React 19 · TypeScript · PostgreSQL via Drizzle ORM · Tailwind CSS 4.
+
+## Design — encre et papier, une seule surface
+
+Le site est **monochrome** : aucune couleur décorative. Fond blanc, une seule colonne centrée
+sur le site public, cartes blanches cerclées d'un filet, boutons noirs en pilule, capitales
+minuscules pour la navigation. Le rythme vient des surfaces (`canvas`, `subtle`, `muted`) et
+des contours (`line`, `line-soft`), jamais de la teinte. Cette règle vaut pour tout le site,
+y compris les espaces de travail (Mon espace, back-office, administration).
+
+Aucune couleur ne subsiste, y compris pour les états : un avancement, une alerte ou une
+information se lisent au **contraste** (fond encre, fond gris, filet) et à l'icône
+(`components/ui.tsx`, encarts `Notice` : les tons `info`, `success`, `warning`, `danger`,
+`neutral` expriment une intention, plus une teinte).
+
+- **Palette.** Échelle de gris calibrée définie dans `app/globals.css` (`--color-canvas`,
+  `--color-subtle`, `--color-muted`, `--color-ink`…`--color-ink-4`, `--color-line`).
+  Aucune classe chromatique (`bg-rose-*`, `text-sky-*`, `bg-slate-*`…) ne subsiste dans le
+  projet ; tout passe par ces jetons.
+- **Deux familles typographiques.** *Cal Sans* (display, un seul poids) pour les titres,
+  *Inter* pour tout le texte d'interface. Les deux sont **auto-hébergées** dans `public/fonts/`
+  (aucune requête vers un tiers, compatible avec la CSP `font-src 'self'`). Cal Sans est
+  distribuée sous SIL Open Font License — voir `public/fonts/CalSans-OFL.txt`.
+- **Contenants.** Rayons 8 px (contrôles) et 12-16 px (conteneurs) ; les blocs sont délimités
+  par un **anneau** discret et une ombre courte plutôt que par une bordure lourde. Les
+  arguments marketing montrent de vrais fragments d'interface (`components/marketing/mocks.tsx`)
+  plutôt que des illustrations.
+- **Partage et indexation.** `public/og.png` sert d'aperçu de partage (image générée, encre
+  sur papier), déclarée dans `app/layout.tsx` avec `metadataBase`. `app/sitemap.ts` liste les
+  pages publiques, `app/robots.ts` écarte les espaces privés et les liens à jeton. Les deux
+  s'appuient sur `NEXT_PUBLIC_SITE_URL` (voir `.env.example`), à définir en production.
+- **Points d'entrée.** `app/globals.css` porte les jetons et les polices ; `components/ui.tsx`
+  porte les primitives (boutons, cartes, champs, pastilles) ; `components/marketing/tiles.tsx`
+  porte les briques du site public (`HeroCard`, `ActionRow`, `Panel`, `LinkRow`) ;
+  `components/public-shell.tsx` porte l'en-tête et le pied de page.
+
+### Pas de carte interactive : la commune suffit
+
+La carte de France a été retirée. Tout se parcourt **en listes** (filtres par univers, type,
+commune, distance, date) dans `/le-monde-aime`.
+
+Le point d'une publication reste obligatoire en base (`lat`/`lng` `numeric(8,2)`), mais il
+n'est plus choisi à la main : il est **déduit de la commune et du code postal** par
+`lib/point.ts` (centre du département via `lib/departements.ts`, puis décalage stable calculé
+sur le nom de la commune, borné à la France métropolitaine). Le code postal est conservé avec
+le nom de la commune (« Chartres (28000) »), sans changement de schéma. Les actions serveur
+acceptent toujours un point explicite : c'est la porte laissée ouverte pour un affinage
+ultérieur (« affiner le point plus tard »).
+
+Les préférences d'affichage (taille du texte, contraste, animations) sont posées
+sur `<html>` (`data-text-scale`, `data-contrast`, `data-motion`) et lues par
+`app/globals.css`.
+
+### Les circuits — un cadre réutilisable
+
+Un **circuit** est un cadre de confiance autour d'un même geste : on dépose une fiche située
+par sa commune, on dit ce qu'on propose, et l'accord se fait entre les personnes. Le
+catalogue vit dans `lib/circuits.ts` : chaque entrée porte ses mots (fiche, produit,
+réservation), ses étapes, ses garanties, ses limites et **son tableau** (`structures` —
+fiches et propositions —, `hands` — disponibilités —, `annonces`, `trajets` ou `personnes`).
+Les pages sont génériques : `app/circuits/page.tsx` (index) et `app/circuits/[key]/page.tsx`
+(un circuit, en listes). Un tableau = un composant : `components/circuits/circuit-board.tsx`
+(structures et coups de main), `circuit-listings.tsx` (annonces), `circuit-trips.tsx`
+(trajets), `circuit-people.tsx` (personnes), plus `circuit-forms.tsx` (dépôt d'une fiche,
+ajout d'une ligne, réservation, statuts, disponibilité). Les actions correspondantes vivent
+dans `lib/actions/circuits.ts` et servent tous les circuits : le circuit visé arrive en clair
+dans le formulaire.
+
+Circuits ouverts aujourd'hui : **producteurs** (`local_points.kind = "producteur"`, avec
+`local_products` et `local_orders`), **coups de main** (`worker_availabilities`),
+**associations et collectifs** (`local_points.kind = "association"`), **artisans**
+(`local_points.kind = "artisan"`), **logements** (`community_listings`, catégorie
+`logements`), **trajets** (`community_trips` + `community_transport_requests`) et
+**transmission** (`users.transmit_text`, un tableau de personnes et non de fiches). Rien
+n'est « prévu mais fermé » aujourd'hui : un circuit est ouvert quand il est écrit, testé et
+relu.
+
+**Ajouter un circuit** demande donc trois choses : une entrée dans `lib/circuits.ts` (avec
+`status: "ouvert"`, ses `words`, et son `catalogue` si le circuit a des fiches), son tableau
+dans `components/circuits/`, et le type de fiche correspondant — rien d'autre n'est à
+recopier. Les tests de `lib/circuits.test.ts` vérifient les invariants à respecter : clé
+d'adresse valide, trois étapes et trois garanties au minimum, limites écrites, mots et
+statuts écrits pour chaque circuit ouvert, un catalogue dès qu'il y a des fiches (et aucun
+sinon), un seul circuit par type de fiche, un tableau qui existe vraiment, pas de promesse de paiement en ligne ni de
+messagerie, et aucun retour du vocabulaire de la carte.
+
 
 ## Démarrage
 
@@ -27,7 +113,28 @@ Pour activer les comptes, les guides administrés, l'annuaire et les fonctions c
 2. Ajouter `DATABASE_URL` et un `AUTH_SECRET` aléatoire d'au moins 32 caractères dans **Vercel → Settings → Environment Variables**. Définir les variables pour chaque environnement visé (Production, Preview et/ou Development), puis redéployer.
 3. Appliquer les migrations (`npm run db:migrate`) à cette base avant d'ouvrir les fonctions connectées. Le build Vercel n'exécute volontairement pas de migration automatiquement.
 
-Sans ces variables, les routes publiques restent consultables en mode dégradé ; connexion, inscription et données en base restent indisponibles. Ne jamais publier de vrais identifiants ni committer un fichier `.env`.
+Sans ces variables, les routes publiques restent consultables en mode dégradé ; les données en base restent indisponibles. Ne jamais publier de vrais identifiants ni committer un fichier `.env`.
+
+### Comptes et connexion — interrupteur
+
+**Les comptes sont fermés par défaut.** Tant que `AIME_AUTH_ENABLED` n'est pas à `1` :
+
+- aucune inscription, aucun mot de passe, aucun formulaire de connexion ;
+- toute session déjà présente dans un navigateur est ignorée (révocation immédiate) ;
+- `/connexion` et `/inscription` renvoient vers `/mon-espace`, la page qui explique la situation ;
+- les espaces `/espace`, `/back-office` et `/admin` renvoient vers `/mon-espace` ;
+- seule la **visite guidée** reste ouverte quand une base est configurée : elle ne demande
+  aucun identifiant et s'exécute en lecture seule (le proxy refuse toutes les écritures).
+
+Pour rallumer les comptes, définir `AIME_AUTH_ENABLED=1` puis redéployer : les formulaires,
+les rôles, les sessions et les trois espaces redeviennent disponibles sans modification de
+code. Le code d'authentification n'a pas été supprimé.
+
+> Suite de travail priorisée : voir `AUDIT-REFONTE.md` (audit complet du dépôt).
+
+Pour afficher le site dans une iframe d'un domaine de prévisualisation, lister les origines
+autorisées dans `PREVIEW_FRAME_ANCESTORS` (séparées par des virgules). Sans cette variable,
+la politique reste stricte : `frame-ancestors 'self'` et `X-Frame-Options: SAMEORIGIN`.
 
 ### Accès mariage sans mot de passe
 
@@ -56,6 +163,7 @@ sauf `ALLOW_DEMO_SEED=1` explicite — ne jamais l'utiliser sur des données ré
 | `npm run dev` | Serveur de développement |
 | `npm run build` / `npm start` | Build puis serveur de production |
 | `npm run typecheck` | Vérification TypeScript |
+| `npm run test` | Tests du calcul de point (`lib/point.test.ts`) |
 | `npm run lint` | ESLint |
 | `npm run check` | typecheck + lint + build (à lancer avant tout commit) |
 | `npm run db:generate` | Génère une migration après modification de `db/schema.ts` |
@@ -67,9 +175,12 @@ Après toute modification de `db/schema.ts` : `npm run db:generate`, relire le S
 ## Organisation
 
 - `app/` — routes (site public, `/espace` membre, `/back-office`, `/admin`, `/le-monde-aime`, API dans `app/api/`)
-- `components/` — composants partagés (coquilles, carte, communauté, assistant local)
+- `components/` — composants partagés (coquilles, marketing, communauté, assistant local)
 - `lib/` — logique serveur : `actions/` (Server Actions, **toujours authentifiées**), requêtes (`*-queries.ts`), auth, validation Zod
 - `db/` — schéma Drizzle (`schema.ts`), scripts d'amorçage (`seed*.ts`)
+- `lib/point.ts` — point d'une publication déduit de la commune et du code postal (sans carte)
+- `lib/circuits.ts` — le catalogue des circuits (mots, étapes, garanties, limites, tableau) ; `lib/actions/circuits.ts` — les actions partagées par tous les circuits
+- `app/circuits/` + `components/circuits/` — l'index des circuits, un circuit par adresse, tableau et formulaires
 - `drizzle/` — migrations SQL versionnées
 
 ## Sécurité — règles du projet

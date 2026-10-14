@@ -3,13 +3,13 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, MessageCircle, Search } from "lucide-react";
 
-const QUICK = ["Je déménage", "Un proche est décédé", "J'organise un événement"];
+const QUICK = ["Je déménage", "Un proche est décédé", "J’organise un événement"];
 
 /**
- * Porte d'entrée unique vers l'aide (chantier 4) : ce champ ne cherche plus
- * lui-même — il ouvre l'assistant de navigation avec la question pré-remplie.
- * Il n'existe donc qu'un seul moteur d'orientation à maintenir (celui de
- * l'assistant, règles explicites, aucun traitement externe).
+ * Porte d’entrée unique vers l’aide (chantier 4) : ce champ ne cherche plus
+ * lui-même — il ouvre l’assistant de navigation avec la question pré-remplie.
+ * Il n’existe donc qu’un seul moteur d’orientation à maintenir (celui de
+ * l’assistant, règles explicites, aucun traitement externe).
  */
 export function OrientationEntry({ variant = "light" }: { variant?: "light" | "hero" }) {
   const [query, setQuery] = useState("");
@@ -25,13 +25,19 @@ export function OrientationEntry({ variant = "light" }: { variant?: "light" | "h
   }
 
   return (
-    <div data-assistant-id="orientation-entry" className={`rounded-2xl p-4 shadow-sm sm:p-5 ${dark ? "border border-white/20 bg-white/95 text-slate-900 backdrop-blur" : "border border-slate-200 bg-white text-slate-900"}`}>
-      <p className="text-sm font-bold text-slate-900">Dites-nous ce que vous cherchez.</p>
-      <p className="mt-1 text-xs text-slate-600">L&apos;assistant de navigation s&apos;ouvre avec votre question et vous propose le bon parcours. Une orientation par situations, pas un diagnostic ni une décision administrative.</p>
-      <form role="search" onSubmit={onSubmit} className="mt-3 flex gap-2">
+    <div
+      data-assistant-id="orientation-entry"
+      className={`rounded-card p-5 sm:p-6 ${dark ? "bg-canvas/95 text-ink ring-1 ring-white/20" : "bg-canvas shadow-rested ring-1 ring-line"}`}
+    >
+      <p className="text-base font-medium text-ink">Dites-nous ce que vous cherchez.</p>
+      <p className="mt-1.5 text-xs leading-relaxed text-ink-3">
+        L’assistant de navigation s’ouvre avec votre question et vous propose le bon parcours. Une orientation par situations, pas un
+        diagnostic ni une décision administrative.
+      </p>
+      <form role="search" onSubmit={onSubmit} className="mt-4 flex gap-2">
         <label htmlFor={`orientation-${variant}`} className="sr-only">Décrivez votre besoin en quelques mots</label>
         <span className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" aria-hidden="true" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-4" aria-hidden="true" />
           <input
             id={`orientation-${variant}`}
             type="search"
@@ -39,18 +45,34 @@ export function OrientationEntry({ variant = "light" }: { variant?: "light" | "h
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Ex. je déménage, je prépare une fête…"
-            className="w-full rounded-lg border border-slate-300 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-500 focus:border-slate-800"
+            className="h-11 w-full rounded-control bg-canvas pl-9 pr-3 text-sm text-ink ring-1 ring-line transition placeholder:text-ink-4 focus:ring-2 focus:ring-ink"
           />
         </span>
-        <button type="submit" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-emerald-800 px-4 text-sm font-bold text-white hover:bg-emerald-900">
-          <MessageCircle className="h-5 w-5" aria-hidden="true" /><span className="hidden sm:inline">Demander</span><ArrowRight className="h-5 w-5 sm:hidden" aria-hidden="true" />
+        <button
+          type="submit"
+          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-control bg-ink px-4 text-sm font-medium text-canvas shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
+        >
+          <MessageCircle className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Demander</span>
+          <ArrowRight className="h-4 w-4 sm:hidden" aria-hidden="true" />
         </button>
       </form>
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[11px] font-medium text-slate-500">Par exemple :</span>
-        {QUICK.map((s) => <button key={s} type="button" onClick={() => { setQuery(s); openAssistant(s); }} className="rounded-full border border-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-slate-400">{s}</button>)}
+      <div className="mt-4 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[11px] text-ink-4">Par exemple :</span>
+        {QUICK.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => { setQuery(s); openAssistant(s); }}
+            className="rounded-full px-2.5 py-1 text-[11px] font-medium text-ink-2 ring-1 ring-line transition hover:bg-muted hover:text-ink"
+          >
+            {s}
+          </button>
+        ))}
       </div>
-      <p className="mt-3 text-[11px] text-slate-500">Règles explicites, sans IA générative ni envoi à un tiers. N&apos;écrivez ni numéro de sécurité sociale ni information médicale.</p>
+      <p className="mt-4 text-[11px] leading-relaxed text-ink-4">
+        Règles explicites, sans IA générative ni envoi à un tiers. N’écrivez ni numéro de sécurité sociale ni information médicale.
+      </p>
     </div>
   );
 }

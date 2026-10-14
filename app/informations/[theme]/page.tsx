@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
-import { Hero, Tag, EmptyState, LinkButton } from "@/components/ui";
+import { CircuitLinks } from "@/components/marketing/tiles";
+import { WEDDING_CIRCUITS, circuitFor } from "@/lib/circuits";
+import { Container, EmptyState, Hero, LinkButton, SectionHeading, Tag } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { db, isDatabaseConfigured } from "@/db";
 import { articles } from "@/db/schema";
@@ -32,37 +34,65 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
   return (
     <PublicPage>
       <Hero
-        image={meta.image}
-        gradient={theme === "mariage" ? "planning" : theme === "famille" ? "wedding" : "event"}
+        size="md"
         eyebrow="Information par thématique"
         title={label}
         subtitle={meta.tagline}
-        actions={<LinkButton href="/connexion">Faire une démarche <Icon name="arrow" className="h-4 w-4" /></LinkButton>}
+        actions={
+          <LinkButton href="/mon-espace" size="lg">
+            Faire une démarche
+            <Icon name="arrow" className="h-4 w-4" />
+          </LinkButton>
+        }
       />
-      <section className="bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <div className="mb-10 flex items-center gap-4">
-            <Icon name={meta.icon} className="h-12 w-12 text-emerald-500" />
-            <h2 className="text-3xl font-bold text-[#1d1d1f]">Articles &amp; guides « {label} »</h2>
+
+      <section className="bg-canvas">
+        <Container className="py-16 lg:py-20">
+          <div className="flex items-center gap-4">
+            <span className="grid h-11 w-11 place-items-center rounded-control bg-muted">
+              <Icon name={meta.icon} className="h-5 w-5 text-ink" />
+            </span>
+            <SectionHeading title={`Articles et guides « ${label} »`} />
           </div>
-          {items.length === 0 ? (
-            <EmptyState title="Aucun contenu publié pour le moment" description="Cette rubrique est enrichie régulièrement." />
-          ) : (
-            <div className="grid gap-5 md:grid-cols-2">
-              {items.map((article) => (
-                <Link key={article.id} href={`/guides/${article.slug}`} className="group rounded-2xl bg-[#fafaf9] p-8 transition hover:bg-emerald-50">
-                  <Tag>{article.kind === "guide" ? "Guide pratique" : "Article"}</Tag>
-                  <h3 className="mt-4 text-xl font-semibold text-[#1d1d1f]">{article.title}</h3>
-                  <p className="mt-2 text-slate-600">{article.summary}</p>
-                  <p className="mt-5 flex items-center justify-between text-sm text-slate-500">
-                    <span>Public : {article.audience}</span>
-                    <Icon name="arrow" className="h-4 w-4 text-emerald-700 transition group-hover:translate-x-1" />
-                  </p>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+
+          <div className="mt-10">
+            {items.length === 0 ? (
+              <EmptyState title="Aucun contenu publié pour le moment" description="Cette rubrique est enrichie régulièrement." />
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2">
+                {items.map((article) => (
+                  <Link
+                    key={article.id}
+                    href={`/guides/${article.slug}`}
+                    className="group flex flex-col rounded-card bg-muted p-7 transition hover:bg-canvas hover:shadow-hover hover:ring-1 hover:ring-line"
+                  >
+                    <Tag>{article.kind === "guide" ? "Guide pratique" : "Article"}</Tag>
+                    <h2 className="mt-4 text-xl leading-snug text-ink">{article.title}</h2>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-3">{article.summary}</p>
+                    <p className="mt-5 flex items-center justify-between text-xs text-ink-4">
+                      <span>Public : {article.audience}</span>
+                      <Icon name="arrow" className="h-4 w-4 text-ink-2 transition group-hover:translate-x-1" />
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        {theme === "mariage" && (
+          <div className="mt-12">
+            <CircuitLinks
+              title="Après le guide, les circuits."
+              text="Ce que vous venez de lire se prépare ; les circuits, eux, trouvent les personnes : le repas, les retouches, les invités qui restent dormir, celles et ceux qui montent en voiture."
+              items={WEDDING_CIRCUITS.map((item) => ({
+                href: `/circuits/${item.key}`,
+                label: circuitFor(item.key)?.label ?? item.key,
+                why: item.why,
+              }))}
+            />
+          </div>
+        )}
+
+        </Container>
       </section>
     </PublicPage>
   );

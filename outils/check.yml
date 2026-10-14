@@ -1,0 +1,25 @@
+# À déposer dans `.github/workflows/check.yml` (déplacer ce fichier là-bas, c'est tout).
+# L'outil de publication utilisé pour ce dépôt n'a pas la permission d'écrire dans
+# `.github/workflows/` : c'est la seule raison pour laquelle ce fichier attend ici.
+# Aucune base de données n'est nécessaire — le build s'en passe.
+name: Vérifications
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
