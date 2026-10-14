@@ -30,6 +30,8 @@ export const ROUTES: RouteEntry[] = [
   { path: "/vision", label: "Notre méthode", roles: ALL_ROLES, purpose: "Comprendre ce qui fonctionne, ce qui existe ailleurs et les intégrations encore indisponibles." },
   { path: "/le-monde-aime", label: "Le Monde Aime · initiative indépendante", roles: ["visiteur", "membre"], purpose: "Parcourir les listes de personnes, offres, besoins, projets et trajets ; publier ; retrouver vos échanges, projets et cercles." },
   { path: "/annuaire", label: "Annuaire des bureaux", roles: ALL_ROLES, purpose: "Trouver un bureau local, ses horaires et son téléphone." },
+  { path: "/le-tour", label: "Le tour du site", roles: ALL_ROLES, purpose: "Les cinq temps, dans l'ordre : entrer par un moment de vie, comprendre, préparer, trouver les personnes, garder et transmettre — avec la règle commune aux sept circuits." },
+  { path: "/circuits", label: "Les sept circuits", roles: ALL_ROLES, purpose: "Voir les circuits ouverts, ce que chacun cadre, et comment ils se relient entre eux." },
   { path: "/connexion", label: "Connexion", roles: ALL_ROLES, purpose: "Se connecter à son espace personnel ou professionnel." },
   { path: "/inscription", label: "Créer mon espace", roles: ALL_ROLES, purpose: "Créer un espace de démonstration en quelques informations." },
 

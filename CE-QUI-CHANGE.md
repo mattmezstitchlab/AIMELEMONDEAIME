@@ -119,7 +119,27 @@ relation »).
 Et **plus aucun circuit « déclaré mais fermé »** : les sept sont ouverts parce que les
 sept sont écrits et testés. Le prochain le sera de la même façon.
 
-## 6. Ce qui reste ouvert
+## 6. Le tour du site : tout, au même endroit
+
+Il manquait la page qui fait le tour complet. Elle existe : **`/le-tour`**, cinq temps,
+dans l'ordre où une personne les traverse.
+
+- **Entrer** par ce qui vous arrive — un mariage, une naissance, une installation.
+- **Comprendre** : les guides, l'annuaire des points d'accueil, et ce qu'AIME® ne décide pas.
+- **Préparer** : le parcours, étape par étape, et l'espace privé qui garde le fil.
+- **Trouver les personnes** : les **sept circuits** — lus directement dans le catalogue,
+  ils se mettent à jour tout seuls — et l'entraide du voisinage.
+- **Garder et transmettre** : vos documents, vos échanges, votre mémoire.
+
+En bas de page, **la règle du jeu** : votre commune suffit, aucune adresse publiée, aucun
+paiement, rien sans l'accord des personnes. Puis deux portes pour celles et ceux qui ne
+savent pas par où commencer : le parcours mariage, ou les sept circuits.
+
+Le tour s'ouvre depuis l'accueil (sous « Commencez par un mariage ») et depuis le pied de
+page de toutes les pages. Et chaque circuit dit, en bas de la sienne, **ce qui va souvent
+avec lui** — trois portes, avec la raison d'y aller.
+
+## 7. Ce qui reste ouvert
 
 - **Les comptes** sont toujours fermés (page « Mon espace » explicative). Les rallumer
   se fera par un simple interrupteur, sans réécriture.
@@ -130,14 +150,17 @@ sept sont écrits et testés. Le prochain le sera de la même façon.
 - **Les photos** : les deux portraits d'accueil (mariage, espace privé) sont conservés.
   Aucune photo n'est affichée sans crédit.
 
-## 7. Où regarder
+## 8. Où regarder
 
 | Quoi | Où |
 | --- | --- |
 | Le récit et la mise en page | accueil du site |
 | Les listes, filtres, publication | « Entraide » dans le menu |
-| Les circuits (producteurs, coups de main, associations) | menu « Circuits », catalogue dans `lib/circuits.ts` |
+| Les sept circuits | menu « Circuits », catalogue dans `lib/circuits.ts` |
+| Le tour du site | `/le-tour`, ouvert depuis l'accueil et le pied de page |
 | Le style (couleurs, rayons, typographie) | `app/globals.css` |
 | Le calcul des points | `lib/point.ts` (et `lib/departements.ts`) |
 | Le détail technique de la refonte | `README.md`, section « Design » |
 | L'audit complet du site | `AUDIT-REFONTE.md` |
+| L'audit du jour (mesuré) | `AUDIT-DU-JOUR.md` |
+| Le contrôle continu à activer | `outils/check.yml`, à déplacer dans `.github/workflows/` |

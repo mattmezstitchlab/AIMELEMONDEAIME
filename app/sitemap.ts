@@ -28,6 +28,7 @@ const PAGES: Array<{ path: string; priority: number; changeFrequency: MetadataRo
   { path: "/decouvrir", priority: 0.7, changeFrequency: "monthly" },
   { path: "/annuaire", priority: 0.6, changeFrequency: "monthly" },
   { path: "/vision", priority: 0.5, changeFrequency: "monthly" },
+  { path: "/le-tour", priority: 0.8, changeFrequency: "monthly" },
   { path: "/mon-espace", priority: 0.4, changeFrequency: "monthly" },
   ...CIRCUIT_PATHS,
 ];

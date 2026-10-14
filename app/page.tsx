@@ -286,6 +286,10 @@ export default async function HomePage() {
               Lire les guides mariage
             </LinkButton>
           </div>
+          <p className="mt-6 text-sm text-ink-3">
+            Envie de voir d’abord tout ce qu’on peut faire ici ?{" "}
+            <Link href="/le-tour" className="font-semibold text-ink underline">Le tour du site, en cinq temps</Link>.
+          </p>
         </section>
       </PageColumn>
     </PublicPage>

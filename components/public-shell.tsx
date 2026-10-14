@@ -81,6 +81,7 @@ export function PublicHeader() {
 
 const FOOTER_LINKS: Array<{ href: string; label: string }> = [
   { href: "/accompagnement", label: "Accompagnement" },
+  { href: "/le-tour", label: "Le tour du site" },
   { href: "/circuits", label: "Les sept circuits" },
   { href: "/informations", label: "Guides et sujets" },
   { href: "/le-monde-aime", label: "Entraide et transmission" },
