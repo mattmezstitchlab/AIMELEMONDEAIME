@@ -7,16 +7,35 @@ import { getYearEvents } from "@/lib/annee-queries";
 import { AssistantWidget } from "@/components/assistant/assistant";
 import type { AssistantRole } from "@/lib/assistant/registry";
 
+/**
+ * Adresse publique du site : sert aux URL canoniques, au sitemap et aux
+ * aperçus de partage. À définir en production (`NEXT_PUBLIC_SITE_URL`) ;
+ * à défaut, l’adresse locale évite un avertissement de build.
+ */
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_DESCRIPTION =
+  "Le fil s’était perdu : démarches civiles, mariage, transmissions entre générations et entraide de proximité. Des repères clairs pour les moments de vie. Prototype indépendant, non affilié à un organisme public.";
+
 export const metadata: Metadata = {
-  title: "AIME® — Le Monde Aime · préparer un mariage et les étapes de la vie",
-  description:
-    "Démarches civiles, préparation de la journée, budget, proches et changements après l’union : des repères et des ressources du territoire, selon votre situation. Prototype indépendant, non affilié à un organisme public.",
+  metadataBase: new URL(SITE_URL),
+  title: "AIME® — Le Monde Aime · mariage, transmissions et entraide de proximité",
+  description: SITE_DESCRIPTION,
   applicationName: "AIME® — Le Monde Aime",
+  robots: { index: true, follow: true },
   openGraph: {
     title: "AIME® — Le Monde Aime",
-    description: "La terre, les arts et les générations : des parcours clairs pour les moments de vie, et les ressources du territoire.",
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: "AIME® — Le Monde Aime",
     locale: "fr_FR",
     type: "website",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "AIME® — Le Monde Aime : le fil s’était perdu, on le reprend." }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AIME® — Le Monde Aime",
+    description: SITE_DESCRIPTION,
+    images: ["/og.png"],
   },
 };
 /** Barre du navigateur : elle reprend le fond papier du site. */

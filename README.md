@@ -15,8 +15,10 @@ minuscules pour la navigation. Le rythme vient des surfaces (`canvas`, `subtle`,
 des contours (`line`, `line-soft`), jamais de la teinte. Cette règle vaut pour tout le site,
 y compris les espaces de travail (Mon espace, back-office, administration).
 
-Ce qui reste coloré est **sémantique** et réservé aux états qui en ont besoin ; partout ailleurs,
-un avancement se lit au contraste (fond noir / fond gris / filet), pas à la couleur.
+Aucune couleur ne subsiste, y compris pour les états : un avancement, une alerte ou une
+information se lisent au **contraste** (fond encre, fond gris, filet) et à l'icône
+(`components/ui.tsx`, encarts `Notice` : les tons `info`, `success`, `warning`, `danger`,
+`neutral` expriment une intention, plus une teinte).
 
 - **Palette.** Échelle de gris calibrée définie dans `app/globals.css` (`--color-canvas`,
   `--color-subtle`, `--color-muted`, `--color-ink`…`--color-ink-4`, `--color-line`).
@@ -30,6 +32,10 @@ un avancement se lit au contraste (fond noir / fond gris / filet), pas à la cou
   par un **anneau** discret et une ombre courte plutôt que par une bordure lourde. Les
   arguments marketing montrent de vrais fragments d'interface (`components/marketing/mocks.tsx`)
   plutôt que des illustrations.
+- **Partage et indexation.** `public/og.png` sert d'aperçu de partage (image générée, encre
+  sur papier), déclarée dans `app/layout.tsx` avec `metadataBase`. `app/sitemap.ts` liste les
+  pages publiques, `app/robots.ts` écarte les espaces privés et les liens à jeton. Les deux
+  s'appuient sur `NEXT_PUBLIC_SITE_URL` (voir `.env.example`), à définir en production.
 - **Points d'entrée.** `app/globals.css` porte les jetons et les polices ; `components/ui.tsx`
   porte les primitives (boutons, cartes, champs, pastilles) ; `components/marketing/tiles.tsx`
   porte les briques du site public (`HeroCard`, `ActionRow`, `Panel`, `LinkRow`) ;
@@ -124,6 +130,7 @@ sauf `ALLOW_DEMO_SEED=1` explicite — ne jamais l'utiliser sur des données ré
 | `npm run dev` | Serveur de développement |
 | `npm run build` / `npm start` | Build puis serveur de production |
 | `npm run typecheck` | Vérification TypeScript |
+| `npm run test` | Tests du calcul de point (`lib/point.test.ts`) |
 | `npm run lint` | ESLint |
 | `npm run check` | typecheck + lint + build (à lancer avant tout commit) |
 | `npm run db:generate` | Génère une migration après modification de `db/schema.ts` |

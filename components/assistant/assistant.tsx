@@ -696,7 +696,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           : role === "visiteur"
             ? [
                 { label: "Parcourir les guides pratiques", kind: "link", href: "/informations?vue=guides" },
-                { label: "Voir la carte de France", kind: "link", href: "/le-monde-aime" },
+                { label: "Voir Le Monde Aime", kind: "link", href: "/le-monde-aime" },
                 { label: "Découvrir Mon espace", kind: "link", href: "/mon-espace" },
               ]
             : [{ label: "Ouvrir les dossiers", kind: "link", href: "/back-office/dossiers" }];

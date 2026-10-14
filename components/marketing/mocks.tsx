@@ -35,9 +35,9 @@ export function MockWindow({
 type RowState = "done" | "current" | "todo" | "waiting";
 
 const ROW_STATE: Record<RowState, { label: string; className: string; icon: IconName }> = {
-  done: { label: "Réuni", className: "text-state-success", icon: "check" },
+  done: { label: "Réuni", className: "text-ink", icon: "check" },
   current: { label: "À faire", className: "text-ink", icon: "clock" },
-  waiting: { label: "En attente", className: "text-state-warning", icon: "timer" },
+  waiting: { label: "En attente", className: "text-ink-3", icon: "timer" },
   todo: { label: "Plus tard", className: "text-ink-4", icon: "clock" },
 };
 
@@ -90,8 +90,8 @@ export function WeddingDossierMock({ className = "" }: { className?: string }) {
 /** Réponses des foyers invités. */
 export function GuestListMock() {
   const guests = [
-    { name: "Famille Bertrand", persons: 4, answer: "Confirmé", tone: "bg-state-success-soft text-state-success ring-state-success-line" },
-    { name: "Léa et Sanjay", persons: 2, answer: "Confirmé", tone: "bg-state-success-soft text-state-success ring-state-success-line" },
+    { name: "Famille Bertrand", persons: 4, answer: "Confirmé", tone: "bg-muted text-ink ring-line" },
+    { name: "Léa et Sanjay", persons: 2, answer: "Confirmé", tone: "bg-muted text-ink ring-line" },
     { name: "Cousins de Nantes", persons: 5, answer: "En attente", tone: "bg-muted text-ink-2 ring-line" },
     { name: "Michel et Anne", persons: 2, answer: "Ne peuvent pas venir", tone: "bg-muted text-ink-3 ring-line" },
   ];

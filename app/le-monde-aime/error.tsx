@@ -10,11 +10,11 @@ export default function LeMondeAimeError({ error, reset }: { error: Error & { di
     <main lang="fr" className="grid min-h-[70vh] place-items-center bg-subtle px-5 py-12">
       <Container className="max-w-xl">
         <section role="alert" className="rounded-panel bg-canvas p-8 text-center shadow-lifted ring-1 ring-line">
-          <span className="mx-auto grid h-11 w-11 place-items-center rounded-control bg-state-warning-soft text-state-warning ring-1 ring-state-warning-line" aria-hidden="true">
+          <span className="mx-auto grid h-11 w-11 place-items-center rounded-control bg-muted text-ink ring-1 ring-ink" aria-hidden="true">
             !
           </span>
           <p className="eyebrow mt-5 justify-center">Le Monde Aime</p>
-          <h1 className="mt-3 text-2xl text-ink">La carte n’a pas pu s’ouvrir</h1>
+          <h1 className="mt-3 text-2xl text-ink">Les publications n’ont pas pu s’ouvrir</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink-3">
             Vos offres et échanges ne sont pas supprimés. Réessayez dans un instant. Si le problème persiste, vous pouvez revenir à la page
             d’accueil.

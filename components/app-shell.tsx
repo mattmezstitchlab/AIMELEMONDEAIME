@@ -112,7 +112,7 @@ export function AppShell({
               {demo && (
                 <p
                   role="status"
-                  className="flex flex-wrap items-center gap-2 rounded-card bg-state-warning-soft px-4 py-3 text-sm text-state-warning ring-1 ring-state-warning-line"
+                  className="flex flex-wrap items-center gap-2 rounded-card bg-muted px-4 py-3 text-sm text-ink ring-1 ring-ink"
                 >
                   <strong>Visite guidée — lecture seule.</strong> Vous parcourez la vraie interface avec un compte de démonstration : les boutons d&apos;action sont inactifs.
                   <Link href="/deconnexion" className="font-semibold underline underline-offset-4">Quitter la visite</Link>

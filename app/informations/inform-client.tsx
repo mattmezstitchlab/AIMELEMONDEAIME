@@ -162,7 +162,7 @@ export function InformClient({ articles, categories }: {
                 Plus d’articles sur ce thème
               </Link>
               <Link href="/le-monde-aime" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink hover:underline hover:underline-offset-4">
-                Explorer la carte
+                Explorer les listes du territoire
                 <Icon name="external" className="h-3.5 w-3.5" />
               </Link>
             </div>

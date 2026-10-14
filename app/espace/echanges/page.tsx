@@ -38,7 +38,7 @@ export default async function EchangesPage() {
       <div className="grid gap-3 sm:grid-cols-3">
         <Link href="/espace/profil" className="rounded-card bg-canvas ring-1 ring-line p-4 shadow-rested hover:ring-ink-4"><Icon name="user" className="h-6 w-6 text-ink-2" /><strong className="mt-2 block text-ink">Mon profil</strong><span className="text-xs text-ink-3">Activités, ce que je propose, recherche ou transmets, zone et disponibilités.</span></Link>
         <Link href="/le-monde-aime/artiste" className="rounded-card bg-canvas ring-1 ring-line p-4 shadow-rested hover:ring-ink-4"><Icon name="music" className="h-6 w-6 text-ink-2" /><strong className="mt-2 block text-ink">Espace artiste</strong><span className="text-xs text-ink-3">{links.hasArtist ? "Prestations, demandes reçues, fiche technique." : "Disciplines, prestations et fiche technique."}</span></Link>
-        <Link href="/le-monde-aime" className="rounded-card bg-canvas ring-1 ring-line p-4 shadow-rested hover:ring-ink-4"><Icon name="pin" className="h-6 w-6 text-ink-2" /><strong className="mt-2 block text-ink">Explorer la carte</strong><span className="text-xs text-ink-3">Personnes, offres, besoins et projets près de vous.</span></Link>
+        <Link href="/le-monde-aime" className="rounded-card bg-canvas ring-1 ring-line p-4 shadow-rested hover:ring-ink-4"><Icon name="pin" className="h-6 w-6 text-ink-2" /><strong className="mt-2 block text-ink">Explorer Le Monde Aime</strong><span className="text-xs text-ink-3">Personnes, offres, besoins et projets près de vous.</span></Link>
       </div>
 
       <InviteResponses invites={links.invites.map((i) => ({ id: i.id, name: i.name, kind: i.kind }))} />
@@ -48,7 +48,7 @@ export default async function EchangesPage() {
       <section>
         <h2 className="text-lg font-bold text-ink">Mes projets</h2>
         <p className="text-sm text-ink-3">Événements, activités et projets partagés : un projet existe une seule fois, vous le retrouvez ici et dans Le Monde Aime.</p>
-        {links.projects.length === 0 ? <EmptyState title="Aucun projet" description="Créez un projet ou rejoignez-en un depuis la carte." /> : (
+        {links.projects.length === 0 ? <EmptyState title="Aucun projet" description="Créez un projet ou rejoignez-en un depuis les listes." /> : (
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             {links.projects.map((p) => (
               <Link key={p.id} href={`/le-monde-aime/projets/${p.id}`}>

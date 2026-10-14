@@ -18,7 +18,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
     <PublicPage>
       <div className="bg-subtle">
         <div className="mx-auto max-w-3xl space-y-5 px-4 py-8 sm:px-6">
-          <Link href="/le-monde-aime" className="text-sm font-semibold text-ink underline">← Retour à la carte</Link>
+          <Link href="/le-monde-aime" className="text-sm font-semibold text-ink underline">← Retour aux listes</Link>
           <header className="flex flex-wrap items-center gap-5 rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
             {p.hasPhoto ? (
               <>

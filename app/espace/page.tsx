@@ -72,9 +72,9 @@ export default async function Apercu() {
             <ul className="mt-4 space-y-3">
               {o.drafts.map((j) => (
                 <li key={j.id}>
-                  <Link href={`/espace/demarches/nouvelle?reprendre=${j.id}`} className="flex items-center justify-between gap-3 rounded-control bg-state-warning-soft px-4 py-3 text-sm ring-1 ring-state-warning-line transition hover:brightness-[0.99]">
-                    <span className="text-state-warning"><strong className="font-medium">{j.title}</strong> · questionnaire à terminer</span>
-                    <span className="shrink-0 font-medium text-state-warning">Reprendre</span>
+                  <Link href={`/espace/demarches/nouvelle?reprendre=${j.id}`} className="flex items-center justify-between gap-3 rounded-control bg-muted px-4 py-3 text-sm ring-1 ring-ink transition hover:opacity-90">
+                    <span className="text-ink"><strong className="font-medium">{j.title}</strong> · questionnaire à terminer</span>
+                    <span className="shrink-0 font-medium text-ink underline">Reprendre</span>
                   </Link>
                 </li>
               ))}

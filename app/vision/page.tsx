@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 };
 
 const STATUS: Record<string, { text: string; className: string }> = {
-  fonctionne: { text: "Fonctionne dans ce prototype", className: "bg-state-success-soft text-state-success ring-state-success-line" },
-  a_verifier: { text: "À vérifier avant déploiement", className: "bg-state-warning-soft text-state-warning ring-state-warning-line" },
-  habilitation: { text: "Habilitation nécessaire", className: "bg-state-danger-soft text-state-danger ring-state-danger-line" },
+  fonctionne: { text: "Fonctionne dans ce prototype", className: "bg-muted text-ink ring-line" },
+  a_verifier: { text: "À vérifier avant déploiement", className: "bg-muted text-ink-2 ring-ink" },
+  habilitation: { text: "Habilitation nécessaire", className: "bg-canvas text-ink ring-ink" },
 };
 
 export default function VisionPage() {

@@ -72,7 +72,7 @@ export default async function BackOfficeDashboard() {
                   <span className="text-ink-2"> — {c.memberName}</span>
                   <span className="block truncate text-xs text-ink-3">{c.title}</span>
                 </span>
-                <span className={`text-xs font-medium ${c.attente >= 14 ? "text-state-danger" : c.attente >= 7 ? "text-state-warning" : "text-ink-4"}`}>
+                <span className={`text-xs font-medium ${c.attente >= 14 ? "font-bold text-ink" : c.attente >= 7 ? "text-ink-2" : "text-ink-4"}`}>
                   sans mouvement depuis {c.attente} j
                 </span>
                 <StatusBadge status={c.status} />

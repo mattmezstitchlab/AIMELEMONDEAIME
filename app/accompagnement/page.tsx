@@ -257,7 +257,7 @@ export default async function Accompagnement({ searchParams }: { searchParams: P
                           <p className="mt-3 text-xs text-ink-4">
                             Public : {o.audience} · Territoire : {o.territory}
                           </p>
-                          <p className={`mt-3 flex items-start gap-1.5 text-[11px] ${verified ? "text-state-success" : linkChecked ? "text-ink-3" : "text-state-warning"}`}>
+                          <p className={`mt-3 flex items-start gap-1.5 text-[11px] ${verified ? "text-ink" : "text-ink-3"}`}>
                             <Icon name={verified ? "check" : "alert"} className="mt-px h-3.5 w-3.5 shrink-0" />
                             {stateLabel}
                           </p>

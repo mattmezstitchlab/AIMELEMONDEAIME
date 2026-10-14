@@ -328,7 +328,7 @@ export const SCENARIOS: AssistantScenario[] = [
     keywords: ["publier annonce", "donner", "preter", "louer", "vendre", "chercher", "partager un objet", "panier local", "materiel evenement"],
     answer: "Un seul bouton « Publier », puis trois choix : une proposition, un besoin ou un projet. Aucun paiement en ligne.",
     steps: [
-      { text: "Je vous montre le bouton de publication.", navigate: "/le-monde-aime", highlight: "lma-publish" },
+      { text: "J'ouvre l'onglet « Publier » du Monde Aime.", navigate: "/le-monde-aime?onglet=publier", highlight: "lma-listing-form" },
       { text: "Choisissez le type de publication : proposition, besoin ou projet.", highlight: "lma-listing-form", action: "Pour une proposition : je donne, je prête, je loue, je vends, je propose une prestation ou je transmets." },
       { text: "Choisissez une catégorie, renseignez l'état, la quantité, la commune et les modalités.", action: "Pour les vêtements et chaussures, précisez la taille ou la pointure. Les produits locaux peuvent préciser l'unité, la quantité, le prix annoncé et le retrait." },
       { text: "Indiquez la commune et le code postal : le point est déduit automatiquement. L'adresse exacte ne sera visible qu'aux participants de l'échange privé." },
@@ -358,7 +358,7 @@ export const SCENARIOS: AssistantScenario[] = [
     keywords: ["trajet", "livraison", "velo", "transporter panier", "sur mon trajet", "transporteur", "collecter", "remettre"],
     answer: "Un trajet est une proposition. Aucune collecte n'est garantie avant acceptation explicite du transporteur.",
     steps: [
-      { text: "Je vous montre le bouton de publication.", navigate: "/le-monde-aime", highlight: "lma-publish" },
+      { text: "J'ouvre l'onglet « Publier » du Monde Aime.", navigate: "/le-monde-aime?onglet=publier", highlight: "lma-listing-form" },
       { text: "Choisissez « Publier un trajet », puis indiquez départ, destination, date, transport, capacité et conditions.", highlight: "lma-trip-form" },
       { text: "Publiez le trajet. Une demande reçue reste en attente jusqu'à votre confirmation." },
       { text: "Le transporteur confirme ensuite la collecte, puis la remise. Le retrait direct reste toujours possible." },

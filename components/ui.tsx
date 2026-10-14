@@ -253,10 +253,11 @@ export function Notice({
   className?: string;
 }) {
   const tones: Record<string, { wrap: string; icon: string }> = {
-    info: { wrap: "bg-state-info-soft text-state-info ring-state-info-line", icon: "alert" },
-    success: { wrap: "bg-state-success-soft text-state-success ring-state-success-line", icon: "check" },
-    warning: { wrap: "bg-state-warning-soft text-state-warning ring-state-warning-line", icon: "alert" },
-    danger: { wrap: "bg-state-danger-soft text-state-danger ring-state-danger-line", icon: "alert" },
+    // Aucune couleur : l'intention se lit au contraste et à l'icône.
+    info: { wrap: "bg-muted text-ink-2 ring-line", icon: "alert" },
+    success: { wrap: "bg-muted text-ink ring-line", icon: "check" },
+    warning: { wrap: "bg-muted text-ink ring-ink", icon: "alert" },
+    danger: { wrap: "bg-canvas text-ink ring-ink", icon: "alert" },
     neutral: { wrap: "bg-muted text-ink-2 ring-line", icon: "alert" },
   };
   const style = tones[tone] ?? tones.neutral;
@@ -326,7 +327,7 @@ const VARIANTS = {
   inverse: "bg-canvas text-ink hover:bg-canvas/90",
   outlineInverse: "text-canvas ring-1 ring-canvas/30 hover:bg-canvas/10",
   /* Action destructive. */
-  danger: "bg-state-danger text-canvas hover:opacity-90",
+  danger: "bg-ink text-canvas hover:opacity-90",
 } as const;
 
 export type ButtonVariant = keyof typeof VARIANTS;

@@ -55,7 +55,7 @@ const nextConfig: NextConfig = {
       { source: "/le-monde-aime/profil", destination: "/espace/profil", permanent: false },
       { source: "/le-monde-aime", has: [{ type: "query", key: "onglet", value: "liens" }], destination: "/espace/echanges", permanent: false },
       { source: "/espace/projets", destination: "/espace/echanges", permanent: false },
-      // Simplification « une porte par besoin » : anciennes portes d'information → /informations et la carte.
+      // Simplification « une porte par besoin » : anciennes portes d'information → /informations et Le Monde Aime.
       { source: "/s-informer", destination: "/informations", permanent: true },
       { source: "/guides", destination: "/informations?vue=guides", permanent: true },
       { source: "/univers/terre", destination: "/le-monde-aime?univers=terre", permanent: true },

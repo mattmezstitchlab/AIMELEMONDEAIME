@@ -15,14 +15,14 @@ const NAV: NavItem[] = [
   { href: "/espace/echanges", label: "Mes échanges & projets", icon: "echanges" },
   { href: "/espace/documents", label: "Mes documents", icon: "documents" },
   { href: "/espace/profil", label: "Mon profil", icon: "user" },
-  { href: "/le-monde-aime", label: "La carte", icon: "pin" },
+  { href: "/le-monde-aime", label: "Entraide et transmission", icon: "pin" },
 ];
 
 const MOBILE: NavItem[] = [
   { href: "/espace", label: "Mon espace", icon: "home", exact: true },
   { href: "/espace/demarches", label: "Démarches", icon: "demarches" },
   { href: "/espace/annee", label: "Année", icon: "calendar" },
-  { href: "/le-monde-aime", label: "Carte", icon: "pin" },
+  { href: "/le-monde-aime", label: "Entraide", icon: "pin" },
   { href: "/le-monde-aime?onglet=publier", label: "Publier", icon: "filePlus" },
   { href: "/espace/echanges", label: "Échanges", icon: "echanges" },
 ];
