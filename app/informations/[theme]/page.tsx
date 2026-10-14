@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
 import { Hero, Tag, EmptyState, LinkButton } from "@/components/ui";
 import { Icon } from "@/components/icon";
-import { db } from "@/db";
+import { db, isDatabaseConfigured } from "@/db";
 import { articles } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
@@ -25,12 +25,15 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
   const meta = THEME_META[theme];
   if (!label || !meta) notFound();
 
-  const items = await db.select().from(articles).where(and(eq(articles.category, theme), eq(articles.isPublished, true)));
+  const items = isDatabaseConfigured
+    ? await db.select().from(articles).where(and(eq(articles.category, theme), eq(articles.isPublished, true))).catch(() => [])
+    : [];
 
   return (
     <PublicPage>
       <Hero
         image={meta.image}
+        gradient={theme === "mariage" ? "planning" : theme === "famille" ? "wedding" : "event"}
         eyebrow="Information par thématique"
         title={label}
         subtitle={meta.tagline}

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
+import { WeddingRsvpLinkButton } from "@/components/community/wedding-access-panels";
 import {
   addWeddingBudgetItem,
   addWeddingGuest,
@@ -91,7 +92,7 @@ function CopyText({ text, filename }: { text: string; filename: string }) {
   );
 }
 
-type GuestView = { id: number; name: string; persons: number; groupe: string; status: string; note: string; thanked?: boolean; tableId?: number | null };
+type GuestView = { id: number; name: string; persons: number; groupe: string; status: string; note: string; thanked?: boolean; tableId?: number | null; rsvpExpiresAt?: Date | null; rsvpLinkActive?: boolean };
 
 const STATUS_STYLE: Record<string, string> = {
   a_inviter: "bg-slate-100 text-slate-700",
@@ -167,6 +168,7 @@ export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, w
                 <button type="button" disabled={pending} onClick={() => run(() => removeWeddingGuest(g.id))} className="text-xs font-semibold text-rose-700 underline">Retirer</button>
               </div>
             )}
+            {isOrganizer && <WeddingRsvpLinkButton guestId={g.id} guestName={g.name} expiresAt={g.rsvpExpiresAt ?? null} active={!!g.rsvpLinkActive} canCreate={editable} canRevoke={isOrganizer} />}
           </li>
         ))}
       </ul>

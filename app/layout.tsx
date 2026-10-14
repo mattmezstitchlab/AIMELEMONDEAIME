@@ -8,9 +8,9 @@ import { AssistantWidget } from "@/components/assistant/assistant";
 import type { AssistantRole } from "@/lib/assistant/registry";
 
 export const metadata: Metadata = {
-  title: "AIME® — Le Monde Aime · La terre, les arts et les générations",
+  title: "AIME® Mariage — Préparer votre mariage et tout ce qui l’entoure",
   description:
-    "Trouvez près de vous de quoi vivre, créer et transmettre. Un seul espace pour vos projets, vos échanges et l'accompagnement de vos démarches. Prototype indépendant, non affilié à un organisme public.",
+    "Démarches civiles, préparation de la journée, budget, proches et changements après l’union : des repères et des services reliés, selon votre situation. Prototype indépendant, non affilié à un organisme public.",
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

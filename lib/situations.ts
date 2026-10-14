@@ -3,12 +3,13 @@
  * Chaque situation : questions progressives → étapes expliquées, pièces, organismes et liens officiels.
  * Les règles sont versionnées et datées ; elles n'attribuent aucun droit et ne valident aucun dossier.
  */
-export const RULES_VERSION = "2026.10-j";
+export const RULES_VERSION = "2026.10-k";
 export const RULES_REVIEWED_AT = "2026-10-13";
 // 2026.10-c : parcours Santé, échéances officielles calculées dans les règles.
 // 2026.10-d : parcours Famille, Proche et Quotidien épaissis au même niveau.
 // 2026.10-e : quatre parcours de couverture ajoutés (transmission, recruteur, invalidité, réversion).
 // 2026.10-f : parcours « Mariage complet » (dossier civil, rétroplanning daté, projet partagé).
+// 2026.10-k : parcours mariage ordonné et réception conditionnelle (sans étapes fête/artiste pour un mariage civil seul).
 
 export type Question = {
   key: string;
@@ -18,6 +19,7 @@ export type Question = {
   help?: string;
   why?: string;
   required?: boolean;
+  showWhen?: { key: string; value: string };
 };
 
 export type TaskRule = {
@@ -69,9 +71,9 @@ const yes = (v?: string) => v === "oui";
 export const SITUATIONS: Situation[] = [
   {
     key: "evenement",
-    label: "J'organise un événement et j'engage un artiste",
+    label: "J'organise un événement et j'envisage un artiste",
     short: "Événement et artiste",
-    description: "Fête, mariage, repas associatif, concert : trouver un artiste, préparer l'engagement, les autorisations et les ressources.",
+    description: "Parcours distinct des démarches civiles du mariage : à choisir seulement si vous organisez aussi une fête, un concert ou un repas et souhaitez chercher un artiste, clarifier son engagement ou préparer les ressources.",
     icon: "music",
     image: "/images/hero-famille.jpg",
     pilot: true,
@@ -132,32 +134,34 @@ export const SITUATIONS: Situation[] = [
     key: "mariage",
     label: "Nous nous marions",
     short: "Mariage complet",
-    description: "Le mariage de bout en bout : dossier civil en mairie et ses délais, rétroplanning de la fête calculé depuis la date, prestataires et coordination dans un projet partagé — puis l'après-mariage enchaîné.",
+    description: "Le parcours commence par le dossier civil en mairie, puis propose des options de préparation de fête et de coordination si vous en avez besoin, avant les démarches possibles après l'union. Une cérémonie civile seule convient aussi : fête, prestataires et artiste restent facultatifs.",
     icon: "heart",
     image: "/images/hero-mariage.jpg",
     pilot: true,
     questions: [
-      { key: "date", label: "Date du mariage", type: "date", required: true, why: "Tout le rétroplanning — réservations, dossier de mairie, bans — se calcule à rebours depuis cette date." },
-      { key: "lieu", label: "Commune du mariage", type: "text", required: true, help: "La commune de la cérémonie civile (et, si elle diffère, précisez la commune de réception dans vos réponses libres du projet)." },
-      { key: "invites", label: "Nombre d'invités estimé", type: "number", why: "Il dimensionne la salle, le repas et les faire-part." },
-      { key: "ceremonie", label: "En plus de la cérémonie civile (obligatoire), prévoyez-vous…", type: "select", options: [["civil_seul", "Non, la cérémonie civile seulement"], ["laique", "Une cérémonie laïque"], ["religieuse", "Une cérémonie religieuse"], ["inconnu", "Nous ne savons pas encore"]] },
-      { key: "contrat", label: "Prévoyez-vous un contrat de mariage chez le notaire ?", type: "select", why: "S'il y a contrat, le certificat du notaire doit être joint au dossier de mairie avant la cérémonie.", options: [["non", "Non"], ["oui", "Oui"], ["inconnu", "Nous ne savons pas encore"]] },
-      { key: "salle", label: "Le lieu de réception", type: "select", required: true, options: [["reservee", "Il est déjà réservé"], ["a_trouver", "Il reste à trouver"], ["salle_communale", "La salle communale ou des fêtes"], ["domicile", "À domicile ou dans un jardin"], ["inconnu", "Pas encore décidé"]] },
-      { key: "repas", label: "Le repas", type: "select", required: true, options: [["traiteur", "Un traiteur"], ["restaurant", "Un restaurant"], ["proches", "Un buffet préparé par nos proches"], ["inconnu", "Pas encore décidé"]] },
-      { key: "musique", label: "La musique", type: "select", required: true, options: [["groupe", "Un groupe ou des musiciens en direct"], ["dj", "Un DJ"], ["playlist", "Une playlist que nous gérerons"], ["proche", "Un proche s'en chargera"], ["inconnu", "Pas encore décidé"]] },
-      { key: "photo", label: "Les photos", type: "select", options: [["pro", "Un photographe professionnel"], ["proche", "Un proche talentueux"], ["inconnu", "Pas encore décidé"]] },
-      { key: "budget", label: "Budget global envisagé (€, facultatif)", type: "number", why: "Il devient l'enveloppe de départ du suivi de budget dans votre projet ; il s'ajuste là-bas à tout moment et ne vous engage à rien." },
+      { key: "date", label: "Date du mariage", type: "date", required: true, why: "Les repères de préparation sont calculés à partir de cette date ; les délais officiels restent à confirmer auprès de la mairie." },
+      { key: "lieu", label: "Commune de la cérémonie civile", type: "text", required: true, help: "Les règles de dépôt du dossier et les disponibilités dépendent de la mairie concernée." },
+      { key: "contrat", label: "Envisagez-vous un contrat de mariage chez le notaire ?", type: "select", why: "Si vous en prévoyez un, le certificat du notaire est à joindre au dossier de mairie.", options: [["non", "Non"], ["oui", "Oui"], ["inconnu", "Nous ne savons pas encore"]] },
+      { key: "ceremonie", label: "En plus de la cérémonie civile, souhaitez-vous une autre cérémonie ?", type: "select", options: [["civil_seul", "Non"], ["laique", "Une cérémonie laïque"], ["religieuse", "Une cérémonie religieuse"], ["inconnu", "Pas encore décidé"]] },
+      { key: "reception", label: "Prévoyez-vous une réception ou une fête en plus de la mairie ?", type: "select", required: true, options: [["oui", "Oui"], ["non", "Non, pas de réception"], ["a_decider", "Pas encore décidé"]] },
+      { key: "invites", label: "Pour la réception, combien d’invités estimez-vous ?", type: "number", showWhen: { key: "reception", value: "oui" }, why: "Une estimation aide à dimensionner le repas et la salle ; vous pourrez la modifier." },
+      { key: "salle", label: "Si vous prévoyez une réception, où en est le lieu ?", type: "select", showWhen: { key: "reception", value: "oui" }, options: [["reservee", "Il est déjà réservé"], ["a_trouver", "Il reste à trouver"], ["salle_communale", "La salle communale ou des fêtes"], ["domicile", "À domicile ou dans un jardin"], ["inconnu", "Pas encore décidé"]] },
+      { key: "repas", label: "Pour la réception, quel repas envisagez-vous ?", type: "select", showWhen: { key: "reception", value: "oui" }, options: [["traiteur", "Un traiteur"], ["restaurant", "Un restaurant"], ["proches", "Un buffet préparé par nos proches"], ["inconnu", "Pas encore décidé"]] },
+      { key: "musique", label: "Pour la réception, qu’envisagez-vous pour la musique ?", type: "select", showWhen: { key: "reception", value: "oui" }, options: [["groupe", "Un groupe ou des musiciens en direct"], ["dj", "Un DJ"], ["playlist", "Une playlist que nous gérerons"], ["proche", "Un proche s'en chargera"], ["inconnu", "Pas encore décidé"]] },
+      { key: "photo", label: "Pour la réception, souhaitez-vous prévoir des photos ?", type: "select", showWhen: { key: "reception", value: "oui" }, options: [["pro", "Un photographe professionnel"], ["proche", "Un proche talentueux"], ["inconnu", "Pas encore décidé"]] },
+      { key: "budget", label: "Si vous organisez une réception, quel budget global envisagez-vous ?", type: "number", showWhen: { key: "reception", value: "oui" }, why: "Cette enveloppe de départ est modifiable dans le projet et ne vous engage à rien." },
     ],
     build: (a) => {
-      const invites = Number(a.invites ?? 0);
+      const hasReception = a.reception === "oui";
+      const invites = hasReception ? Number(a.invites ?? 0) : 0;
       // Repères de préparation (rappels personnels, calculés à rebours depuis
       // la date du mariage) ; seule la publication des bans est officielle.
       const repere = (days: number) => ({ days, from: "date" });
-      const t: TaskRule[] = [
-        { kind: "action", label: "Partager le projet du mariage et y inviter votre conjoint·e, vos témoins et vos proches organisateurs", detail: "Le projet créé avec ce parcours rassemble programme, besoins, contributions et documents de la fête. Votre démarche et vos pièces personnelles, elles, restent privées.", reason: "Un mariage se prépare à plusieurs : un seul endroit pour coordonner évite les fils de messages contradictoires." },
-      ];
-      t.push({ kind: "action", label: "Dresser la liste des invités dans le projet partagé", detail: "Foyer par foyer : nom, nombre de personnes, cercle (famille, amis, travail). Les réponses se noteront au même endroit, et le compteur des confirmés donnera le nombre de convives à transmettre au traiteur.", reason: "La liste conditionne les faire-part, le repas et le plan de table : elle se construit tôt et vit jusqu'au bout.", due: repere(-240) });
-      t.push({ kind: "action", label: "Ouvrir le suivi de budget dans le projet et y noter chaque devis", detail: "Chaque poste (lieu, repas, musique, photo…) avec son montant estimé, puis le montant du devis confirmé et sa case « réglé » quand vous l'avez payé par vos propres moyens. AIME® ne perçoit ni ne verse aucun paiement.", reason: "Un budget de mariage dérape rarement d'un coup : il dérape poste par poste, et ça se voit tôt quand tout est au même endroit.", due: repere(-240) });
+      const t: TaskRule[] = [];
+      if (hasReception) {
+        t.push({ kind: "action", label: "Partager le projet du mariage et y inviter votre conjoint·e, vos témoins et vos proches organisateurs", detail: "Le projet créé avec ce parcours rassemble programme, besoins, contributions et documents de la fête. Votre démarche et vos pièces personnelles, elles, restent privées.", reason: "Un mariage se prépare à plusieurs : un seul endroit pour coordonner évite les fils de messages contradictoires.", due: repere(-300) });
+        t.push({ kind: "action", label: "Dresser la liste des invités dans le projet partagé", detail: "Foyer par foyer : nom, nombre de personnes, cercle (famille, amis, travail). Les réponses se noteront au même endroit, et le compteur des confirmés donnera le nombre de convives à transmettre au traiteur.", reason: "La liste conditionne les faire-part, le repas et le plan de table : elle se construit tôt et vit jusqu'au bout.", due: repere(-240) });
+        t.push({ kind: "action", label: "Ouvrir le suivi de budget dans le projet et y noter chaque devis", detail: "Chaque poste (lieu, repas, musique, photo…) avec son montant estimé, puis le montant du devis confirmé et sa case « réglé » quand vous l'avez payé par vos propres moyens. AIME® ne perçoit ni ne verse aucun paiement.", reason: "Un budget de mariage dérape rarement d'un coup : il dérape poste par poste, et ça se voit tôt quand tout est au même endroit.", due: repere(-240) });
       // --- Le lieu et les prestataires (les plus longs à réserver) ---
       if (a.salle === "a_trouver") t.push({ kind: "action", label: "Réserver le lieu de réception", detail: "Les lieux demandés partent 9 à 12 mois à l'avance. La carte AIME® recense des lieux et espaces près de chez vous ; la salle communale se réserve en mairie.", reason: "C'est le premier verrou du rétroplanning : tout le reste se cale sur le lieu.", organisms: ["mairie"], due: repere(-270) });
       if (a.salle === "salle_communale") t.push({ kind: "action", label: "Réserver la salle communale auprès de la mairie et signer la convention de location", detail: "Tarif habitants, caution, horaires, état des lieux et règles (musique, fin de soirée) sont fixés par la convention.", reason: "Les salles communales sont très demandées pour les mariages, surtout au printemps et en été.", organisms: ["mairie"], due: repere(-270) });
@@ -177,6 +181,7 @@ export const SITUATIONS: Situation[] = [
       }
       if (a.musique === "dj") t.push({ kind: "action", label: "Choisir le DJ et vérifier son cadre d'engagement", detail: "Professionnel déclaré facturant, ou salarié via le Guso : demandez le cadre par écrit, ainsi que le matériel fourni et l'heure de fin.", reason: "Le cadre et les horaires se confirment avant tout versement.", due: repere(-150), frameworkFlag: "cadre_a_verifier" });
       if (a.musique === "playlist") t.push({ kind: "action", label: "Préparer la playlist et le matériel son (enceinte, micro, secours)", detail: "Testez la sonorisation sur place avant le jour J et prévoyez un téléphone de secours avec les morceaux téléchargés.", reason: "Le silence technique est le premier risque d'une soirée sans professionnel.", due: repere(-30) });
+      }
       // --- Le dossier civil en mairie ---
       t.push({ kind: "action", label: "Prendre rendez-vous avec la mairie pour constituer le dossier de mariage", detail: "Chaque mairie fixe ses modalités et ses délais de dépôt ; le dossier complet doit permettre la publication des bans. Apportez dès le premier rendez-vous les pièces ci-dessous.", reason: "C'est le seul rendez-vous dont dépend la date elle-même : un dossier incomplet peut décaler la cérémonie.", organisms: ["mairie"], officialUrl: "https://www.service-public.fr", due: repere(-60), frameworkFlag: "cadre_a_verifier" });
       t.push({ kind: "piece", label: "Acte de naissance récent de chacun des futurs époux", reason: "En principe daté de moins de 3 mois au dépôt du dossier ; il se demande à la mairie de naissance ou en ligne." });
@@ -188,7 +193,7 @@ export const SITUATIONS: Situation[] = [
       }
       t.push({ kind: "action", label: "Vérifier la publication des bans (affichée au moins 10 jours avant la cérémonie)", detail: "Les bans sont affichés aux portes des mairies concernées pendant 10 jours ; la cérémonie ne peut pas avoir lieu avant la fin de ce délai.", reason: "C'est un délai légal : il conditionne la date elle-même.", organisms: ["mairie"], officialUrl: "https://www.service-public.fr", due: { days: -10, from: "date", official: true, source: "service-public.fr — publication des bans, 10 jours avant le mariage" } });
       // --- Les invités, la cérémonie, le jour J ---
-      if (invites > 0) {
+      if (hasReception && invites > 0) {
         t.push({ kind: "action", label: "Envoyer les faire-part (avec date limite de réponse)", detail: "Indiquez la date de réponse souhaitée, les informations d'hébergement et de trajet ; le nombre définitif de convives se confirme au traiteur ensuite.", reason: "Huit à dix semaines laissent aux invités le temps de s'organiser.", due: repere(-60) });
         if (invites >= 50) t.push({ kind: "action", label: "Préparer l'information des invités : hébergements, trajets, covoiturage", detail: "Une page du projet ou un message groupé ; la carte AIME® aide pour les trajets partagés.", reason: "Au-delà de 50 invités, les questions logistiques deviennent un flux continu.", due: repere(-45) });
         t.push({ kind: "action", label: "Relancer les invités sans réponse et figer le nombre de convives", detail: "Le nombre figé part au traiteur ou au restaurant et sert au plan de table. La liste des invités du projet affiche en direct les confirmés, les en-attente et les déclinés : c'est ce compteur-là qui fait foi.", reason: "C'est le chiffre dont dépendent repas, salle et budget final.", due: repere(-21) });
@@ -196,13 +201,15 @@ export const SITUATIONS: Situation[] = [
       }
       if (a.ceremonie === "laique") t.push({ kind: "action", label: "Préparer la cérémonie Laïque : officiant, textes, rituels, musique", detail: "Désignez l'officiant et répétez le déroulement ; la cérémonie Laïque n'a pas de valeur légale, elle suit la cérémonie civile.", reason: "C'est souvent le moment le plus personnel de la journée : il se répète.", due: repere(-30) });
       if (a.ceremonie === "religieuse") t.push({ kind: "action", label: "Rencontrer le célébrant et préparer la cérémonie religieuse", detail: "La cérémonie religieuse a lieu après la cérémonie civile ; la préparation (rencontres, dossier) commence plusieurs mois avant.", reason: "Les paroisses et lieux de culte demandent une préparation anticipée.", due: repere(-60) });
-      t.push({ kind: "action", label: "Choisir les alliances et les tenues", reason: "Délais d'essayage, de gravure et de retouches : mieux vaut ne pas s'y prendre au dernier mois.", due: repere(-90) });
-      t.push({ kind: "action", label: "Prévoir fleurs et décoration (commande chez le fleuriste ou organisation entre proches)", detail: "Bouquet, boutonnières, décoration de salle et de voitures ; sur la carte, des voisins proposent aussi plantes et prêt de décoration.", reason: "Les fleuristes prennent les commandes de mariage plusieurs semaines à l'avance.", due: repere(-30) });
-      t.push({ kind: "action", label: "Vérifier votre assurance et les autorisations du lieu (fin de soirée, musique, feu d'artifice éventuel)", detail: "Le règlement du lieu et, en extérieur, les règles locales sur le bruit s'imposent à la fête ; un feu d'artifice relève d'une déclaration en mairie.", reason: "C'est le point qui peut arrêter une soirée en cours de route.", organisms: ["mairie"], due: repere(-30), frameworkFlag: "cadre_a_verifier" });
-      t.push({ kind: "action", label: "Écrire le déroulé du jour J et le partager dans le projet", detail: "Horaires, enchaînement des moments, qui fait quoi, numéros utiles (prestataires, témoins, lieu) : la page « jour J » du projet rassemble déroulé, plan de table et contacts sur une page à imprimer ou à ouvrir le matin même.", reason: "Le jour J, les mariés ne doivent coordonner personne : le papier le fait pour eux.", due: repere(-7) });
+      if (hasReception) {
+        t.push({ kind: "action", label: "Choisir les alliances et les tenues, si vous le souhaitez", reason: "Les délais d'essayage, de gravure ou de retouches peuvent être anticipés selon vos choix.", due: repere(-90) });
+        t.push({ kind: "action", label: "Prévoir les fleurs ou la décoration, si vous en souhaitez", detail: "Bouquet, décoration de salle ou organisation entre proches : retenez seulement les options qui vous correspondent.", reason: "Certains choix de décoration se préparent quelques semaines à l'avance.", due: repere(-30) });
+        t.push({ kind: "action", label: "Vérifier l’assurance et les autorisations liées au lieu de réception", detail: "Le règlement du lieu et les règles locales (horaires, bruit, feu d'artifice éventuel) varient ; demandez confirmation au lieu et à la mairie.", reason: "Ces vérifications ne concernent que les lieux et activités effectivement prévus.", organisms: ["mairie"], due: repere(-30), frameworkFlag: "cadre_a_verifier" });
+        t.push({ kind: "action", label: "Écrire le déroulé du jour J et le partager dans le projet", detail: "Horaires, enchaînement des moments, qui fait quoi et numéros utiles : la page « jour J » du projet rassemble le déroulé, le plan de table et les contacts sur une page à consulter ou imprimer.", reason: "Un déroulé partagé aide les proches organisateurs à coordonner la fête.", due: repere(-7) });
+      }
       // --- L'après ---
       t.push({ kind: "piece", label: "Livret de famille (remis par la mairie le jour du mariage)", reason: "Il vous sera demandé par presque tous les organismes ensuite : photographiez-le dès le retour." });
-      t.push({ kind: "action", label: "Remercier les invités et les proches qui ont aidé", detail: "La rubrique Remerciements du projet reprend les foyers confirmés, à cocher au fil de vos envois, avec des modèles de mots à copier : cartes, messages ou appels, ce sont vos remerciements, envoyés par vous.", reason: "Un remerciement parti dans les semaines qui suivent se remarque ; un an après, il s'excuse.", due: repere(21) });
+      if (hasReception && invites > 0) t.push({ kind: "action", label: "Remercier les invités et les proches qui ont aidé", detail: "La rubrique Remerciements du projet reprend les foyers confirmés, à cocher au fil de vos envois, avec des modèles de mots à copier : cartes, messages ou appels, ce sont vos remerciements, envoyés par vous.", reason: "Un remerciement parti dans les semaines qui suivent se remarque ; un an après, il s'excuse.", due: repere(21) });
       t.push({ kind: "action", label: "Après le mariage : enchaîner avec le parcours « Ma famille change »", detail: "Nom d'usage, impôts, organismes à prévenir : ce parcours prend le relais pour l'administratif d'après-mariage, sans tout ressaisir.", reason: "Le mariage change votre situation auprès de presque tous les organismes." });
       return t;
     },

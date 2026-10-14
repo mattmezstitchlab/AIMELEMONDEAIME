@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { CASE_STATUS_LABELS, CASE_STATUS_STYLES } from "@/lib/constants";
 import { Icon } from "@/components/icon";
+import { MeshGradientBackground, type HeroGradientTheme } from "@/components/mesh-gradient-background";
 
 export function Logo({ light = false, size = "md" }: { light?: boolean; size?: "sm" | "md" }) {
   const box = size === "sm" ? "h-8 w-8" : "h-10 w-10";
@@ -23,6 +24,7 @@ export function Logo({ light = false, size = "md" }: { light?: boolean; size?: "
 /** Grand visuel immersif plein écran pour les pages publiques. */
 export function Hero({
   image,
+  gradient,
   eyebrow,
   title,
   subtitle,
@@ -30,7 +32,9 @@ export function Hero({
   size = "lg",
   children,
 }: {
+  /** Existing photo asset retained as a fallback; the image files are intentionally left in place during the shader test. */
   image: string;
+  gradient?: HeroGradientTheme;
   eyebrow?: string;
   title: ReactNode;
   subtitle?: ReactNode;
@@ -41,8 +45,14 @@ export function Hero({
   const height = size === "xl" ? "min-h-[92vh]" : size === "lg" ? "min-h-[72vh]" : "min-h-[52vh]";
   return (
     <section className={`relative isolate flex ${height} items-end overflow-hidden bg-[#0f1a14] md:items-center`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
+      {gradient ? (
+        <MeshGradientBackground theme={gradient} />
+      ) : (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
+        </>
+      )}
       <div className="hero-overlay absolute inset-0 z-10" />
       <div className="hero-overlay-bottom absolute inset-0 z-10 md:hidden" />
       <div className="animate-fade-up relative z-20 mx-auto w-full max-w-7xl px-6 pb-16 pt-40 md:py-32 lg:px-8">
@@ -68,18 +78,25 @@ export function SectionTitle({
   title,
   description,
   image = "/images/hero-espace.jpg",
+  gradient,
   actions,
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   image?: string;
+  gradient?: HeroGradientTheme;
   actions?: ReactNode;
 }) {
   return (
-    <section className="relative isolate -mx-4 -mt-6 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
+    <section className="relative isolate -mx-4 -mt-6 overflow-hidden bg-[#0f1a14] sm:mx-0 sm:mt-0 sm:rounded-2xl">
+      {gradient ? (
+        <MeshGradientBackground theme={gradient} />
+      ) : (
+        // The original image stays available as a fallback and remains in public/images.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={image} alt="" className="animate-hero-zoom absolute inset-0 z-0 h-full w-full object-cover" />
+      )}
       <div className="hero-overlay absolute inset-0 z-10" />
       <div className="animate-fade-up relative z-20 flex min-h-[260px] flex-col justify-end gap-5 px-6 py-8 sm:min-h-[300px] sm:px-10 sm:py-10 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">

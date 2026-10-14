@@ -1,17 +1,38 @@
 import "server-only";
 import { and, asc, desc, eq, inArray, isNull, ne, or } from "drizzle-orm";
-import { db } from "@/db";
+import { db, isDatabaseConfigured } from "@/db";
 import {
   artistEngagements, artistProfiles, cases, communityListings, communityRequests, documentShares, documents, journeyEvents, journeyTasks, journeys, notifications,
   organisms, projectDocuments, projectMembers, projects, users,
 } from "@/db/schema";
 import { distanceKm } from "@/lib/lma";
 import type { AssistantSummary } from "@/lib/assistant/personal";
+import { ORGANISMS_SEED } from "@/lib/situations";
 
 const pub = (d: string | null, f: string) => d ?? f.split(" ")[0];
 
 export async function getOrganisms() {
-  return db.select().from(organisms).where(eq(organisms.isActive, true)).orderBy(asc(organisms.category), asc(organisms.name));
+  if (isDatabaseConfigured) {
+    try {
+      return await db.select().from(organisms).where(eq(organisms.isActive, true)).orderBy(asc(organisms.category), asc(organisms.name));
+    } catch {
+      // La page publique conserve ses liens d'orientation si la base échoue.
+    }
+  }
+
+  // Repli de lecture seule : aucune donnée administrée ni vérification récente
+  // n'est prétendue en l'absence de PostgreSQL.
+  return ORGANISMS_SEED.map(({ contentSource, ...organism }, index) => ({
+    id: index + 1,
+    ...organism,
+    territory: "National",
+    source: contentSource ?? "",
+    linkStatus: "a_verifier" as const,
+    contentStatus: "a_verifier" as const,
+    verifiedAt: null,
+    isActive: true,
+    updatedAt: new Date(0),
+  }));
 }
 
 export async function getMyJourneys(userId: number) {

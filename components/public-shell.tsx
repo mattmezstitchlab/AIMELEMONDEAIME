@@ -5,27 +5,17 @@ import { Icon } from "@/components/icon";
 import { getCurrentUser } from "@/lib/auth";
 import { BottomTabs } from "@/components/bottom-tabs";
 
-// Navigation par intention : Explorer (la carte), Être accompagné (démarches), S'informer (thématiques + guides).
+// Navigation principale centrée sur le parcours mariage ; les autres services restent accessibles discrètement en pied de page.
 const PRIMARY = [
-  { href: "/le-monde-aime", label: "Explorer la carte" },
-  { href: "/accompagnement", label: "Être accompagné" },
-];
-// Une seule page « S'informer » qui réunit toutes les thématiques et les guides.
-const INFORMER = [
-  { href: "/informations", label: "Tout voir" },
-  { href: "/informations/famille", label: "Famille" },
-  { href: "/informations/mariage", label: "Mariage" },
-  { href: "/informations/sante", label: "Santé" },
-  { href: "/informations/argent", label: "Argent et difficultés" },
-  { href: "/informations/logement", label: "Logement" },
-  { href: "/informations/retraite", label: "Retraite" },
-  { href: "/informations/emploi", label: "Emploi agricole" },
-  { href: "/informations/cotisations", label: "Activité et cotisations" },
+  { href: "/accompagnement?besoin=mariage", label: "Préparer mon mariage" },
+  { href: "/informations/mariage", label: "Guides mariage" },
 ];
 
 export async function PublicHeader({ solid = false }: { solid?: boolean }) {
   const user = await getCurrentUser();
   const spaceHref = user ? (user.role === "membre" ? "/espace" : user.role === "gestionnaire" ? "/back-office" : "/admin") : "/connexion";
+  const weddingStart = encodeURIComponent("/espace/demarches/nouvelle?situation=mariage");
+  const createProjectHref = `/inscription?next=${weddingStart}`;
   const text = solid ? "text-slate-700 hover:text-emerald-800" : "text-white/85 hover:text-white";
   return (
     <header className={solid ? "relative z-30 border-b border-black/[0.06] bg-white" : "absolute inset-x-0 top-0 z-30"}>
@@ -39,26 +29,15 @@ export async function PublicHeader({ solid = false }: { solid?: boolean }) {
               {item.label}
             </Link>
           ))}
-          <details className="group relative">
-            <summary className={`flex cursor-pointer list-none items-center gap-1 text-sm font-medium transition [&::-webkit-details-marker]:hidden ${text}`}>
-              S&apos;informer
-              <svg viewBox="0 0 24 24" className="h-4 w-4 transition group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </summary>
-            <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-black/[0.06] bg-white p-2 shadow-xl">
-              {INFORMER.map((item) => (
-                <Link key={item.href} href={item.href} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-800 hover:bg-[#fafaf9]">{item.label}</Link>
-              ))}
-            </div>
-          </details>
-          {!user && <Link href="/decouvrir" className={`text-sm font-medium transition ${text}`}>Découvrir l&apos;espace</Link>}
+          {!user && <Link href="/connexion" className={`text-sm font-medium transition ${text}`}>Connexion</Link>}
         </nav>
         <div className="flex items-center gap-2">
           <Link
-            href={spaceHref}
+            href={user ? spaceHref : createProjectHref}
             className="inline-flex items-center gap-2 rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900"
           >
             <Icon name="user" className="h-4 w-4" />
-            {user ? "Mon espace" : "Se connecter"}
+            {user ? "Mon espace" : "Créer mon projet"}
           </Link>
           <details className="relative lg:hidden">
             <summary className={`flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg backdrop-blur [&::-webkit-details-marker]:hidden ${solid ? "bg-slate-100 text-slate-800" : "bg-white/15 text-white"}`}>
@@ -67,14 +46,11 @@ export async function PublicHeader({ solid = false }: { solid?: boolean }) {
                 <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
               </svg>
             </summary>
-            <nav aria-label="Navigation mobile" className="absolute right-0 mt-2 w-64 rounded-2xl bg-white p-2 shadow-xl">
-              <Link href="/le-monde-aime" className="block rounded-lg px-3 py-2.5 text-sm font-bold text-emerald-800 hover:bg-[#fafaf9]">Explorer la carte</Link>
-              <Link href="/accompagnement" className="block rounded-lg px-3 py-2.5 text-sm font-bold text-emerald-800 hover:bg-[#fafaf9]">Être accompagné</Link>
-              {!user && <Link href="/decouvrir" className="block rounded-lg px-3 py-2.5 text-sm font-bold text-emerald-800 hover:bg-[#fafaf9]">Découvrir l&apos;espace</Link>}
-              <p className="px-3 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-slate-400">S&apos;informer</p>
-              {INFORMER.map((item) => (
-                <Link key={item.href} href={item.href} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-800 hover:bg-[#fafaf9]">{item.label}</Link>
+            <nav aria-label="Navigation mobile" className="absolute right-0 mt-2 max-h-[75vh] w-72 overflow-y-auto rounded-2xl bg-white p-2 shadow-xl">
+              {PRIMARY.map((item) => (
+                <Link key={item.href} href={item.href} className="block rounded-lg px-3 py-2.5 text-sm font-bold text-emerald-800 hover:bg-[#fafaf9]">{item.label}</Link>
               ))}
+              {!user && <Link href="/connexion" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-800 hover:bg-[#fafaf9]">Connexion</Link>}
             </nav>
           </details>
         </div>
@@ -83,43 +59,42 @@ export async function PublicHeader({ solid = false }: { solid?: boolean }) {
   );
 }
 
+const OTHER_SERVICE_LINKS = [
+  { href: "/accompagnement?besoin=evenement", label: "Événements et artistes (facultatif)" },
+  { href: "/accompagnement?besoin=famille", label: "Famille et démarches après l’union" },
+  { href: "/accompagnement?besoin=paiement", label: "Budget et difficultés de paiement" },
+  { href: "/accompagnement?besoin=demenagement", label: "Logement et déménagement" },
+  { href: "/accompagnement?besoin=proche", label: "Santé, handicap et proches" },
+  { href: "/le-monde-aime", label: "Ressources locales et entraide" },
+  { href: "/informations", label: "Tous les guides et sujets" },
+  { href: "/accompagnement", label: "Tous les accompagnements" },
+  { href: "/annuaire", label: "Points d’accueil" },
+  { href: "/decouvrir", label: "Découvrir la démonstration" },
+  { href: "/vision", label: "Notre méthode et nos limites" },
+  { href: "/connexion", label: "Connexion" },
+];
+
 export function PublicFooter() {
   return (
     <footer className="bg-[#f7f7f5]">
-      <div className="mx-auto max-w-6xl px-6 py-16 text-center">
-        <div className="flex justify-center">
-          <Logo />
+      <div className="mx-auto max-w-6xl px-6 py-10 text-center sm:py-12">
+        <div className="flex flex-col items-center justify-between gap-5 sm:flex-row">
+          <Link href="/" aria-label="AIME® — accueil"><Logo /></Link>
+          <nav aria-label="Liens mariage" className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
+            <Link href="/accompagnement?besoin=mariage" className="font-semibold text-emerald-800 hover:underline">Parcours mariage complet</Link>
+            <Link href="/informations/mariage" className="font-semibold text-emerald-800 hover:underline">Guides mariage</Link>
+          </nav>
         </div>
-        <nav aria-label="Liens de pied de page" className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-slate-600">
-          <Link href="/informations" className="font-semibold text-emerald-700 hover:underline">S&apos;informer</Link>
-          <Link href="/informations/famille" className="hover:text-emerald-700">Famille</Link>
-          <Link href="/informations/mariage" className="hover:text-emerald-700">Mariage</Link>
-          <Link href="/informations/sante" className="hover:text-emerald-700">Santé</Link>
-          <Link href="/informations/argent" className="hover:text-emerald-700">Argent et difficultés</Link>
-          <Link href="/informations/logement" className="hover:text-emerald-700">Logement</Link>
-          <Link href="/informations/retraite" className="hover:text-emerald-700">Retraite</Link>
-          <Link href="/informations/emploi" className="hover:text-emerald-700">Emploi agricole</Link>
-          <Link href="/informations/cotisations" className="hover:text-emerald-700">Activité et cotisations</Link>
-          <Link href="/accompagnement" className="hover:text-emerald-700">Accompagnement des démarches</Link>
-          <Link href="/annuaire" className="hover:text-emerald-700">Points d&apos;accueil</Link>
-          <Link href="/decouvrir" className="hover:text-emerald-700">Découvrir l&apos;espace (démo)</Link>
-          <Link href="/vision" className="hover:text-emerald-700">Notre méthode et nos limites</Link>
-          <Link href="/le-monde-aime" className="font-semibold text-emerald-700 hover:underline">Explorer la carte</Link>
-          <Link href="/connexion" className="hover:text-emerald-700">Connexion</Link>
-        </nav>
-        <div className="mt-8 flex justify-center gap-3">
-          {(["phone", "pin", "echanges"] as const).map((name) => (
-            <span key={name} className="grid h-10 w-10 place-items-center rounded-full bg-slate-300/70 text-white">
-              <Icon name={name} className="h-4 w-4" />
-            </span>
-          ))}
-        </div>
-        <p className="mx-auto mt-8 max-w-2xl text-xs leading-relaxed text-slate-500">
-          AIME® (Le Monde Aime) est une initiative indépendante présentée sous forme de prototype. Elle n&apos;attribue aucun droit, ne délivre aucune
-          assurance et n&apos;est affiliée à aucun organisme : la MSA, la CAF, l&apos;Assurance Maladie, France Travail et les autres organismes cités sont des
-          structures externes référencées. Attestations (« SPÉCIMEN »), dossiers et paiements de démonstration sont fictifs ; aucune connexion officielle n&apos;est active.
+        <details className="mt-6 border-t border-black/[0.06] pt-4 text-left">
+          <summary className="cursor-pointer text-[11px] font-semibold text-slate-500">Autres services AIME® et sujets — accessibles séparément, non obligatoires pour le mariage</summary>
+          <nav aria-label="Autres services et sujets" className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[11px] leading-relaxed text-slate-500">
+            {OTHER_SERVICE_LINKS.map((item) => <Link key={item.href} href={item.href} className="hover:text-slate-800 hover:underline">{item.label}</Link>)}
+          </nav>
+        </details>
+        <p className="mx-auto mt-6 max-w-3xl text-[10px] leading-relaxed text-slate-500">
+          AIME® est un prototype indépendant. Les démarches officielles dépendent notamment de votre situation et de votre mairie ; vérifiez toujours les informations auprès des sources officielles. AIME® n’est affilié à aucun organisme et n’effectue aucune réservation, déclaration ou transaction.
         </p>
-        <p className="mt-4 text-sm text-slate-500">© {new Date().getFullYear()} AIME® — Le Monde Aime · prototype de démonstration</p>
+        <p className="mt-3 text-[11px] text-slate-500">© {new Date().getFullYear()} AIME® — Le Monde Aime · prototype de démonstration</p>
       </div>
     </footer>
   );

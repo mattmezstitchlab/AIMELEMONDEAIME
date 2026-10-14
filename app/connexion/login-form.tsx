@@ -6,7 +6,7 @@ import { PrimaryButton } from "@/components/ui";
 
 const initialState: ActionResult | null = null;
 
-export function LoginForm({ next }: { next?: string }) {
+export function LoginForm({ next, available = true }: { next?: string; available?: boolean }) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
 
   return (
@@ -37,7 +37,7 @@ export function LoginForm({ next }: { next?: string }) {
       {state && !state.ok && (
         <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{state.error}</p>
       )}
-      <PrimaryButton type="submit" disabled={pending} className="mt-2">
+      <PrimaryButton type="submit" disabled={pending || !available} className="mt-2">
         {pending ? "Connexion…" : "Me connecter"}
       </PrimaryButton>
     </form>

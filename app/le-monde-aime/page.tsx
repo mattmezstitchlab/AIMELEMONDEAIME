@@ -17,7 +17,12 @@ export const metadata: Metadata = {
 export default async function LeMondeAimePage({ searchParams }: { searchParams: Promise<{ onglet?: string }> }) {
   // « Mes liens » est désormais intégré à l'espace personnel unique.
   if ((await searchParams).onglet === "liens") redirect("/espace");
-  const [explorer, user, legacyPoints, extras] = await Promise.all([getCommunityExplorerData(), getCurrentUser(), getMapLocalPoints(), getExplorerExtras()]);
+  const [explorer, user, legacyPoints, extras] = await Promise.all([
+    getCommunityExplorerData().catch(() => ({ listings: [], trips: [], servicePins: [], agencies: [] })),
+    getCurrentUser(),
+    getMapLocalPoints().catch(() => []),
+    getExplorerExtras().catch(() => ({ people: [], projects: [], stories: [] })),
+  ]);
   const isMember = user?.role === "membre";
   const mine = isMember ? await getMyCommunityData(user!.id) : null;
   const servicePins = legacyPoints.map((p) => ({

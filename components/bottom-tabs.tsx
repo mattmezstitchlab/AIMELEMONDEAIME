@@ -1,39 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "@/components/icon";
 
-/**
- * Dock public pour mobile : les cinq entrées principales du produit, en un
- * seul endroit, au pouce. Sur ordinateur, l'en-tête et le pied de page
- * portent la navigation (le dock est masqué dès md). L'espace connecté a
- * sa propre navigation basse (AppShell) ; ce dock ne s'affiche que via
- * PublicShell. L'assistant reste au-dessus du dock (bottom-20 sur mobile).
- */
+/** Navigation mobile centrée sur les étapes du mariage. */
 const TABS: Array<{ key: string; label: string; href: string; icon: IconName }> = [
   { key: "accueil", label: "Accueil", href: "/", icon: "home" },
-  { key: "informer", label: "S'informer", href: "/informations", icon: "book" },
-  { key: "carte", label: "Carte", href: "/le-monde-aime", icon: "pin" },
-  { key: "publier", label: "Publier", href: "/le-monde-aime?onglet=publier", icon: "filePlus" },
-  { key: "espace", label: "Mon espace", href: "/espace", icon: "user" },
+  { key: "parcours", label: "Parcours", href: "/accompagnement?besoin=mariage", icon: "demarches" },
+  { key: "guides", label: "Guides", href: "/informations/mariage", icon: "book" },
+  { key: "espace", label: "Mon espace", href: "/connexion", icon: "user" },
 ];
 
-function activeKey(pathname: string, onglet: string | null): string {
+function activeKey(pathname: string): string {
   if (pathname === "/") return "accueil";
-  if (pathname.startsWith("/informations") || pathname.startsWith("/guides")) return "informer";
-  if (pathname.startsWith("/le-monde-aime")) return onglet === "publier" ? "publier" : "carte";
+  if (pathname.startsWith("/accompagnement")) return "parcours";
+  if (pathname.startsWith("/informations") || pathname.startsWith("/guides")) return "guides";
   if (pathname.startsWith("/espace") || pathname.startsWith("/connexion") || pathname.startsWith("/inscription")) return "espace";
   return "";
 }
 
 export function BottomTabs() {
   const pathname = usePathname() ?? "";
-  const searchParams = useSearchParams();
-  const active = activeKey(pathname, searchParams?.get("onglet") ?? null);
+  const active = activeKey(pathname);
   return (
     <nav aria-label="Navigation principale mobile" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-      <div className="mx-auto grid max-w-md grid-cols-5">
+      <div className="mx-auto grid max-w-md grid-cols-4">
         {TABS.map((tab) => {
           const isActive = tab.key === active;
           return (

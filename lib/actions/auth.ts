@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/db";
+import { db, isDatabaseConfigured } from "@/db";
 import { users, type Role } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { hashPassword, verifyPassword, setSessionCookie, DEMO_ACCOUNT_EMAIL } from "@/lib/auth";
@@ -26,6 +26,7 @@ function safeDestination(value: FormDataEntryValue | null, role: Role): string {
 }
 
 export async function loginAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  if (!isDatabaseConfigured) return { ok: false, error: "Connexion indisponible : la base de données du site n'est pas configurée." };
   const parsed = parseOrError(loginSchema, {
     email: String(formData.get("email") || ""),
     password: String(formData.get("password") || ""),
@@ -38,7 +39,12 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
     return { ok: false, error: "Trop de tentatives de connexion. Réessayez dans quelques minutes." };
   }
 
-  const [user] = await db.select().from(users).where(eq(users.email, parsed.data.email.toLowerCase())).limit(1);
+  let user: typeof users.$inferSelect | undefined;
+  try {
+    [user] = await db.select().from(users).where(eq(users.email, parsed.data.email.toLowerCase())).limit(1);
+  } catch {
+    return { ok: false, error: "Connexion indisponible : vérifiez la configuration de la base de données." };
+  }
   if (!user || !user.isActive) {
     return { ok: false, error: "Identifiants incorrects." };
   }
@@ -55,6 +61,7 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
 }
 
 export async function registerAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  if (!isDatabaseConfigured) return { ok: false, error: "Inscription indisponible : la base de données du site n'est pas configurée." };
   const raw = {
     fullName: String(formData.get("fullName") || ""),
     email: String(formData.get("email") || ""),
@@ -83,37 +90,48 @@ export async function registerAction(_prev: ActionResult | null, formData: FormD
     return { ok: false, error: "L'inscription est réservée aux adultes. Les activités pour enfants passent par leurs responsables légaux ou une structure encadrante." };
   }
 
-  const [existing] = await db.select().from(users).where(eq(users.email, parsed.data.email.toLowerCase())).limit(1);
+  let existing: typeof users.$inferSelect | undefined;
+  try {
+    [existing] = await db.select().from(users).where(eq(users.email, parsed.data.email.toLowerCase())).limit(1);
+  } catch {
+    return { ok: false, error: "Inscription indisponible : vérifiez la configuration de la base de données." };
+  }
   if (existing) {
     return { ok: false, error: "Un compte existe déjà avec cette adresse e-mail." };
   }
 
   const passwordHash = await hashPassword(parsed.data.password);
-  const [created] = await db
-    .insert(users)
-    .values({
-      fullName: parsed.data.fullName,
-      email: parsed.data.email.toLowerCase(),
-      passwordHash,
-      role: "membre",
-      phone: parsed.data.phone || null,
-      situation: parsed.data.situation ?? null,
-      officeId: parsed.data.officeId ?? null,
-      address: parsed.data.address || null,
-      city: parsed.data.city,
-      postalCode: parsed.data.postalCode || null,
-      birthDate: parsed.data.birthDate,
-      familyStatus: parsed.data.familyStatus || null,
-      displayName: parsed.data.fullName.split(" ")[0],
-      profileCity: parsed.data.city,
-      onboardingCompleted: true,
-    })
-    .returning();
+  let created: typeof users.$inferSelect | undefined;
+  try {
+    [created] = await db
+      .insert(users)
+      .values({
+        fullName: parsed.data.fullName,
+        email: parsed.data.email.toLowerCase(),
+        passwordHash,
+        role: "membre",
+        phone: parsed.data.phone || null,
+        situation: parsed.data.situation ?? null,
+        officeId: parsed.data.officeId ?? null,
+        address: parsed.data.address || null,
+        city: parsed.data.city,
+        postalCode: parsed.data.postalCode || null,
+        birthDate: parsed.data.birthDate,
+        familyStatus: parsed.data.familyStatus || null,
+        displayName: parsed.data.fullName.split(" ")[0],
+        profileCity: parsed.data.city,
+        onboardingCompleted: true,
+      })
+      .returning();
+  } catch {
+    return { ok: false, error: "Inscription impossible pour le moment. Vérifiez la configuration de la base de données." };
+  }
+  if (!created) return { ok: false, error: "Le compte n'a pas pu être créé." };
 
   await setSessionCookie({ userId: created.id, role: created.role, fullName: created.fullName, email: created.email });
   await logAudit({ actorId: created.id, action: "creation_compte", entityType: "user", entityId: created.id });
 
-  redirect("/espace");
+  redirect(safeDestination(formData.get("next"), "membre"));
 }
 
 /**
@@ -123,7 +141,13 @@ export async function registerAction(_prev: ActionResult | null, formData: FormD
  * alors toutes les écritures (lecture seule dans la vraie interface).
  */
 export async function loginAsDemo() {
-  const [user] = await db.select().from(users).where(eq(users.email, DEMO_ACCOUNT_EMAIL)).limit(1);
+  if (!isDatabaseConfigured) redirect("/decouvrir?indisponible=1");
+  let user: typeof users.$inferSelect | undefined;
+  try {
+    [user] = await db.select().from(users).where(eq(users.email, DEMO_ACCOUNT_EMAIL)).limit(1);
+  } catch {
+    redirect("/decouvrir?indisponible=1");
+  }
   if (!user || !user.isDemo || !user.isActive || user.role !== "membre") {
     redirect("/decouvrir?indisponible=1");
   }

@@ -2,7 +2,7 @@ import { PublicPage } from "@/components/public-shell";
 import type { Metadata } from "next";
 import { Hero, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icon";
-import { db } from "@/db";
+import { db, isDatabaseConfigured } from "@/db";
 import { offices } from "@/db/schema";
 import { ilike, or } from "drizzle-orm";
 
@@ -12,13 +12,21 @@ export const dynamic = "force-dynamic";
 
 export default async function AnnuairePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;
-  const items = q
-    ? await db.select().from(offices).where(or(ilike(offices.city, `%${q}%`), ilike(offices.name, `%${q}%`), ilike(offices.postalCode, `%${q}%`), ilike(offices.region, `%${q}%`)))
-    : await db.select().from(offices);
+  let items: (typeof offices.$inferSelect)[] = [];
+  let directoryAvailable = isDatabaseConfigured;
+  if (directoryAvailable) {
+    try {
+      items = q
+        ? await db.select().from(offices).where(or(ilike(offices.city, `%${q}%`), ilike(offices.name, `%${q}%`), ilike(offices.postalCode, `%${q}%`), ilike(offices.region, `%${q}%`)))
+        : await db.select().from(offices);
+    } catch {
+      directoryAvailable = false;
+    }
+  }
 
   return (
     <PublicPage>
-      <Hero image="/images/hero-conseiller.jpg" eyebrow="Points d'accueil AIME® · démonstration" title="Un point d'accueil près de chez vous" subtitle="Lieux fictifs de démonstration. Pour les organismes officiels (MSA, CAF, CPAM…), consultez la page Accompagnement.">
+      <Hero image="/images/hero-conseiller.jpg" gradient="planning" eyebrow="Points d'accueil AIME® · démonstration" title="Un point d'accueil près de chez vous" subtitle="Lieux fictifs de démonstration. Pour les organismes officiels (MSA, CAF, CPAM…), consultez la page Accompagnement.">
         <form role="search" className="mt-9 flex max-w-xl overflow-hidden rounded-lg bg-white shadow-xl">
           <label htmlFor="q" className="sr-only">Ville, code postal ou région</label>
           <div className="flex flex-1 items-center gap-2 px-4">
@@ -31,7 +39,10 @@ export default async function AnnuairePage({ searchParams }: { searchParams: Pro
 
       <div className="mx-auto max-w-6xl px-6 py-20">
         {items.length === 0 ? (
-          <EmptyState title="Aucun bureau trouvé" description="Essayez une autre ville ou un autre code postal." />
+          <EmptyState
+            title={directoryAvailable ? "Aucun bureau trouvé" : "Annuaire indisponible pour le moment"}
+            description={directoryAvailable ? "Essayez une autre ville ou un autre code postal." : "Les lieux de démonstration seront affichés dès que la base de données du site sera configurée."}
+          />
         ) : (
           <div className="grid gap-5 md:grid-cols-2">
             {items.map((office) => (

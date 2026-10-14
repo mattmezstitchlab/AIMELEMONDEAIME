@@ -30,19 +30,20 @@ export function JourneyWizard({ situation, questions, initial, journeyId, projec
   const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, string>>(initial);
   const [id, setId] = useState<number | undefined>(journeyId);
-  const firstEmpty = questions.findIndex((q) => !initial[q.key]);
-  const [step, setStep] = useState(firstEmpty === -1 ? questions.length : firstEmpty);
+  const visibleQuestions = questions.filter((question) => !question.showWhen || answers[question.showWhen.key] === question.showWhen.value);
+  const firstEmpty = visibleQuestions.findIndex((question) => !initial[question.key]);
+  const [step, setStep] = useState(firstEmpty === -1 ? visibleQuestions.length : firstEmpty);
   const [projectChoice, setProjectChoice] = useState("new");
   const { fb, pending, run } = useRun();
-  const q = questions[step];
-  const done = step >= questions.length;
+  const q = visibleQuestions[step];
+  const done = step >= visibleQuestions.length;
 
   function save(next: number) {
     run(() => saveJourneyDraft(situation, answers, id), (r) => { if (r.ok) { if (r.id) setId(r.id); setStep(next); } });
   }
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3"><div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200" aria-hidden="true"><div className="h-full rounded-full bg-emerald-700 transition-all" style={{ width: `${(Math.min(step, questions.length) / questions.length) * 100}%` }} /></div><span className="text-xs font-semibold text-slate-600">{Math.min(step + 1, questions.length)} / {questions.length}</span></div>
+      <div className="flex items-center gap-3"><div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200" aria-hidden="true"><div className="h-full rounded-full bg-emerald-700 transition-all" style={{ width: `${(Math.min(step, visibleQuestions.length) / visibleQuestions.length) * 100}%` }} /></div><span className="text-xs font-semibold text-slate-600">{Math.min(step + 1, visibleQuestions.length)} / {visibleQuestions.length}</span></div>
       {!done && q && (
         <form onSubmit={(e) => { e.preventDefault(); if (q.required && !answers[q.key]) return; save(step + 1); }} className="space-y-3">
           <label id={`q-label-${q.key}`} htmlFor={q.type === "select" ? undefined : `q-${q.key}`} className="block text-lg font-bold text-slate-900">{q.label}{q.required ? "" : <span className="ml-2 text-xs font-normal text-slate-500">(facultatif)</span>}</label>
@@ -80,7 +81,7 @@ export function JourneyWizard({ situation, questions, initial, journeyId, projec
           )}
           <Note value={fb} />
           <div className="flex flex-wrap gap-2">
-            <SecondaryButton type="button" onClick={() => setStep(questions.length - 1)}>Revoir mes réponses</SecondaryButton>
+            <SecondaryButton type="button" onClick={() => setStep(visibleQuestions.length - 1)}>Revoir mes réponses</SecondaryButton>
             <PrimaryButton type="button" disabled={pending || !id} onClick={() => run(() => finalizeJourney(id!, projectChoice), (r) => { if (r.ok && r.id) router.push(`/espace/demarches/suivi/${r.id}`); })}>{pending ? "Préparation…" : "Préparer mon plan"}</PrimaryButton>
           </div>
           {!id && <p className="text-xs text-amber-800">Enregistrez au moins une réponse pour créer la démarche.</p>}

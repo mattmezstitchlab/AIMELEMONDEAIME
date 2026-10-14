@@ -77,7 +77,8 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
     if (j.status !== "questionnaire") return { ok: false, error: "Le plan a déjà été préparé." };
     const def = SITUATION_BY_KEY.get(j.situation)!;
     if (j.situation === "famille" && j.answers.evenement === "deces") return { ok: false, error: "Le décès d'un proche dispose maintenant d'un parcours dédié. Ouvrez « Un proche est décédé » pour préparer les étapes adaptées." };
-    const missing = def.questions.filter((q) => q.required && !j.answers[q.key]);
+    const visibleQuestions = def.questions.filter((q) => !q.showWhen || j.answers[q.showWhen.key] === q.showWhen.value);
+    const missing = visibleQuestions.filter((q) => q.required && !j.answers[q.key]);
     if (missing.length) return { ok: false, error: `Il manque une réponse : « ${missing[0].label} ».` };
 
     let projectId: number | null = null;
@@ -116,7 +117,7 @@ export async function finalizeJourney(journeyId: number, projectChoice: string):
           };
         }));
       }
-      const summary = def.questions.filter((q) => j.answers[q.key]).map((q) => `${q.label} ${q.options?.find(([v]) => v === j.answers[q.key])?.[1] ?? j.answers[q.key]}`).join("\n");
+      const summary = visibleQuestions.filter((q) => j.answers[q.key]).map((q) => `${q.label} ${q.options?.find(([v]) => v === j.answers[q.key])?.[1] ?? j.answers[q.key]}`).join("\n");
       await tx.update(journeys).set({ status: "en_cours", projectId, summary, rulesVersion: RULES_VERSION, title: j.situation === "evenement" ? `Événement à ${j.answers.lieu}` : j.situation === "mariage" ? `Mariage à ${j.answers.lieu}` : def.short, updatedAt: new Date() }).where(eq(journeys.id, j.id));
     });
     await log(j.id, user.id, `Plan préparé : ${rules.length} étapes et pièces (règles ${RULES_VERSION}).${projectId ? " Projet relié." : ""}`);

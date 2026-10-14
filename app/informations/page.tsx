@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
 import { Hero } from "@/components/ui";
 import { Icon } from "@/components/icon";
-import { db } from "@/db";
+import { db, isDatabaseConfigured } from "@/db";
 import { articles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
@@ -21,14 +21,17 @@ export const dynamic = "force-dynamic";
 export default async function InformationsHub({ searchParams }: { searchParams: Promise<{ vue?: string }> }) {
   const { vue } = await searchParams;
   const guidesOnly = vue === "guides";
-  const rows = await db.select().from(articles).where(eq(articles.isPublished, true));
-  const visible = guidesOnly ? rows.filter((a) => a.kind === "guide") : rows;
+  const rows = isDatabaseConfigured
+    ? await db.select().from(articles).where(eq(articles.isPublished, true)).catch(() => [])
+    : [];
+  const visible = guidesOnly ? rows.filter((article) => article.kind === "guide") : rows;
 
   return (
     <PublicPage>
       <Hero
         size="md"
         image="/images/hero-campagne.jpg"
+        gradient="event"
         eyebrow="Informations"
         title={guidesOnly ? "Guides pratiques" : "Tout ce qu'il faut savoir, au même endroit"}
         subtitle={guidesOnly

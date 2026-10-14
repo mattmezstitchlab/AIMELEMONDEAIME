@@ -1,181 +1,225 @@
 import Link from "next/link";
 import { PublicPage } from "@/components/public-shell";
-import { Hero, LinkButton, FeatureIcon, Tag } from "@/components/ui";
-import { Icon, type IconName } from "@/components/icon";
-import { db } from "@/db";
-import { articles, offices } from "@/db/schema";
-import { and, desc, eq, inArray, notInArray } from "drizzle-orm";
-import { ARTICLE_CATEGORY_LABELS, FEATURED_GUIDE_SLUGS, THEME_META } from "@/lib/constants";
-import { SITUATIONS } from "@/lib/situations";
-import { OrientationEntry } from "@/components/orientation-entry";
-
-const MOSAIC_TINT = "from-slate-950/70 via-slate-900/20 to-transparent";
-
-const MOSAIC: Array<{ label: string; desc: string; href: string; image: string; icon: IconName }> = [
-  { label: "Santé", desc: "Remboursements, arrêts de travail, prévention.", href: "/informations/sante", image: "/images/hero-sante.jpg", icon: "sante" },
-  { label: "Famille", desc: "Naissance, union, séparation, prestations.", href: "/informations/famille", image: "/images/hero-famille.jpg", icon: "famille" },
-  { label: "Mariage", desc: "Le mariage de bout en bout : dossier, invités, budget, jour J.", href: "/informations/mariage", image: "/images/hero-mariage.jpg", icon: "heart" },
-  { label: "Logement", desc: "Louer, être aidé, connaître ses droits.", href: "/informations/logement", image: "/images/hero-logement.jpg", icon: "logement" },
-  { label: "Argent et difficultés", desc: "Factures, loyer, crédits, impôts : les premiers gestes et les interlocuteurs gratuits.", href: "/informations/argent", image: "/images/hero-difficultes.jpg", icon: "paiements" },
-  { label: "Retraite", desc: "Carrière, estimation, demande en ligne.", href: "/informations/retraite", image: "/images/hero-retraite.jpg", icon: "retraite" },
-  { label: "Activité et cotisations", desc: "Créer, déclarer, cotiser.", href: "/informations/cotisations", image: "/images/hero-cotisations.jpg", icon: "cotisations" },
-  { label: "Emploi", desc: "Embauche, recherche d'emploi, formation.", href: "/informations/emploi", image: "/images/hero-emploi.jpg", icon: "emploi" },
-  { label: "Terre & quotidien", desc: "Produits locaux, dons, prêts, trajets, jardins.", href: "/le-monde-aime?univers=terre", image: "/images/univers-terre.jpg", icon: "sprout" },
-  { label: "Arts & rencontres", desc: "Artistes, concerts, ateliers, lieux, matériel.", href: "/le-monde-aime?univers=arts", image: "/images/univers-arts.jpg", icon: "music" },
-  { label: "Savoirs & générations", desc: "Transmission, cuisine, couture, mémoire locale.", href: "/le-monde-aime?univers=savoirs", image: "/images/univers-savoirs.jpg", icon: "graduation" },
-  { label: "Événements et artistes", desc: "Organiser, engager un artiste, préparer.", href: "/le-monde-aime?univers=arts", image: "/images/hero-accueil.jpg", icon: "calendar" },
-  { label: "Accompagner un proche", desc: "Autonomie, handicap, soutien aux aidants.", href: "/accompagnement", image: "/images/hero-conseiller.jpg", icon: "heart" },
-  { label: "Vie administrative", desc: "Orientation et organismes de référence.", href: "/informations", image: "/images/hero-espace.jpg", icon: "shield" },
-];
+import { Hero, LinkButton, Tag } from "@/components/ui";
+import { Icon } from "@/components/icon";
+import { db, isDatabaseConfigured } from "@/db";
+import { articles } from "@/db/schema";
+import { and, desc, eq } from "drizzle-orm";
+import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 type ArticleRow = typeof articles.$inferSelect;
 
+const PROJECT_FEATURES = [
+  {
+    icon: "users" as const,
+    title: "Invités et RSVP",
+    text: "Suivez les réponses foyer par foyer. Chaque lien RSVP est limité au foyer concerné, temporaire et révocable.",
+  },
+  {
+    icon: "shield" as const,
+    title: "Proches organisateurs",
+    text: "Donnez à chaque proche un accès limité au projet et au rôle confié, avec un lien temporaire que vous pouvez révoquer.",
+  },
+  {
+    icon: "calendar" as const,
+    title: "Budget et jour J",
+    text: "Rassemblez les devis, le programme, les contributions et le plan de table ; retrouvez une page du jour J à consulter ou imprimer.",
+  },
+];
+
+const PHASES = [
+  {
+    number: "01",
+    icon: "calendar" as const,
+    title: "D’abord, les démarches à la mairie",
+    text: "Date, commune, dossier civil, pièces et délais : vérifiez les modalités directement auprès de votre mairie.",
+    href: "/accompagnement?besoin=mariage",
+    linkLabel: "Commencer le parcours",
+  },
+  {
+    number: "02",
+    icon: "heart" as const,
+    title: "La fête, si vous en souhaitez une",
+    text: "En parallèle du civil, choisissez librement ce qui vous convient : lieu, repas, musique, photos ou aucune réception.",
+    href: "#projet-mariage",
+    linkLabel: "Voir les options facultatives",
+  },
+  {
+    number: "03",
+    icon: "users" as const,
+    title: "Le jour J et les proches",
+    text: "Si vous le souhaitez, coordonnez invités, réponses, programme, budget et coups de main dans un projet partagé.",
+    href: "#projet-mariage",
+    linkLabel: "Découvrir l’espace de préparation",
+  },
+  {
+    number: "04",
+    icon: "refresh" as const,
+    title: "Après l’union",
+    text: "Retrouvez les repères utiles après le mariage, à adapter à votre situation et à vérifier auprès des organismes concernés.",
+    href: "/informations/mariage",
+    linkLabel: "Voir les guides mariage",
+  },
+];
+
+async function getWeddingGuides(): Promise<ArticleRow[]> {
+  if (!isDatabaseConfigured) return [];
+  try {
+    return await db
+      .select()
+      .from(articles)
+      .where(and(eq(articles.category, "mariage"), eq(articles.isPublished, true)))
+      .orderBy(desc(articles.publishedAt))
+      .limit(3);
+  } catch {
+    return [];
+  }
+}
+
 function ArticleCard({ article }: { article: ArticleRow }) {
   return (
-    <Link href={`/guides/${article.slug}`} className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.04] transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="h-48 overflow-hidden">
+    <Link href={`/guides/${article.slug}`} className="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.05] transition hover:-translate-y-1 hover:shadow-lg">
+      <div className="h-44 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={THEME_META[article.category]?.image ?? "/images/hero-accueil.jpg"} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+        <img
+          src={THEME_META[article.category]?.image ?? "/images/hero-mariage.jpg"}
+          alt=""
+          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+        />
       </div>
-      <div className="p-7">
-        <Tag>{ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}</Tag>
-        <h3 className="mt-4 text-lg font-semibold leading-snug text-[#1d1d1f]">{article.title}</h3>
-        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{article.summary}</p>
+      <div className="p-6">
+        <Tag>{article.kind === "guide" ? "Guide pratique" : ARTICLE_CATEGORY_LABELS[article.category] ?? "Mariage"}</Tag>
+        <h3 className="mt-4 text-lg font-bold leading-snug text-slate-900">{article.title}</h3>
+        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600">{article.summary}</p>
+        <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+          Lire le guide<Icon name="arrow" className="h-4 w-4 transition group-hover:translate-x-1" />
+        </span>
       </div>
     </Link>
   );
 }
 
 export default async function HomePage() {
-  const featuredRows = await db.select().from(articles).where(and(eq(articles.isPublished, true), inArray(articles.slug, [...FEATURED_GUIDE_SLUGS])));
-  const featuredArticles = FEATURED_GUIDE_SLUGS.map((slug) => featuredRows.find((a) => a.slug === slug)).filter((a): a is ArticleRow => Boolean(a));
-  const latestArticles = await db.select().from(articles).where(and(eq(articles.isPublished, true), notInArray(articles.slug, [...FEATURED_GUIDE_SLUGS]))).orderBy(desc(articles.publishedAt)).limit(3);
-  const officeList = await db.select().from(offices);
+  const weddingGuides = await getWeddingGuides();
 
   return (
     <PublicPage>
       <Hero
         size="xl"
-        image="/images/hero-accueil.jpg"
-        eyebrow="AIME® · Le Monde Aime"
-        title={<>La terre, les arts<br />et les générations.</>}
-        subtitle="Trouvez près de vous de quoi vivre, créer et transmettre. Dites votre situation : AIME® vous oriente vers les personnes, les ressources et les démarches pour avancer."
+        image="/images/hero-mariage.jpg"
+        gradient="wedding"
+        eyebrow="AIME® · MARIAGE"
+        title={<>Votre mariage,<br />étape par étape.</>}
+        subtitle="D’abord les démarches civiles. Puis, si vous le souhaitez, la fête et sa coordination. Enfin, les repères après l’union."
+        actions={
+          <>
+            <LinkButton href="/accompagnement?besoin=mariage">
+              Commencer le parcours mariage<Icon name="arrow" className="h-4 w-4" />
+            </LinkButton>
+            <LinkButton href="#etapes-mariage" variant="ghost">Voir les étapes</LinkButton>
+          </>
+        }
       >
-        <div className="mt-8 max-w-xl"><OrientationEntry variant="hero" /></div>
-        <p className="mt-5 text-sm text-white/75">
-          <Link href="/inscription" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Créer mon espace</Link>
-          <span aria-hidden="true" className="mx-2 text-white/40">·</span>
-          <Link href="/decouvrir" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Découvrir la démo</Link>
-          <span aria-hidden="true" className="mx-2 text-white/40">·</span>
-          <Link href="/le-monde-aime" className="font-semibold text-white underline underline-offset-4 hover:text-emerald-200">Explorer la carte</Link>
+        <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/80">
+          Cérémonie civile seule ou journée de fête : vous choisissez les étapes qui vous concernent. AIME® ne transmet rien à une mairie et n’effectue aucune réservation ni paiement.
         </p>
       </Hero>
 
-      <section className="bg-white">
-        <div className="mx-auto grid max-w-6xl gap-16 px-6 py-32 sm:grid-cols-3 sm:gap-12 lg:py-40">
-          <FeatureIcon name="book" label="Une entrée par le besoin" text="Inutile de connaître l'organisme compétent : quelques questions suffisent pour être orienté." />
-          <FeatureIcon name="timer" label="Un seul espace" text="Vos démarches, projets, échanges et documents reliés dans AIME®. Aucune transmission automatique à un organisme externe." />
-          <FeatureIcon name="refresh" label="Des personnes près de vous" text="Producteurs, artistes, voisins et associations, sur la même carte." />
-        </div>
-        <p className="mx-auto -mt-16 max-w-3xl px-6 pb-24 text-center text-sm text-slate-600 lg:pb-28">Un prototype indépendant, transparent sur ce qui fonctionne et sur ce qui reste à vérifier. <Link href="/vision" className="font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-700">Lire notre méthode et nos limites</Link>.</p>
-      </section>
-
-      <section className="bg-[#fafaf9]">
-        <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
+      <section id="etapes-mariage" className="bg-white scroll-mt-20">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
           <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-700">Informations et univers</p>
-            <h2 className="mt-4 text-4xl font-bold leading-[1.1] text-[#1d1d1f] sm:text-5xl">Tout ce qui compte, par thématique.</h2>
-            <p className="mt-6 text-lg leading-relaxed text-slate-600">Les sujets du quotidien et les univers de Le Monde Aime, au même endroit.</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-600">Le parcours mariage, dans l’ordre</p>
+            <h2 className="mt-3 text-3xl font-bold leading-tight text-[#1d1d1f] sm:text-4xl">Du dossier civil aux suites de l’union.</h2>
+            <p className="mt-4 text-base leading-relaxed text-slate-600">
+              Commencez par la mairie, ajoutez seulement les options de fête qui vous correspondent, puis retrouvez les repères pour le jour J et l’après-mariage.
+            </p>
           </div>
-        </div>
-        <div className="grid grid-cols-2">
-          {MOSAIC.map((t) => (
-            <Link key={t.label} href={t.href} className="group relative isolate flex aspect-square flex-col justify-end overflow-hidden p-6 focus-visible:z-10 sm:p-10">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={t.image} alt="" className="absolute inset-0 z-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-              <div className={`absolute inset-0 z-10 bg-gradient-to-t ${MOSAIC_TINT}`} />
-              <span className="relative z-20 mb-auto grid h-11 w-11 place-items-center rounded-xl bg-white/15 text-white backdrop-blur"><Icon name={t.icon} className="h-5 w-5" /></span>
-              <h3 className="relative z-20 text-xl font-bold leading-tight text-white sm:text-3xl">{t.label}</h3>
-              <p className="relative z-20 mt-2 text-sm leading-relaxed text-white/85 sm:text-base">{t.desc}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
-          <div className="flex flex-wrap items-end justify-between gap-8">
-            <div className="max-w-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-700">Être accompagné</p>
-              <h2 className="mt-4 text-4xl font-bold leading-[1.1] text-[#1d1d1f] sm:text-5xl">De quoi avez-vous besoin aujourd&apos;hui ?</h2>
-              <p className="mt-6 text-lg leading-relaxed text-slate-600">Inutile de connaître l&apos;organisme compétent. Choisissez votre situation : AIME® réunit les interlocuteurs, les étapes et les ressources dans un seul endroit.</p>
-            </div>
-            <LinkButton href="/accompagnement" variant="ghost" className="!border-slate-300 !bg-white !text-emerald-800 hover:!bg-emerald-50">Voir l&apos;accompagnement <Icon name="arrow" className="h-4 w-4" /></LinkButton>
-          </div>
-          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {SITUATIONS.map((s) => (
-              <Link key={s.key} href={`/espace/demarches/nouvelle?situation=${s.key}`} className="group relative flex flex-col rounded-3xl bg-[#fafaf9] p-7 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-emerald-200">
-                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-emerald-100 text-emerald-800 transition group-hover:bg-emerald-800 group-hover:text-white"><Icon name={s.icon} className="h-6 w-6" /></span>
-                <span className="mt-6 text-lg font-bold leading-snug text-slate-900">{s.label}</span>
-                <span className="mt-2 text-sm leading-relaxed text-slate-600">{s.description}</span>
-                <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-800">{s.pilot ? "Parcours complet" : "Être orienté"} <Icon name="arrow" className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {PHASES.map((phase) => (
+              <Link key={phase.number} href={phase.href} className="group rounded-2xl bg-[#fafaf9] p-6 transition hover:bg-white hover:shadow-lg hover:ring-1 hover:ring-slate-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold tracking-[0.16em] text-slate-500">ÉTAPE {phase.number}</span>
+                  <Icon name={phase.icon} className="h-6 w-6 text-slate-700" />
+                </div>
+                <h3 className="mt-5 text-xl font-bold text-slate-900">{phase.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{phase.text}</p>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  {phase.linkLabel}<Icon name="arrow" className="h-4 w-4 transition group-hover:translate-x-1" />
+                </span>
               </Link>
             ))}
           </div>
-          <div className="mt-16 overflow-hidden rounded-[32px] bg-emerald-950 px-8 py-14 text-center text-white sm:px-16">
-            <h3 className="text-2xl font-bold sm:text-3xl">Envie de voir à quoi ressemble « Mon espace » ?</h3>
-            <p className="mx-auto mt-3 max-w-xl text-white/80">Parcourez une démonstration complète, sans créer de compte.</p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/decouvrir" className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-bold text-emerald-950 hover:bg-emerald-50">Découvrir l&apos;espace (démo) <Icon name="arrow" className="h-4 w-4" /></Link>
-              <Link href="/inscription" className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-3 text-sm font-bold text-white hover:bg-white/10">Créer mon espace</Link>
-            </div>
-          </div>
         </div>
       </section>
 
-      {featuredArticles.length > 0 ? (
-        <section className="bg-white">
-          <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
-            <div className="max-w-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-700">Les guides essentiels</p>
-              <h2 className="mt-4 text-4xl font-bold leading-[1.1] text-[#1d1d1f] sm:text-5xl">Guides à la une.</h2>
-              <p className="mt-6 text-lg leading-relaxed text-slate-600">Un guide d&apos;entrée par grande thématique, choisi durablement : mariage, famille, santé, argent, logement, retraite.</p>
-            </div>
-            <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {featuredArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      <section className="bg-[#fafaf9]">
-        <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8 lg:py-40">
+      <section id="projet-mariage" className="scroll-mt-20 bg-[#fafaf9]">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <h2 className="text-4xl font-bold text-[#1d1d1f] sm:text-5xl">Derniers guides.</h2>
-            <Link href="/informations?vue=guides" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline">
-              Tous les guides <Icon name="arrow" className="h-4 w-4" />
-            </Link>
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-600">Votre espace de préparation</p>
+              <h2 className="mt-3 text-3xl font-bold leading-tight text-[#1d1d1f] sm:text-4xl">Tout au même endroit, chacun·e à sa juste place.</h2>
+              <p className="mt-4 text-base leading-relaxed text-slate-600">
+                Si vous préparez une fête, le projet partagé aide à coordonner les invités et les proches, du premier RSVP au jour J. La cérémonie civile seule reste un parcours complet.
+              </p>
+            </div>
+            <LinkButton href="/accompagnement?besoin=mariage">
+              Préparer mon mariage<Icon name="arrow" className="h-4 w-4" />
+            </LinkButton>
           </div>
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {latestArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {PROJECT_FEATURES.map((feature) => (
+              <article key={feature.title} className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+                <Icon name={feature.icon} className="h-7 w-7 text-slate-700" />
+                <h3 className="mt-4 text-lg font-bold text-slate-900">{feature.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{feature.text}</p>
+              </article>
             ))}
           </div>
+          <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-slate-500">
+            <Icon name="lock" className="mt-0.5 h-4 w-4 shrink-0" />
+            Vos réponses au parcours et vos documents personnels restent privés : les invités et les proches organisateurs n’y ont pas accès. AIME® ne réserve, ne paie et ne transmet rien à votre place.
+          </p>
         </div>
       </section>
 
       <section className="bg-white">
-        <div className="mx-auto max-w-3xl px-6 py-32 text-center lg:py-40">
-          <p className="text-2xl leading-relaxed text-slate-600">Trouvez un point d&apos;accueil parmi {officeList.length} lieux de démonstration :</p>
-          <form action="/annuaire" role="search" className="mx-auto mt-10 flex max-w-xl overflow-hidden rounded-2xl bg-[#fafaf9] shadow-sm ring-1 ring-black/[0.05]">
-            <label htmlFor="home-q" className="sr-only">Ville ou code postal</label>
-            <input id="home-q" name="q" placeholder="Ville ou code postal" className="min-w-0 flex-1 bg-transparent px-6 py-5 text-base outline-none" />
-            <button type="submit" className="bg-emerald-800 px-8 text-base font-semibold text-white hover:bg-emerald-900">Rechercher</button>
-          </form>
+        <div className="mx-auto max-w-7xl px-6 py-16 text-center lg:px-8 lg:py-20">
+          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-600">À votre rythme</p>
+          <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-bold leading-tight text-[#1d1d1f] sm:text-4xl">Commencez par la prochaine étape, pas par tout le reste.</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600">Le parcours garde le fil du dossier civil, des options de fête que vous choisissez et des repères après l’union.</p>
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
+            <LinkButton href="/accompagnement?besoin=mariage">Commencer le parcours mariage<Icon name="arrow" className="h-4 w-4" /></LinkButton>
+            <LinkButton href="/informations/mariage" variant="ghost">Lire les guides mariage</LinkButton>
+          </div>
+        </div>
+      </section>
+
+      {weddingGuides.length > 0 && (
+        <section className="bg-[#fafaf9]">
+          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-600">Pour aller plus loin</p>
+                <h2 className="mt-3 text-3xl font-bold text-[#1d1d1f] sm:text-4xl">Guides pratiques pour le mariage.</h2>
+              </div>
+              <Link href="/informations/mariage" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 underline underline-offset-4">
+                Tous les guides<Icon name="arrow" className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="mt-9 grid gap-6 md:grid-cols-3">
+              {weddingGuides.map((article) => <ArticleCard key={article.id} article={article} />)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="border-t border-black/[0.06] bg-white">
+        <div className="mx-auto max-w-4xl px-6 py-12 text-center">
+          <p className="text-xs leading-relaxed text-slate-500">
+            AIME® est un prototype indépendant. Les démarches officielles dépendent notamment de votre situation et de votre mairie ; vérifiez toujours les informations auprès des sources officielles. AIME® n’est affilié à aucun organisme et n’effectue aucune réservation, déclaration ou transaction.
+          </p>
         </div>
       </section>
     </PublicPage>
