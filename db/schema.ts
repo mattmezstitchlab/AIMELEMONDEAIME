@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   serial,
@@ -9,6 +10,8 @@ import {
   jsonb,
   numeric,
   customType,
+  check,
+  index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
@@ -599,9 +602,35 @@ export const weddingGuests = pgTable("wedding_guests", {
   note: varchar("note", { length: 200 }).notNull().default(""),
   thanked: boolean("thanked").notNull().default(false),
   tableId: integer("table_id").references(() => weddingTables.id, { onDelete: "set null" }),
+  rsvpTokenHash: varchar("rsvp_token_hash", { length: 64 }),
+  rsvpExpiresAt: timestamp("rsvp_expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [uniqueIndex("wedding_guests_rsvp_token_hash_unique").on(table.rsvpTokenHash)]);
+
+export const weddingAccessRoleEnum = ["coordination", "temoin"] as const;
+export type WeddingAccessRole = (typeof weddingAccessRoleEnum)[number];
+
+/** Liens temporaires et révocables à portée limitée, sans compte membre. */
+export const weddingAccessLinks = pgTable(
+  "wedding_access_links",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    createdById: integer("created_by_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    label: varchar("label", { length: 80 }).notNull().default("Proche"),
+    role: varchar("role", { length: 20 }).notNull().$type<WeddingAccessRole>(),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("wedding_access_links_token_hash_unique").on(table.tokenHash),
+    index("wedding_access_links_project_idx").on(table.projectId),
+    check("wedding_access_links_role_check", sql`${table.role} in ('coordination', 'temoin')`),
+  ]
+);
 
 /** Tables du plan de table : seuls les foyers confirmés y prennent place. */
 export const weddingTables = pgTable("wedding_tables", {

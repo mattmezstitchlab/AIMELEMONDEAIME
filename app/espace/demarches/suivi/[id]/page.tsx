@@ -24,11 +24,15 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
   if (!d) notFound();
   const { journey: j, tasks, organisms, project } = d;
   const def = SITUATION_BY_KEY.get(j.situation)!;
-  const actions = tasks.filter((t) => t.kind === "action");
-  const pieces = tasks.filter((t) => t.kind === "piece");
+  const orderedTasks = j.situation === "mariage"
+    ? [...tasks].sort((a, b) => (a.dueAt?.getTime() ?? Number.POSITIVE_INFINITY) - (b.dueAt?.getTime() ?? Number.POSITIVE_INFINITY) || a.sortOrder - b.sortOrder)
+    : tasks;
+  const actions = orderedTasks.filter((t) => t.kind === "action");
+  const pieces = orderedTasks.filter((t) => t.kind === "piece");
   const next = actions.find((t) => !["termine", "effectue_declare"].includes(t.status));
   const orgBySlug = new Map(organisms.map((o) => [o.slug, o]));
-  const showArtists = j.status === "en_cours" && (j.situation === "evenement" || (j.situation === "mariage" && ["groupe", "dj"].includes(j.answers.musique ?? "")));
+  const weddingReception = j.answers.reception === "oui" || (!j.answers.reception && Boolean(j.answers.musique));
+  const showArtists = j.status === "en_cours" && (j.situation === "evenement" || (j.situation === "mariage" && weddingReception && ["groupe", "dj"].includes(j.answers.musique ?? "")));
   const artists = showArtists ? await searchArtists(j.situation === "mariage" ? "Musique" : (j.answers.discipline ?? ""), project ? { lat: Number(project.lat), lng: Number(project.lng) } : null, user.id) : [];
   const engagedIds = new Set(d.engagements.filter((e) => !["refusee", "annulee"].includes(e.status)).map((e) => e.artistId));
   const wedding = j.situation === "mariage" && project ? await getWeddingWorkspace(project.id) : null;
@@ -36,7 +40,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image={def.image} eyebrow={`Mes démarches · ${def.short}`} title={j.title} description={def.description} />
+      <SectionTitle image={def.image} gradient={j.situation === "mariage" ? "planning" : j.situation === "evenement" ? "event" : undefined} eyebrow={`Mes démarches · ${def.short}`} title={j.title} description={def.description} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link href="/espace/demarches" className="text-sm font-semibold text-emerald-800 underline">← Mes démarches</Link>
         <div className="flex flex-wrap gap-3"><a href={`/api/demarches/${j.id}/recapitulatif`} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700">Télécharger le récapitulatif</a><JourneyStatusButton journeyId={j.id} status={j.status} /></div>
@@ -67,7 +71,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
             <AddTask journeyId={j.id} />
           </Card>
 
-          {(j.situation === "evenement" || j.situation === "mariage") && (
+          {(j.situation === "evenement" || (j.situation === "mariage" && (showArtists || d.engagements.length > 0))) && (
             <Card>
               <h2 className="text-lg font-semibold text-slate-900">{j.situation === "mariage" ? "Engager les musiciens ou le DJ" : "Engager un artiste"}</h2>
               <p className="mt-1 text-xs text-slate-500">Demande envoyée → proposition reçue → devis accepté → contrat signé (déclaré) → embauche déclarée. Chaque étape est distincte ; AIME® n&apos;effectue ni signature, ni paiement, ni déclaration.</p>

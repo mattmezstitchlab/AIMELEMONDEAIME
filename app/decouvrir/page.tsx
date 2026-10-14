@@ -33,8 +33,8 @@ export default async function DecouvrirPage({ searchParams }: { searchParams: Pr
 
         {sp.indisponible && (
           <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-            La visite guidée n&apos;est pas disponible sur cet environnement (le compte de démonstration n&apos;y a pas été créé).
-            Vous pouvez <a href="/inscription" className="font-bold underline">créer un compte</a> pour découvrir l&apos;espace.
+            La visite guidée n&apos;est pas disponible : la base de données n&apos;est peut-être pas configurée ou le compte de démonstration n&apos;y a pas été créé.
+            Vous pouvez <a href="/inscription" className="font-bold underline">créer un compte</a> si la base est activée.
           </p>
         )}
 

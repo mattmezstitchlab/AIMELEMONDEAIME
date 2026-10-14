@@ -8,10 +8,11 @@ import { REGISTRATION_SITUATION_KEYS, SITUATION_LABELS } from "@/lib/constants";
 const initialState: ActionResult | null = null;
 type Office = { id: number; name: string; city: string };
 
-export function RegisterForm({ offices }: { offices: Office[] }) {
+export function RegisterForm({ offices, available = true, next }: { offices: Office[]; available?: boolean; next?: string }) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
   return (
     <form action={formAction} className="mt-6 flex flex-col gap-4" noValidate>
+      {next && <input type="hidden" name="next" value={next} />}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nom complet" name="fullName" required autoComplete="name" />
         <Field label="Adresse e-mail" name="email" type="email" required autoComplete="email" />
@@ -46,7 +47,7 @@ export function RegisterForm({ offices }: { offices: Office[] }) {
         <Field label="Situation familiale" name="familyStatus" placeholder="Ex : marié(e), 2 enfants" />
       </div>
       {state && !state.ok && <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{state.error}</p>}
-      <PrimaryButton type="submit" disabled={pending} className="mt-2">{pending ? "Création en cours…" : "Créer mon espace"}</PrimaryButton>
+      <PrimaryButton type="submit" disabled={pending || !available} className="mt-2">{pending ? "Création en cours…" : "Créer mon espace"}</PrimaryButton>
     </form>
   );
 }

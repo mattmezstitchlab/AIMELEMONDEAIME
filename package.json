@@ -13,6 +13,7 @@
     "db:seed": "tsx db/seed.ts"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "^0.0.81",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "dotenv": "17.3.1",
@@ -40,5 +41,8 @@
     "postcss": "^8.5.30",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

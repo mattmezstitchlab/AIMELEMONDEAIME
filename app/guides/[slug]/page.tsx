@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PublicPage } from "@/components/public-shell";
 import { Hero, LinkButton } from "@/components/ui";
 import { Icon } from "@/components/icon";
-import { db } from "@/db";
+import { db, isDatabaseConfigured } from "@/db";
 import { articles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
@@ -13,14 +13,18 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const [article] = await db.select({ title: articles.title, summary: articles.summary }).from(articles).where(eq(articles.slug, slug)).limit(1);
+  const [article] = isDatabaseConfigured
+    ? await db.select({ title: articles.title, summary: articles.summary }).from(articles).where(eq(articles.slug, slug)).limit(1).catch(() => [])
+    : [];
   if (!article) return { title: "Guide introuvable — AIME®" };
   return { title: `${article.title} — AIME®`, description: article.summary };
 }
 
 export default async function GuideDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [article] = await db.select().from(articles).where(eq(articles.slug, slug)).limit(1);
+  const [article] = isDatabaseConfigured
+    ? await db.select().from(articles).where(eq(articles.slug, slug)).limit(1).catch(() => [])
+    : [];
   if (!article || !article.isPublished) notFound();
 
   return (
@@ -28,6 +32,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
       <Hero
         size="md"
         image={THEME_META[article.category]?.image ?? "/images/hero-campagne.jpg"}
+        gradient={article.category === "mariage" ? "planning" : article.category === "famille" ? "wedding" : "event"}
         eyebrow={`${ARTICLE_CATEGORY_LABELS[article.category] ?? article.category} · ${article.kind === "guide" ? "Guide pratique" : "Article"}`}
         title={article.title}
         subtitle={article.summary}
