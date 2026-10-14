@@ -259,7 +259,7 @@ export default async function HomePage() {
             {openCircuits().map((circuit) => (
               <LinkRow key={circuit.key} href={`/circuits/${circuit.key}`} title={circuit.label} meta={circuit.tagline} />
             ))}
-            <LinkRow href="/circuits" title="Tous les circuits" meta="Producteurs, coups de main, associations et collectifs : ce qui est ouvert aujourd'hui, et comment un circuit s'écrit." />
+            <LinkRow href="/circuits" title="Tous les circuits" meta="Les sept, ce qu’ils ouvrent, et la règle commune : votre commune suffit, rien ne se conclut sans accord." />
           </div>
         </section>
 
@@ -268,6 +268,14 @@ export default async function HomePage() {
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-3">
             Le parcours garde le fil du dossier civil, des proches, de la fête si vous en voulez une — et de ce que vous décidez
             de transmettre.
+          </p>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-ink-3">
+            Autour du mariage, les circuits prennent le relais : les{" "}
+            <Link href="/circuits/producteurs" className="underline">producteurs</Link> pour le repas, les{" "}
+            <Link href="/circuits/artisans" className="underline">artisans</Link> pour les retouches et les réparations, les{" "}
+            <Link href="/circuits/logements" className="underline">logements</Link> et les{" "}
+            <Link href="/circuits/transports" className="underline">trajets</Link> pour les invités qui viennent de loin — puis la{" "}
+            <Link href="/circuits/transmission" className="underline">transmission</Link> pour ce qui se passe après.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <LinkButton href="/accompagnement?besoin=mariage" size="lg">

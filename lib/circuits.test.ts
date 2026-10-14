@@ -59,6 +59,22 @@ test("deux circuits ne revendiquent pas le même type de fiche", () => {
   assert.equal(circuitForPointKind("inconnu"), undefined);
 });
 
+test("chaque circuit dit ses voisins, et ces voisins existent", () => {
+  const keys = new Set(CIRCUITS.map((circuit) => circuit.key));
+  for (const circuit of CIRCUITS) {
+    assert.ok(circuit.neighbours.length >= 2, `${circuit.key} : au moins deux portes vers les autres circuits`);
+    const vus = new Set<string>();
+    for (const voisin of circuit.neighbours) {
+      assert.ok(keys.has(voisin.key), `${circuit.key} : le circuit voisin « ${voisin.key} » n'existe pas`);
+      assert.notEqual(voisin.key, circuit.key, `${circuit.key} ne peut pas se renvoyer à lui-même`);
+      assert.ok(!vus.has(voisin.key), `${circuit.key} : le voisin « ${voisin.key} » est écrit deux fois`);
+      vus.add(voisin.key);
+      assert.ok(voisin.why.trim().length > 20, `${circuit.key} → ${voisin.key} : la raison d'y aller tient en trois mots, ce n'est pas une raison`);
+      assert.ok(voisin.why.endsWith("."), `${circuit.key} → ${voisin.key} : la raison d'y aller n'est pas une phrase`);
+    }
+  }
+});
+
 test("les circuits gardent le vocabulaire du site : plus de carte à remplir", () => {
   for (const circuit of CIRCUITS) {
     const text = JSON.stringify(circuit).toLowerCase();

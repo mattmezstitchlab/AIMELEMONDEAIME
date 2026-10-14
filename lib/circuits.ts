@@ -34,6 +34,13 @@ export type Circuit = {
   /** Ce que l'on dépose dans ce circuit. */
   deposit: { label: string; text: string };
   /**
+   * Les circuits voisins, avec la raison d'y aller depuis celui-ci.
+   *
+   * Trois portes, pas la liste complète : c'est un fil — ce qui va souvent
+   * avec ce circuit — et l'index des circuits reste là pour voir les sept.
+   */
+  neighbours: Array<{ key: string; why: string }>;
+  /**
    * Le vocabulaire du catalogue : il n'existe que sur un circuit à fiches.
    * Un circuit qui n'a pas de fiches (les coups de main) n'en porte pas.
    */
@@ -141,6 +148,11 @@ export const PRODUCTEURS: Circuit = {
     statusLabels: { commandee: "En attente de préparation", prete: "Prête à être retirée", recuperee: "Retirée", annulee: "Annulée" },
   },
   board: "structures",
+  neighbours: [
+    { key: "coups-de-main", why: "Un coup de main à la belle saison, une heure de conduite : ça se propose là." },
+    { key: "artisans", why: "Pour réparer le matériel au lieu de le remplacer." },
+    { key: "logements", why: "Pour loger celles et ceux qui viennent travailler la saison." },
+  ],
   pointKind: "producteur",
   steps: [
     { title: "Une fiche située par la commune", text: "Nom, commune, code postal, ce que vous proposez. Le point reste approximatif : il dit « dans ce secteur », jamais votre porte." },
@@ -192,6 +204,11 @@ export const COUPS_DE_MAIN: Circuit = {
     demandSent: "La personne vous répond directement.",
   },
   board: "hands",
+  neighbours: [
+    { key: "producteurs", why: "Là où un après-midi donné se transforme en panier." },
+    { key: "transports", why: "Un trajet partagé vaut un coup de main, et se propose là-bas." },
+    { key: "transmission", why: "Ce qu'on sait faire, on peut aussi l'apprendre, pas seulement le prêter." },
+  ],
   pointKind: "presence",
   steps: [
     { title: "Vous dites ce que vous savez faire", text: "Bricolage, jardinage, courses, écoute, cours de français, conduite, musique : les mots que les gens cherchent." },
@@ -255,6 +272,11 @@ export const ASSOCIATIONS: Circuit = {
     statusLabels: { commandee: "En attente de réponse", prete: "Mise en relation acceptée", recuperee: "Rencontre faite", annulee: "Annulée" },
   },
   board: "structures",
+  neighbours: [
+    { key: "coups-de-main", why: "Les bénévoles d'un samedi se trouvent ici." },
+    { key: "logements", why: "Un local, une salle, un hébergement : ce que le collectif peut offrir." },
+    { key: "transmission", why: "Un atelier qui se répète devient une transmission." },
+  ],
   pointKind: "association",
   steps: [
     { title: "Une fiche située par la commune", text: "Nom, commune, code postal, objet. Le point reste approximatif : il dit « dans ce secteur », jamais l'adresse de votre local." },
@@ -384,6 +406,11 @@ export const ARTISANS: Circuit = {
     statusLabels: { commandee: "En attente de réponse", prete: "Prêt à être remis", recuperee: "Remis", annulee: "Annulée" },
   },
   board: "structures",
+  neighbours: [
+    { key: "producteurs", why: "Ce qu'on répare vient souvent de tout près." },
+    { key: "coups-de-main", why: "Un savoir-faire peut aussi se donner, une heure par semaine." },
+    { key: "transmission", why: "Beaucoup de métiers s'apprennent encore auprès de quelqu'un." },
+  ],
   pointKind: "artisan",
   steps: [
     { title: "Une fiche située par la commune", text: "Nom, commune, code postal, savoir-faire. Le point reste approximatif : il dit « dans ce secteur », jamais l'adresse de l'atelier." },
@@ -434,6 +461,11 @@ export const LOGEMENTS: Circuit = {
     demandSent: "La personne vous répond directement.",
   },
   board: "annonces",
+  neighbours: [
+    { key: "transports", why: "Comment venir, quand on n'a pas de voiture." },
+    { key: "producteurs", why: "Vivre ici commence par savoir où l'on mange." },
+    { key: "artisans", why: "Un logement à remettre en état cherche des mains." },
+  ],
   listingCategory: "logements",
   steps: [
     { title: "Une annonce située par la commune", text: "Type de logement, commune, code postal, dates. Le point reste approximatif : il dit « dans ce secteur », jamais l'adresse." },
@@ -484,6 +516,11 @@ export const TRANSPORTS: Circuit = {
     demandSent: "Le conducteur doit confirmer explicitement.",
   },
   board: "trajets",
+  neighbours: [
+    { key: "logements", why: "Où dormir, une fois arrivé." },
+    { key: "coups-de-main", why: "Un trajet peut se rendre sans rien attendre en retour." },
+    { key: "producteurs", why: "Rapporter un panier au retour, en passant." },
+  ],
   steps: [
     { title: "Un départ, une arrivée, une date", text: "Deux communes et un code postal suffisent : le point reste approximatif, et aucun horaire précis n'est publié." },
     { title: "Ce qui reste de place", text: "Chaque trajet dit ce qu'il peut prendre — paniers, objets, passagers — et ce qu'il ne peut pas." },
@@ -533,6 +570,11 @@ export const TRANSMISSION: Circuit = {
     demandSent: "La personne vous répond directement.",
   },
   board: "personnes",
+  neighbours: [
+    { key: "artisans", why: "Le geste s'apprend auprès de quelqu'un qui en vit." },
+    { key: "producteurs", why: "Les savoir-faire de la terre se passent de main en main." },
+    { key: "associations", why: "Les collectifs organisent souvent les ateliers." },
+  ],
   steps: [
     { title: "Ce que vous acceptez de transmettre", text: "Un geste, un métier, une recette, une langue, une mémoire de famille ou de village : quelques mots suffisent pour commencer." },
     { title: "Une fiche visible seulement si vous le décidez", text: "Votre commune suffit à situer la proposition, sans adresse. Rien n'apparaît tant que vous ne l'avez pas voulu, et tout se retire en un geste." },

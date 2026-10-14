@@ -348,18 +348,29 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
           </div>
 
           <div className="mt-10 border-t border-line pt-6">
-            <h2 className="text-sm font-bold text-ink">Les autres circuits</h2>
-            <ul className="mt-3 flex flex-wrap gap-3">
-              {CIRCUITS.filter((item) => item.key !== circuit.key).map((item) => (
-                <li key={item.key}>
-                  <Link href={`/circuits/${item.key}`} className="inline-flex items-center gap-2 rounded-full ring-1 ring-line px-4 py-2 text-sm font-semibold text-ink-2 transition hover:text-ink">
-                    <Icon name={item.icon} className="h-4 w-4" />
-                    {item.label}
-                    {item.status === "prevu" && <Tag tone="outline">En préparation</Tag>}
+            <h2 className="text-sm font-bold text-ink">Ce qui va souvent avec</h2>
+            <div className="mt-2">
+              {circuit.neighbours.map((voisin) => {
+                const autre = circuitFor(voisin.key);
+                if (!autre) return null;
+                return (
+                  <Link
+                    key={voisin.key}
+                    href={`/circuits/${autre.key}`}
+                    className="group flex items-center justify-between gap-4 border-b border-line py-3.5 transition last:border-b-0"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-[15px] text-ink">{autre.label}</span>
+                      <span className="mt-0.5 block text-xs text-ink-3">{voisin.why}</span>
+                    </span>
+                    <Icon name="arrow" className="h-4 w-4 shrink-0 text-ink-4 transition group-hover:translate-x-0.5 group-hover:text-ink" />
                   </Link>
-                </li>
-              ))}
-            </ul>
+                );
+              })}
+            </div>
+            <p className="mt-5 text-xs text-ink-4">
+              <Link href="/circuits" className="underline">Voir les sept circuits et ce qu&apos;ils ouvrent</Link> · la même règle partout : votre commune suffit.
+            </p>
           </div>
         </Container>
       </section>

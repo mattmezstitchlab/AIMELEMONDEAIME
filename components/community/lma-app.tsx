@@ -312,6 +312,12 @@ export function CommunityApp({ data }: { data: LmaData }) {
             <div className="rounded-panel bg-canvas ring-1 ring-line p-6 shadow-rested sm:p-8">
               <h1 className="text-[1.9rem] leading-tight tracking-[-0.02em] text-ink">Que souhaitez-vous publier ?</h1>
               <p className="mt-2 text-sm text-ink-2">Indiquez la commune et le code postal : le point est déduit automatiquement, il reste approximatif. L&apos;adresse précise n&apos;est partagée qu&apos;avec les personnes concernées, après accord.</p>
+              <p className="mt-2 text-sm text-ink-2">
+                Ici, c&apos;est le voisinage : une annonce ponctuelle, une recherche, un projet. Pour ce qui se répète — vendre
+                régulièrement, proposer un trajet, un logement, un savoir-faire ou ce qu&apos;on transmet — les{" "}
+                <Link href="/circuits" className="font-semibold text-ink underline">sept circuits</Link> ont leur cadre, avec le
+                même point approximatif et le même accord entre les personnes.
+              </p>
               {!user ? <div className="mt-6 rounded-card bg-muted p-4 text-sm text-ink-2">Les comptes ouvrent bientôt : en attendant, tout le public reste consultable. <Link href="/mon-espace" className="font-bold text-ink underline">Mon espace</Link></div>
               : !isMember ? <div className="mt-6 rounded-card bg-muted p-4 text-sm text-ink-2">La publication est réservée aux comptes membres.</div> : (
                 <>
