@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { ASSOCIATIONS, CIRCUITS, DEFAULT_ORDER_STATUS_LABELS, PRODUCTEURS, circuitFor, circuitForPointKind, openCircuits, plannedCircuits } from "@/lib/circuits";
+import { LISTING_CATEGORIES } from "@/lib/lma";
 
 /*
  * Garde-fous des circuits.
@@ -48,7 +49,7 @@ test("un circuit ouvert a un tableau ; un circuit prévu dit ce qu'il reste à f
 });
 
 test("deux circuits ne revendiquent pas le même type de fiche", () => {
-  const kinds = CIRCUITS.filter((circuit) => circuit.board === "structures").map((circuit) => circuit.pointKind);
+  const kinds = CIRCUITS.filter((circuit) => circuit.board === "structures").map((circuit) => circuit.pointKind ?? "(sans type)");
   assert.equal(new Set(kinds).size, kinds.length, "deux circuits à fiches partagent le même type enregistré");
   assert.equal(circuitForPointKind("producteur")?.key, "producteurs");
   assert.equal(circuitForPointKind("presence"), undefined, "le circuit des coups de main n'affiche pas de fiches");
@@ -87,15 +88,35 @@ test("chaque circuit ouvert écrit ses mots : rien d'emprunté au circuit voisin
     } else {
       assert.equal(circuit.catalogue, undefined, `${circuit.key} : ce circuit n'a pas de catalogue à nommer`);
     }
-    for (const status of ["commandee", "prete", "recuperee", "annulee"] as const) {
-      assert.ok(circuit.words.statusLabels[status].length > 2, `${circuit.key} : statut « ${status} » sans mot`);
+    if (circuit.board === "structures") {
+      assert.ok(circuit.words.statusLabels, `${circuit.key} : un circuit à fiches dit ses quatre statuts`);
+      for (const status of ["commandee", "prete", "recuperee", "annulee"] as const) {
+        assert.ok((circuit.words.statusLabels ?? {})[status]?.length > 2, `${circuit.key} : statut « ${status} » sans mot`);
+      }
+    } else {
+      assert.equal(circuit.words.statusLabels, undefined, `${circuit.key} : ce circuit n'a pas de statut d'ordre`);
     }
   }
   assert.notEqual(
-    PRODUCTEURS.words.statusLabels.recuperee,
-    ASSOCIATIONS.words.statusLabels.recuperee,
+    PRODUCTEURS.words.statusLabels?.["recuperee"],
+    ASSOCIATIONS.words.statusLabels?.["recuperee"],
     "chaque circuit nomme ce qui se passe avec ses mots, pas ceux du circuit voisin",
   );
+});
+
+test("un circuit d'annonces dit la catégorie qu'il cadre, et rien d'autre", () => {
+  for (const circuit of CIRCUITS) {
+    if (circuit.board === "annonces") {
+      assert.ok(circuit.listingCategory, `${circuit.key} : un circuit d'annonces dit sa catégorie`);
+      assert.ok(
+        LISTING_CATEGORIES.some((category) => category.value === circuit.listingCategory),
+        `${circuit.key} : la catégorie « ${circuit.listingCategory} » n'existe pas dans Le Monde Aime`,
+      );
+      assert.equal(circuit.pointKind, undefined, `${circuit.key} : un circuit d'annonces n'a pas de fiche à situer`);
+    } else {
+      assert.equal(circuit.listingCategory, undefined, `${circuit.key} : pas de catégorie d'annonces ici`);
+    }
+  }
 });
 
 test("un circuit ne parle pas avec les mots d'un autre", () => {

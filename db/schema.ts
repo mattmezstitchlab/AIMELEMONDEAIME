@@ -355,6 +355,7 @@ export const communityCategoryEnum = [
   "arts_rencontres",
   "lieux_espaces",
   "savoirs_transmission",
+  "logements",
 ] as const;
 export type CommunityCategory = (typeof communityCategoryEnum)[number];
 export const communityListingStatusEnum = ["publiee", "suspendue", "archivee"] as const;

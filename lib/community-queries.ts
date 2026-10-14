@@ -13,6 +13,7 @@ import {
   localPoints,
   offices,
   users,
+  type CommunityCategory,
 } from "@/db/schema";
 
 /** Données publiques uniquement : pas de situation sociale, téléphone ni coordonnée précise. */
@@ -94,6 +95,94 @@ export async function getCommunityExplorerData() {
   const agencies = agencyRows.map((office) => ({ ...office, lat: office.lat ? Number(office.lat) : null, lng: office.lng ? Number(office.lng) : null }));
 
   return { listings, trips, servicePins, agencies };
+}
+
+/**
+ * Les annonces d'une catégorie, pour un circuit.
+ *
+ * Même forme que l'explorateur du Monde Aime (les cartes sont partagées), mais
+ * filtrée sur une seule catégorie : c'est ce qui fait un circuit de plus sans
+ * écrire un tableau de plus.
+ */
+export async function getCircuitListings(category: CommunityCategory) {
+  const rows = await db.select({
+    id: communityListings.id,
+    ownerId: communityListings.ownerId,
+    action: communityListings.action,
+    category: communityListings.category,
+    title: communityListings.title,
+    description: communityListings.description,
+    condition: communityListings.condition,
+    quantity: communityListings.quantity,
+    unit: communityListings.unit,
+    price: communityListings.price,
+    deposit: communityListings.deposit,
+    attributes: communityListings.attributes,
+    city: communityListings.city,
+    lat: communityListings.lat,
+    lng: communityListings.lng,
+    availableFrom: communityListings.availableFrom,
+    availableUntil: communityListings.availableUntil,
+    pickupDetails: communityListings.pickupDetails,
+    hasPhoto: communityListings.photoMime,
+    isDemo: communityListings.isDemo,
+    createdAt: communityListings.createdAt,
+    universes: communityListings.universes,
+    publicationType: communityListings.publicationType,
+    priceMode: communityListings.priceMode,
+    ownerDisplay: users.displayName,
+    ownerFull: users.fullName,
+    ownerVisible: users.profileVisible,
+  }).from(communityListings)
+    .innerJoin(users, eq(communityListings.ownerId, users.id))
+    .where(and(eq(communityListings.status, "publiee"), eq(communityListings.category, category)))
+    .orderBy(desc(communityListings.createdAt))
+    .limit(250);
+
+  return rows.map(({ ownerDisplay, ownerFull, hasPhoto, ...item }) => ({
+    ...item,
+    ownerName: ownerDisplay ?? ownerFull.split(" ")[0],
+    ownerVisible: item.ownerVisible,
+    // L'adresse précise ne circule jamais dans la liste publique.
+    pickupDetails: "Adresse et modalités communiquées après accord, dans l'échange privé.",
+    lat: Number(item.lat),
+    lng: Number(item.lng),
+    hasPhoto: hasPhoto !== null,
+  }));
+}
+
+/** Les trajets publiés, avec le nom du conducteur : la matière d'un circuit de trajets. */
+export async function getCircuitTrips() {
+  const rows = await db.select({
+    id: communityTrips.id,
+    ownerId: communityTrips.ownerId,
+    listingId: communityTrips.listingId,
+    startCity: communityTrips.startCity,
+    endCity: communityTrips.endCity,
+    startLat: communityTrips.startLat,
+    startLng: communityTrips.startLng,
+    endLat: communityTrips.endLat,
+    endLng: communityTrips.endLng,
+    departureAt: communityTrips.departureAt,
+    transportMode: communityTrips.transportMode,
+    capacity: communityTrips.capacity,
+    availableCapacity: communityTrips.availableCapacity,
+    terms: communityTrips.terms,
+    compensation: communityTrips.compensation,
+    ownerDisplay: users.displayName,
+    ownerFull: users.fullName,
+  }).from(communityTrips)
+    .innerJoin(users, eq(communityTrips.ownerId, users.id))
+    .where(eq(communityTrips.status, "publie"))
+    .orderBy(communityTrips.departureAt)
+    .limit(150);
+
+  return rows.map(({ ownerDisplay, ownerFull, ...trip }) => ({
+    ...trip,
+    ownerName: ownerDisplay ?? ownerFull.split(" ")[0],
+    startLat: Number(trip.startLat), startLng: Number(trip.startLng),
+    endLat: Number(trip.endLat), endLng: Number(trip.endLng),
+  }));
 }
 
 /** Données privées visibles uniquement par l'acheteur/le propriétaire des échanges concernés. */

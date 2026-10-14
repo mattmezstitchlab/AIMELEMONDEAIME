@@ -88,11 +88,19 @@ export function PlaceFields({
   );
 }
 
-export function PublishListingForm({ type, onPublished }: { type: "proposition" | "besoin"; onPublished?: () => void }) {
+export function PublishListingForm({ type, defaultAction, defaultCategory, onPublished }: {
+  type: "proposition" | "besoin";
+  /** Un circuit peut pré-remplir la modalité et la catégorie (logements, etc.). */
+  defaultAction?: string;
+  defaultCategory?: string;
+  onPublished?: () => void;
+}) {
   const isNeed = type === "besoin";
-  const [actionKind, setActionKind] = useState(isNeed ? "cherche" : "don");
-  const [category, setCategory] = useState(isNeed ? "objets_materiel" : "besoins_essentiels");
-  const [universes, setUniverses] = useState<string[]>(defaultUniverses(isNeed ? "objets_materiel" : "besoins_essentiels"));
+  const firstAction = defaultAction ?? (isNeed ? "cherche" : "don");
+  const firstCategory = defaultCategory ?? (isNeed ? "objets_materiel" : "besoins_essentiels");
+  const [actionKind, setActionKind] = useState(firstAction);
+  const [category, setCategory] = useState(firstCategory);
+  const [universes, setUniverses] = useState<string[]>(defaultUniverses(firstCategory));
   const [priceMode, setPriceMode] = useState("gratuit");
   const [unit, setUnit] = useState("pièce");
   const state = useAction(createCommunityListing, onPublished);

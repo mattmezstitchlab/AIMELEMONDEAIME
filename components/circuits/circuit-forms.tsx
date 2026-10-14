@@ -8,7 +8,8 @@ import {
 } from "@/lib/actions/circuits";
 import { PlaceFields } from "@/components/community/forms";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
-import { SKILL_SUGGESTIONS, type Circuit } from "@/lib/circuits";
+import { DEFAULT_ORDER_STATUS_LABELS, SKILL_SUGGESTIONS, type Circuit } from "@/lib/circuits";
+import { updateCommunityListingStatus } from "@/lib/actions/community";
 
 /*
  * Formulaires des circuits.
@@ -173,6 +174,18 @@ export function DeleteStructureButton({ structureId }: { structureId: number }) 
   );
 }
 
+/** Retire une annonce des listes : c'est une suspension, l'annonce reste en mémoire. */
+export function SuspendListingButton({ listingId }: { listingId: number }) {
+  return (
+    <ActionButton
+      label="Retirer des listes"
+      pendingLabel="Retrait…"
+      className="text-xs font-semibold text-ink underline"
+      action={() => updateCommunityListingStatus(listingId, "suspendue")}
+    />
+  );
+}
+
 export function DeleteItemButton({ itemId }: { itemId: number }) {
   return <ActionButton label="Retirer" pendingLabel="…" className="text-xs font-semibold text-ink underline" action={() => deleteCircuitItem(itemId)} />;
 }
@@ -210,7 +223,7 @@ export function OrderForm({ circuit, item, onDone }: {
 }
 
 export function OrderStatusButtons({ circuit, orderId }: { circuit: Circuit; orderId: number }) {
-  const labels = circuit.words.statusLabels;
+  const labels = circuit.words.statusLabels ?? DEFAULT_ORDER_STATUS_LABELS;
   return (
     <div className="mt-2 flex flex-wrap gap-3">
       <ActionButton label={labels.prete} pendingLabel="…" action={() => updateCircuitOrderStatus(orderId, "prete", circuit.key)} />

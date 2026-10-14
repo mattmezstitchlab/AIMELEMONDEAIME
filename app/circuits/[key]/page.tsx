@@ -6,12 +6,17 @@ import { PublicPage } from "@/components/public-shell";
 import { Container, Hero, SectionHeading, Tag } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { CircuitBoard } from "@/components/circuits/circuit-board";
+import { CircuitListings } from "@/components/circuits/circuit-listings";
+import { CircuitTrips, type CircuitTripRow } from "@/components/circuits/circuit-trips";
 import {
-  CIRCUITS, circuitFor,
+  CIRCUITS, DEFAULT_ORDER_STATUS_LABELS, circuitFor,
   type Circuit, type CircuitHandRow, type CircuitMine, type CircuitOrderRow, type CircuitStructureRow,
 } from "@/lib/circuits";
 import { getCurrentUser } from "@/lib/auth";
 import { getAvailableHands, getLocalStructures, getMemberCircuitData } from "@/lib/queries";
+import { getCircuitListings, getCircuitTrips, getMyCommunityData } from "@/lib/community-queries";
+import { communityCategoryEnum, type CommunityCategory } from "@/db/schema";
+import type { Listing, OwnListing, TripRequest } from "@/components/community/community-app";
 import { splitCommuneLabel } from "@/lib/point";
 
 /*
@@ -38,7 +43,7 @@ function orderRow(circuit: Circuit, raw: {
   id: number; reference: string; quantity: number; status: string; pickupAt: Date | string | null;
   productName: string; pointName: string; city: string; counterparty: string; isSeller: boolean;
 }): CircuitOrderRow {
-  const labels = circuit.words.statusLabels;
+  const labels = circuit.words.statusLabels ?? DEFAULT_ORDER_STATUS_LABELS;
   return {
     id: raw.id,
     reference: raw.reference,
@@ -66,6 +71,26 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
   let structures: CircuitStructureRow[] = [];
   let hands: CircuitHandRow[] = [];
   let mine: CircuitMine | null = null;
+
+  // Circuit d'annonces (logements et hébergement) : la catégorie du Monde Aime
+  // qui nourrit le circuit, et mes propres annonces.
+  const isListingCategory = (value: string | undefined): value is CommunityCategory =>
+    Boolean(value) && (communityCategoryEnum as readonly string[]).includes(value as string);
+  const listingCategory = isListingCategory(circuit.listingCategory) ? circuit.listingCategory : undefined;
+  const isListings = circuit.status === "ouvert" && circuit.board === "annonces" && Boolean(listingCategory);
+  let listings: Listing[] = [];
+  let myListings: OwnListing[] = [];
+  if (isListings && listingCategory) {
+    listings = await getCircuitListings(listingCategory).catch(() => []);
+  }
+
+  // Circuit de trajets : les trajets publiés dans Le Monde Aime, les mêmes ici.
+  const isTrips = circuit.status === "ouvert" && circuit.board === "trajets";
+  let trips: CircuitTripRow[] = [];
+  let myTripRequests: TripRequest[] = [];
+  if (isTrips) {
+    trips = await getCircuitTrips().catch(() => []);
+  }
 
   if (circuit.status === "ouvert" && circuit.board === "structures") {
     const points = await getLocalStructures().catch(() => []);
@@ -106,6 +131,14 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
       isMine: user?.id === row.userId,
       hasProfile: row.person?.profileVisible === true,
     }));
+  }
+
+  if (isMember && user && (isListings || isTrips)) {
+    const community = await getMyCommunityData(user.id).catch(() => null);
+    if (isListings && listingCategory) {
+      myListings = (community?.ownListings ?? []).filter((listing) => listing.category === listingCategory);
+    }
+    myTripRequests = community?.tripRequests ?? [];
   }
 
   if (isMember && user && circuit.status === "ouvert") {
@@ -225,7 +258,13 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
           <Container className="py-14 lg:py-16">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
               <SectionHeading
-                eyebrow={circuit.board === "hands" ? `${hands.length} disponibilité(s)` : `${structures.length} fiche(s)`}
+                eyebrow={circuit.board === "hands"
+                  ? `${hands.length} disponibilité(s)`
+                  : circuit.board === "annonces"
+                    ? `${listings.length} annonce(s)`
+                    : circuit.board === "trajets"
+                      ? `${trips.length} trajet(s)`
+                      : `${structures.length} fiche(s)`}
                 title={circuit.words.boardTitle}
                 description={circuit.deposit.text}
               />
@@ -235,7 +274,25 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
               </span>
             </div>
             <div className="mt-8">
-              <CircuitBoard circuit={circuit} structures={structures} hands={hands} mine={mine} signedIn={Boolean(user)} />
+              {isTrips ? (
+                <CircuitTrips
+                  circuit={circuit}
+                  trips={trips}
+                  mine={myTripRequests}
+                  userId={user?.id ?? null}
+                  isMember={isMember}
+                />
+              ) : isListings ? (
+                <CircuitListings
+                  circuit={circuit}
+                  listings={listings}
+                  mine={myListings}
+                  userId={user?.id ?? null}
+                  isMember={isMember}
+                />
+              ) : (
+                <CircuitBoard circuit={circuit} structures={structures} hands={hands} mine={mine} signedIn={Boolean(user)} />
+              )}
             </div>
           </Container>
         </section>

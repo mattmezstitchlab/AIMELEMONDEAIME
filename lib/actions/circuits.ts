@@ -7,7 +7,7 @@ import { localOrders, localPoints, localProducts, workerAvailabilities, type Loc
 import { requireRole, requireUser, AuthError } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { createNotification } from "@/lib/queries";
-import { circuitFor, circuitForPointKind, type Circuit } from "@/lib/circuits";
+import { DEFAULT_ORDER_STATUS_LABELS, circuitFor, circuitForPointKind, type Circuit } from "@/lib/circuits";
 import { communeLabel, isBoundedPoint, pointFromCommune } from "@/lib/point";
 
 /*
@@ -86,7 +86,7 @@ export async function createCircuitStructure(form: FormData): Promise<CircuitRes
       .insert(localPoints)
       .values({
         ownerId: user.id,
-        kind: circuit.pointKind,
+        kind: circuit.pointKind ?? "presence",
         name,
         description,
         city: communeLabel(city, postalCode),
@@ -267,7 +267,7 @@ export async function updateCircuitOrderStatus(orderId: number, status: LocalOrd
     await createNotification({
       userId: isSeller ? order.buyerId : structure.ownerId,
       title: circuit.words.statusUpdateTitle,
-      body: `${order.reference} · ${circuit.words.statusLabels[status]}`,
+      body: `${order.reference} · ${circuit.words.statusLabels?.[status] ?? DEFAULT_ORDER_STATUS_LABELS[status]}`,
       link: "/circuits",
     });
     await logAudit({ actorId: user.id, action: "statut_reservation_circuit", entityType: "local_order", entityId: String(orderId) });

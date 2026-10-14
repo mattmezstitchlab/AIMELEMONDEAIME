@@ -2324,6 +2324,10 @@ export async function seedLmaDemoIfEmpty(db: NodePgDatabase) {
     mk(jean, { action: "vends", category: "produits_locaux", title: "Exemple · Farine paysanne T65 (sachet 2 kg)", description: "Blé de la ferme moulu à la meule de pierre. Retrait à la ferme.", condition: "neuf", priceMode: "prix", price: "4.80", quantity: 25, unit: "sachet", universes: ["terre"], city: "Chartres", lat: "48.45", lng: "1.50" }),
     mk(jean, { action: "cherche", category: "evenementiel", title: "Exemple · Je cherche une sono pour la fête d'été à la ferme", description: "Enceinte et micro pour environ 80 personnes, un samedi de l'été. Sans budget fixé : à discuter.", publicationType: "besoin", priceMode: "prix", universes: ["arts", "terre"], city: "Chartres", lat: "48.45", lng: "1.50" }),
     mk(tom.id, { action: "cherche", category: "lieux_espaces", title: "Exemple · Nous cherchons un lieu pour répéter", description: "Petit groupe de musique, répétitions le soir, environ 10 personnes.", publicationType: "besoin", priceMode: "prix", universes: ["arts"], city: "Chartres", lat: "48.44", lng: "1.52" }),
+    // Logements et hébergement (circuit « logements »).
+    mk(paul, { action: "loue", category: "logements", title: "Exemple · Chambre meublée chez l'habitant", description: "Chambre de 12 m² avec salle d'eau, dans une maison calme près du centre. Charges comprises, cuisine partagée. Fiche fictive de démonstration.", priceMode: "prix", price: "380.00", quantity: 1, unit: "le mois", universes: ["terre"], city: "Chartres", lat: "48.46", lng: "1.47", availableFrom: soon, availableUntil: until }),
+    mk(marie, { action: "loue", category: "logements", title: "Exemple · Gîte à la ferme, semaine ou week-end", description: "Ancienne grange aménagée, 4 personnes, cuisine et terrasse. Fiche fictive de démonstration : le tarif se confirme selon la saison.", priceMode: "prix", price: "260.00", quantity: 1, unit: "la semaine", universes: ["terre"], city: "Saint-Brieuc", lat: "48.52", lng: "-2.75", availableFrom: soon, availableUntil: until }),
+    mk(amelie ?? marie, { action: "loue", category: "logements", title: "Exemple · Colocation : une chambre à prendre", description: "Maison partagée à trois, jardin, chambre libre au premier étage. Fiche fictive de démonstration.", priceMode: "prix", price: "420.00", quantity: 1, unit: "le mois", universes: ["terre"], city: "Nantes", lat: "47.24", lng: "-1.53", availableFrom: soon, availableUntil: until }),
   ]);
 
   // ---- Projet partagé : fête d'été à la ferme
@@ -2435,6 +2439,30 @@ export async function seedCommunityDemoIfEmpty(db: NodePgDatabase) {
     tripId: trip.id, requesterId: jean, communityRequestId: request.id,
     description: "Exemple fictif : un petit panier de légumes.", status: "demandee",
   });
+
+  // Trajets de démonstration pour le circuit « transports ».
+  await db.insert(communityTrips).values([
+    {
+      ownerId: marie,
+      startCity: "Saint-Brieuc",
+      endCity: "Chartres",
+      startLat: "48.51", startLng: "-2.77", endLat: "48.45", endLng: "1.49",
+      departureAt: new Date(Date.now() + 9 * 86400000),
+      transportMode: "voiture", capacity: 3, availableCapacity: 2,
+      terms: "Exemple fictif : retour vers la Beauce, deux places et un peu de coffre.",
+      compensation: "5.00",
+    },
+    {
+      ownerId: amelie ?? marie,
+      startCity: "Nantes",
+      endCity: "Chartres",
+      startLat: "47.24", startLng: "-1.53", endLat: "48.45", endLng: "1.49",
+      departureAt: new Date(Date.now() + 12 * 86400000),
+      transportMode: "utilitaire", capacity: 6, availableCapacity: 4,
+      terms: "Exemple fictif : tournée de livraison, on partage les frais au prorata.",
+      compensation: "8.00",
+    },
+  ]);
   return true;
 }
 

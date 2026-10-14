@@ -17,8 +17,8 @@ import type { LocalOrderStatus, LocalPointKind } from "@/db/schema";
 
 export type CircuitStatus = "ouvert" | "prevu";
 
-/** Le tableau que le circuit affiche : des structures, ou des personnes. */
-export type CircuitBoard = "structures" | "hands";
+/** Le tableau que le circuit affiche : des fiches, des disponibilités, des annonces. */
+export type CircuitBoard = "structures" | "hands" | "annonces" | "trajets";
 
 export type CircuitStep = { title: string; text: string };
 
@@ -71,12 +71,24 @@ export type Circuit = {
     counterpartyWord: string;
     demandTitle: string;
     demandSent: string;
-    /** Les quatre statuts d'une demande, dits avec les mots du circuit. */
-    statusLabels: Record<LocalOrderStatus, string>;
+    /**
+     * Les quatre statuts d'une demande, dits avec les mots du circuit.
+     * Il n'existe que là où il y a des fiches à demander.
+     */
+    statusLabels?: Record<LocalOrderStatus, string>;
   };
   board: CircuitBoard | null;
+  /**
+   * Pour un tableau d'annonces : la catégorie du Monde Aime qui nourrit le
+   * circuit. Un circuit ne réinvente pas les annonces, il les cadre.
+   */
+  listingCategory?: string;
   /** Valeur enregistrée dans local_points.kind (circuit des structures). */
-  pointKind: LocalPointKind;
+  /**
+   * Le type de fiche enregistré, quand le circuit affiche des fiches.
+   * Un circuit d'annonces ou de disponibilités n'en a pas.
+   */
+  pointKind?: LocalPointKind;
   steps: CircuitStep[];
   guarantees: string[];
   limits: string[];
@@ -178,7 +190,6 @@ export const COUPS_DE_MAIN: Circuit = {
     counterpartyWord: "auprès de",
     demandTitle: "Nouvelle demande de coup de main",
     demandSent: "La personne vous répond directement.",
-    statusLabels: { commandee: "Demande envoyée", prete: "Accord donné", recuperee: "Coup de main fait", annulee: "Annulée" },
   },
   board: "hands",
   pointKind: "presence",
@@ -391,10 +402,110 @@ export const ARTISANS: Circuit = {
   empty: "Aucun savoir-faire déclaré dans ce secteur pour l'instant. Le premier peut être le vôtre.",
 };
 
-export const CIRCUITS: Circuit[] = [PRODUCTEURS, COUPS_DE_MAIN, ASSOCIATIONS, ARTISANS];
+export const LOGEMENTS: Circuit = {
+  key: "logements",
+  label: "Logements et hébergement",
+  short: "Logements",
+  icon: "logement",
+  status: "ouvert",
+  tagline: "Une chambre, un gîte, une colocation, un logement à louer ou à prêter : ce qui se libère à côté de chez soi.",
+  intro:
+    "Un logement se propose ici sous forme d'annonce : commune, dates, participation éventuelle, et rien de plus. Le point est déduit de la commune et du code postal — l'adresse exacte ne se donne qu'à la personne avec qui vous vous êtes entendus. Les annonces publiées dans Le Monde Aime sont les mêmes : ce circuit les cadre.",
+  deposit: {
+    label: "Proposer un logement",
+    text: "Commune, type de logement, dates et participation éventuelle. L'annonce se retire à tout moment, et l'adresse reste privée jusqu'à l'accord.",
+  },
+  words: {
+    boardTitle: "Les logements du secteur.",
+    searchLabel: "Quel logement ?",
+    searchHint: "chambre, gîte, colocation…",
+    demandWord: "Demande",
+    demandDone: "La personne vous répond directement.",
+    statusUpdateTitle: "Votre demande a changé",
+    dateLabel: "Date souhaitée",
+    ordersTitle: "Mes demandes",
+    orderNoteLabel: "Un mot au propriétaire",
+    orderNoteHint: "Qui vous êtes, pour quand vous cherchez, ce que vous cherchez…",
+    paymentNote: "Aucun paiement ne passe par AIME® : loyer, caution et état des lieux se règlent directement entre vous.",
+    stockWord: "disponible(s)",
+    soldOut: "Plus disponible pour l'instant",
+    counterpartyWord: "auprès de",
+    demandTitle: "Nouvelle demande sur votre annonce",
+    demandSent: "La personne vous répond directement.",
+  },
+  board: "annonces",
+  listingCategory: "logements",
+  steps: [
+    { title: "Une annonce située par la commune", text: "Type de logement, commune, code postal, dates. Le point reste approximatif : il dit « dans ce secteur », jamais l'adresse." },
+    { title: "Ce qui se libère, et pour quand", text: "Chambre, gîte, colocation, logement entier : chaque annonce dit la période et la participation éventuelle, sans engagement." },
+    { title: "La demande, puis l'accord", text: "Une personne intéressée écrit, vous répondez si cela vous convient, et la suite se convient directement — visite, loyer, état des lieux." },
+  ],
+  guarantees: [
+    "Aucun paiement en ligne : ni loyer, ni caution, ni frais ne passent par AIME®.",
+    "L'adresse exacte ne circule jamais dans la liste : elle se donne après accord, entre les personnes.",
+    "L'annonce se retire ou se suspend en un geste, dès que le logement est pris.",
+  ],
+  limits: [
+    "AIME® n'établit ni bail, ni état des lieux, ni quittance, et ne remplace aucune démarche officielle de logement.",
+    "Aucun logement n'est visité ni vérifié : rien n'est certifié, tout se juge sur place.",
+  ],
+  empty: "Aucun logement proposé dans ce secteur pour l'instant. Le premier peut être le vôtre.",
+};
+
+export const TRANSPORTS: Circuit = {
+  key: "transports",
+  label: "Trajets et covoiturage",
+  short: "Trajets",
+  icon: "velo",
+  status: "ouvert",
+  tagline: "Un aller en voiture, un colis à vélo, une place dans l'utilitaire : ce qui roule près de chez soi, et vers où.",
+  intro:
+    "Un trajet se propose avec un départ, une destination, une date et les places disponibles. La commune et le code postal suffisent : aucun point précis n'est publié. Une personne demande la place ou le transport, le conducteur confirme explicitement, et la participation éventuelle se règle en main propre. Les trajets publiés dans Le Monde Aime sont les mêmes : ce circuit les cadre.",
+  deposit: {
+    label: "Proposer un trajet",
+    text: "Départ, destination, date, places et participation éventuelle. Le trajet se retire à tout moment, et chaque demande attend votre accord explicite.",
+  },
+  words: {
+    boardTitle: "Les trajets proposés dans le secteur.",
+    searchLabel: "Vers où, ou depuis où ?",
+    searchHint: "Saint-Brieuc, un retour, un colis…",
+    demandWord: "Demande de transport",
+    demandDone: "Le conducteur doit confirmer : rien n'est réservé avant son accord.",
+    statusUpdateTitle: "Votre demande de transport a changé",
+    dateLabel: "Date souhaitée",
+    ordersTitle: "Mes demandes de transport",
+    orderNoteLabel: "Un mot au conducteur",
+    orderNoteHint: "Ce que vous transportez, où le déposer…",
+    paymentNote: "Aucun paiement ne passe par AIME® : la participation annoncée se règle en main propre.",
+    stockWord: "place(s)",
+    soldOut: "Complet",
+    counterpartyWord: "auprès de",
+    demandTitle: "Nouvelle demande de transport",
+    demandSent: "Le conducteur doit confirmer explicitement.",
+  },
+  board: "trajets",
+  steps: [
+    { title: "Un départ, une arrivée, une date", text: "Deux communes et un code postal suffisent : le point reste approximatif, et aucun horaire précis n'est publié." },
+    { title: "Ce qui reste de place", text: "Chaque trajet dit ce qu'il peut prendre — paniers, objets, passagers — et ce qu'il ne peut pas." },
+    { title: "Le conducteur confirme", text: "La demande part vers le conducteur, qui accepte ou refuse explicitement. Aucun paiement ne passe par le site." },
+  ],
+  guarantees: [
+    "Aucun paiement en ligne : la participation annoncée se règle en main propre, ou rien du tout.",
+    "Le conducteur doit accepter explicitement : rien n'est réservé avant sa confirmation.",
+    "Un trajet se retire à tout moment, et rien ne se publie à une adresse précise.",
+  ],
+  limits: [
+    "AIME® n'organise ni le transport, ni l'assurance, ni les règles du covoiturage : la responsabilité reste celle des personnes.",
+    "Aucune place n'est garantie : une demande acceptée reste un accord entre deux personnes, sans engagement du site.",
+  ],
+  empty: "Aucun trajet proposé dans ce secteur pour l'instant. Le premier peut être le vôtre.",
+};
+
+export const CIRCUITS: Circuit[] = [PRODUCTEURS, COUPS_DE_MAIN, ASSOCIATIONS, ARTISANS, LOGEMENTS, TRANSPORTS];
 
 /** Le repli des libellés de statut reste celui des producteurs, premier circuit à fiches. */
-export const DEFAULT_ORDER_STATUS_LABELS: Record<LocalOrderStatus, string> = PRODUCTEURS.words.statusLabels;
+export const DEFAULT_ORDER_STATUS_LABELS: Record<LocalOrderStatus, string> =
+  PRODUCTEURS.words.statusLabels ?? { commandee: "En attente", prete: "Prête", recuperee: "Retirée", annulee: "Annulée" };
 
 export function circuitFor(key: string): Circuit | undefined {
   return CIRCUITS.find((circuit) => circuit.key === key);

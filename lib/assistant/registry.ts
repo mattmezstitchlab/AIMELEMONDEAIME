@@ -265,6 +265,21 @@ export const SCENARIOS: AssistantScenario[] = [
     ],
   },
 
+  {
+    id: "transports",
+    roles: ["membre"],
+    pages: ["/le-monde-aime", "/circuits/transports"],
+    question: "Trouver un trajet ou faire transporter quelque chose",
+    keywords: ["trajet", "trajets", "covoiturage", "transport", "colis", "livraison", "place", "voiture", "velo", "utilitaire", "circuit", "circuits"],
+    answer: "Les trajets ont leur circuit : un départ, une destination, une date, les places disponibles et la participation éventuelle. Vous envoyez une demande, le conducteur confirme explicitement, et la participation se règle en main propre — aucun paiement en ligne, aucune place garantie avant son accord.",
+    steps: [
+      { text: "J'ouvre le circuit des trajets et du covoiturage.", navigate: "/circuits/transports" },
+      { text: "Filtrez par commune de départ ou d'arrivée, ou par mot-clé.", highlight: "circuit-filters" },
+      { text: "Sur un trajet, demandez la place ou le transport en disant ce que vous transportez.", action: "Le conducteur accepte ou refuse explicitement." },
+      { text: "Suivez vos demandes en bas de la page du circuit.", highlight: "circuit-mine" },
+    ],
+  },
+
   // ------------------------------------------------------------------ Employés
   {
     id: "retrouver-dossier",
@@ -510,6 +525,7 @@ const PAGE_SPECIFIC: Record<string, Suggestion[]> = {
     { label: "Retrouver les producteurs", kind: "scenario", scenarioId: "producteurs" },
     { label: "Trouver une association", kind: "scenario", scenarioId: "associations" },
     { label: "Trouver un artisan", kind: "scenario", scenarioId: "artisans" },
+    { label: "Trouver un trajet", kind: "scenario", scenarioId: "transports" },
   ],
   "/back-office": [
     { label: "Retrouver un dossier", kind: "scenario", scenarioId: "retrouver-dossier" },
