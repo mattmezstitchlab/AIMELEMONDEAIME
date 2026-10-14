@@ -28,10 +28,10 @@ export default async function LeMondeAimePage({ searchParams }: { searchParams: 
   // Les fiches des circuits (producteurs, associations) sont résumées ici, avec
   // un lien vers leur tableau complet : une seule liste, deux circuits.
   const servicePins = structures
-    .filter((point) => point.kind === "producteur" || point.kind === "association")
+    .filter((point) => point.kind === "producteur" || point.kind === "association" || point.kind === "artisan")
     .map((p) => ({
       id: p.id, name: p.name, city: p.city, lat: Number(p.lat), lng: Number(p.lng),
-      kind: p.kind === "association" ? ("association" as const) : ("producteur" as const),
+      kind: p.kind as "producteur" | "association" | "artisan",
       products: p.products.map((x) => ({ id: x.id, name: x.name, description: x.description, price: x.price, unit: x.unit, stock: x.stock })),
     }));
   return (

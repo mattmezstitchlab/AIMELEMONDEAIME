@@ -250,6 +250,21 @@ export const SCENARIOS: AssistantScenario[] = [
     ],
   },
 
+  {
+    id: "artisans",
+    roles: ["membre"],
+    pages: ["/le-monde-aime", "/circuits/artisans"],
+    question: "Trouver un artisan ou quelqu'un qui sait réparer",
+    keywords: ["artisan", "artisans", "reparation", "reparer", "couture", "ourlet", "velo", "menuiserie", "bricole", "atelier", "savoir-faire", "circuit", "circuits"],
+    answer: "Les artisans et les savoir-faire ont leur circuit : une fiche par atelier, située par la commune, avec ce qui est proposé et un tarif indicatif. Vous envoyez une demande, l'artisan répond, et le travail se convient directement — aucun paiement en ligne, aucun devis établi ici.",
+    steps: [
+      { text: "J'ouvre le circuit des artisans et savoir-faire.", navigate: "/circuits/artisans" },
+      { text: "Filtrez par commune ou par savoir-faire : le point est déduit de la commune et du code postal, jamais d'une adresse.", highlight: "circuit-filters" },
+      { text: "Sur une fiche, choisissez une prestation et envoyez votre demande.", action: "L'artisan répond seulement s'il accepte le travail." },
+      { text: "Suivez vos demandes en bas de la page du circuit.", highlight: "circuit-mine" },
+    ],
+  },
+
   // ------------------------------------------------------------------ Employés
   {
     id: "retrouver-dossier",
@@ -494,6 +509,7 @@ const PAGE_SPECIFIC: Record<string, Suggestion[]> = {
     { label: "Proposer un trajet", kind: "scenario", scenarioId: "lma-trajet" },
     { label: "Retrouver les producteurs", kind: "scenario", scenarioId: "producteurs" },
     { label: "Trouver une association", kind: "scenario", scenarioId: "associations" },
+    { label: "Trouver un artisan", kind: "scenario", scenarioId: "artisans" },
   ],
   "/back-office": [
     { label: "Retrouver un dossier", kind: "scenario", scenarioId: "retrouver-dossier" },

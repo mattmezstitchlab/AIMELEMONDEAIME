@@ -1593,6 +1593,17 @@ export async function seedDatabase(db: NodePgDatabase) {
         phone: "06 34 56 78 90",
       },
       {
+        ownerId: lucas.id,
+        kind: "artisan",
+        name: "Le Garage du Pont — vélos et petites mécaniques",
+        description:
+          "Fiche fictive de démonstration. Réparation de vélos, freins, chaînes, éclairage, et petits dépannages mécaniques. On dépose, on reprend quand c'est prêt, on explique ce qui a été fait.",
+        city: "Chartres",
+        lat: "48.4432",
+        lng: "1.4897",
+        phone: "06 45 67 89 01",
+      },
+      {
         ownerId: amelie.id,
         kind: "association",
         name: "Les Jardins partagés du canal — collectif de quartier",
@@ -1606,7 +1617,7 @@ export async function seedDatabase(db: NodePgDatabase) {
     ])
     .returning();
 
-  const [ptMarie, ptAmelie, ptJean, ptPaul, ptAnne, ptVeillees, ptJardin] = points;
+  const [ptMarie, ptAmelie, ptJean, ptPaul, ptAnne, ptGarage, ptVeillees, ptJardin] = points;
 
   await db.insert(localProducts).values([
     {
@@ -1680,6 +1691,34 @@ export async function seedDatabase(db: NodePgDatabase) {
       price: "8.00",
       unit: "la bouteille",
       stock: 18,
+    },
+    // Ce que proposent les artisans (circuit « artisans »).
+    {
+      pointId: ptGarage.id,
+      name: "Réparation d'un vélo — freins, chaîne, éclairage",
+      description: "Diagnostic, réglages et pièces courantes. On vous dit ce qui a été fait et ce qui viendra plus tard.",
+      category: "Vélo",
+      price: "25.00",
+      unit: "la réparation",
+      stock: 6,
+    },
+    {
+      pointId: ptGarage.id,
+      name: "Révision complète avant l'été",
+      description: "Démontage, nettoyage, graissage, réglage des dérailleurs et contrôle des roues.",
+      category: "Vélo",
+      price: "60.00",
+      unit: "le vélo",
+      stock: 4,
+    },
+    {
+      pointId: ptGarage.id,
+      name: "Petit dépannage mécanique à domicile",
+      description: "Porte qui frotte, charnière, machine à laver qui marche mal : un coup d'œil avant d'acheter du neuf.",
+      category: "Petites mécaniques",
+      price: "20.00",
+      unit: "le déplacement",
+      stock: 8,
     },
     // Ce que proposent les associations et collectifs (circuit « associations »).
     {
@@ -1783,6 +1822,16 @@ export async function seedDatabase(db: NodePgDatabase) {
       status: "commandee",
       pickupAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       note: "Je peux aider à monter la fête du quartier.",
+    },
+    {
+      reference: "LOC-DEMO-2026-0006",
+      productId: productByName.get("Réparation d'un vélo — freins, chaîne, éclairage")!.id,
+      pointId: ptGarage.id,
+      buyerId: paul.id,
+      quantity: 1,
+      status: "commandee",
+      pickupAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+      note: "Les freins grincent depuis l'hiver.",
     },
     {
       reference: "LOC-DEMO-2026-0005",
@@ -2207,6 +2256,52 @@ export async function seedLmaDemoIfEmpty(db: NodePgDatabase) {
   await enrich(paul, { displayName: "Paul", bio: "Retraité jardinier et conteur. Fiche fictive.", activities: ["Retraité", "Jardinier", "Conteur"], universes: ["savoirs", "terre"], transmitText: "Le greffage des arbres fruitiers et les contes", profileVisible: true, profileCity: "Chartres", profileLat: "48.46", profileLng: "1.47", travelRadiusKm: 15 });
   await enrich(lucas, { displayName: "Lucas", bio: "Profil volontairement non affiché sur la carte (exemple de discrétion).", activities: ["Étudiant", "Coup de main à vélo"], profileVisible: false });
   await enrich(amelie, { displayName: "Amélie — maraîchage", bio: "Maraîchère près de Nantes. Fiche fictive.", activities: ["Maraîchère"], universes: ["terre"], offersText: "Paniers de légumes, miel", profileVisible: true, profileCity: "Nantes", profileLat: "47.24", profileLng: "-1.53" });
+
+  // Fiches de circuit qui ont besoin d'un compte de démonstration créé ici :
+  // l'atelier de couture d'Odette, qui complète les artisans.
+  const [ptCouture] = await db
+    .insert(localPoints)
+    .values({
+      ownerId: odette.id,
+      kind: "artisan",
+      name: "L'Atelier d'Odette — couture et réparation",
+      description:
+        "Fiche fictive de démonstration. Ourlets, fermetures, boutons, retouches et réparations : on apporte le vêtement, on repart avec, souvent le jour même.",
+      city: "Chartres",
+      lat: "48.4701",
+      lng: "1.4612",
+      phone: "06 12 90 34 56",
+    })
+    .returning();
+  await db.insert(localProducts).values([
+    {
+      pointId: ptCouture.id,
+      name: "Ourlet ou retouche simple",
+      description: "Pantalon, robe, rideau : l'ourlet est repris à la machine, à la bonne longueur.",
+      category: "Couture",
+      price: "12.00",
+      unit: "la retouche",
+      stock: 10,
+    },
+    {
+      pointId: ptCouture.id,
+      name: "Réparation de vêtement — fermeture, boutons, doublure",
+      description: "On répare plutôt que de jeter. Devis de rien du tout, dit avant de commencer.",
+      category: "Couture",
+      price: "10.00",
+      unit: "la réparation",
+      stock: 12,
+    },
+    {
+      pointId: ptCouture.id,
+      name: "Atelier couture — apprendre les gestes de base",
+      description: "Deux heures avec vos mains et une machine : coudre un bouton, poser une fermeture, reprendre un ourlet.",
+      category: "Atelier",
+      price: "5.00",
+      unit: "la séance",
+      stock: 6,
+    },
+  ]);
 
   await db.insert(artistProfiles).values({
     userId: tom.id, disciplines: ["Musique", "Son et lumière"],

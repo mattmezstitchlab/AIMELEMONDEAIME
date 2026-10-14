@@ -159,7 +159,7 @@ function MyWork({ circuit, mine }: { circuit: Circuit; mine: CircuitMine }) {
   return (
     <section aria-labelledby="circuit-mine" data-assistant-id="circuit-mine" className="mt-10 border-t border-line pt-6">
       <h2 id="circuit-mine" className="text-xl leading-tight tracking-[-0.02em] text-ink">Mon atelier</h2>
-      <p className="mt-1 text-sm text-ink-2">Vos fiches, vos réservations et votre disponibilité — visibles de vous seul.</p>
+      <p className="mt-1 text-sm text-ink-2">Vos fiches, vos demandes et votre disponibilité — visibles de vous seul.</p>
 
       {circuit.board === "structures" && (
         <div className="mt-5 grid gap-5 lg:grid-cols-2">

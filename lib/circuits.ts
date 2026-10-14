@@ -329,7 +329,69 @@ export type CircuitMine = {
 };
 
 /** Tous les circuits déclarés, ouverts ou prévus. L'ordre est celui de l'affichage. */
-export const CIRCUITS: Circuit[] = [PRODUCTEURS, COUPS_DE_MAIN, ASSOCIATIONS];
+export const ARTISANS: Circuit = {
+  key: "artisans",
+  label: "Artisans et savoir-faire",
+  short: "Artisans",
+  icon: "boutique",
+  status: "ouvert",
+  tagline: "Couture, réparation de vélos, menuiserie, petits travaux : des mains qui savent faire, à côté de chez soi.",
+  intro:
+    "Un atelier, un garage, une table de couture : l'artisan dépose sa fiche, dit ce qu'il sait faire et à quel tarif indicatif. Le point est déduit de la commune et du code postal — aucune adresse exacte n'est demandée. La demande part de la fiche, l'artisan répond, et le travail se convient directement.",
+  deposit: {
+    label: "Déposer mon savoir-faire",
+    text: "Votre fiche porte votre commune, ce que vous savez faire et vos tarifs indicatifs. Vous pouvez la retirer à tout moment.",
+  },
+  catalogue: {
+    entryLabel: "Nom de l'atelier ou de l'artisan",
+    entryPlaceholder: "Ex. Atelier du Bas-Chemin",
+    descriptionHint: "Ce que vous savez faire, vos horaires, où vous intervenez et ce que vous ne faites pas.",
+    catalogueLabel: "Prestations et savoir-faire",
+    itemSingular: "prestation",
+    priceLabel: "Tarif indicatif (€)",
+    unitPlaceholder: "la réparation, l'heure, la pièce…",
+    defaultCategory: "Savoir-faire",
+    orderLabel: "Demander",
+  },
+  words: {
+    boardTitle: "Les savoir-faire du secteur.",
+    searchLabel: "Quel savoir-faire ?",
+    searchHint: "vélo, couture, menuiserie…",
+    demandWord: "Demande",
+    demandDone: "L'artisan vous répond directement.",
+    statusUpdateTitle: "Votre demande a changé",
+    dateLabel: "Jour souhaité",
+    ordersTitle: "Mes demandes",
+    orderNoteLabel: "Un mot pour l'artisan",
+    orderNoteHint: "Ce qu'il y a à réparer ou à fabriquer, quand cela vous arrangerait…",
+    paymentNote: "Aucun paiement ne passe par AIME® : le tarif est indicatif et le règlement se fait sur place, une fois le travail vu.",
+    stockWord: "disponible(s)",
+    soldOut: "Complet pour l'instant",
+    counterpartyWord: "auprès de",
+    demandTitle: "Nouvelle demande sur votre fiche",
+    demandSent: "L'artisan vous répond directement.",
+    statusLabels: { commandee: "En attente de réponse", prete: "Prêt à être remis", recuperee: "Remis", annulee: "Annulée" },
+  },
+  board: "structures",
+  pointKind: "artisan",
+  steps: [
+    { title: "Une fiche située par la commune", text: "Nom, commune, code postal, savoir-faire. Le point reste approximatif : il dit « dans ce secteur », jamais l'adresse de l'atelier." },
+    { title: "Ce que l'artisan sait faire", text: "Chaque prestation s'ajoute avec un tarif indicatif et un nombre de places. Ce qui est complet disparaît tout seul." },
+    { title: "La demande, puis l'accord", text: "Vous demandez en un geste, l'artisan confirme, et le travail se convient directement. Aucun paiement ne passe par le site." },
+  ],
+  guarantees: [
+    "Aucun paiement en ligne : l'argent ne circule jamais sur AIME®, même pour une avance sur travaux.",
+    "L'artisan répond seulement s'il accepte le travail : une demande n'est pas une commande.",
+    "La fiche se retire en un geste, et le point ne désigne jamais une adresse précise.",
+  ],
+  limits: [
+    "AIME® ne vérifie ni les qualifications, ni les assurances, ni la qualité du travail : c'est un carnet d'adresses, pas un carnet de commandes.",
+    "Aucun devis n'est établi ici : le tarif affiché est indicatif et se confirme entre vous.",
+  ],
+  empty: "Aucun savoir-faire déclaré dans ce secteur pour l'instant. Le premier peut être le vôtre.",
+};
+
+export const CIRCUITS: Circuit[] = [PRODUCTEURS, COUPS_DE_MAIN, ASSOCIATIONS, ARTISANS];
 
 /** Le repli des libellés de statut reste celui des producteurs, premier circuit à fiches. */
 export const DEFAULT_ORDER_STATUS_LABELS: Record<LocalOrderStatus, string> = PRODUCTEURS.words.statusLabels;

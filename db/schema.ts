@@ -253,7 +253,7 @@ export const notifications = pgTable("notifications", {
 // ---------------------------------------------------------------------------
 
 /** Type d'une fiche. « association » est déclaré pour le circuit à venir. */
-export const localPointKindEnum = ["producteur", "presence", "association"] as const;
+export const localPointKindEnum = ["producteur", "presence", "association", "artisan"] as const;
 export type LocalPointKind = (typeof localPointKindEnum)[number];
 
 /** Fiche déposée par un adhérent : lieu de production, association ou présence. */

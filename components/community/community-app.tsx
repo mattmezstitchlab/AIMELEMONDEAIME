@@ -43,7 +43,8 @@ export type Trip = {
   transportMode: string; capacity: number; availableCapacity: number; terms: string; compensation: string | null;
 };
 export type Agency = { id: number; name: string; city: string; postalCode: string; address: string; phone: string; hours: string; region: string; lat: number | null; lng: number | null };
-export type ServicePin = { id: number; name: string; city: string; lat: number; lng: number; kind?: "producteur" | "association"; ownerName?: string; products?: Array<{ id: number; name: string; description: string; price: string; unit: string; stock: number }> };
+export type ServiceKind = "producteur" | "association" | "artisan";
+export type ServicePin = { id: number; name: string; city: string; lat: number; lng: number; kind?: ServiceKind; ownerName?: string; products?: Array<{ id: number; name: string; description: string; price: string; unit: string; stock: number }> };
 export type Request = {
   id: number; reference: string; listingId: number; requesterId: number; quantity: number; message: string; ownerName: string;
   startsAt: string | Date | null; endsAt: string | Date | null; status: string; createdAt: string | Date; updatedAt: string | Date;
@@ -170,27 +171,40 @@ export function AgencyCard({ agency }: { agency: Agency }) {
  * Résumé d'une fiche de circuit dans la liste du Monde Aime.
  *
  * Le détail vit dans le circuit : ici, on dit seulement ce que c'est, où c'est,
- * et combien de lignes sont publiées.
+ * combien de lignes sont publiées, et comment on demande.
  */
+const SERVICE_KIND_TEXT: Record<ServiceKind, { badge: string; link: string; detail: string; empty: string }> = {
+  producteur: {
+    badge: "Producteur local",
+    link: "/circuits/producteurs",
+    detail: "les quantités et le retrait se conviennent directement avec le producteur",
+    empty: "Aucun produit publié pour l'instant",
+  },
+  association: {
+    badge: "Association ou collectif",
+    link: "/circuits/associations",
+    detail: "ateliers, prêts et entraide se demandent depuis le circuit",
+    empty: "Rien de publié pour l'instant",
+  },
+  artisan: {
+    badge: "Artisan ou savoir-faire",
+    link: "/circuits/artisans",
+    detail: "les prestations se demandent depuis le circuit",
+    empty: "Aucune prestation publiée pour l'instant",
+  },
+};
+
 export function CircuitSummaryCard({ point }: { point: ServicePin }) {
+  const info = SERVICE_KIND_TEXT[point.kind ?? "producteur"];
   const count = point.products?.length ?? 0;
-  const association = point.kind === "association";
-  const lines = count > 0
-    ? `${count} ligne(s) publiée(s) sur sa fiche`
-    : association ? "Rien de publié pour l'instant" : "Aucun produit publié pour l'instant";
+  const lines = count > 0 ? `${count} ligne(s) publiée(s) sur sa fiche` : info.empty;
   return (
     <article className="animate-fade-up rounded-card bg-canvas p-5 ring-1 ring-line shadow-rested">
-      <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">
-        {association ? "Association ou collectif" : "Producteur local"}
-      </span>
+      <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">{info.badge}</span>
       <h3 className="mt-2 font-bold text-ink">{point.name}</h3>
       <p className="text-sm text-ink-3">{point.city} · position approximative, déduite de la commune</p>
-      <p className="mt-2 text-xs text-ink-3">
-        {lines} · {association
-          ? "ateliers, prêts et entraide se demandent depuis le circuit"
-          : "les quantités et le retrait se conviennent directement avec le producteur"}.
-      </p>
-      <Link href={association ? "/circuits/associations" : "/circuits/producteurs"} className="mt-3 inline-flex h-10 items-center rounded-full bg-ink px-4 text-xs font-semibold text-canvas">
+      <p className="mt-2 text-xs text-ink-3">{lines} · {info.detail}.</p>
+      <Link href={info.link} className="mt-3 inline-flex h-10 items-center rounded-full bg-ink px-4 text-xs font-semibold text-canvas">
         Voir la fiche dans son circuit
       </Link>
     </article>

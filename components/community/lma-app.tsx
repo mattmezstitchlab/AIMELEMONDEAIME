@@ -146,13 +146,19 @@ export function CommunityApp({ data }: { data: LmaData }) {
       });
     }
     for (const p of data.servicePins) {
-      // Fiches des circuits : producteurs, associations et collectifs.
-      const association = p.kind === "association";
+      // Fiches des circuits : producteurs, associations, artisans et savoir-faire.
+      const kind = p.kind ?? "producteur";
+      const badge = kind === "association" ? "Association" : kind === "artisan" ? "Artisan" : "Producteur";
+      const mots = kind === "association"
+        ? "association collectif atelier adhésion prêt salle matériel entraide"
+        : kind === "artisan"
+          ? "artisan atelier réparation couture vélo menuiserie savoir-faire"
+          : "producteur ferme produits locaux terre";
       out.push({
-        key: `circuit:${p.id}`, type: "offre", universes: ["terre"], lat: p.lat, lng: p.lng, city: p.city, name: p.name, detail: p.city,
-        badge: association ? "Association" : "Producteur",
+        key: `circuit:${p.id}`, type: "offre", universes: kind === "artisan" ? ["savoirs", "terre"] : ["terre"],
+        lat: p.lat, lng: p.lng, city: p.city, name: p.name, detail: p.city, badge,
         free: false, from: null, to: null,
-        text: `${p.name} ${p.city} ${association ? "association collectif atelier adhésion prêt salle matériel entraide" : "producteur ferme produits locaux"}`,
+        text: `${p.name} ${p.city} ${mots}`,
         render: () => <CircuitSummaryCard point={p} />,
       });
     }
