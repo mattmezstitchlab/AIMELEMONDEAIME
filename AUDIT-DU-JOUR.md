@@ -48,16 +48,20 @@ Tout est dans le dépôt, vérifié, et poussé sur la branche.
   CSS et 28 jetons de couleur jamais utilisés retirés, code de la carte retiré.
 - **La documentation** : `README.md` (design, point sans carte, circuits, tests, partage) et
   `.env.example` (adresse du site) à jour.
-- **Les circuits (14 octobre, soir).** Le circuit des producteurs est ouvert :
+- **Les circuits (14 octobre, soir).** Trois circuits sont ouverts :
   `/circuits`, `/circuits/producteurs` (fiches, produits, réservation en retrait sur place,
-  « Mon atelier » pour le producteur) et `/circuits/coups-de-main` (savoirs-faire déclarés,
-  disponibilité qu'on suspend d'un interrupteur). Un circuit « associations » est **déclaré
-  et décrit, pas ouvert** : il refuse toute écriture et indique ce qu'il reste à construire.
-  Les huit actions serveur qui dormaient depuis le retrait de la carte sont toutes
-  rebranchées (vérifié : chacune a un écran). `lib/actions/local.ts` a disparu au profit de
-  `lib/actions/circuits.ts`, qui sert tous les circuits. Seize tests passent, dont huit
-  nouveaux sur les invariants d'un circuit (clé d'adresse, étapes, garanties, limites,
-  absence de promesse de paiement en ligne, aucun retour du mot « carte »).
+  « Mon atelier » pour le producteur), `/circuits/coups-de-main` (savoirs-faire déclarés,
+  disponibilité qu'on suspend d'un interrupteur) et `/circuits/associations` (fiches
+  d'association et de collectif : adhésion, atelier, prêt de salle ou de matériel, mise en
+  relation nominative). Les huit actions serveur qui dormaient depuis le retrait de la carte
+  sont toutes rebranchées (vérifié : chacune a un écran). `lib/actions/local.ts` a disparu
+  au profit de `lib/actions/circuits.ts`, qui sert tous les circuits : chaque circuit écrit
+  ses propres mots (fiche, ligne de catalogue, statuts, messages), et un circuit sans
+  catalogue n'en invente pas. **Dix-neuf tests** passent, dont onze sur les invariants d'un
+  circuit : clé d'adresse, étapes, garanties, limites, mots remplis, catalogue présent
+  seulement quand il y a des fiches, un seul circuit par type de fiche, aucune promesse de
+  paiement en ligne, de messagerie ou de créneau, et aucun mot d'un circuit qui fuit dans un
+  autre.
 
 ## 3. Ce qui manque — par ordre d'importance
 
@@ -65,8 +69,8 @@ Tout est dans le dépôt, vérifié, et poussé sur la branche.
 
 1. ~~**Le circuit « producteur » n'a plus d'écran.**~~ **Réglé le 14 octobre au soir, à
    votre demande** : les huit actions serveur sont rebranchées dans un vrai circuit, en
-   listes (voir la section 2). Le même moule sert déjà à un deuxième circuit et attend les
-   suivants.
+   listes (voir la section 2). Le circuit des associations et collectifs a suivi le même
+   chemin ; le moule en sert trois, et le prochain ne demandera rien de plus.
 2. **« Affiner le point plus tard ».** Aujourd'hui le point vient de la commune et du code
    postal : c'est approximatif (échelle de la commune, pas de la rue). Le serveur accepte
    déjà un point précis, mais rien n'est proposé à l'utilisateur. À faire quand vous voudrez.

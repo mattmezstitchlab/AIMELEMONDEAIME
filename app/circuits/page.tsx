@@ -96,6 +96,18 @@ export default function CircuitsPage() {
         </Container>
       </section>
 
+      {planned.length === 0 && (
+        <section className="border-t border-line bg-subtle">
+          <Container className="py-14">
+            <SectionHeading
+              eyebrow="La suite"
+              title="Rien d'autre n'est ouvert aujourd'hui."
+              description="Un circuit s'écrit dans le même moule : un catalogue de mots, des règles vérifiées par des tests, puis une relecture avant d'ouvrir. Le prochain le sera quand il sera prêt, pas avant."
+            />
+          </Container>
+        </section>
+      )}
+
       {planned.length > 0 && (
         <section className="border-t border-line bg-subtle">
           <Container className="py-16 lg:py-20">

@@ -88,18 +88,30 @@ function ActionButton({ action, label, pendingLabel, className = "h-10 rounded-f
  * Circuits à structures (producteurs, associations…)                  *
  * ------------------------------------------------------------------ */
 
+/**
+ * Le vocabulaire du catalogue.
+ *
+ * Ces formulaires ne sont montés que pour un circuit à fiches. Si un circuit
+ * sans catalogue les appelait un jour, on veut le savoir ici et pas en ligne.
+ */
+export function catalogueWords(circuit: Circuit) {
+  if (!circuit.catalogue) throw new Error(`Le circuit « ${circuit.key} » n'a pas de catalogue.`);
+  return circuit.catalogue;
+}
+
 export function StructureForm({ circuit, existing }: { circuit: Circuit; existing: boolean }) {
+  const catalogue = catalogueWords(circuit);
   const state = useCircuitAction(createCircuitStructure);
   return (
     <form onSubmit={state.submit} className="space-y-4">
       <input type="hidden" name="circuit" value={circuit.key} />
       <div>
-        <label className={fieldLabel} htmlFor="circuit-name">{circuit.words.entryLabel}</label>
-        <input id="circuit-name" name="name" required minLength={3} maxLength={160} placeholder={circuit.words.entryPlaceholder} className={`mt-1 ${field}`} />
+        <label className={fieldLabel} htmlFor="circuit-name">{catalogue.entryLabel}</label>
+        <input id="circuit-name" name="name" required minLength={3} maxLength={160} placeholder={catalogue.entryPlaceholder} className={`mt-1 ${field}`} />
       </div>
       <div>
         <label className={fieldLabel} htmlFor="circuit-description">À savoir en deux phrases</label>
-        <textarea id="circuit-description" name="description" rows={3} maxLength={600} placeholder={circuit.words.descriptionHint} className={`mt-1 ${field}`} />
+        <textarea id="circuit-description" name="description" rows={3} maxLength={600} placeholder={catalogue.descriptionHint} className={`mt-1 ${field}`} />
       </div>
       <PlaceFields communeId="circuit-city" />
       <div>
@@ -107,7 +119,7 @@ export function StructureForm({ circuit, existing }: { circuit: Circuit; existin
         <input id="circuit-phone" name="phone" maxLength={30} inputMode="tel" placeholder="Laissez vide pour ne le donner qu'aux personnes intéressées" className={`mt-1 ${field}`} />
       </div>
       <p className="rounded-card bg-muted p-3 text-xs text-ink-2">
-        Votre fiche est visible par tous, avec votre commune seulement. Vous ajoutez ensuite ce que vous proposez, {circuit.words.catalogueLabel.toLowerCase()}. Vous pourrez la retirer à tout moment.
+        Votre fiche est visible par tous, avec votre commune seulement. Vous ajoutez ensuite ce que vous proposez, {catalogue.catalogueLabel.toLowerCase()}. Vous pourrez la retirer à tout moment.
         {existing && " Une fiche à votre nom existe déjà : celle-ci sera une fiche supplémentaire."}
       </p>
       <Message value={state.feedback} />
@@ -117,27 +129,28 @@ export function StructureForm({ circuit, existing }: { circuit: Circuit; existin
 }
 
 export function ItemForm({ circuit, structureId }: { circuit: Circuit; structureId: number }) {
+  const catalogue = catalogueWords(circuit);
   const state = useCircuitAction(createCircuitItem);
   return (
     <form onSubmit={state.submit} className="mt-3 space-y-3 rounded-card bg-muted p-4">
       <input type="hidden" name="structureId" value={structureId} />
-      <p className="text-sm font-bold text-ink">Ajouter un {circuit.words.itemSingular}</p>
+      <p className="text-sm font-bold text-ink">Ajouter un {catalogue.itemSingular}</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label className={fieldLabel} htmlFor={`item-name-${structureId}`}>Quoi ?</label>
-          <input id={`item-name-${structureId}`} name="name" required minLength={2} maxLength={160} placeholder={circuit.words.itemSingular === "produit" ? "Ex. Pommes de terre nouvelles" : "Ex. Atelier d'écriture"} className={`mt-1 ${field}`} />
+          <input id={`item-name-${structureId}`} name="name" required minLength={2} maxLength={160} placeholder={catalogue.itemSingular === "produit" ? "Ex. Pommes de terre nouvelles" : "Ex. Atelier d'écriture"} className={`mt-1 ${field}`} />
         </div>
         <div>
           <label className={fieldLabel} htmlFor={`item-category-${structureId}`}>Catégorie</label>
-          <input id={`item-category-${structureId}`} name="category" maxLength={60} defaultValue={circuit.words.defaultCategory} className={`mt-1 ${field}`} />
+          <input id={`item-category-${structureId}`} name="category" maxLength={60} defaultValue={catalogue.defaultCategory} className={`mt-1 ${field}`} />
         </div>
         <div>
-          <label className={fieldLabel} htmlFor={`item-price-${structureId}`}>{circuit.words.priceLabel}</label>
+          <label className={fieldLabel} htmlFor={`item-price-${structureId}`}>{catalogue.priceLabel}</label>
           <input id={`item-price-${structureId}`} name="price" type="number" min={0} max={9999} step="0.01" defaultValue={0} required className={`mt-1 ${field}`} />
         </div>
         <div>
           <label className={fieldLabel} htmlFor={`item-unit-${structureId}`}>Unité</label>
-          <input id={`item-unit-${structureId}`} name="unit" maxLength={30} defaultValue="l'unité" placeholder={circuit.words.unitPlaceholder} className={`mt-1 ${field}`} />
+          <input id={`item-unit-${structureId}`} name="unit" maxLength={30} defaultValue="l'unité" placeholder={catalogue.unitPlaceholder} className={`mt-1 ${field}`} />
         </div>
         <div>
           <label className={fieldLabel} htmlFor={`item-stock-${structureId}`}>Quantité disponible</label>
@@ -173,34 +186,36 @@ export function OrderForm({ circuit, item, onDone }: {
   return (
     <form onSubmit={state.submit} className="mt-3 space-y-3 rounded-card bg-muted p-4">
       <input type="hidden" name="productId" value={item.id} />
-      <p className="text-sm font-bold text-ink">{circuit.words.orderLabel} · {item.name}</p>
+      <input type="hidden" name="circuit" value={circuit.key} />
+      <p className="text-sm font-bold text-ink">{catalogueWords(circuit).orderLabel} · {item.name}</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label className={fieldLabel} htmlFor={`order-qty-${item.id}`}>Quantité · {item.unit}</label>
           <input id={`order-qty-${item.id}`} name="quantity" type="number" min={1} max={Math.min(99, Math.max(item.stock, 1))} defaultValue={1} required className={`mt-1 ${field}`} />
         </div>
         <div>
-          <label className={fieldLabel} htmlFor={`order-pickup-${item.id}`}>Retrait souhaité (facultatif)</label>
+          <label className={fieldLabel} htmlFor={`order-pickup-${item.id}`}>{circuit.words.dateLabel} (facultatif)</label>
           <input id={`order-pickup-${item.id}`} name="pickupAt" type="datetime-local" className={`mt-1 ${field}`} />
         </div>
       </div>
       <div>
-        <label className={fieldLabel} htmlFor={`order-note-${item.id}`}>Un mot pour le producteur</label>
-        <textarea id={`order-note-${item.id}`} name="note" rows={2} maxLength={300} placeholder="Quand vous passez, ce dont vous avez besoin…" className={`mt-1 ${field}`} />
+        <label className={fieldLabel} htmlFor={`order-note-${item.id}`}>{circuit.words.orderNoteLabel}</label>
+        <textarea id={`order-note-${item.id}`} name="note" rows={2} maxLength={300} placeholder={circuit.words.orderNoteHint} className={`mt-1 ${field}`} />
       </div>
-      <p className="text-xs text-ink-3">Aucun paiement ne passe par AIME® : le prix est indicatif et le règlement se fait au retrait.</p>
+      <p className="text-xs text-ink-3">{circuit.words.paymentNote}</p>
       <Message value={state.feedback} />
-      <SecondaryButton type="submit" disabled={state.pending} className="!px-3 !py-2 text-xs">{state.pending ? "Envoi…" : "Envoyer ma réservation"}</SecondaryButton>
+      <SecondaryButton type="submit" disabled={state.pending} className="!px-3 !py-2 text-xs">{state.pending ? "Envoi…" : "Envoyer ma demande"}</SecondaryButton>
     </form>
   );
 }
 
-export function OrderStatusButtons({ orderId }: { orderId: number }) {
+export function OrderStatusButtons({ circuit, orderId }: { circuit: Circuit; orderId: number }) {
+  const labels = circuit.words.statusLabels;
   return (
     <div className="mt-2 flex flex-wrap gap-3">
-      <ActionButton label="Prête à être retirée" pendingLabel="…" action={() => updateCircuitOrderStatus(orderId, "prete")} />
-      <ActionButton label="Retirée" pendingLabel="…" action={() => updateCircuitOrderStatus(orderId, "recuperee")} />
-      <ActionButton label="Annuler" pendingLabel="…" className="text-xs font-semibold text-ink underline" action={() => updateCircuitOrderStatus(orderId, "annulee")} />
+      <ActionButton label={labels.prete} pendingLabel="…" action={() => updateCircuitOrderStatus(orderId, "prete", circuit.key)} />
+      <ActionButton label={labels.recuperee} pendingLabel="…" action={() => updateCircuitOrderStatus(orderId, "recuperee", circuit.key)} />
+      <ActionButton label={labels.annulee} pendingLabel="…" className="text-xs font-semibold text-ink underline" action={() => updateCircuitOrderStatus(orderId, "annulee", circuit.key)} />
     </div>
   );
 }

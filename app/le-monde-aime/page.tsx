@@ -25,12 +25,13 @@ export default async function LeMondeAimePage({ searchParams }: { searchParams: 
   ]);
   const isMember = user?.role === "membre";
   const mine = isMember ? await getMyCommunityData(user!.id) : null;
-  // Les fiches de producteurs viennent du circuit des producteurs : la même
-  // liste, ici en résumé, avec un lien vers leur tableau complet.
+  // Les fiches des circuits (producteurs, associations) sont résumées ici, avec
+  // un lien vers leur tableau complet : une seule liste, deux circuits.
   const servicePins = structures
-    .filter((p) => p.kind === "producteur")
+    .filter((point) => point.kind === "producteur" || point.kind === "association")
     .map((p) => ({
       id: p.id, name: p.name, city: p.city, lat: Number(p.lat), lng: Number(p.lng),
+      kind: p.kind === "association" ? ("association" as const) : ("producteur" as const),
       products: p.products.map((x) => ({ id: x.id, name: x.name, description: x.description, price: x.price, unit: x.unit, stock: x.stock })),
     }));
   return (

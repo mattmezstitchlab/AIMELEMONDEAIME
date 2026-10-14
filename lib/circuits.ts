@@ -6,10 +6,10 @@ import type { LocalOrderStatus, LocalPointKind } from "@/db/schema";
  *
  * Un circuit, c'est un cadre de confiance autour d'un même geste : on dépose
  * une fiche située par sa commune, on dit ce qu'on propose, et l'accord se
- * fait entre les personnes. Le circuit des producteurs est le premier ; les
- * suivants (coups de main, associations) réutilisent exactement la même
- * mécanique : une entrée dans ce fichier, un tableau à l'écran, les mêmes
- * garde-fous.
+ * fait entre les personnes. Trois circuits sont ouverts : les producteurs,
+ * les coups de main, les associations et collectifs. Ils réutilisent tous
+ * exactement la même mécanique : une entrée dans ce fichier, un tableau à
+ * l'écran, les mêmes garde-fous. Un circuit de plus ne demande rien d'autre.
  *
  * Rien n'est inventé ici : chaque promesse écrite ci-dessous doit être vraie
  * dans le code, sinon elle n'a pas sa place sur le site.
@@ -33,8 +33,11 @@ export type Circuit = {
   intro: string;
   /** Ce que l'on dépose dans ce circuit. */
   deposit: { label: string; text: string };
-  /** Les mots justes pour nommer ce qu'on publie ici. */
-  words: {
+  /**
+   * Le vocabulaire du catalogue : il n'existe que sur un circuit à fiches.
+   * Un circuit qui n'a pas de fiches (les coups de main) n'en porte pas.
+   */
+  catalogue?: {
     entryLabel: string;
     entryPlaceholder: string;
     descriptionHint: string;
@@ -44,6 +47,32 @@ export type Circuit = {
     unitPlaceholder: string;
     defaultCategory: string;
     orderLabel: string;
+  };
+  /** Les mots justes pour nommer ce qu'on publie ici. */
+  words: {
+    /** Titre du tableau public : ce qu'on vient y chercher. */
+    boardTitle: string;
+    /** Le libellé du filtre par mot-clé, et ce qu'on y cherche. */
+    searchLabel: string;
+    searchHint: string;
+    /** Comment on nomme une demande, et ce qu'on répond quand elle est envoyée. */
+    demandWord: string;
+    demandDone: string;
+    statusUpdateTitle: string;
+    /** Le nom du jour ou de l'heure qu'on propose, s'il y en a un. */
+    dateLabel: string;
+    /** Ce que voit la structure dans « Mon atelier ». */
+    ordersTitle: string;
+    orderNoteLabel: string;
+    orderNoteHint: string;
+    paymentNote: string;
+    stockWord: string;
+    soldOut: string;
+    counterpartyWord: string;
+    demandTitle: string;
+    demandSent: string;
+    /** Les quatre statuts d'une demande, dits avec les mots du circuit. */
+    statusLabels: Record<LocalOrderStatus, string>;
   };
   board: CircuitBoard | null;
   /** Valeur enregistrée dans local_points.kind (circuit des structures). */
@@ -69,7 +98,7 @@ export const PRODUCTEURS: Circuit = {
     label: "Déposer ma production",
     text: "Votre fiche porte votre commune, ce que vous proposez et vos conditions de retrait. Vous pouvez la retirer à tout moment.",
   },
-  words: {
+  catalogue: {
     entryLabel: "Nom de la ferme, de l'atelier ou du jardin",
     entryPlaceholder: "Ex. Ferme des Grands Champs",
     descriptionHint: "Ce que vous produisez, comment et quand on vous trouve, ce qui est déjà réservé.",
@@ -79,6 +108,25 @@ export const PRODUCTEURS: Circuit = {
     unitPlaceholder: "le kilo, le panier, la douzaine…",
     defaultCategory: "Produit fermier",
     orderLabel: "Réserver",
+  },
+  words: {
+    boardTitle: "Ce qui se produit dans le secteur.",
+    searchLabel: "Quel produit, quelle récolte ?",
+    searchHint: "légumes, pain, miel…",
+    demandWord: "Réservation",
+    demandDone: "Retrait sur place, à convenir avec le producteur.",
+    statusUpdateTitle: "Votre réservation a changé",
+    dateLabel: "Retrait souhaité",
+    ordersTitle: "Mes réservations",
+    orderNoteLabel: "Un mot pour le producteur",
+    orderNoteHint: "Quand vous passez, ce dont vous avez besoin…",
+    paymentNote: "Aucun paiement ne passe par AIME® : le prix est indicatif et le règlement se fait au retrait.",
+    stockWord: "disponible(s)",
+    soldOut: "Épuisé pour l'instant",
+    counterpartyWord: "chez",
+    demandTitle: "Nouvelle réservation sur votre fiche",
+    demandSent: "Retrait sur place, à convenir avec le producteur.",
+    statusLabels: { commandee: "En attente de préparation", prete: "Prête à être retirée", recuperee: "Retirée", annulee: "Annulée" },
   },
   board: "structures",
   pointKind: "producteur",
@@ -112,16 +160,25 @@ export const COUPS_DE_MAIN: Circuit = {
     label: "Déclarer ma disponibilité",
     text: "Jusqu'à six savoir-faire, votre commune et un mot sur vos conditions. Vous pouvez suspendre votre disponibilité quand vous voulez.",
   },
+  // Pas de catalogue ici : ce circuit affiche des disponibilités, pas des fiches.
   words: {
-    entryLabel: "",
-    entryPlaceholder: "",
-    descriptionHint: "Comment vous aider concrètement, avec vos contraintes.",
-    catalogueLabel: "Savoir-faire déclarés",
-    itemSingular: "savoir-faire",
-    priceLabel: "Participation éventuelle (€)",
-    unitPlaceholder: "l'heure, la journée, le trajet…",
-    defaultCategory: "Coup de main",
-    orderLabel: "Demander",
+    boardTitle: "Qui peut donner un coup de main dans le secteur.",
+    searchLabel: "Quel coup de main ?",
+    searchHint: "bricolage, courses, français…",
+    demandWord: "Demande de coup de main",
+    demandDone: "La personne vous répond directement.",
+    statusUpdateTitle: "Votre demande a changé",
+    dateLabel: "Jour souhaité",
+    ordersTitle: "Mes mises en relation",
+    orderNoteLabel: "Un mot pour la personne",
+    orderNoteHint: "Ce que vous cherchez, quand vous êtes disponible…",
+    paymentNote: "Aucun paiement ne passe par AIME® : ni pour un coup de main, ni pour autre chose.",
+    stockWord: "disponible(s)",
+    soldOut: "Complet pour l'instant",
+    counterpartyWord: "auprès de",
+    demandTitle: "Nouvelle demande de coup de main",
+    demandSent: "La personne vous répond directement.",
+    statusLabels: { commandee: "Demande envoyée", prete: "Accord donné", recuperee: "Coup de main fait", annulee: "Annulée" },
   },
   board: "hands",
   pointKind: "presence",
@@ -148,15 +205,15 @@ export const ASSOCIATIONS: Circuit = {
   label: "Associations et collectifs",
   short: "Associations",
   icon: "users",
-  status: "prevu",
-  tagline: "Une association, ses besoins récurrents et ses temps forts, avec la même méthode.",
+  status: "ouvert",
+  tagline: "Une association, un collectif : ce qu'ils proposent, leurs ateliers, leurs prêts de matériel — situés par la commune.",
   intro:
-    "Le circuit des associations reprend exactement la mécanique des producteurs : une fiche située par la commune, ce que la structure propose, ce qu'elle cherche, et des besoins datés pour ses événements.",
+    "Déclarez votre association : son nom, sa commune, son objet, et ce qu'elle propose ou prête. Le point vient de la commune et du code postal, jamais d'une adresse. Les personnes intéressées demandent une mise en relation, et la suite se convient entre vous.",
   deposit: {
     label: "Déclarer une association",
-    text: "Nom, commune, objet, ce que vous proposez (ateliers, prêt de salle, entraide) et ce qui vous manque.",
+    text: "Nom, commune, objet, ce que vous proposez : ateliers, prêt de salle ou de matériel, entraide. Chaque proposition s'ajoute et se retire à tout moment.",
   },
-  words: {
+  catalogue: {
     entryLabel: "Nom de l'association ou du collectif",
     entryPlaceholder: "Ex. Les Jardins partagés du canal",
     descriptionHint: "L'objet de l'association, ses horaires, ce qu'elle propose et ce qu'elle cherche.",
@@ -167,24 +224,43 @@ export const ASSOCIATIONS: Circuit = {
     defaultCategory: "Association",
     orderLabel: "Me mettre en relation",
   },
-  board: null,
+  words: {
+    boardTitle: "Les associations du secteur et ce qu'elles proposent.",
+    searchLabel: "Quelle association, quelle proposition ?",
+    searchHint: "atelier, couture, prêt de salle…",
+    demandWord: "Mise en relation",
+    demandDone: "L'association vous répond directement.",
+    statusUpdateTitle: "Votre mise en relation a changé",
+    dateLabel: "Jour souhaité",
+    ordersTitle: "Mes mises en relation",
+    orderNoteLabel: "Un mot pour l'association",
+    orderNoteHint: "Ce que vous aimeriez faire, vos disponibilités…",
+    paymentNote: "Aucun paiement ne passe par AIME® : la participation se règle sur place, avec l'association.",
+    stockWord: "place(s)",
+    soldOut: "Complet pour l'instant",
+    counterpartyWord: "auprès de",
+    demandTitle: "Nouvelle mise en relation demandée",
+    demandSent: "L'association vous répond directement.",
+    statusLabels: { commandee: "En attente de réponse", prete: "Mise en relation acceptée", recuperee: "Rencontre faite", annulee: "Annulée" },
+  },
+  board: "structures",
   pointKind: "association",
   steps: [
-    { title: "Une fiche d'association", text: "Le même formulaire que les producteurs, avec des mots adaptés : ateliers, prêt de matériel, entraide." },
-    { title: "Des besoins datés", text: "Bénévoles pour une fête, matériel pour un atelier : chaque besoin porte une date et un nombre." },
-    { title: "Des rencontres, pas des dons anonymes", text: "La mise en relation se fait entre personnes nommées, avec l'accord de l'association." },
+    { title: "Une fiche située par la commune", text: "Nom, commune, code postal, objet. Le point reste approximatif : il dit « dans ce secteur », jamais l'adresse de votre local." },
+    { title: "Ce que l'association propose", text: "Ateliers, prêt de salle ou de matériel, entraide : chaque ligne s'ajoute et se retire, avec une participation et un nombre de places." },
+    { title: "Des besoins dans Le Monde Aime", text: "Vos besoins ponctuels — bénévoles, matériel, covoiturage — se publient dans Le Monde Aime, avec une date : les personnes disponibles les y trouvent." },
   ],
   guarantees: [
-    "Aucune collecte d'argent n'est gérée par AIME®.",
-    "Les besoins affichés sont datés et s'éteignent tout seuls une fois passés.",
-    "Chaque association garde la main sur sa fiche et sur ses annonces.",
+    "Aucun paiement en ligne : l'argent ne circule jamais sur AIME®, même pour une participation.",
+    "Chaque association garde la main : sa fiche et ses propositions se publient et se retirent depuis son espace.",
+    "La mise en relation est nominative : l'association sait qui demande et répond seulement si cela lui convient.",
   ],
   limits: [
-    "Le circuit n'est pas encore ouvert : rien n'est enregistrable aujourd'hui.",
+    "AIME® affiche des propositions et transmet une demande : il n'organise ni les ateliers, ni les réservations de salle.",
     "Il ne remplace ni le registre national des associations, ni les démarches officielles.",
+    "Une proposition qui porte encore une demande en cours se retire après l'avoir traitée : rien ne disparaît sous les pieds de quelqu'un.",
   ],
-  empty: "Ce circuit ouvrira avec ses premières associations.",
-  pending: "Le tableau des associations est la seule pièce à écrire : le formulaire, la fiche, les besoins datés et les règles sont déjà décidés plus haut dans ce fichier.",
+  empty: "Aucune association dans ce secteur pour l'instant. La première peut être la vôtre.",
 };
 
 /* ------------------------------------------------------------------ *
@@ -255,13 +331,8 @@ export type CircuitMine = {
 /** Tous les circuits déclarés, ouverts ou prévus. L'ordre est celui de l'affichage. */
 export const CIRCUITS: Circuit[] = [PRODUCTEURS, COUPS_DE_MAIN, ASSOCIATIONS];
 
-/** Le statut d'une réservation, dit en français, au même endroit pour tous. */
-export const ORDER_STATUS_LABELS: Record<LocalOrderStatus, string> = {
-  commandee: "En attente de préparation",
-  prete: "Prête à être retirée",
-  recuperee: "Retirée",
-  annulee: "Annulée",
-};
+/** Le repli des libellés de statut reste celui des producteurs, premier circuit à fiches. */
+export const DEFAULT_ORDER_STATUS_LABELS: Record<LocalOrderStatus, string> = PRODUCTEURS.words.statusLabels;
 
 export function circuitFor(key: string): Circuit | undefined {
   return CIRCUITS.find((circuit) => circuit.key === key);

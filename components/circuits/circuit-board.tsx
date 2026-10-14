@@ -7,6 +7,7 @@ import { SecondaryButton } from "@/components/ui";
 import { normalizeText, dateText } from "@/components/community/community-app";
 import {
   DeleteItemButton, DeleteStructureButton, HandForm, HandToggle, ItemForm, OrderForm, OrderStatusButtons, StructureForm,
+  catalogueWords,
 } from "@/components/circuits/circuit-forms";
 import type { Circuit, CircuitHandRow, CircuitMine, CircuitOrderRow, CircuitStructureRow } from "@/lib/circuits";
 
@@ -37,6 +38,8 @@ function StructureCard({ circuit, structure, signedIn, isMember }: {
 }) {
   const [openItem, setOpenItem] = useState<number | null>(null);
   const [adding, setAdding] = useState(false);
+  // Une fiche ne se montre pas sans son catalogue : les mots viennent du circuit.
+  const catalogue = catalogueWords(circuit);
   return (
     <article className={card}>
       <div className="flex items-start justify-between gap-3">
@@ -58,7 +61,7 @@ function StructureCard({ circuit, structure, signedIn, isMember }: {
 
       {structure.description && <p className="mt-3 text-sm leading-relaxed text-ink-2">{structure.description}</p>}
 
-      <h4 className="mt-4 text-xs font-bold uppercase tracking-wide text-ink-3">{circuit.words.catalogueLabel}</h4>
+      <h4 className="mt-4 text-xs font-bold uppercase tracking-wide text-ink-3">{catalogue.catalogueLabel}</h4>
       {structure.items.length === 0 ? (
         <p className="mt-1 text-sm text-ink-3">Rien de publié pour l&apos;instant{structure.isMine ? " — ajoutez votre première ligne juste en dessous." : "."}</p>
       ) : (
@@ -74,7 +77,7 @@ function StructureCard({ circuit, structure, signedIn, isMember }: {
                 <div className="text-right">
                   <p className="text-sm font-bold text-ink">{price(item)}</p>
                   <p className="text-xs text-ink-3">
-                    {item.stock > 0 ? `${item.stock} disponible(s)` : "Épuisé pour l'instant"}
+                    {item.stock > 0 ? `${item.stock} ${circuit.words.stockWord}` : circuit.words.soldOut}
                   </p>
                 </div>
               </div>
@@ -95,7 +98,7 @@ function StructureCard({ circuit, structure, signedIn, isMember }: {
                     aria-expanded={openItem === item.id}
                     className="h-10 rounded-full bg-ink px-4 text-xs font-semibold text-canvas"
                   >
-                    {openItem === item.id ? "Fermer" : circuit.words.orderLabel}
+                    {openItem === item.id ? "Fermer" : catalogue.orderLabel}
                   </button>
                 ) : (
                   <span className="text-xs text-ink-3">Plus rien à réserver pour l&apos;instant.</span>
@@ -113,7 +116,7 @@ function StructureCard({ circuit, structure, signedIn, isMember }: {
             <ItemForm circuit={circuit} structureId={structure.id} />
           ) : (
             <SecondaryButton type="button" className="!px-3 !py-2 text-xs" onClick={() => setAdding(true)}>
-              Ajouter un {circuit.words.itemSingular}
+              Ajouter un {catalogue.itemSingular}
             </SecondaryButton>
           )}
         </div>
@@ -186,7 +189,7 @@ function MyWork({ circuit, mine }: { circuit: Circuit; mine: CircuitMine }) {
           </div>
 
           <div className="rounded-card bg-muted p-5">
-            <h3 className="text-sm font-bold text-ink">Mes réservations</h3>
+            <h3 className="text-sm font-bold text-ink">{circuit.words.ordersTitle}</h3>
             {orders.length === 0 ? (
               <p className="mt-2 text-xs text-ink-3">Aucune réservation pour l&apos;instant. Elles apparaîtront ici, avec le statut et le nom de la personne concernée.</p>
             ) : (
@@ -194,13 +197,13 @@ function MyWork({ circuit, mine }: { circuit: Circuit; mine: CircuitMine }) {
                 {orders.map((order: CircuitOrderRow) => (
                   <li key={`${order.isSeller ? "recue" : "passee"}-${order.id}`} className="rounded-card bg-canvas p-4 ring-1 ring-line">
                     <p className="text-xs font-bold text-ink-3">
-                      {order.isSeller ? `Reçue · ${order.counterparty}` : `Passée · chez ${order.structureName}`} · {order.reference}
+                      {order.isSeller ? `Reçue · ${order.counterparty}` : `Envoyée · ${circuit.words.counterpartyWord} ${order.structureName}`} · {order.reference}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-ink">
                       {order.quantity} × {order.itemName} <span className="font-normal text-ink-3">· {order.city}</span>
                     </p>
-                    <p className="text-xs text-ink-2">{order.statusLabel}{order.pickupAt ? ` · retrait souhaité le ${order.pickupAt}` : ""}</p>
-                    <OrderStatusButtons orderId={order.id} />
+                    <p className="text-xs text-ink-2">{order.statusLabel}{order.pickupAt ? ` · ${circuit.words.dateLabel.toLowerCase()} le ${order.pickupAt}` : ""}</p>
+                    <OrderStatusButtons circuit={circuit} orderId={order.id} />
                   </li>
                 ))}
               </ul>
@@ -285,13 +288,13 @@ export function CircuitBoard({ circuit, structures, hands, mine, signedIn }: {
           </div>
           <div>
             <label className={fieldLabel} htmlFor="circuit-filter-kw">
-              {circuit.board === "hands" ? "Quel coup de main ?" : "Quel produit, quelle production ?"}
+              {circuit.words.searchLabel}
             </label>
             <input
               id="circuit-filter-kw"
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
-              placeholder={circuit.board === "hands" ? "bricolage, courses, français…" : "légumes, pain, miel…"}
+              placeholder={circuit.words.searchHint}
               className={field}
             />
           </div>

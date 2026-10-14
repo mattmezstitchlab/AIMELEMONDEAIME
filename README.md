@@ -72,16 +72,21 @@ statuts, disponibilité). Les actions correspondantes vivent dans `lib/actions/c
 servent tous les circuits : le circuit visé arrive en clair dans le formulaire.
 
 Circuits ouverts aujourd'hui : **producteurs** (`local_points.kind = "producteur"`, avec
-`local_products` et `local_orders`) et **coups de main** (`worker_availabilities`).
-`associations` est **déclaré mais non ouvert** : il décrit ses règles, refuse toute écriture
-et attend son tableau.
+`local_products` et `local_orders`), **coups de main** (`worker_availabilities`, tableau de
+disponibilités) et **associations et collectifs** (`local_points.kind = "association"` : la
+même mécanique que les producteurs, avec les mots du monde associatif — adhésions, ateliers,
+prêts de salle ou de matériel — et un lien vers Le Monde Aime pour les besoins datés publiés
+là-bas). Rien n'est « prévu mais fermé » aujourd'hui : un circuit est ouvert quand il est
+écrit, testé et relu.
 
-**Ajouter un circuit** (par exemple « associations ») demande donc trois choses : une entrée
-dans `lib/circuits.ts` (avec `status: "ouvert"`), son tableau dans
-`components/circuits/`, et le type de fiche correspondant — rien d'autre n'est à recopier.
-Les tests de `lib/circuits.test.ts` vérifient les invariants à respecter : clé d'adresse
-valide, trois étapes et trois garanties au minimum, limites écrites, pas de promesse de
-paiement en ligne, et aucun retour du vocabulaire de la carte.
+**Ajouter un circuit** demande donc trois choses : une entrée dans `lib/circuits.ts` (avec
+`status: "ouvert"`, ses `words`, et son `catalogue` si le circuit a des fiches), son tableau
+dans `components/circuits/`, et le type de fiche correspondant — rien d'autre n'est à
+recopier. Les tests de `lib/circuits.test.ts` vérifient les invariants à respecter : clé
+d'adresse valide, trois étapes et trois garanties au minimum, limites écrites, mots et
+statuts écrits pour chaque circuit ouvert, un catalogue dès qu'il y a des fiches (et aucun
+sinon), un seul circuit par type de fiche, pas de promesse de paiement en ligne ni de
+messagerie, et aucun retour du vocabulaire de la carte.
 
 
 ## Démarrage

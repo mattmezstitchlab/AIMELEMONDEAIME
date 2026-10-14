@@ -43,7 +43,7 @@ export type Trip = {
   transportMode: string; capacity: number; availableCapacity: number; terms: string; compensation: string | null;
 };
 export type Agency = { id: number; name: string; city: string; postalCode: string; address: string; phone: string; hours: string; region: string; lat: number | null; lng: number | null };
-export type ServicePin = { id: number; name: string; city: string; lat: number; lng: number; ownerName?: string; products?: Array<{ id: number; name: string; description: string; price: string; unit: string; stock: number }> };
+export type ServicePin = { id: number; name: string; city: string; lat: number; lng: number; kind?: "producteur" | "association"; ownerName?: string; products?: Array<{ id: number; name: string; description: string; price: string; unit: string; stock: number }> };
 export type Request = {
   id: number; reference: string; listingId: number; requesterId: number; quantity: number; message: string; ownerName: string;
   startsAt: string | Date | null; endsAt: string | Date | null; status: string; createdAt: string | Date; updatedAt: string | Date;
@@ -166,18 +166,33 @@ export function AgencyCard({ agency }: { agency: Agency }) {
   </article>;
 }
 
-/** Résumé d'une fiche de producteur dans la liste du Monde Aime : le détail vit dans le circuit. */
-export function ProducerCard({ point }: { point: ServicePin }) {
+/**
+ * Résumé d'une fiche de circuit dans la liste du Monde Aime.
+ *
+ * Le détail vit dans le circuit : ici, on dit seulement ce que c'est, où c'est,
+ * et combien de lignes sont publiées.
+ */
+export function CircuitSummaryCard({ point }: { point: ServicePin }) {
   const count = point.products?.length ?? 0;
+  const association = point.kind === "association";
+  const lines = count > 0
+    ? `${count} ligne(s) publiée(s) sur sa fiche`
+    : association ? "Rien de publié pour l'instant" : "Aucun produit publié pour l'instant";
   return (
     <article className="animate-fade-up rounded-card bg-canvas p-5 ring-1 ring-line shadow-rested">
-      <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">Producteur local</span>
+      <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">
+        {association ? "Association ou collectif" : "Producteur local"}
+      </span>
       <h3 className="mt-2 font-bold text-ink">{point.name}</h3>
       <p className="text-sm text-ink-3">{point.city} · position approximative, déduite de la commune</p>
       <p className="mt-2 text-xs text-ink-3">
-        {count > 0 ? `${count} ligne(s) publiée(s) sur sa fiche` : "Aucun produit publié pour l'instant"} · les quantités et le retrait se conviennent directement avec le producteur.
+        {lines} · {association
+          ? "ateliers, prêts et entraide se demandent depuis le circuit"
+          : "les quantités et le retrait se conviennent directement avec le producteur"}.
       </p>
-      <Link href="/circuits/producteurs" className="mt-3 inline-flex h-10 items-center rounded-full bg-ink px-4 text-xs font-semibold text-canvas">Voir la fiche dans son circuit</Link>
+      <Link href={association ? "/circuits/associations" : "/circuits/producteurs"} className="mt-3 inline-flex h-10 items-center rounded-full bg-ink px-4 text-xs font-semibold text-canvas">
+        Voir la fiche dans son circuit
+      </Link>
     </article>
   );
 }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/icon";
 import {
-  AgencyCard, ListingCard, ProducerCard, TripCard, dateText, distanceKm, normalizeText, priceLabel,
+  AgencyCard, CircuitSummaryCard, ListingCard, TripCard, dateText, distanceKm, normalizeText, priceLabel,
   type Agency, type CommunityData, type Listing, type ServicePin, type Trip,
 } from "@/components/community/community-app";
 import { PublishListingForm, SavedSearchForm, TripForm } from "@/components/community/forms";
@@ -146,9 +146,14 @@ export function CommunityApp({ data }: { data: LmaData }) {
       });
     }
     for (const p of data.servicePins) {
+      // Fiches des circuits : producteurs, associations et collectifs.
+      const association = p.kind === "association";
       out.push({
-        key: `legacy:${p.id}`, type: "offre", universes: ["terre"], lat: p.lat, lng: p.lng, city: p.city, name: p.name, detail: p.city, badge: "Producteur",
-        free: false, from: null, to: null, text: `${p.name} ${p.city} producteur ferme produits locaux`, render: () => <ProducerCard point={p} />,
+        key: `circuit:${p.id}`, type: "offre", universes: ["terre"], lat: p.lat, lng: p.lng, city: p.city, name: p.name, detail: p.city,
+        badge: association ? "Association" : "Producteur",
+        free: false, from: null, to: null,
+        text: `${p.name} ${p.city} ${association ? "association collectif atelier adhésion prêt salle matériel entraide" : "producteur ferme produits locaux"}`,
+        render: () => <CircuitSummaryCard point={p} />,
       });
     }
     for (const p of data.people) {

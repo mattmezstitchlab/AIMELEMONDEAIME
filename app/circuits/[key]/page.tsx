@@ -7,7 +7,7 @@ import { Container, Hero, SectionHeading, Tag } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { CircuitBoard } from "@/components/circuits/circuit-board";
 import {
-  CIRCUITS, ORDER_STATUS_LABELS, circuitFor,
+  CIRCUITS, circuitFor,
   type Circuit, type CircuitHandRow, type CircuitMine, type CircuitOrderRow, type CircuitStructureRow,
 } from "@/lib/circuits";
 import { getCurrentUser } from "@/lib/auth";
@@ -34,16 +34,17 @@ function publicName(display: string | null, full: string) {
   return display?.trim() || full.split(" ")[0];
 }
 
-function orderRow(raw: {
+function orderRow(circuit: Circuit, raw: {
   id: number; reference: string; quantity: number; status: string; pickupAt: Date | string | null;
   productName: string; pointName: string; city: string; counterparty: string; isSeller: boolean;
 }): CircuitOrderRow {
+  const labels = circuit.words.statusLabels;
   return {
     id: raw.id,
     reference: raw.reference,
     quantity: raw.quantity,
     status: raw.status,
-    statusLabel: ORDER_STATUS_LABELS[raw.status as keyof typeof ORDER_STATUS_LABELS] ?? raw.status,
+    statusLabel: labels[raw.status as keyof typeof labels] ?? raw.status,
     itemName: raw.productName,
     structureName: raw.pointName,
     city: raw.city,
@@ -129,11 +130,11 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
       mine = {
         isMember: true,
         structures: myStructures,
-        received: raw.sales.map((sale) => orderRow({
+        received: raw.sales.map((sale) => orderRow(circuit, {
           id: sale.id, reference: sale.reference, quantity: sale.quantity, status: sale.status, pickupAt: sale.pickupAt,
           productName: sale.productName, pointName: sale.pointName, city: "", counterparty: sale.buyerName, isSeller: true,
         })),
-        placed: raw.purchases.map((purchase) => orderRow({
+        placed: raw.purchases.map((purchase) => orderRow(circuit, {
           id: purchase.id, reference: purchase.reference, quantity: purchase.quantity, status: purchase.status, pickupAt: purchase.pickupAt,
           productName: purchase.productName, pointName: purchase.pointName, city: purchase.pointCity, counterparty: purchase.pointName, isSeller: false,
         })),
@@ -225,7 +226,7 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
               <SectionHeading
                 eyebrow={circuit.board === "hands" ? `${hands.length} disponibilité(s)` : `${structures.length} fiche(s)`}
-                title={circuit.board === "hands" ? "Qui peut donner un coup de main." : "Ce qui se produit dans le secteur."}
+                title={circuit.words.boardTitle}
                 description={circuit.deposit.text}
               />
               <span className="inline-flex items-center gap-2 text-xs text-ink-3">

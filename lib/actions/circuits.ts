@@ -7,7 +7,7 @@ import { localOrders, localPoints, localProducts, workerAvailabilities, type Loc
 import { requireRole, requireUser, AuthError } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { createNotification } from "@/lib/queries";
-import { ORDER_STATUS_LABELS, circuitFor, circuitForPointKind, type Circuit } from "@/lib/circuits";
+import { circuitFor, circuitForPointKind, type Circuit } from "@/lib/circuits";
 import { communeLabel, isBoundedPoint, pointFromCommune } from "@/lib/point";
 
 /*
@@ -118,7 +118,7 @@ export async function deleteCircuitStructure(structureId: number): Promise<Circu
       .from(localOrders)
       .where(and(eq(localOrders.pointId, structureId), ne(localOrders.status, "recuperee"), ne(localOrders.status, "annulee")))
       .limit(1);
-    if (pending.length) return { ok: false, error: "Des réservations sont en cours sur cette fiche : traitez-les avant de la retirer." };
+    if (pending.length) return { ok: false, error: "Des demandes sont en cours sur cette fiche : traitez-les avant de la retirer." };
 
     await db.delete(localPoints).where(eq(localPoints.id, structureId));
     await logAudit({ actorId: user.id, action: "suppression_fiche_circuit", entityType: "local_point", entityId: String(structureId) });
@@ -142,7 +142,7 @@ export async function createCircuitItem(form: FormData): Promise<CircuitResult> 
     const circuit = circuitForPointKind(structure.kind);
     const name = value(form, "name");
     const description = value(form, "description").slice(0, 400);
-    const category = value(form, "category").slice(0, 60) || circuit?.words.defaultCategory || "Produit fermier";
+    const category = value(form, "category").slice(0, 60) || circuit?.catalogue?.defaultCategory || "Produit fermier";
     const unit = value(form, "unit").slice(0, 30) || "l'unité";
     const price = numberValue(form, "price");
     const stock = Math.round(numberValue(form, "stock"));
@@ -171,7 +171,7 @@ export async function deleteCircuitItem(productId: number): Promise<CircuitResul
     if (!structure || structure.ownerId !== user.id) return { ok: false, error: "Élément introuvable." };
 
     const linked = await db.select({ id: localOrders.id }).from(localOrders).where(and(eq(localOrders.productId, productId), ne(localOrders.status, "annulee"))).limit(1);
-    if (linked.length) return { ok: false, error: "Cet élément a déjà été réservé : il ne peut plus être supprimé." };
+    if (linked.length) return { ok: false, error: "Cet élément porte déjà une demande : il ne peut plus être supprimé." };
 
     await db.delete(localProducts).where(eq(localProducts.id, productId));
     await logAudit({ actorId: user.id, action: "suppression_produit_circuit", entityType: "local_product", entityId: String(productId) });
@@ -187,6 +187,8 @@ export async function deleteCircuitItem(productId: number): Promise<CircuitResul
 export async function createCircuitOrder(form: FormData): Promise<CircuitResult> {
   try {
     const user = await requireRole(["membre"]);
+    const circuit = requireCircuit(form);
+    if ("error" in circuit) return { ok: false, error: circuit.error };
     const productId = Number(value(form, "productId"));
     if (!safeId(productId)) return { ok: false, error: "Élément introuvable." };
     const quantity = Math.round(numberValue(form, "quantity"));
@@ -199,11 +201,11 @@ export async function createCircuitOrder(form: FormData): Promise<CircuitResult>
     if (!product) return { ok: false, error: "Élément introuvable." };
     const [structure] = await db.select().from(localPoints).where(eq(localPoints.id, product.pointId)).limit(1);
     if (!structure || !structure.isActive) return { ok: false, error: "Cette fiche n'est plus active." };
-    if (structure.ownerId === user.id) return { ok: false, error: "Vous ne pouvez pas réserver votre propre produit." };
-    if (product.stock < quantity) return { ok: false, error: `Stock insuffisant : ${product.stock} disponible(s).` };
+    if (structure.ownerId === user.id) return { ok: false, error: "Vous ne pouvez pas demander votre propre ligne." };
+    if (product.stock < quantity) return { ok: false, error: `Quantité trop élevée : il reste ${product.stock} ligne(s) à demander.` };
 
     const pickupAt = pickupRaw ? new Date(pickupRaw) : null;
-    if (pickupAt && Number.isNaN(pickupAt.getTime())) return { ok: false, error: "Date de retrait invalide." };
+    if (pickupAt && Number.isNaN(pickupAt.getTime())) return { ok: false, error: "Date invalide." };
 
     const reference = `CIR-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     await db.insert(localOrders).values({
@@ -219,36 +221,38 @@ export async function createCircuitOrder(form: FormData): Promise<CircuitResult>
     await db.update(localProducts).set({ stock: product.stock - quantity }).where(eq(localProducts.id, productId));
     await createNotification({
       userId: structure.ownerId,
-      title: "Nouvelle réservation sur votre fiche",
+      title: circuit.words.demandTitle,
       body: `${reference} · ${quantity} × ${product.name} (${structure.city || structure.name})`,
       link: "/circuits",
     });
     await logAudit({ actorId: user.id, action: "reservation_circuit", entityType: "local_order", entityId: reference });
     revalidateCircuits();
-    return { ok: true, message: `Réservation ${reference} enregistrée. Retrait sur place, à convenir avec le producteur.` };
+    return { ok: true, message: `${circuit.words.demandWord} ${reference} : ${circuit.words.demandDone}` };
   } catch (error) {
-    if (error instanceof AuthError) return { ok: false, error: "Connectez-vous pour réserver." };
-    return { ok: false, error: "La réservation n'a pas pu être enregistrée." };
+    if (error instanceof AuthError) return { ok: false, error: "Connectez-vous pour envoyer une demande." };
+    return { ok: false, error: "La demande n'a pas pu être enregistrée." };
   }
 }
 
-/** Le producteur fait avancer la réservation ; l'acheteur peut annuler. */
-export async function updateCircuitOrderStatus(orderId: number, status: LocalOrderStatus): Promise<CircuitResult> {
+/** Celle ou celui qui reçoit fait avancer la demande ; l'autre peut annuler. */
+export async function updateCircuitOrderStatus(orderId: number, status: LocalOrderStatus, circuitKey: string): Promise<CircuitResult> {
   try {
     const user = await requireUser();
-    if (!safeId(orderId)) return { ok: false, error: "Réservation introuvable." };
+    const circuit = circuitFor(circuitKey);
+    if (!circuit || circuit.status !== "ouvert") return { ok: false, error: "Circuit inconnu." };
+    if (!safeId(orderId)) return { ok: false, error: "Demande introuvable." };
     const [order] = await db.select().from(localOrders).where(eq(localOrders.id, orderId)).limit(1);
-    if (!order) return { ok: false, error: "Réservation introuvable." };
+    if (!order) return { ok: false, error: "Demande introuvable." };
     const [structure] = await db.select().from(localPoints).where(eq(localPoints.id, order.pointId)).limit(1);
     if (!structure) return { ok: false, error: "Fiche introuvable." };
 
     const isSeller = structure.ownerId === user.id;
     const isBuyer = order.buyerId === user.id;
-    if (!isSeller && !isBuyer && user.role !== "administrateur") return { ok: false, error: "Vous n'êtes pas concerné par cette réservation." };
+    if (!isSeller && !isBuyer && user.role !== "administrateur") return { ok: false, error: "Vous n'êtes pas concerné par cette demande." };
 
     if (isBuyer && !isSeller) {
       if (status !== "annulee" || order.status === "recuperee") {
-        return { ok: false, error: "Vous pouvez uniquement annuler une réservation non retirée." };
+        return { ok: false, error: "Vous pouvez uniquement annuler une demande non aboutie." };
       }
     }
     if (isSeller && !["prete", "recuperee", "annulee"].includes(status)) return { ok: false, error: "Statut non autorisé." };
@@ -262,13 +266,13 @@ export async function updateCircuitOrderStatus(orderId: number, status: LocalOrd
     await db.update(localOrders).set({ status }).where(eq(localOrders.id, orderId));
     await createNotification({
       userId: isSeller ? order.buyerId : structure.ownerId,
-      title: "Mise à jour de votre réservation",
-      body: `${order.reference} · ${ORDER_STATUS_LABELS[status]}`,
+      title: circuit.words.statusUpdateTitle,
+      body: `${order.reference} · ${circuit.words.statusLabels[status]}`,
       link: "/circuits",
     });
     await logAudit({ actorId: user.id, action: "statut_reservation_circuit", entityType: "local_order", entityId: String(orderId) });
     revalidateCircuits();
-    return { ok: true, message: "Réservation mise à jour." };
+    return { ok: true, message: `${circuit.words.demandWord} mise à jour.` };
   } catch (error) {
     if (error instanceof AuthError) return { ok: false, error: "Connexion requise." };
     return { ok: false, error: "Mise à jour impossible." };

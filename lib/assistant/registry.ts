@@ -235,6 +235,20 @@ export const SCENARIOS: AssistantScenario[] = [
       { text: "Suivez vos réservations dans « Mon atelier », en bas de la page du circuit.", highlight: "circuit-mine" },
     ],
   },
+  {
+    id: "associations",
+    roles: ["membre"],
+    pages: ["/le-monde-aime", "/circuits/associations"],
+    question: "Trouver une association ou un collectif près de chez moi",
+    keywords: ["association", "associations", "collectif", "club", "atelier", "benevolat", "benevole", "adhesion", "pret de materiel", "salle", "circuit", "circuits"],
+    answer: "Les associations et les collectifs ont leur circuit : une fiche par association, située par la commune, avec ce qu'elle propose — ateliers, prêt de salle ou de matériel, entraide — et une participation indicative. Vous demandez une mise en relation, l'association répond, et l'argent se règle sur place : aucun paiement en ligne.",
+    steps: [
+      { text: "J'ouvre le circuit des associations et collectifs.", navigate: "/circuits/associations" },
+      { text: "Filtrez par commune ou par mot-clé : le point est déduit de la commune et du code postal, jamais d'une adresse.", highlight: "circuit-filters" },
+      { text: "Sur une fiche, choisissez une proposition — un atelier, un prêt — et demandez la mise en relation.", action: "L'association vous répond seulement si cela lui convient." },
+      { text: "Suivez vos mises en relation en bas de la page du circuit.", highlight: "circuit-mine" },
+    ],
+  },
 
   // ------------------------------------------------------------------ Employés
   {
@@ -479,6 +493,7 @@ const PAGE_SPECIFIC: Record<string, Suggestion[]> = {
     { label: "Demander un objet", kind: "scenario", scenarioId: "lma-demander" },
     { label: "Proposer un trajet", kind: "scenario", scenarioId: "lma-trajet" },
     { label: "Retrouver les producteurs", kind: "scenario", scenarioId: "producteurs" },
+    { label: "Trouver une association", kind: "scenario", scenarioId: "associations" },
   ],
   "/back-office": [
     { label: "Retrouver un dossier", kind: "scenario", scenarioId: "retrouver-dossier" },

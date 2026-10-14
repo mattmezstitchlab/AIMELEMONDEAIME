@@ -260,7 +260,7 @@ export default async function HomePage() {
             {openCircuits().map((circuit) => (
               <LinkRow key={circuit.key} href={`/circuits/${circuit.key}`} title={circuit.label} meta={circuit.tagline} />
             ))}
-            <LinkRow href="/circuits" title="Les circuits suivants" meta="Associations et collectifs : la même mécanique, préparée puis ouverte circuit par circuit." />
+            <LinkRow href="/circuits" title="Tous les circuits" meta="Producteurs, coups de main, associations et collectifs : ce qui est ouvert aujourd'hui, et comment un circuit s'écrit." />
           </div>
         </section>
 
