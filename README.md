@@ -6,6 +6,35 @@ accompagnement des démarches, et mise en relation locale (personnes, producteur
 
 Stack : Next.js 16 (App Router, Server Actions) · React 19 · TypeScript · PostgreSQL via Drizzle ORM · Tailwind CSS 4.
 
+## Design — système « encre et papier »
+
+La refonte s'inspire du système de **Cal.com** et le transpose au service public :
+
+- **Palette monochrome.** Les surfaces, textes et contours suivent une échelle de gris
+  calibrée (`bg`, `bg-subtle`, `bg-muted`, `text-emphasis`, `text-subtle`, `border`,
+  `border-subtle`). La couleur est réservée aux **états** (information, succès,
+  attention, erreur) et aux **marqueurs de la carte** : jamais décorative.
+- **Deux familles typographiques.** *Cal Sans* (display, un seul poids) pour les
+  titres, *Inter* pour tout le texte d'interface. Les deux sont **auto-hébergées**
+  dans `public/fonts/` (aucune requête vers un tiers, compatible avec la CSP
+  `font-src 'self'`). Cal Sans est distribuée sous SIL Open Font License — voir
+  `public/fonts/CalSans-OFL.txt`.
+- **Contenants.** Rayons 8 px (contrôles) et 12-16 px (conteneurs) ; les blocs sont
+  délimités par un **anneau** discret et une ombre courte plutôt que par une bordure
+  lourde. Les arguments marketing montrent de vrais fragments d'interface
+  (`components/marketing/mocks.tsx`) plutôt que des illustrations.
+- **Points d'entrée.** `app/globals.css` porte les jetons et les polices ;
+  `components/ui.tsx` porte les primitives (boutons, cartes, champs, pastilles) ;
+  `components/public-shell.tsx` porte l'en-tête et le pied de page sombre.
+
+Les anciennes palettes `emerald-*` et `slate-*` sont remappées dans `globals.css`
+afin que les composants historiques héritent du même langage sans réécriture.
+
+Les préférences d'affichage (taille du texte, contraste, animations) sont posées
+sur `<html>` (`data-text-scale`, `data-contrast`, `data-motion`) et lues par
+`app/globals.css`.
+
+
 ## Démarrage
 
 Prérequis : Node.js 22+, un PostgreSQL accessible.
@@ -28,6 +57,10 @@ Pour activer les comptes, les guides administrés, l'annuaire et les fonctions c
 3. Appliquer les migrations (`npm run db:migrate`) à cette base avant d'ouvrir les fonctions connectées. Le build Vercel n'exécute volontairement pas de migration automatiquement.
 
 Sans ces variables, les routes publiques restent consultables en mode dégradé ; connexion, inscription et données en base restent indisponibles. Ne jamais publier de vrais identifiants ni committer un fichier `.env`.
+
+Pour afficher le site dans une iframe d'un domaine de prévisualisation, lister les origines
+autorisées dans `PREVIEW_FRAME_ANCESTORS` (séparées par des virgules). Sans cette variable,
+la politique reste stricte : `frame-ancestors 'self'` et `X-Frame-Options: SAMEORIGIN`.
 
 ### Accès mariage sans mot de passe
 

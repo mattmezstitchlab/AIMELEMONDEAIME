@@ -47,6 +47,15 @@ import {
   Send,
   UserRound,
   Sparkles,
+  ChevronDown,
+  Menu,
+  X,
+  ArrowUpRight,
+  Plus,
+  BarChart3,
+  Link2,
+  Copy,
+  Printer,
   type LucideProps,
 } from "lucide-react";
 
@@ -99,6 +108,15 @@ const ICONS = {
   send: Send,
   user: UserRound,
   sparkles: Sparkles,
+  chevron: ChevronDown,
+  menu: Menu,
+  close: X,
+  external: ArrowUpRight,
+  plus: Plus,
+  chart: BarChart3,
+  link: Link2,
+  copy: Copy,
+  print: Printer,
 } as const;
 
 export type IconName = keyof typeof ICONS;

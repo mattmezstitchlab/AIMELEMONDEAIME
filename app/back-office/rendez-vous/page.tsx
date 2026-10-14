@@ -16,7 +16,7 @@ export default async function RendezVousPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-sante.jpg" eyebrow="Agenda" title="Rendez-vous" description="Confirmez, annulez ou clôturez les demandes de rendez-vous de votre bureau." />
+      <SectionTitle eyebrow="Agenda" title="Rendez-vous" description="Confirmez, annulez ou clôturez les demandes de rendez-vous de votre bureau." />
       {items.length === 0 ? (
         <EmptyState title="Aucune demande de rendez-vous" />
       ) : (
@@ -26,7 +26,7 @@ export default async function RendezVousPage() {
               <div>
                 <p className="text-sm font-semibold text-slate-900">{a.reason}</p>
                 <p className="text-xs text-slate-500">{a.memberName} · {formatDateTime(a.requestedSlot)}</p>
-                <span className="mt-1 inline-block text-xs font-medium text-emerald-800">{APPOINTMENT_STATUS_LABELS[a.status] ?? a.status}</span>
+                <span className="mt-1 inline-block text-xs font-medium text-ink">{APPOINTMENT_STATUS_LABELS[a.status] ?? a.status}</span>
               </div>
               <AppointmentActions appointmentId={a.id} status={a.status} />
             </Card>

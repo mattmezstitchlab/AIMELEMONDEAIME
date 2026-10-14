@@ -26,8 +26,8 @@ export function MapTeaser() {
 export function MapTeaserLegend() {
   return (
     <ul className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate-600">
-      <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-emerald-800" aria-hidden="true" /> Agences</li>
-      <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-emerald-300 bg-white" aria-hidden="true" /> Production locale</li>
+      <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-ink" aria-hidden="true" /> Agences</li>
+      <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 ring-ink-4 bg-white" aria-hidden="true" /> Production locale</li>
       <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-amber-400" aria-hidden="true" /> Jeunes disponibles</li>
     </ul>
   );

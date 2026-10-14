@@ -3,9 +3,15 @@ import type { ReactNode } from "react";
 import { SidebarLink, BottomNavLink } from "@/components/nav-link";
 import { Logo } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icon";
+import { DisplayPreferences } from "@/components/display-preferences";
 
 export type NavItem = { href: string; label: string; icon: IconName; exact?: boolean };
 
+/**
+ * Coquille des espaces connectés (membre, équipe, administration).
+ * Registre Cal.com « application » : fond papier, barre latérale blanche
+ * délimitée par une hairline, entrées en pastilles, contenus en cartes.
+ */
 export function AppShell({
   children,
   navItems,
@@ -36,62 +42,80 @@ export function AppShell({
     .toUpperCase();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#fafaf9]">
+    <div className="flex min-h-screen flex-col bg-subtle">
       <div className="flex flex-1">
-        <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-black/[0.06] bg-white/80 px-5 py-7 backdrop-blur-xl md:flex">
-          <Link href={homeHref} className="mb-8 px-2" aria-label="Accueil de l'espace">
-            <Logo />
+        <aside className="sticky top-0 hidden h-screen w-[17.5rem] shrink-0 flex-col border-r border-line bg-canvas px-3.5 py-6 md:flex">
+          <Link href={homeHref} className="mb-7 px-2.5" aria-label="Accueil de l'espace">
+            <Logo withMark />
           </Link>
-          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{roleLabel}</p>
-          <nav aria-label="Navigation principale" className="flex flex-1 flex-col gap-1">
+          <p className="mb-2 px-3 font-display text-[11px] uppercase tracking-[0.14em] text-ink-4">{roleLabel}</p>
+          <nav aria-label="Navigation principale" className="flex flex-1 flex-col gap-0.5">
             {navItems.map((item) => (
               <SidebarLink key={item.href} {...item} />
             ))}
           </nav>
-          <div className="mt-6 rounded-2xl bg-[#fafaf9] p-4">
+
+          <div className="mt-6 rounded-card bg-subtle p-3">
             <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-800 text-sm font-semibold text-white">{initials}</span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-900">{userName}</p>
-                {officeName && <p className="truncate text-xs text-slate-500">{officeName}</p>}
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink text-xs font-medium text-white">{initials}</span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-ink">{userName}</p>
+                {officeName && <p className="truncate text-xs text-ink-3">{officeName}</p>}
               </div>
               {typeof notificationCount === "number" && notificationCount > 0 && (
-                <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-800 px-2 py-0.5 text-xs font-semibold text-white" aria-label={`${notificationCount} notifications non lues`}>
+                <span
+                  className="inline-flex items-center gap-1 rounded-full bg-ink px-2 py-0.5 text-[11px] font-medium text-white"
+                  aria-label={`${notificationCount} notifications non lues`}
+                >
                   <Icon name="bell" className="h-3 w-3" />
                   {notificationCount}
                 </span>
               )}
             </div>
-            <Link href="/deconnexion" className="mt-3 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-600 hover:bg-white">
-              <Icon name="logout" className="h-4 w-4" />
-              Se déconnecter
-            </Link>
+            <div className="mt-3 flex flex-col gap-0.5 border-t border-line pt-2">
+              <Link href="/deconnexion" className="flex items-center gap-2 rounded-control px-2 py-2 text-sm text-ink-2 transition hover:bg-canvas hover:text-ink">
+                <Icon name="logout" className="h-4 w-4" />
+                Se déconnecter
+              </Link>
+              <DisplayPreferences mode="sidebar" />
+            </div>
           </div>
         </aside>
 
         <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-black/[0.06] bg-white/80 px-4 py-3 backdrop-blur-xl md:hidden">
+          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-canvas/85 px-4 py-3 backdrop-blur-xl md:hidden">
             <Link href={homeHref} aria-label="Accueil de l'espace">
-              <Logo size="sm" />
+              <Logo size="sm" withMark />
             </Link>
             <div className="flex items-center gap-2">
               {typeof notificationCount === "number" && notificationCount > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-800 px-2 py-1 text-xs font-semibold text-white" aria-label={`${notificationCount} notifications non lues`}>
+                <span
+                  className="inline-flex items-center gap-1 rounded-full bg-ink px-2 py-1 text-[11px] font-medium text-white"
+                  aria-label={`${notificationCount} notifications non lues`}
+                >
                   <Icon name="bell" className="h-3 w-3" />
                   {notificationCount}
                 </span>
               )}
-              <Link href="/deconnexion" className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-700" aria-label="Se déconnecter">
+              <DisplayPreferences mode="mobile" />
+              <Link
+                href="/deconnexion"
+                className="grid h-9 w-9 place-items-center rounded-control text-ink-2 ring-1 ring-line transition hover:bg-muted"
+                aria-label="Se déconnecter"
+              >
                 <Icon name="logout" className="h-4 w-4" />
               </Link>
             </div>
           </header>
           <main id="contenu-principal" className="flex-1 px-4 py-6 pb-28 sm:px-6 md:pb-10 lg:px-10 lg:py-8">
-            <div className="mx-auto flex max-w-6xl flex-col">
+            <div className="mx-auto flex max-w-6xl flex-col gap-5">
               {demo && (
-                <p role="status" className="mb-5 flex flex-wrap items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <p
+                  role="status"
+                  className="flex flex-wrap items-center gap-2 rounded-card bg-state-warning-soft px-4 py-3 text-sm text-state-warning ring-1 ring-state-warning-line"
+                >
                   <strong>Visite guidée — lecture seule.</strong> Vous parcourez la vraie interface avec un compte de démonstration : les boutons d&apos;action sont inactifs.
-                  <Link href="/deconnexion" className="font-bold underline">Quitter la visite</Link>
+                  <Link href="/deconnexion" className="font-semibold underline underline-offset-4">Quitter la visite</Link>
                 </p>
               )}
               {children}
@@ -102,7 +126,7 @@ export function AppShell({
 
       <nav
         aria-label="Navigation principale mobile"
-        className="fixed inset-x-0 bottom-0 z-20 flex border-t border-black/[0.06] bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
       >
         {(mobileItems ?? navItems).map((item) => (
           <BottomNavLink key={item.href} {...item} />

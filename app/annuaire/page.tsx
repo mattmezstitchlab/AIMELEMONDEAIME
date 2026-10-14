@@ -1,6 +1,6 @@
 import { PublicPage } from "@/components/public-shell";
 import type { Metadata } from "next";
-import { Hero, EmptyState } from "@/components/ui";
+import { Container, EmptyState, Hero, SectionHeading } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { db, isDatabaseConfigured } from "@/db";
 import { offices } from "@/db/schema";
@@ -26,39 +26,74 @@ export default async function AnnuairePage({ searchParams }: { searchParams: Pro
 
   return (
     <PublicPage>
-      <Hero image="/images/hero-conseiller.jpg" gradient="planning" eyebrow="Points d'accueil AIME® · démonstration" title="Un point d'accueil près de chez vous" subtitle="Lieux fictifs de démonstration. Pour les organismes officiels (MSA, CAF, CPAM…), consultez la page Accompagnement.">
-        <form role="search" className="mt-9 flex max-w-xl overflow-hidden rounded-lg bg-white shadow-xl">
+      <Hero
+        size="md"
+        eyebrow="Points d'accueil AIME® · démonstration"
+        title="Un point d'accueil près de chez vous"
+        subtitle="Lieux fictifs de démonstration. Pour les organismes officiels (MSA, CAF, CPAM…), consultez la page Accompagnement."
+      >
+        <form role="search" className="mt-9 flex max-w-xl items-center gap-2 rounded-card bg-canvas p-2 shadow-rested ring-1 ring-line">
           <label htmlFor="q" className="sr-only">Ville, code postal ou région</label>
-          <div className="flex flex-1 items-center gap-2 px-4">
-            <Icon name="pin" className="h-5 w-5 text-slate-400" />
-            <input id="q" name="q" defaultValue={q} placeholder="Ville, code postal ou région" className="w-full py-4 text-base text-slate-900 outline-none" />
+          <div className="flex min-w-0 flex-1 items-center gap-2 pl-2">
+            <Icon name="pin" className="h-4 w-4 shrink-0 text-ink-4" />
+            <input
+              id="q"
+              name="q"
+              defaultValue={q}
+              placeholder="Ville, code postal ou région"
+              className="h-10 w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-4"
+            />
           </div>
-          <button type="submit" className="bg-emerald-800 px-6 text-base font-semibold text-white hover:bg-emerald-900">Rechercher</button>
+          <button
+            type="submit"
+            className="h-10 shrink-0 rounded-control bg-ink px-4 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
+          >
+            Rechercher
+          </button>
         </form>
       </Hero>
 
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        {items.length === 0 ? (
-          <EmptyState
-            title={directoryAvailable ? "Aucun bureau trouvé" : "Annuaire indisponible pour le moment"}
-            description={directoryAvailable ? "Essayez une autre ville ou un autre code postal." : "Les lieux de démonstration seront affichés dès que la base de données du site sera configurée."}
+      <section className="bg-canvas">
+        <Container className="py-16 lg:py-20">
+          <SectionHeading
+            eyebrow="Annuaire interne"
+            title={q ? `Résultats pour « ${q} »` : "Tous les points d'accueil"}
+            description="Ces fiches servent à la démonstration. Les coordonnées réelles des organismes publics se vérifient sur les sites officiels."
           />
-        ) : (
-          <div className="grid gap-5 md:grid-cols-2">
-            {items.map((office) => (
-              <div key={office.id} className="rounded-2xl bg-[#fafaf9] p-8">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">{office.region}</p>
-                <h2 className="mt-2 text-xl font-semibold text-[#1d1d1f]">{office.name}</h2>
-                <ul className="mt-5 space-y-3 text-slate-700">
-                  <li className="flex gap-3"><Icon name="pin" className="h-5 w-5 shrink-0 text-emerald-500" />{office.address}, {office.postalCode} {office.city}</li>
-                  <li className="flex gap-3"><Icon name="phone" className="h-5 w-5 shrink-0 text-emerald-500" /><a href={`tel:${office.phone.replace(/\s/g, "")}`} className="hover:underline">{office.phone}</a></li>
-                  <li className="flex gap-3"><Icon name="clock" className="h-5 w-5 shrink-0 text-emerald-500" />{office.hours}</li>
-                </ul>
+
+          <div className="mt-10">
+            {items.length === 0 ? (
+              <EmptyState
+                title={directoryAvailable ? "Aucun bureau trouvé" : "Annuaire indisponible pour le moment"}
+                description={directoryAvailable ? "Essayez une autre ville ou un autre code postal." : "Les lieux de démonstration seront affichés dès que la base de données du site sera configurée."}
+              />
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2">
+                {items.map((office) => (
+                  <article key={office.id} className="rounded-card bg-canvas p-7 shadow-rested ring-1 ring-line">
+                    <p className="eyebrow">{office.region}</p>
+                    <h2 className="mt-3 text-xl text-ink">{office.name}</h2>
+                    <ul className="mt-5 space-y-3 text-sm text-ink-2">
+                      <li className="flex gap-3">
+                        <Icon name="pin" className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" />
+                        {office.address}, {office.postalCode} {office.city}
+                      </li>
+                      <li className="flex gap-3">
+                        <Icon name="phone" className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" />
+                        <a href={`tel:${office.phone.replace(/\s/g, "")}`} className="hover:underline hover:underline-offset-4">{office.phone}</a>
+                      </li>
+                      <li className="flex gap-3">
+                        <Icon name="clock" className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" />
+                        {office.hours}
+                      </li>
+                    </ul>
+                  </article>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
+        </Container>
+      </section>
     </PublicPage>
   );
 }

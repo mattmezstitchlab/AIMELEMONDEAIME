@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { getCurrentUser, getSession } from "@/lib/auth";
@@ -11,6 +11,12 @@ export const metadata: Metadata = {
   title: "AIME® Mariage — Préparer votre mariage et tout ce qui l’entoure",
   description:
     "Démarches civiles, préparation de la journée, budget, proches et changements après l’union : des repères et des services reliés, selon votre situation. Prototype indépendant, non affilié à un organisme public.",
+};
+
+/** Couleur d'interface unifiée : la barre du navigateur suit le fond papier. */
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  colorScheme: "light",
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -29,7 +35,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const canAct = user?.role === "membre" && (await getSession())?.demo !== true;
   return (
     <html lang="fr">
-      <body className="bg-white text-slate-900 antialiased">
+      <body className="min-h-screen bg-canvas text-ink-2 antialiased">
         <a href="#contenu-principal" className="skip-link">
           Aller au contenu principal
         </a>

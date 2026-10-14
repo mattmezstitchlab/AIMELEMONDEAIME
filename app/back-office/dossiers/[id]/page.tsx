@@ -32,9 +32,8 @@ export default async function CaseworkerCaseDetail({ params }: { params: Promise
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/back-office/dossiers" className="text-sm font-medium text-emerald-800 hover:underline">← Dossiers</Link>
+      <Link href="/back-office/dossiers" className="text-sm font-medium text-ink hover:underline">← Dossiers</Link>
       <SectionTitle
-        image={THEME_META[procedureType?.category ?? ""]?.image ?? "/images/hero-conseiller.jpg"}
         eyebrow={`Dossier ${item.reference} · ${member?.fullName ?? ""}`}
         title={item.title}
         description={detail.caseworker ? `Gestionnaire : ${detail.caseworker.fullName}` : "Dossier non affecté"}
@@ -78,9 +77,9 @@ export default async function CaseworkerCaseDetail({ params }: { params: Promise
             ) : (
               <ul className="mt-3 flex flex-col gap-2">
                 {caseDocuments.map((doc) => (
-                  <li key={doc.id} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                  <li key={doc.id} className="flex items-center justify-between rounded-control ring-1 ring-line px-3 py-2 text-sm">
                     <span>{doc.filename} {doc.isSpecimen && <Tag>SPÉCIMEN</Tag>}</span>
-                    <a href={`/api/documents/${doc.id}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-800 hover:underline">
+                    <a href={`/api/documents/${doc.id}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-ink hover:underline">
                       Télécharger
                     </a>
                   </li>
@@ -117,11 +116,11 @@ export default async function CaseworkerCaseDetail({ params }: { params: Promise
 
           <Card>
             <h2 className="text-lg font-semibold text-slate-900">Historique</h2>
-            <ol className="mt-3 flex flex-col gap-4 border-l-2 border-emerald-100 pl-4">
+            <ol className="mt-3 flex flex-col gap-4 border-l-2 ring-line-soft pl-4">
               {events.map((event) => (
                 <li key={event.id} className="relative">
-                  <span className="absolute -left-[22px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-600" aria-hidden="true" />
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">{CASE_EVENT_LABELS[event.type] ?? event.type}</p>
+                  <span className="absolute -left-[22px] top-1 h-2.5 w-2.5 rounded-full bg-ink-2" aria-hidden="true" />
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink">{CASE_EVENT_LABELS[event.type] ?? event.type}</p>
                   <p className="text-sm text-slate-700">{event.message}</p>
                   <p className="text-xs text-slate-500">
                     {event.actorId ? actorMap.get(event.actorId)?.fullName ?? "Utilisateur" : "Système"} · {formatDateTime(event.createdAt)}

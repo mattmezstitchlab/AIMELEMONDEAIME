@@ -738,49 +738,49 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     const busy = state?.status === "busy";
     const btn = "rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50";
     return (
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-3.5 py-3">
+      <div className="rounded-card border ring-line bg-muted/80 px-3.5 py-3">
         {state?.status === "error" && (
           <p className="mb-2 text-xs font-medium text-red-700">{state.message}</p>
         )}
         {action.kind === "creer_brouillon" && (
           <>
-            <p className="text-sm font-semibold text-emerald-950">Créer le brouillon « {action.situationLabel} » ?</p>
-            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Je crée un brouillon vide dans Mes démarches. Aucune donnée n&apos;est envoyée : vous répondrez aux questions ensuite, à votre rythme, avec la possibilité de tout relire avant la moindre transmission.</p>
+            <p className="text-sm font-semibold text-ink">Créer le brouillon « {action.situationLabel} » ?</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink/75">Je crée un brouillon vide dans Mes démarches. Aucune donnée n&apos;est envoyée : vous répondrez aux questions ensuite, à votre rythme, avec la possibilité de tout relire avant la moindre transmission.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "Création…" : "Oui, créer le brouillon"}</button>
-              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-white hover:bg-ink-2`}>{busy ? "Création…" : "Oui, créer le brouillon"}</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-white text-ink`}>Pas maintenant</button>
             </div>
           </>
         )}
         {action.kind === "rappel" && (
           <>
-            <p className="text-sm font-semibold text-emerald-950">Poser un rappel pour « {action.taskLabel} » ?</p>
-            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Rappel personnel, sans valeur officielle : vous recevrez une notification ici à l&apos;approche de la date.</p>
+            <p className="text-sm font-semibold text-ink">Poser un rappel pour « {action.taskLabel} » ?</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink/75">Rappel personnel, sans valeur officielle : vous recevrez une notification ici à l&apos;approche de la date.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(1))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "En cours…" : "Demain"}</button>
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(3))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>Dans 3 jours</button>
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(7))} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>Dans 1 semaine</button>
-              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(1))} className={`${btn} bg-ink text-white hover:bg-ink-2`}>{busy ? "En cours…" : "Demain"}</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(3))} className={`${btn} bg-ink text-white hover:bg-ink-2`}>Dans 3 jours</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(7))} className={`${btn} bg-ink text-white hover:bg-ink-2`}>Dans 1 semaine</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-white text-ink`}>Pas maintenant</button>
             </div>
           </>
         )}
         {action.kind === "finaliser" && (
           <>
-            <p className="text-sm font-semibold text-emerald-950">Préparer le plan « {action.title} » à partir de ces réponses ?</p>
-            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Je génère vos étapes et vos pièces depuis les réponses relues ci-dessus.{action.evenement ? " Un projet partagé sera créé dans votre espace pour coordonner l'organisation, comme depuis le formulaire." : ""} Aucune transmission à votre bureau : ce sera une autre étape, seulement si vous la demandez.</p>
+            <p className="text-sm font-semibold text-ink">Préparer le plan « {action.title} » à partir de ces réponses ?</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink/75">Je génère vos étapes et vos pièces depuis les réponses relues ci-dessus.{action.evenement ? " Un projet partagé sera créé dans votre espace pour coordonner l'organisation, comme depuis le formulaire." : ""} Aucune transmission à votre bureau : ce sera une autre étape, seulement si vous la demandez.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "Préparation…" : "Oui, préparer mon plan"}</button>
-              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-white hover:bg-ink-2`}>{busy ? "Préparation…" : "Oui, préparer mon plan"}</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-white text-ink`}>Pas maintenant</button>
             </div>
           </>
         )}
         {action.kind === "transmettre" && (
           <>
-            <p className="text-sm font-semibold text-emerald-950">Transmettre « {action.title} » à votre bureau ?</p>
-            <p className="mt-1 text-xs leading-relaxed text-emerald-900/75">Confirmation définitive : un dossier sera créé et suivi par votre bureau d&apos;accompagnement, à partir des réponses que vous avez relues dans ce parcours. Rien ne part vers un organisme extérieur, et le parcours reste consultable.</p>
+            <p className="text-sm font-semibold text-ink">Transmettre « {action.title} » à votre bureau ?</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink/75">Confirmation définitive : un dossier sera créé et suivi par votre bureau d&apos;accompagnement, à partir des réponses que vous avez relues dans ce parcours. Rien ne part vers un organisme extérieur, et le parcours reste consultable.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-emerald-800 text-white hover:bg-emerald-900`}>{busy ? "Transmission…" : "Oui, transmettre à mon bureau"}</button>
-              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border border-emerald-300 bg-white text-emerald-900`}>Pas maintenant</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-white hover:bg-ink-2`}>{busy ? "Transmission…" : "Oui, transmettre à mon bureau"}</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-white text-ink`}>Pas maintenant</button>
             </div>
           </>
         )}
@@ -806,7 +806,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           onClick={() => { if (open) { setOpen(false); triggerRef.current?.focus(); } else setOpen(true); }}
           aria-expanded={open}
           aria-controls="assistant-panel"
-          className="grid h-14 w-14 place-items-center rounded-full bg-emerald-800 text-white shadow-lg transition hover:bg-emerald-900"
+          className="grid h-14 w-14 place-items-center rounded-full bg-ink text-white shadow-hover transition hover:bg-ink-2"
           aria-label={open ? "Fermer l'assistant de navigation" : "Ouvrir l'assistant de navigation"}
         >
           {open ? <Icon name="alert" className="h-6 w-6" /> : <Msasprout className="h-7 w-7" />}
@@ -820,10 +820,10 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           role="dialog"
           aria-modal="false"
           aria-label="Assistant de navigation"
-          className="fixed inset-x-3 bottom-36 z-50 flex max-h-[70vh] md:bottom-24 flex-col overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-2xl sm:inset-x-auto sm:bottom-36 sm:right-5 md:bottom-24 sm:w-[400px]"
+          className="fixed inset-x-3 bottom-36 z-50 flex max-h-[70vh] md:bottom-24 flex-col overflow-hidden rounded-card bg-canvas ring-1 ring-line shadow-lifted sm:inset-x-auto sm:bottom-36 sm:right-5 md:bottom-24 sm:w-[400px]"
         >
           <header className="flex items-center gap-3 border-b border-slate-100 bg-white px-4 py-3">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-800 text-white">
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-ink text-white">
               <Msasprout className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
@@ -838,36 +838,36 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           </header>
 
           {guide && (
-            <div className="flex items-center gap-2 border-b border-slate-100 bg-emerald-50 px-4 py-2.5">
-              <span className="text-xs font-semibold text-emerald-800">
+            <div className="flex items-center gap-2 border-b border-slate-100 bg-muted px-4 py-2.5">
+              <span className="text-xs font-semibold text-ink">
                 Étape {guide.stepIndex + 1} sur {totalSteps}
               </span>
-              <div className="mx-1 h-1.5 flex-1 overflow-hidden rounded-full bg-emerald-100" aria-hidden="true">
-                <div className="h-full rounded-full bg-emerald-700 transition-all" style={{ width: `${((guide.stepIndex + 1) / Math.max(1, totalSteps)) * 100}%` }} />
+              <div className="mx-1 h-1.5 flex-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+                <div className="h-full rounded-full bg-ink-2 transition-all" style={{ width: `${((guide.stepIndex + 1) / Math.max(1, totalSteps)) * 100}%` }} />
               </div>
-              <button type="button" onClick={previousStep} disabled={guide.stepIndex === 0} className="rounded-md px-2 py-1 text-xs font-semibold text-emerald-800 disabled:opacity-40">
+              <button type="button" onClick={previousStep} disabled={guide.stepIndex === 0} className="rounded-md px-2 py-1 text-xs font-semibold text-ink disabled:opacity-40">
                 Précédent
               </button>
-              <button type="button" onClick={nextStep} className="rounded-md bg-emerald-800 px-2.5 py-1 text-xs font-semibold text-white">
+              <button type="button" onClick={nextStep} className="rounded-md bg-ink px-2.5 py-1 text-xs font-semibold text-white">
                 {guide.stepIndex + 1 === totalSteps ? "Terminer" : "Suivant"}
               </button>
-              <button type="button" onClick={quitGuide} className="rounded-md border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-800">
+              <button type="button" onClick={quitGuide} className="rounded-md border ring-line px-2 py-1 text-xs font-semibold text-ink">
                 Quitter le guide
               </button>
             </div>
           )}
 
           {highlightLabel && (
-            <p className="border-b border-slate-100 bg-[#fafaf9] px-4 py-2 text-xs text-slate-600">
+            <p className="border-b border-slate-100 bg-subtle px-4 py-2 text-xs text-slate-600">
               Élément mis en évidence : <strong className="text-slate-900">{highlightLabel}</strong>
             </p>
           )}
 
-          <div ref={threadRef} className="flex-1 space-y-3 overflow-y-auto bg-[#fafaf9] px-4 py-4" aria-live="polite">
+          <div ref={threadRef} className="flex-1 space-y-3 overflow-y-auto bg-subtle px-4 py-4" aria-live="polite">
             {displayTurns.map((turn) => (
               <div key={turn.id} className="space-y-2">
                 <div className={`flex ${turn.from === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[85%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-emerald-800 text-white" : "bg-white text-slate-800 shadow-sm"}`}>
+                  <div className={`max-w-[85%] whitespace-pre-line rounded-card px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-ink text-white" : "bg-white text-slate-800 shadow-rested"}`}>
                     {turn.text}
                   </div>
                 </div>
@@ -877,7 +877,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             {lastSuggestions && !guide && (
               <div role="group" aria-label="Choix proposés par l'assistant" className="flex flex-wrap gap-2">
                 {lastSuggestions.map((suggestion) => (
-                  <button key={`${suggestion.label}-${suggestion.href ?? suggestion.scenarioId ?? ""}`} type="button" onClick={() => handleSuggestion(suggestion)} className="min-h-9 rounded-lg border border-slate-300 bg-white px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-sm hover:border-slate-600">
+                  <button key={`${suggestion.label}-${suggestion.href ?? suggestion.scenarioId ?? ""}`} type="button" onClick={() => handleSuggestion(suggestion)} className="min-h-9 rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-rested hover:border-slate-600">
                     {suggestion.label}
                   </button>
                 ))}
@@ -892,7 +892,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                 <button
                   type="button"
                   onClick={() => { pushTurn({ from: "user", text: "Faire le point sur mes démarches" }); answerPersonal(buildPoint(summary, focusLine)); proposeReminderIfUseful(); }}
-                  className="rounded-full border border-emerald-700 bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-900"
+                  className="rounded-full border ring-ink bg-ink px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-ink-2"
                 >
                   Faire le point sur mes démarches
                 </button>
@@ -902,7 +902,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                   key={suggestion.label}
                   type="button"
                   onClick={() => handleSuggestion(suggestion)}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
+                  className="rounded-full ring-1 ring-line bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:ring-ink hover:text-ink"
                 >
                   {suggestion.label}
                 </button>
@@ -917,7 +917,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                 maxLength={120}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder="Ex. je déménage, je cherche mon attestation"
-                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-700"
+                className="min-w-0 flex-1 rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm outline-none focus:ring-ink"
               />
               <PrimaryButton type="submit" className="!px-3 !py-2 text-xs">Envoyer</PrimaryButton>
             </form>

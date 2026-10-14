@@ -30,7 +30,7 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-cotisations.jpg" eyebrow="Back-office" title="Dossiers" description="Filtrez, affectez, inspectez et traitez les dossiers de votre bureau." />
+      <SectionTitle eyebrow="Back-office" title="Dossiers" description="Filtrez, affectez, inspectez et traitez les dossiers de votre bureau." />
 
       <Card>
         <form className="flex flex-wrap items-end gap-3">
@@ -43,12 +43,12 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
               defaultValue={q ?? ""}
               data-assistant-id="backoffice-search"
               placeholder="Référence, titre ou adhérent"
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm"
             />
           </div>
           <div>
             <label htmlFor="statut" className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Statut</label>
-            <select id="statut" name="statut" data-assistant-id="backoffice-filters" defaultValue={statut || ""} className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <select id="statut" name="statut" data-assistant-id="backoffice-filters" defaultValue={statut || ""} className="mt-1 rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm">
               <option value="">Tous les statuts</option>
               {Object.entries(CASE_STATUS_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -57,20 +57,20 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
           </div>
           <div>
             <label htmlFor="affectation" className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Affectation</label>
-            <select id="affectation" name="affectation" defaultValue={affectation || ""} className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <select id="affectation" name="affectation" defaultValue={affectation || ""} className="mt-1 rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm">
               <option value="">Tous</option>
               <option value="moi">Mes dossiers</option>
               <option value="non_affectes">Non affectés</option>
             </select>
           </div>
-          <button type="submit" className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-900">Filtrer</button>
+          <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-2">Filtrer</button>
         </form>
       </Card>
 
       {items.length === 0 ? (
         <EmptyState title="Aucun dossier ne correspond aux filtres" />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="overflow-hidden rounded-card ring-1 ring-line bg-white">
           <table data-assistant-id="backoffice-table" className="w-full text-left text-sm">
             <caption className="sr-only">Liste des dossiers</caption>
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -86,9 +86,9 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
             </thead>
             <tbody className="divide-y divide-slate-100">
               {items.map((c) => (
-                <tr key={c.id} className="hover:bg-emerald-50/40">
+                <tr key={c.id} className="hover:bg-muted/40">
                   <td className="px-4 py-3">
-                    <Link href={`/back-office/dossiers/${c.id}`} className="font-semibold text-emerald-800 hover:underline">{c.reference}</Link>
+                    <Link href={`/back-office/dossiers/${c.id}`} className="font-semibold text-ink hover:underline">{c.reference}</Link>
                   </td>
                   <td className="px-4 py-3 text-slate-700">{c.memberName}</td>
                   <td className="px-4 py-3 text-slate-700">{c.title}</td>

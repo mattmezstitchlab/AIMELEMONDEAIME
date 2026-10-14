@@ -19,15 +19,15 @@ export function NotificationList({ items }: { items: Item[] }) {
     <div className="mt-3">
       <ul className="flex flex-col gap-2">
         {optimistic.map((n) => (
-          <li key={n.id} className={`rounded-xl px-3 py-2.5 text-sm ${n.isRead ? "bg-white" : "bg-emerald-50"}`}>
+          <li key={n.id} className={`rounded-card px-3 py-2.5 text-sm ${n.isRead ? "bg-white" : "bg-muted"}`}>
             <div className="flex items-start gap-2">
-              {!n.isRead && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-600" aria-label="Non lue" />}
+              {!n.isRead && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink-2" aria-label="Non lue" />}
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-slate-900">{n.title}</p>
                 <p className="text-slate-600">{n.body}</p>
                 <div className="mt-1 flex gap-3 text-xs">
                   {n.link && (
-                    <Link href={n.link} className="font-semibold text-emerald-700 hover:underline" onClick={() => startTransition(async () => { setOptimistic(n.id); await markNotificationRead(n.id); })}>
+                    <Link href={n.link} className="font-semibold text-ink-2 hover:underline" onClick={() => startTransition(async () => { setOptimistic(n.id); await markNotificationRead(n.id); })}>
                       Voir
                     </Link>
                   )}
@@ -43,7 +43,7 @@ export function NotificationList({ items }: { items: Item[] }) {
         ))}
       </ul>
       {unread && (
-        <button type="button" className="mt-3 text-xs font-semibold text-emerald-700 hover:underline" onClick={() => startTransition(async () => { setOptimistic("all"); await markAllNotificationsRead(); })}>
+        <button type="button" className="mt-3 text-xs font-semibold text-ink-2 hover:underline" onClick={() => startTransition(async () => { setOptimistic("all"); await markAllNotificationsRead(); })}>
           Tout marquer comme lu
         </button>
       )}

@@ -15,7 +15,7 @@ import { PrimaryButton, SecondaryButton } from "@/components/ui";
 
 type State = { ok: boolean; message?: string; error?: string } | null;
 
-const inputCls = "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm";
+const inputCls = "mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm";
 const labelCls = "block text-sm font-medium text-slate-700";
 
 function Field({ label, name, type = "text", defaultValue, required = true, placeholder }: { label: string; name: string; type?: string; defaultValue?: string; required?: boolean; placeholder?: string }) {
@@ -37,11 +37,11 @@ export function PlacePointForm({ lat, lng, onDone }: { lat: number; lng: number;
   }, null);
 
   return (
-    <form action={action} className="flex flex-col gap-3 rounded-2xl bg-[#fafaf9] p-5">
+    <form action={action} className="flex flex-col gap-3 rounded-card bg-subtle p-5">
       <input type="hidden" name="lat" value={lat.toFixed(6)} />
       <input type="hidden" name="lng" value={lng.toFixed(6)} />
       <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-        <Icon name="pin" className="h-5 w-5 text-emerald-600" /> Déposer mon point
+        <Icon name="pin" className="h-5 w-5 text-ink-3" /> Déposer mon point
       </h3>
       <p className="text-xs text-slate-500">
         Position retenue : {lat.toFixed(4)}, {lng.toFixed(4)}. Aucune donnée personnelle sensible n&apos;est demandée.
@@ -61,7 +61,7 @@ export function PlacePointForm({ lat, lng, onDone }: { lat: number; lng: number;
         <textarea id="desc-point" name="description" rows={3} maxLength={600} className={inputCls} placeholder="Ce que vous proposez, vos jours de présence…" />
       </div>
       {state?.error && <p role="alert" className="text-sm text-rose-700">{state.error}</p>}
-      {state?.ok && <p role="status" className="text-sm text-emerald-700">{state.message}</p>}
+      {state?.ok && <p role="status" className="text-sm text-ink-2">{state.message}</p>}
       <div className="flex gap-2">
         <PrimaryButton type="submit" disabled={pending}>{pending ? "Envoi…" : "Publier sur la carte"}</PrimaryButton>
         <SecondaryButton type="button" onClick={onDone}>Annuler</SecondaryButton>
@@ -74,7 +74,7 @@ export function PlacePointForm({ lat, lng, onDone }: { lat: number; lng: number;
 export function ProductForm({ pointId }: { pointId: number }) {
   const [state, action, pending] = useActionState<State, FormData>(async (_prev, form) => addLocalProduct(form), null);
   return (
-    <form action={action} className="mt-3 flex flex-col gap-3 rounded-xl bg-[#fafaf9] p-4">
+    <form action={action} className="mt-3 flex flex-col gap-3 rounded-card bg-subtle p-4">
       <input type="hidden" name="pointId" value={pointId} />
       <h4 className="text-sm font-semibold text-slate-900">Ajouter un produit</h4>
       <Field label="Nom du produit" name="name" placeholder="Ex. Panier de légumes" />
@@ -96,7 +96,7 @@ export function ProductForm({ pointId }: { pointId: number }) {
         <textarea id={`pdesc-${pointId}`} name="description" rows={2} maxLength={400} className={inputCls} />
       </div>
       {state?.error && <p role="alert" className="text-sm text-rose-700">{state.error}</p>}
-      {state?.ok && <p role="status" className="text-sm text-emerald-700">{state.message}</p>}
+      {state?.ok && <p role="status" className="text-sm text-ink-2">{state.message}</p>}
       <PrimaryButton type="submit" disabled={pending}>{pending ? "Ajout…" : "Ajouter le produit"}</PrimaryButton>
     </form>
   );
@@ -120,7 +120,7 @@ export function AvailabilityForm({
   const skillOptions = ["Livraison de proximité", "Aide aux champs", "Tenue de stand", "Préparation de paniers", "Coup de main au marché", "Accueil à la ferme"];
 
   return (
-    <form action={action} className="flex flex-col gap-3 rounded-2xl bg-[#fafaf9] p-5">
+    <form action={action} className="flex flex-col gap-3 rounded-card bg-subtle p-5">
       <input type="hidden" name="lat" value={coords.lat.toFixed(6)} />
       <input type="hidden" name="lng" value={coords.lng.toFixed(6)} />
       <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -134,13 +134,13 @@ export function AvailabilityForm({
         <label className={labelCls} htmlFor="avail-note">Vos créneaux (facultatif)</label>
         <input id="avail-note" name="availabilityNote" defaultValue={defaultValues?.availabilityNote ?? ""} maxLength={400} className={inputCls} placeholder="Ex. mercredis et samedis" />
       </div>
-      <fieldset className="rounded-xl border border-slate-200 p-3">
+      <fieldset className="rounded-card ring-1 ring-line p-3">
         <legend className="px-1 text-sm font-medium text-slate-700">Missions possibles</legend>
         <div className="mt-1 flex flex-wrap gap-2">
           {skillOptions.map((skill) => {
             const active = skills.includes(skill);
             return (
-              <label key={skill} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "border-emerald-700 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-700"}`}>
+              <label key={skill} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-700"}`}>
                 <input type="checkbox" name="skills" value={skill} className="sr-only" checked={active} onChange={() => setSkills((prev) => prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill])} />
                 {skill}
               </label>
@@ -148,11 +148,11 @@ export function AvailabilityForm({
           })}
         </div>
       </fieldset>
-      <button type="button" className="self-start text-xs font-semibold text-emerald-700 underline" onClick={() => setCoords({ lat: 48.4474 + Math.random() * 0.02 - 0.01, lng: 1.4877 + Math.random() * 0.02 - 0.01 })}>
+      <button type="button" className="self-start text-xs font-semibold text-ink-2 underline" onClick={() => setCoords({ lat: 48.4474 + Math.random() * 0.02 - 0.01, lng: 1.4877 + Math.random() * 0.02 - 0.01 })}>
         Recentrer sur ma commune
       </button>
       {state?.error && <p role="alert" className="text-sm text-rose-700">{state.error}</p>}
-      {state?.ok && <p role="status" className="text-sm text-emerald-700">{state.message}</p>}
+      {state?.ok && <p role="status" className="text-sm text-ink-2">{state.message}</p>}
       <PrimaryButton type="submit" disabled={pending}>{pending ? "Envoi…" : "Publier ma disponibilité"}</PrimaryButton>
     </form>
   );
@@ -171,22 +171,22 @@ export function OrderButton({ productId, stock, label = "Commander" }: { product
     );
   }
   return (
-    <form action={action} className="mt-2 flex flex-col gap-2 rounded-xl bg-[#fafaf9] p-3">
+    <form action={action} className="mt-2 flex flex-col gap-2 rounded-card bg-subtle p-3">
       <input type="hidden" name="productId" value={productId} />
       <div className="flex items-end gap-2">
         <div>
           <label className="block text-xs font-medium text-slate-700" htmlFor={`qty-${productId}`}>Quantité</label>
-          <input id={`qty-${productId}`} name="quantity" type="number" min={1} max={Math.max(1, stock)} defaultValue={1} className="mt-1 w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm" />
+          <input id={`qty-${productId}`} name="quantity" type="number" min={1} max={Math.max(1, stock)} defaultValue={1} className="mt-1 w-20 rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-700" htmlFor={`pickup-${productId}`}>Retrait souhaité</label>
-          <input id={`pickup-${productId}`} name="pickupAt" type="datetime-local" className="mt-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm" />
+          <input id={`pickup-${productId}`} name="pickupAt" type="datetime-local" className="mt-1 rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
         </div>
       </div>
-      <input name="note" maxLength={300} placeholder="Précision pour le retrait (facultatif)" className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm" />
+      <input name="note" maxLength={300} placeholder="Précision pour le retrait (facultatif)" className="rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
       <p className="text-xs text-slate-500">Stock disponible : {stock}. Le retrait se fait sur place, sans paiement en ligne.</p>
       {state?.error && <p role="alert" className="text-xs text-rose-700">{state.error}</p>}
-      {state?.ok && <p role="status" className="text-xs text-emerald-700">{state.message}</p>}
+      {state?.ok && <p role="status" className="text-xs text-ink-2">{state.message}</p>}
       <div className="flex gap-2">
         <PrimaryButton type="submit" disabled={pending} className="!px-3 !py-1.5 text-xs">{pending ? "Envoi…" : "Confirmer"}</PrimaryButton>
         <SecondaryButton type="button" className="!px-3 !py-1.5 text-xs" onClick={() => setOpen(false)}>Fermer</SecondaryButton>
@@ -201,7 +201,7 @@ export function OwnerPointActions({ pointId }: { pointId: number }) {
   return (
     <form action={action} className="inline">
       {state?.error && <p role="alert" className="mb-1 text-xs text-rose-700">{state.error}</p>}
-      {state?.ok && <p role="status" className="mb-1 text-xs text-emerald-700">{state.message}</p>}
+      {state?.ok && <p role="status" className="mb-1 text-xs text-ink-2">{state.message}</p>}
       <SecondaryButton type="submit" disabled={pending} className="!px-3 !py-1.5 text-xs text-rose-700">
         {pending ? "Suppression…" : "Retirer de la carte"}
       </SecondaryButton>
@@ -226,7 +226,7 @@ export function DirectionsLink({ lat, lng, label }: { lat: number; lng: number; 
       href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=14/${lat}/${lng}`}
       target="_blank"
       rel="noreferrer noopener"
-      className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline"
+      className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-2 hover:underline"
     >
       <Icon name="pin" className="h-4 w-4" /> {label}
     </a>
@@ -237,7 +237,7 @@ export function AssistantHint() {
   return (
     <p className="text-xs text-slate-500">
       Besoin d&apos;aide pour utiliser la carte ?{" "}
-      <Link href="/carte#comment-ca-marche" className="font-semibold text-emerald-700 hover:underline">Voir le mode d&apos;emploi</Link>.
+      <Link href="/carte#comment-ca-marche" className="font-semibold text-ink-2 hover:underline">Voir le mode d&apos;emploi</Link>.
     </p>
   );
 }

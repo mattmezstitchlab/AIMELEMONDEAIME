@@ -13,7 +13,7 @@ const KIND_STYLES: Record<YearEventKind, string> = {
   echeance: "bg-rose-700 text-white",
   rappel: "bg-slate-200 text-slate-800",
   "rendez-vous": "bg-sky-100 text-sky-900",
-  projet: "bg-emerald-100 text-emerald-900",
+  projet: "bg-muted text-ink",
   evenement: "bg-violet-100 text-violet-900",
   trajet: "bg-amber-100 text-amber-900",
   anniversaire: "bg-pink-100 text-pink-900",
@@ -24,7 +24,7 @@ const fmtWeekday = new Intl.DateTimeFormat("fr-FR", { weekday: "short" });
 function EventRow({ e, now }: { e: YearEvent; now: Date }) {
   return (
     <li>
-      <Link href={e.href} className="flex items-center gap-4 rounded-xl bg-[#fafaf9] px-4 py-3 transition hover:bg-emerald-50">
+      <Link href={e.href} className="flex items-center gap-4 rounded-card bg-subtle px-4 py-3 transition hover:bg-muted">
         <span className="w-14 shrink-0 text-center">
           <span className="block text-xl font-bold leading-none text-slate-900">{e.date.getDate()}</span>
           <span className="mt-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">{fmtWeekday.format(e.date)}</span>
@@ -78,7 +78,7 @@ export default async function MonAnnee() {
       </div>
 
       {year.overdue.length > 0 ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
+        <div className="rounded-card border border-rose-200 bg-rose-50 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
           <h2 className="text-lg font-semibold text-rose-900">En retard — à traiter d&apos;abord</h2>
           <p className="mt-1 text-sm text-rose-800">Ces dates sont passées et l&apos;étape n&apos;est pas marquée comme terminée. Les reprendre maintenant vaut presque toujours mieux que les laisser vieillir.</p>
           <ul className="mt-4 space-y-2">
@@ -95,8 +95,8 @@ export default async function MonAnnee() {
           description="Dès qu'un parcours pose un rappel, qu'un rendez-vous est demandé ou qu'un projet prend date, tout apparaît ici, mois par mois."
           action={
             <span className="flex flex-wrap justify-center gap-3">
-              <Link href="/espace/demarches/nouvelle" className="font-semibold text-emerald-800 underline">Commencer un parcours</Link>
-              <Link href="/le-monde-aime?onglet=publier" className="font-semibold text-emerald-800 underline">Créer un projet</Link>
+              <Link href="/espace/demarches/nouvelle" className="font-semibold text-ink underline">Commencer un parcours</Link>
+              <Link href="/le-monde-aime?onglet=publier" className="font-semibold text-ink underline">Créer un projet</Link>
             </span>
           }
         />
@@ -119,7 +119,7 @@ export default async function MonAnnee() {
         </div>
       )}
 
-      <p className="rounded-2xl bg-[#fafaf9] p-5 text-sm leading-6 text-slate-600">
+      <p className="rounded-card bg-subtle p-5 text-sm leading-6 text-slate-600">
         <strong className="text-slate-800">Comment lire cette page :</strong> les <strong>échéances officielles</strong> sont les seules dates qui engagent un organisme — leur source est indiquée. Les <strong>rappels personnels</strong> sont les dates que vos parcours ont calculées pour vous aider à avancer : utiles, mais ils n&apos;engagent que vous. Un projet ou un événement passé disparaît de l&apos;année ; une étape de parcours en retard, elle, reste affichée tant qu&apos;elle n&apos;est pas terminée.
       </p>
     </div>

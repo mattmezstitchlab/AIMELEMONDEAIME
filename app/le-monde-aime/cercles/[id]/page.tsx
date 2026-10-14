@@ -21,10 +21,10 @@ export default async function CirclePage({ params }: { params: Promise<{ id: str
   if (!detail) notFound();
   return (
     <PublicPage solidHeader>
-      <div className="bg-[#fafaf9]">
+      <div className="bg-subtle">
         <div className="mx-auto max-w-4xl space-y-5 px-4 py-8 sm:px-6">
-          <Link href="/espace" className="text-sm font-semibold text-emerald-800 underline">← Mes liens</Link>
-          <header className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+          <Link href="/espace" className="text-sm font-semibold text-ink underline">← Mes liens</Link>
+          <header className="rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
             <div className="flex flex-wrap gap-2"><span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">Cercle privé</span><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{KIND[detail.circle.kind] ?? detail.circle.kind}</span>{detail.circle.isDemo && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Exemple fictif</span>}</div>
             <h1 className="mt-3 text-3xl font-bold text-slate-900">{detail.circle.name}</h1>
             {detail.circle.description && <p className="mt-2 text-slate-700">{detail.circle.description}</p>}
@@ -38,13 +38,13 @@ export default async function CirclePage({ params }: { params: Promise<{ id: str
           <Section title="Partages du cercle">
             {detail.posts.length === 0 ? <p className="text-sm text-slate-600">Rien n&apos;a encore été partagé.</p> : (
               <ul className="space-y-4">{detail.posts.map((p) => (
-                <li key={p.id} className="rounded-xl border border-slate-200 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-emerald-800">{POST_KIND_LABEL[p.kind] ?? p.kind} · {p.authorName}</p>
+                <li key={p.id} className="rounded-card ring-1 ring-line p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-ink">{POST_KIND_LABEL[p.kind] ?? p.kind} · {p.authorName}</p>
                   <h3 className="mt-1 text-lg font-bold text-slate-900">{p.title}</h3>
                   {p.hasPhoto && (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
-                      <img src={`/api/cercles/posts/${p.id}/photo`} alt="" className="mt-3 max-h-72 w-full rounded-xl object-cover" loading="lazy" />
+                      <img src={`/api/cercles/posts/${p.id}/photo`} alt="" className="mt-3 max-h-72 w-full rounded-card object-cover" loading="lazy" />
                     </>
                   )}
                   {p.body && <p className="mt-2 whitespace-pre-line text-sm text-slate-700">{p.body}</p>}

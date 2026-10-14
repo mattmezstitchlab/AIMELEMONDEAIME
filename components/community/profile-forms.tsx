@@ -7,10 +7,10 @@ import { FranceMap } from "@/components/carte/france-map";
 import { PrimaryButton } from "@/components/ui";
 import { ARTIST_DISCIPLINES, UNIVERSES } from "@/lib/lma";
 
-const input = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
-const Note = ({ value }: { value: Fb }) => value ? <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-sm ${value.ok ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"}`}>{value.text}</p> : null;
+const Note = ({ value }: { value: Fb }) => value ? <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-sm ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p> : null;
 
 function useSave(action: (f: FormData) => Promise<ProfileResult>) {
   const [fb, setFb] = useState<Fb>(null);
@@ -43,7 +43,7 @@ export function ProfileForm({ data }: { data: ProfileData }) {
               {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
               <img src={`/api/profil/${data.userId}/photo`} alt="Votre photo" className="h-24 w-24 rounded-full object-cover" />
             </>
-          ) : <span className="grid h-24 w-24 place-items-center rounded-full bg-emerald-50 text-3xl font-bold text-emerald-800" aria-hidden="true">{(data.displayName || "?").slice(0, 1).toUpperCase()}</span>}
+          ) : <span className="grid h-24 w-24 place-items-center rounded-full bg-muted text-3xl font-bold text-ink" aria-hidden="true">{(data.displayName || "?").slice(0, 1).toUpperCase()}</span>}
         </div>
         <div className="grid gap-4">
           <div><label className={label} htmlFor="pf-name">Nom d&apos;affichage</label><input id="pf-name" name="displayName" defaultValue={data.displayName} maxLength={80} placeholder="Le nom que les autres verront" className={input} /></div>
@@ -55,7 +55,7 @@ export function ProfileForm({ data }: { data: ProfileData }) {
         <div><label className={label} htmlFor="pf-act">Activités et compétences</label><input id="pf-act" name="activities" defaultValue={data.activities} placeholder="Agriculteur, musicien, parent, bénévole…" className={input} /><p className="mt-1 text-xs text-slate-500">Séparées par des virgules. Vous pouvez en cumuler autant que vous voulez.</p></div>
         <div><label className={label} htmlFor="pf-int">Centres d&apos;intérêt</label><input id="pf-int" name="interests" defaultValue={data.interests} placeholder="Jardinage, chorale, cuisine…" className={input} /></div>
       </div>
-      <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Univers qui vous parlent</legend><div className="flex flex-wrap gap-2">{UNIVERSES.map((u) => { const on = universes.includes(u.key); return <label key={u.key} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "border-emerald-700 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-700"}`}><input type="checkbox" name="universes" value={u.key} checked={on} onChange={() => setUniverses((p) => (p.includes(u.key) ? p.filter((k) => k !== u.key) : [...p, u.key]))} className="sr-only" />{u.label}</label>; })}</div></fieldset>
+      <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Univers qui vous parlent</legend><div className="flex flex-wrap gap-2">{UNIVERSES.map((u) => { const on = universes.includes(u.key); return <label key={u.key} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-700"}`}><input type="checkbox" name="universes" value={u.key} checked={on} onChange={() => setUniverses((p) => (p.includes(u.key) ? p.filter((k) => k !== u.key) : [...p, u.key]))} className="sr-only" />{u.label}</label>; })}</div></fieldset>
       <div className="grid gap-4 sm:grid-cols-3">
         <div><label className={label} htmlFor="pf-off">Je propose</label><input id="pf-off" name="offersText" defaultValue={data.offersText} maxLength={300} className={input} placeholder="Légumes, concerts…" /></div>
         <div><label className={label} htmlFor="pf-need">Je recherche</label><input id="pf-need" name="needsText" defaultValue={data.needsText} maxLength={300} className={input} placeholder="Un lieu de répétition…" /></div>
@@ -66,13 +66,13 @@ export function ProfileForm({ data }: { data: ProfileData }) {
         <div><label className={label} htmlFor="pf-radius">Zone de déplacement (km)</label><input id="pf-radius" name="travelRadiusKm" type="number" min={0} max={300} defaultValue={data.travelRadiusKm} className={input} /></div>
         <div><label className={label} htmlFor="pf-avail">Disponibilités utiles</label><input id="pf-avail" name="availabilityNote" defaultValue={data.availabilityNote} maxLength={300} placeholder="Week-ends, soirées…" className={input} /></div>
       </div>
-      <div className="rounded-xl bg-slate-50 p-4">
+      <div className="rounded-card bg-slate-50 p-4">
         <p className="text-sm font-semibold text-slate-800">Votre position approximative</p>
         <p className="text-xs text-slate-500">{coords ? `Point retenu : ${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)} (arrondi, jamais votre adresse).` : "Touchez la carte à hauteur de votre commune."}</p>
         <div className="mx-auto mt-3 max-w-md"><FranceMap pins={coords ? [{ id: "me", kind: "personne", name: "Vous", subtitle: "", lat: coords.lat, lng: coords.lng }] : []} selectedId={null} onSelect={() => {}} onPickLocation={setCoords} canPlacePin /></div>
       </div>
-      <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm">
-        <input type="checkbox" name="profileVisible" defaultChecked={data.profileVisible} className="mt-1 h-4 w-4 accent-emerald-700" />
+      <label className="flex items-start gap-3 rounded-card ring-1 ring-line p-4 text-sm">
+        <input type="checkbox" name="profileVisible" defaultChecked={data.profileVisible} className="mt-1 h-4 w-4 accent-ink" />
         <span><strong className="text-slate-900">Apparaître sur la carte publique</strong><br /><span className="text-slate-600">Votre nom d&apos;affichage, votre présentation et votre position approximative deviennent visibles. Décochez pour rester discret : vous pourrez toujours publier et échanger.</span></span>
       </label>
       <Note value={fb} /><PrimaryButton type="submit" disabled={pending}>{pending ? "Enregistrement…" : "Enregistrer mon profil"}</PrimaryButton>
@@ -88,7 +88,7 @@ export function ArtistForm({ data }: { data: ArtistData }) {
   const others = data.disciplines.filter((d) => !ARTIST_DISCIPLINES.includes(d)).join(", ");
   return (
     <form onSubmit={(e) => submit(e)} className="space-y-5">
-      <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Disciplines</legend><div className="flex flex-wrap gap-2">{ARTIST_DISCIPLINES.map((d) => { const on = chosen.includes(d); return <label key={d} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "border-emerald-700 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-700"}`}><input type="checkbox" name="disciplines" value={d} checked={on} onChange={() => setChosen((p) => (p.includes(d) ? p.filter((x) => x !== d) : [...p, d]))} className="sr-only" />{d}</label>; })}</div></fieldset>
+      <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Disciplines</legend><div className="flex flex-wrap gap-2">{ARTIST_DISCIPLINES.map((d) => { const on = chosen.includes(d); return <label key={d} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-700"}`}><input type="checkbox" name="disciplines" value={d} checked={on} onChange={() => setChosen((p) => (p.includes(d) ? p.filter((x) => x !== d) : [...p, d]))} className="sr-only" />{d}</label>; })}</div></fieldset>
       <div><label className={label} htmlFor="ar-other">Autres disciplines</label><input id="ar-other" name="otherDisciplines" defaultValue={others} maxLength={120} className={input} placeholder="Séparées par des virgules" /></div>
       <div><label className={label} htmlFor="ar-pres">Présentation artistique</label><textarea id="ar-pres" name="presentation" defaultValue={data.presentation} rows={4} maxLength={800} className={input} /></div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -113,7 +113,7 @@ export function ArtistRequestActions({ requestId, status }: { requestId: number;
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2">
       <PrimaryButton type="button" disabled={pending} onClick={() => go("accepter")} className="!px-3 !py-1.5 text-xs">Accepter</PrimaryButton>
-      <button type="button" disabled={pending} onClick={() => go("refuser")} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700">Refuser</button>
+      <button type="button" disabled={pending} onClick={() => go("refuser")} className="rounded-lg ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700">Refuser</button>
       <Note value={fb} />
     </div>
   );

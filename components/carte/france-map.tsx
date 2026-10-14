@@ -42,7 +42,7 @@ function PinButton({ pin, selected, onSelect }: { pin: MapPin; selected: boolean
       onClick={() => onSelect(pin)}
       aria-label={`${style.label} : ${pin.name}${pin.badge ? ` (${pin.badge})` : ""}`}
       aria-pressed={selected}
-       className={`pointer-events-auto absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full ring-2 shadow-sm transition duration-200 hover:z-20 hover:scale-110 ${style.bg} ${style.ring} ${style.text} ${
+       className={`pointer-events-auto absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full ring-2 shadow-rested transition duration-200 hover:z-20 hover:scale-110 ${style.bg} ${style.ring} ${style.text} ${
          selected ? "z-20 scale-110 ring-4 ring-slate-900/35" : "z-10"
        }`}
       style={{ left: `${(x / MAP_SIZE) * 100}%`, top: `${(y / MAP_SIZE) * 100}%` }}
@@ -130,7 +130,7 @@ export function FranceMap({
 
       {canPlacePin && !fill && (
         <p className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
-          <Icon name="pin" className="h-4 w-4 text-emerald-600" />
+          <Icon name="pin" className="h-4 w-4 text-ink-3" />
           Cliquez sur la carte pour déposer votre point à cet endroit précis.
         </p>
       )}

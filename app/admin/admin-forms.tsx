@@ -42,7 +42,7 @@ function useFormAction(fn: (fd: FormData) => Promise<Result>, resetOnSuccess = t
   return { error, success, pending, onSubmit };
 }
 
-const input = "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm";
+const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm";
 
 function F({ label, name, defaultValue, type = "text", required = true }: { label: string; name: string; defaultValue?: string; type?: string; required?: boolean }) {
   const id = `${name}-${useId()}`;
@@ -76,7 +76,7 @@ export function CreateStaffForm({ offices }: { offices: { id: number; name: stri
         </select>
       </div>
       {f.error && <p role="alert" className="text-sm text-rose-700 sm:col-span-2">{f.error}</p>}
-      {f.success && <p role="status" className="text-sm text-emerald-700 sm:col-span-2">Compte créé.</p>}
+      {f.success && <p role="status" className="text-sm text-ink-2 sm:col-span-2">Compte créé.</p>}
       <PrimaryButton type="submit" disabled={f.pending} className="sm:col-span-2 sm:justify-self-start">{f.pending ? "Création…" : "Créer le compte"}</PrimaryButton>
     </form>
   );
@@ -97,7 +97,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
       </td>
       <td className="px-4 py-3">
         <label className="sr-only" htmlFor={`role-${user.id}`}>Rôle de {user.fullName}</label>
-        <select id={`role-${user.id}`} value={role} disabled={isSelf} onChange={(e) => setRole(e.target.value)} className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
+        <select id={`role-${user.id}`} value={role} disabled={isSelf} onChange={(e) => setRole(e.target.value)} className="rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm">
           <option value="membre">Membre</option>
           <option value="gestionnaire">Gestionnaire</option>
           <option value="administrateur">Administrateur</option>
@@ -105,7 +105,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
       </td>
       <td className="px-4 py-3">
         <label className="sr-only" htmlFor={`office-${user.id}`}>Bureau de {user.fullName}</label>
-        <select id={`office-${user.id}`} value={officeId} onChange={(e) => setOfficeId(e.target.value)} className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
+        <select id={`office-${user.id}`} value={officeId} onChange={(e) => setOfficeId(e.target.value)} className="rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm">
           <option value="">—</option>
           {offices.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
         </select>
@@ -116,7 +116,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
             type="button"
             disabled={pending}
             onClick={() => start(async () => { const r = await updateUserRole(user.id, role as "membre", officeId ? Number(officeId) : undefined); setMsg(r.ok ? "Enregistré" : r.error); router.refresh(); })}
-            className="rounded-lg bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-900"
+            className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink-2"
           >
             Enregistrer
           </button>
@@ -125,7 +125,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
               type="button"
               disabled={pending}
               onClick={() => start(async () => { const r = await toggleUserActive(user.id, !user.isActive); setMsg(r.ok ? null : r.error); router.refresh(); })}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-lg ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
               {user.isActive ? "Désactiver" : "Réactiver"}
             </button>
@@ -153,7 +153,7 @@ export function OfficeForm({ office, onDone }: { office?: Office; onDone?: () =>
       <F label="Horaires" name="hours" defaultValue={office?.hours} />
       <F label="Région" name="region" defaultValue={office?.region} />
       {f.error && <p role="alert" className="text-sm text-rose-700 sm:col-span-2">{f.error}</p>}
-      {f.success && <p role="status" className="text-sm text-emerald-700 sm:col-span-2">Bureau enregistré.</p>}
+      {f.success && <p role="status" className="text-sm text-ink-2 sm:col-span-2">Bureau enregistré.</p>}
       <PrimaryButton type="submit" disabled={f.pending} className="sm:col-span-2 sm:justify-self-start">{f.pending ? "Enregistrement…" : office ? "Enregistrer" : "Ajouter le bureau"}</PrimaryButton>
     </form>
   );
@@ -165,12 +165,12 @@ export function OfficeCard({ office }: { office: Office }) {
   const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+    <div className="rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
       {editing ? (
         <OfficeForm office={office} onDone={() => setEditing(false)} />
       ) : (
         <>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">{office.region} · {office.code}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-2">{office.region} · {office.code}</p>
           <h3 className="mt-1 text-lg font-semibold text-slate-900">{office.name}</h3>
           <p className="mt-1 text-sm text-slate-600">{office.address}, {office.postalCode} {office.city} · {office.phone}</p>
           <p className="text-sm text-slate-600">{office.hours}</p>
@@ -225,7 +225,7 @@ export function ArticleForm({ article, onDone }: { article?: Article; onDone?: (
         <textarea id={`content-${article?.id ?? "new"}`} name="content" required rows={6} defaultValue={article?.content} className={input} />
       </div>
       {f.error && <p role="alert" className="text-sm text-rose-700 sm:col-span-2">{f.error}</p>}
-      {f.success && <p role="status" className="text-sm text-emerald-700 sm:col-span-2">Contenu enregistré.</p>}
+      {f.success && <p role="status" className="text-sm text-ink-2 sm:col-span-2">Contenu enregistré.</p>}
       <PrimaryButton type="submit" disabled={f.pending} className="sm:col-span-2 sm:justify-self-start">{f.pending ? "Enregistrement…" : article ? "Enregistrer" : "Publier"}</PrimaryButton>
     </form>
   );
@@ -236,16 +236,16 @@ export function ArticleRow({ article }: { article: Article }) {
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
-    <li className="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+    <li className="rounded-card bg-canvas ring-1 ring-line p-5 shadow-rested">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-2">
             {ARTICLE_CATEGORY_LABELS[article.category]} · {article.kind === "guide" ? "Guide" : "Article"}
           </p>
           <p className="mt-1 font-semibold text-slate-900">{article.title}</p>
           <p className="text-sm text-slate-600">{article.summary}</p>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${article.isPublished ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${article.isPublished ? "bg-muted text-ink-2" : "bg-slate-100 text-slate-600"}`}>
           {article.isPublished ? "Publié" : "Brouillon"}
         </span>
       </div>

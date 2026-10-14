@@ -32,15 +32,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     : [];
   return (
     <PublicPage solidHeader>
-      <div className="bg-[#fafaf9]">
+      <div className="bg-subtle">
         <div className="mx-auto max-w-5xl space-y-5 px-4 py-8 sm:px-6">
-          <Link href="/espace" className="text-sm font-semibold text-emerald-800 underline">← Mes liens</Link>
-          <header className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+          <Link href="/espace" className="text-sm font-semibold text-ink underline">← Mes liens</Link>
+          <header className="rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-800">Projet</span>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{STATUS[project.status] ?? project.status}</span>
               {project.isDemo && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Exemple fictif</span>}
-              {project.universes.map((u) => <span key={u} className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">{UNIVERSE_LABEL[u]}</span>)}
+              {project.universes.map((u) => <span key={u} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-ink">{UNIVERSE_LABEL[u]}</span>)}
             </div>
             <h1 className="mt-3 text-3xl font-bold text-slate-900">{project.title}</h1>
             <p className="mt-2 text-slate-700">{project.intention}</p>
@@ -61,7 +61,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <Section title="Programme"><ProgramEditor projectId={id} program={project.program} editable={viewer.isOrganizer} /></Section>
 
           {wedding && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-rose-200 bg-rose-50 px-5 py-4">
               <div>
                 <p className="text-sm font-bold text-slate-900">La page du jour J est prête</p>
                 <p className="text-xs text-slate-600">Déroulé, plan de table, prestataires engagés et notes utiles, sur une page à imprimer pour les témoins.</p>

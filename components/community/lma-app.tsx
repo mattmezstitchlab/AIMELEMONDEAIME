@@ -46,7 +46,7 @@ const toDate = (v: Date | string | null) => (v ? new Date(v) : null);
 
 function PersonCard({ p, highlighted }: { p: Person; highlighted: boolean }) {
   return (
-    <article className={`rounded-2xl border bg-white p-4 ${highlighted ? "border-emerald-700 ring-2 ring-emerald-100" : "border-black/[0.06] shadow-sm"}`}>
+    <article className={`rounded-card border bg-white p-4 ${highlighted ? "ring-ink ring-2 ring-muted" : "border-line shadow-rested"}`}>
       <div className="flex gap-3">
         {p.hasPhoto ? (
           <>
@@ -60,7 +60,7 @@ function PersonCard({ p, highlighted }: { p: Person; highlighted: boolean }) {
           <p className="text-xs text-slate-500">{p.city ?? "France"} · zone d&apos;environ {p.travelRadiusKm} km · position approximative</p>
         </div>
       </div>
-      <div className="mt-2 flex flex-wrap gap-1.5">{p.activities.slice(0, 5).map((a) => <span key={a} className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">{a}</span>)}</div>
+      <div className="mt-2 flex flex-wrap gap-1.5">{p.activities.slice(0, 5).map((a) => <span key={a} className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-ink">{a}</span>)}</div>
       {p.bio && <p className="mt-2 line-clamp-3 text-sm text-slate-600">{p.bio}</p>}
       <ul className="mt-2 space-y-0.5 text-xs text-slate-600">
         {p.offersText && <li><strong>Propose :</strong> {p.offersText}</li>}
@@ -68,21 +68,21 @@ function PersonCard({ p, highlighted }: { p: Person; highlighted: boolean }) {
         {p.transmitText && <li><strong>Transmet :</strong> {p.transmitText}</li>}
         {p.availabilityNote && <li><strong>Disponible :</strong> {p.availabilityNote}</li>}
       </ul>
-      <Link href={`/le-monde-aime/personnes/${p.id}`} className="mt-3 inline-block rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-900">Voir la fiche</Link>
+      <Link href={`/le-monde-aime/personnes/${p.id}`} className="mt-3 inline-block rounded-lg bg-ink px-3 py-2 text-xs font-bold text-white hover:bg-ink-2">Voir la fiche</Link>
     </article>
   );
 }
 
 function ProjectCard({ p, highlighted }: { p: ProjectPin; highlighted: boolean }) {
   return (
-    <article className={`rounded-2xl border bg-white p-4 ${highlighted ? "border-emerald-700 ring-2 ring-emerald-100" : "border-black/[0.06] shadow-sm"}`}>
+    <article className={`rounded-card border bg-white p-4 ${highlighted ? "ring-ink ring-2 ring-muted" : "border-line shadow-rested"}`}>
       <span className="inline-flex rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-800">Projet{p.isDemo ? " · exemple fictif" : ""}</span>
       <h3 className="mt-2 text-base font-bold text-slate-900">{p.title}</h3>
       <p className="mt-1 line-clamp-3 text-sm text-slate-600">{p.intention}</p>
       <p className="mt-2 text-xs text-slate-500"><Icon name="pin" className="mr-1 inline h-3.5 w-3.5" />{p.city} · position approximative · {dateText(p.startsAt)}</p>
       <p className="text-xs text-slate-500">Organisé par {p.organizerName} · {p.participants} participant(s) · {p.needsConfirmed}/{p.needsTotal} besoin(s) confirmé(s)</p>
       <div className="mt-2 flex flex-wrap gap-1.5">{p.universes.map((u) => <span key={u} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">{UNIVERSE_LABEL[u]}</span>)}</div>
-      <Link href={`/le-monde-aime/projets/${p.id}`} className="mt-3 inline-block rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-900">Voir le projet</Link>
+      <Link href={`/le-monde-aime/projets/${p.id}`} className="mt-3 inline-block rounded-lg bg-ink px-3 py-2 text-xs font-bold text-white hover:bg-ink-2">Voir le projet</Link>
     </article>
   );
 }
@@ -229,7 +229,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
   const hasFilters = Boolean(center || city || keyword || dateFilter || freeOnly || type !== "tout" || universe !== "tout");
   function resetFilters() { setCenter(null); setCity(""); setKeyword(""); setDateFilter(""); setFreeOnly(false); setType("tout"); setUniverse("tout"); setClusterSelection([]); setSelection(null); }
 
-  const selectCls = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm";
+  const selectCls = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2 text-sm";
   const publishPins = useMemo<MapPin[]>(() => [pubCoords && { id: "me", kind: "offre" as const, name: "Départ / lieu", subtitle: "", lat: pubCoords.lat, lng: pubCoords.lng }, tripEnd && pubSub === "trajet" && { id: "end", kind: "lieu" as const, name: "Destination", subtitle: "", lat: tripEnd.lat, lng: tripEnd.lng }].filter(Boolean) as MapPin[], [pubCoords, tripEnd, pubSub]);
 
   return (
@@ -241,9 +241,9 @@ export function CommunityApp({ data }: { data: LmaData }) {
             <h1 className="text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">Tout ce qui compte près de vous, sur une seule carte.</h1>
             <p className="mt-2 max-w-xl text-sm text-slate-600 sm:text-base">Personnes, productions locales, artistes, besoins, lieux et projets. Initiative indépendante : aucun paiement en ligne, aucune réservation sans accord explicite.</p>
           </div>
-          <nav aria-label="Sections Le Monde Aime" className="inline-flex gap-1 rounded-xl bg-slate-100 p-1">
+          <nav aria-label="Sections Le Monde Aime" className="inline-flex gap-1 rounded-card bg-slate-100 p-1">
             {([["explorer", "Explorer", "search"], ["publier", "Publier", "filePlus"]] as const).map(([key, text, icon]) => (
-              <button key={key} type="button" onClick={() => goTab(key)} aria-current={tab === key ? "page" : undefined} className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition ${tab === key ? "bg-white text-emerald-900 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}><Icon name={icon} className="h-4 w-4" />{text}</button>
+              <button key={key} type="button" onClick={() => goTab(key)} aria-current={tab === key ? "page" : undefined} className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition ${tab === key ? "bg-white text-ink shadow-rested" : "text-slate-600 hover:text-slate-900"}`}><Icon name={icon} className="h-4 w-4" />{text}</button>
             ))}
             {/* Mes échanges & projets vivent désormais dans l'espace membre (une seule porte). */}
             <Link href="/espace/echanges" className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-slate-600 transition hover:text-slate-900"><Icon name="heart" className="h-4 w-4" />Mes échanges &amp; projets</Link>
@@ -256,7 +256,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
           <>
             <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="group" aria-label="Univers" data-assistant-id="lma-filters">
               {[{ key: "tout", label: "Tout" }, ...UNIVERSES.map((u) => ({ key: u.key as string, label: u.label })), { key: "services", label: "Structures externes" }].map((u) => (
-                <button key={u.key} type="button" aria-pressed={universe === u.key} onClick={() => { setUniverse(u.key); setClusterSelection([]); setSelection(null); }} className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition ${universe === u.key ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-emerald-500"}`}>{u.label}</button>
+                <button key={u.key} type="button" aria-pressed={universe === u.key} onClick={() => { setUniverse(u.key); setClusterSelection([]); setSelection(null); }} className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition ${universe === u.key ? "ring-ink bg-ink text-white" : "border-slate-200 bg-white text-slate-700 hover:ring-ink-3"}`}>{u.label}</button>
               ))}
             </div>
 
@@ -270,14 +270,14 @@ export function CommunityApp({ data }: { data: LmaData }) {
                 {/* Bouton filtres (mobile uniquement) */}
                 <div className="absolute left-3 top-3 z-30 lg:hidden">
                   <button type="button" onClick={() => setFiltersOpen((v) => !v)} aria-expanded={filtersOpen} aria-controls="lma-filters-panel"
-                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-xl">
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-lifted">
                     <Icon name="filter" className="h-4 w-4" />
                     Filtrer{hasFilters && <span className="grid h-5 w-5 place-items-center rounded-full bg-orange-500 text-[11px] font-bold text-white" aria-hidden="true">•</span>}
                   </button>
                 </div>
 
                 {/* Panneau filtres : latéral en continu sur desktop, tiroir sur mobile */}
-                <div id="lma-filters-panel" className={`${filtersOpen ? "block" : "hidden"} absolute inset-x-3 top-16 z-20 max-h-[55dvh] overflow-y-auto rounded-2xl bg-white/95 p-4 shadow-2xl ring-1 ring-black/[0.08] backdrop-blur lg:block lg:inset-x-auto lg:left-5 lg:top-5 lg:max-h-[calc(100%-2.5rem)] lg:w-[330px]`}>
+                <div id="lma-filters-panel" className={`${filtersOpen ? "block" : "hidden"} absolute inset-x-3 top-16 z-20 max-h-[55dvh] overflow-y-auto rounded-card bg-white/95 p-4 shadow-lifted ring-1 ring-black/[0.08] backdrop-blur lg:block lg:inset-x-auto lg:left-5 lg:top-5 lg:max-h-[calc(100%-2.5rem)] lg:w-[330px]`}>
                   <div className="mb-3 flex items-center justify-between">
                     <p className="text-sm font-bold text-slate-900">Filtres</p>
                     <button type="button" onClick={() => setFiltersOpen(false)} className="text-sm font-bold text-slate-500 lg:hidden">Voir la carte</button>
@@ -301,7 +301,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <button type="button" onClick={() => locate(setCenter)} className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">Me localiser</button>
-                      {hasFilters && <button type="button" onClick={resetFilters} className="text-xs font-bold text-emerald-700 underline">Réinitialiser</button>}
+                      {hasFilters && <button type="button" onClick={resetFilters} className="text-xs font-bold text-ink-2 underline">Réinitialiser</button>}
                     </div>
                     <div className="grid grid-cols-2 gap-x-2 gap-y-1 border-t border-slate-200 pt-3 text-[11px] text-slate-600" aria-label="Légende">
                       {LEGEND.map(([c, t]) => <span key={t} className="flex items-center gap-1.5"><span className={`h-2.5 w-2.5 shrink-0 rounded-full ${c}`} aria-hidden="true" />{t}</span>)}
@@ -311,7 +311,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
 
                 {/* Fiche de détail en surcouche */}
                 {(selectedItem || clusterItems.length > 0) && (
-                  <aside data-assistant-id="lma-detail" aria-label={selectedItem ? "Détail de la sélection" : "Éléments du secteur sélectionné"} className="absolute inset-x-3 bottom-3 z-20 max-h-[52dvh] overflow-y-auto rounded-2xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl ring-1 ring-black/[0.08] lg:inset-x-auto lg:bottom-5 lg:right-5 lg:top-5 lg:z-30 lg:max-h-none lg:w-[360px] lg:pb-4">
+                  <aside data-assistant-id="lma-detail" aria-label={selectedItem ? "Détail de la sélection" : "Éléments du secteur sélectionné"} className="absolute inset-x-3 bottom-3 z-20 max-h-[52dvh] overflow-y-auto rounded-card bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lifted ring-1 ring-black/[0.08] lg:inset-x-auto lg:bottom-5 lg:right-5 lg:top-5 lg:z-30 lg:max-h-none lg:w-[360px] lg:pb-4">
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
                         {selectedItem ? selectedItem.subtitle : `${clusterItems.length} élément(s) dans ce secteur`}
@@ -322,12 +322,12 @@ export function CommunityApp({ data }: { data: LmaData }) {
                       <ul className="space-y-2">
                         {clusterItems.map((i) => (
                           <li key={i.key}>
-                            <button type="button" onClick={() => { setClusterSelection([]); setSelection(i.key); }} className="flex w-full items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3 text-left transition hover:bg-orange-50">
+                            <button type="button" onClick={() => { setClusterSelection([]); setSelection(i.key); }} className="flex w-full items-center justify-between gap-3 rounded-card bg-slate-50 px-4 py-3 text-left transition hover:bg-orange-50">
                               <span className="min-w-0">
                                 <span className="block truncate text-sm font-bold text-slate-900">{i.name}</span>
                                 <span className="block truncate text-xs text-slate-500">{i.subtitle}</span>
                               </span>
-                              <span className="shrink-0 text-xs font-bold text-emerald-700">Voir →</span>
+                              <span className="shrink-0 text-xs font-bold text-ink-2">Voir →</span>
                             </button>
                           </li>
                         ))}
@@ -345,7 +345,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
             <details className="border-t border-slate-200 bg-white px-4 py-3 text-sm sm:px-6">
               <summary className="min-h-10 cursor-pointer font-semibold text-slate-800">Explorer les {filtered.length} résultats sans utiliser la carte</summary>
               <p className="mt-2 text-xs text-slate-600">Alternative accessible : choisissez un résultat pour ouvrir sa fiche sur la même carte.</p>
-              <ul className="mt-3 max-h-72 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200">
+              <ul className="mt-3 max-h-72 divide-y divide-slate-100 overflow-y-auto rounded-control ring-1 ring-line">
                 {filtered.map((item) => (
                   <li key={item.key}>
                     <button type="button" onClick={() => { setClusterSelection([]); setSelection(item.key); document.getElementById("lma-map-title")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex min-h-11 w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-slate-50">
@@ -361,22 +361,22 @@ export function CommunityApp({ data }: { data: LmaData }) {
 
         {tab === "publier" && (
           <section className="mx-auto max-w-4xl">
-            <div className="rounded-3xl border border-black/[0.06] bg-white p-5 shadow-sm sm:p-8">
+            <div className="rounded-panel bg-canvas ring-1 ring-line p-5 shadow-rested sm:p-8">
               <h1 className="text-3xl font-bold text-slate-900">Que souhaitez-vous publier ?</h1>
               <p className="mt-2 text-sm text-slate-600">Votre position publique reste approximative. L&apos;adresse précise n&apos;est partagée qu&apos;avec les personnes concernées, après accord.</p>
-              {!user ? <div className="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Connectez-vous pour publier. <Link href="/connexion" className="font-bold underline">Se connecter</Link> · <Link href="/inscription" className="font-bold underline">Créer un compte</Link></div>
-              : !isMember ? <div className="mt-6 rounded-xl bg-slate-100 p-4 text-sm text-slate-700">La publication est réservée aux comptes membres.</div> : (
+              {!user ? <div className="mt-6 rounded-card bg-amber-50 p-4 text-sm text-amber-900">Connectez-vous pour publier. <Link href="/connexion" className="font-bold underline">Se connecter</Link> · <Link href="/inscription" className="font-bold underline">Créer un compte</Link></div>
+              : !isMember ? <div className="mt-6 rounded-card bg-slate-100 p-4 text-sm text-slate-700">La publication est réservée aux comptes membres.</div> : (
                 <>
                   <div className="mt-6 grid gap-3 sm:grid-cols-3" role="group" aria-label="Type de publication">
                     {([["proposition", "Une proposition", "Je donne, je prête, je loue, je vends, je propose une prestation, je transmets."], ["besoin", "Un besoin", "Je cherche une sono, je voudrais apprendre à coudre…"], ["projet", "Un projet", "Organisons une fête, créons un jardin partagé…"]] as const).map(([k, t, d]) => (
-                      <button key={k} type="button" onClick={() => setPubType(k)} aria-pressed={pubType === k} className={`rounded-2xl border p-4 text-left ${pubType === k ? "border-emerald-700 bg-emerald-50 ring-1 ring-emerald-700" : "border-slate-200 hover:border-slate-400"}`}><span className="block text-base font-bold text-slate-900">{t}</span><span className="mt-1 block text-xs text-slate-600">{d}</span></button>
+                      <button key={k} type="button" onClick={() => setPubType(k)} aria-pressed={pubType === k} className={`rounded-card border p-4 text-left ${pubType === k ? "ring-ink bg-muted ring-1 ring-ink" : "border-slate-200 hover:ring-ink-4"}`}><span className="block text-base font-bold text-slate-900">{t}</span><span className="mt-1 block text-xs text-slate-600">{d}</span></button>
                     ))}
                   </div>
                   {pubType === "proposition" && (
-                    <div className="mt-4 flex gap-2"><button type="button" onClick={() => setPubSub("annonce")} className={`rounded-full px-4 py-2 text-sm font-bold ${pubSub === "annonce" ? "bg-emerald-800 text-white" : "bg-slate-100 text-slate-700"}`}>Objet, produit, service ou savoir</button><button type="button" onClick={() => setPubSub("trajet")} className={`rounded-full px-4 py-2 text-sm font-bold ${pubSub === "trajet" ? "bg-emerald-800 text-white" : "bg-slate-100 text-slate-700"}`}>Un trajet</button></div>
+                    <div className="mt-4 flex gap-2"><button type="button" onClick={() => setPubSub("annonce")} className={`rounded-full px-4 py-2 text-sm font-bold ${pubSub === "annonce" ? "bg-ink text-white" : "bg-slate-100 text-slate-700"}`}>Objet, produit, service ou savoir</button><button type="button" onClick={() => setPubSub("trajet")} className={`rounded-full px-4 py-2 text-sm font-bold ${pubSub === "trajet" ? "bg-ink text-white" : "bg-slate-100 text-slate-700"}`}>Un trajet</button></div>
                   )}
-                  <div className="mt-6 rounded-xl bg-slate-50 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-bold text-slate-800">{pubSub === "trajet" && pubType === "proposition" ? "Départ puis destination" : "Où ? Touchez la carte à hauteur de la commune"}</p><button type="button" onClick={() => locate(setPubCoords)} className="text-xs font-semibold text-emerald-800 underline">Me localiser (facultatif)</button></div>
+                  <div className="mt-6 rounded-card bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-bold text-slate-800">{pubSub === "trajet" && pubType === "proposition" ? "Départ puis destination" : "Où ? Touchez la carte à hauteur de la commune"}</p><button type="button" onClick={() => locate(setPubCoords)} className="text-xs font-semibold text-ink underline">Me localiser (facultatif)</button></div>
                     <p className="mt-1 text-xs text-slate-500">{pubCoords ? `Point retenu : ${pubCoords.lat.toFixed(2)}, ${pubCoords.lng.toFixed(2)} (approximatif)` : "Aucun point choisi."}</p>
                     <div className="mx-auto mt-3 max-w-md"><FranceMap pins={publishPins} selectedId={null} onSelect={() => {}} onPickLocation={(c) => { if (pubType === "proposition" && pubSub === "trajet" && pickEnd) setTripEnd(c); else setPubCoords(c); }} canPlacePin /></div>
                   </div>

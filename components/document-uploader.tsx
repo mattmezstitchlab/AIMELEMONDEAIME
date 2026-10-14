@@ -46,18 +46,18 @@ export function DocumentUploader({ caseId, onUploaded }: { caseId?: number; onUp
             type="file"
             required
             accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-emerald-800"
+            className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink"
           />
         </div>
         <div>
           <label htmlFor={`category-${caseId ?? "general"}`} className="block text-sm font-medium text-slate-700">Catégorie</label>
-          <select id={`category-${caseId ?? "general"}`} name="category" className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <select id={`category-${caseId ?? "general"}`} name="category" className="mt-1 rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm">
             {CATEGORY_OPTIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
       </div>
       {state && !state.ok && <p role="alert" className="text-sm text-rose-700">{state.error}</p>}
-      {state && state.ok && <p role="status" className="text-sm text-emerald-700">Document ajouté avec succès.</p>}
+      {state && state.ok && <p role="status" className="text-sm text-ink-2">Document ajouté avec succès.</p>}
       <PrimaryButton type="submit" disabled={pending} className="self-start">
         {pending ? "Envoi…" : "Téléverser le document"}
       </PrimaryButton>

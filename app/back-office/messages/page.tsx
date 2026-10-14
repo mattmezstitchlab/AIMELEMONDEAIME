@@ -29,7 +29,7 @@ export default async function BackOfficeMessages() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-famille.jpg" eyebrow="Messagerie" title="Messages des adhérents" description="Questions générales adressées à votre bureau (hors dossiers)." />
+      <SectionTitle eyebrow="Messagerie" title="Messages des adhérents" description="Questions générales adressées à votre bureau (hors dossiers)." />
       {threads.size === 0 ? (
         <EmptyState title="Aucun message" />
       ) : (
@@ -39,7 +39,7 @@ export default async function BackOfficeMessages() {
               <h2 className="text-lg font-semibold text-slate-900">{userMap.get(memberId)?.fullName ?? "Adhérent"}</h2>
               <ul className="flex max-h-72 flex-col gap-2 overflow-y-auto">
                 {list.map((m) => (
-                  <li key={m.id} className={`rounded-xl px-3 py-2 text-sm ${m.senderId === memberId ? "mr-6 bg-[#fafaf9]" : "ml-6 bg-emerald-50"}`}>
+                  <li key={m.id} className={`rounded-card px-3 py-2 text-sm ${m.senderId === memberId ? "mr-6 bg-subtle" : "ml-6 bg-muted"}`}>
                     <p className="text-slate-800">{m.body}</p>
                     <p className="mt-1 text-xs text-slate-500">{userMap.get(m.senderId)?.fullName} · {formatDateTime(m.createdAt)}</p>
                   </li>

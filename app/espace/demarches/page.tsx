@@ -32,7 +32,7 @@ const STATUS_STYLE: Record<string, string> = {
   "En cours": "bg-sky-50 text-sky-800",
   "En cours d'instruction": "bg-sky-50 text-sky-800",
   "Transmis à l'équipe": "bg-sky-50 text-sky-800",
-  "Terminée": "bg-emerald-50 text-emerald-800",
+  "Terminée": "bg-muted text-ink",
 };
 
 type UnifiedItem = {
@@ -96,9 +96,9 @@ export default async function DemarchesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-conseiller.jpg" eyebrow="Mes démarches" title="Accompagner vos moments de vie" description="Comprendre, préparer, organiser et suivre — sans recommencer votre histoire à chaque étape. Parcours guidés et dossiers suivis par l'équipe vivent ici, au même endroit."
+      <SectionTitle eyebrow="Mes démarches" title="Accompagner vos moments de vie" description="Comprendre, préparer, organiser et suivre — sans recommencer votre histoire à chaque étape. Parcours guidés et dossiers suivis par l'équipe vivent ici, au même endroit."
         actions={<LinkButton href="/espace/demarches/nouvelle"><Icon name="filePlus" className="h-4 w-4" /> Nouvelle démarche</LinkButton>} />
-      <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+      <div className="rounded-card border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
         <strong>Ce que fait AIME® dans cette version :</strong> orientation (interlocuteurs, liens officiels) et préparation (étapes, pièces, rappels, récapitulatif).
         <strong> Aucune connexion officielle n&apos;est active</strong> : rien n&apos;est transmis à un organisme réel, et les organismes restent seuls responsables de leurs décisions. Les dossiers sont suivis par une équipe d&apos;accompagnement de démonstration.
       </div>
@@ -106,18 +106,18 @@ export default async function DemarchesPage() {
         <div className="grid gap-3 md:grid-cols-2">
           {items.map((item) => (
             <Link key={item.key} href={item.href}>
-              <Card className="h-full transition hover:border-emerald-300">
+              <Card className="h-full transition hover:bg-subtle">
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="rounded-full bg-emerald-800 px-2.5 py-1 font-bold text-white">{item.kind}</span>
+                  <span className="rounded-full bg-ink px-2.5 py-1 font-bold text-white">{item.kind}</span>
                   <span className={`rounded-full px-2.5 py-1 font-bold ${STATUS_STYLE[item.status] ?? "bg-slate-100 text-slate-700"}`}>{item.status}</span>
                   {item.isDemo && <span className="font-bold uppercase text-slate-500">exemple fictif</span>}
                 </div>
-                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-emerald-700">{item.kicker}</p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-ink-2">{item.kicker}</p>
                 <p className="mt-1 text-lg font-bold text-slate-900">{item.title}</p>
                 <p className="text-sm text-slate-600">{item.detail}</p>
                 {item.progress !== null && (
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuenow={item.progress} aria-valuemin={0} aria-valuemax={100}>
-                    <div className="h-full rounded-full bg-emerald-600" style={{ width: `${item.progress}%` }} />
+                    <div className="h-full rounded-full bg-ink-2" style={{ width: `${item.progress}%` }} />
                   </div>
                 )}
                 <p className="mt-2 text-xs text-slate-400">Mis à jour le {formatDate(item.updatedAt)}</p>

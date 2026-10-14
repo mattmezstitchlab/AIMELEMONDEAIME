@@ -90,7 +90,7 @@ export function CaseForm({
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
                 rows={4}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600"
+                className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
               />
             ) : field.type === "select" ? (
               <select
@@ -98,7 +98,7 @@ export function CaseForm({
                 required={field.required}
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600"
+                className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
               >
                 <option value="" disabled>Choisissez une option</option>
                 {field.options?.map((opt) => (
@@ -112,7 +112,7 @@ export function CaseForm({
                 required={field.required}
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600"
+                className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
               />
             )}
           </div>
@@ -126,7 +126,7 @@ export function CaseForm({
       </p>
 
       {requiredDocuments.length > 0 && (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
+        <div className="rounded-control ring-1 ring-line bg-slate-50 p-4 text-sm">
           <p className="font-semibold text-slate-800">Pièces justificatives nécessaires</p>
           <ul className="mt-1 list-inside list-disc text-slate-600">
             {requiredDocuments.map((doc) => <li key={doc}>{doc}</li>)}

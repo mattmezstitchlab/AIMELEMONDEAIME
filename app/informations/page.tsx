@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
-import { Hero } from "@/components/ui";
+import { Container, Hero, SectionHeading } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { db, isDatabaseConfigured } from "@/db";
 import { articles } from "@/db/schema";
@@ -30,25 +30,36 @@ export default async function InformationsHub({ searchParams }: { searchParams: 
     <PublicPage>
       <Hero
         size="md"
-        image="/images/hero-campagne.jpg"
-        gradient="event"
         eyebrow="Informations"
         title={guidesOnly ? "Guides pratiques" : "Tout ce qu'il faut savoir, au même endroit"}
         subtitle={guidesOnly
           ? "Les guides pas à pas, toutes thématiques confondues."
           : "Santé, famille, mariage, argent et difficultés, logement, retraite, cotisations, emploi : articles et guides pratiques, regroupés par thématique."}
       />
-      <div className="mx-auto grid max-w-6xl gap-5 px-6 pt-16 sm:grid-cols-2 lg:grid-cols-3">
-        {Object.entries(THEME_META).map(([slug, meta]) => (
-          <Link key={slug} href={`/informations/${slug}`} className="flex items-center gap-4 rounded-2xl bg-[#fafaf9] p-7 transition hover:bg-emerald-50">
-            <Icon name={meta.icon} className="h-10 w-10 text-emerald-500" />
-            <span>
-              <span className="block text-lg font-semibold text-[#1d1d1f]">{ARTICLE_CATEGORY_LABELS[slug]}</span>
-              <span className="text-sm text-slate-600">{meta.desc}</span>
-            </span>
-          </Link>
-        ))}
-      </div>
+
+      <section className="bg-canvas">
+        <Container className="pt-14 sm:pt-16">
+          <SectionHeading eyebrow="Par thématique" title="Choisissez un sujet de vie." />
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Object.entries(THEME_META).map(([slug, meta]) => (
+              <Link
+                key={slug}
+                href={`/informations/${slug}`}
+                className="group flex items-start gap-4 rounded-card bg-muted p-6 transition hover:bg-canvas hover:shadow-hover hover:ring-1 hover:ring-line"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-control bg-canvas ring-1 ring-line">
+                  <Icon name={meta.icon} className="h-5 w-5 text-ink" />
+                </span>
+                <span>
+                  <span className="block text-base font-medium text-ink">{ARTICLE_CATEGORY_LABELS[slug]}</span>
+                  <span className="mt-1 block text-sm leading-relaxed text-ink-3">{meta.desc}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Container>
+      </section>
+
       <InformClient articles={visible} categories={ARTICLE_CATEGORY_LABELS} />
     </PublicPage>
   );

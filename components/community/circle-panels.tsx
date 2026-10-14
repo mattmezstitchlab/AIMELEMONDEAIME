@@ -6,10 +6,10 @@ import { createCircle, createCirclePost, deleteCirclePost, inviteToCircle, respo
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 import { POST_KIND_LABEL } from "@/lib/lma";
 
-const input = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
-const Note = ({ value }: { value: Fb }) => value ? <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-xs ${value.ok ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"}`}>{value.text}</p> : null;
+const Note = ({ value }: { value: Fb }) => value ? <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-xs ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p> : null;
 
 function useCircleRun() {
   const [fb, setFb] = useState<Fb>(null);
@@ -26,7 +26,7 @@ export function CreateCircleForm() {
   const { fb, pending, run } = useCircleRun();
   function submit(e: FormEvent<HTMLFormElement>) { e.preventDefault(); const f = new FormData(e.currentTarget); const el = e.currentTarget; run(() => createCircle(f), (r) => { if (r.ok) el.reset(); }); }
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-xl bg-slate-50 p-4">
+    <form onSubmit={submit} className="space-y-3 rounded-card bg-slate-50 p-4">
       <p className="text-sm font-bold text-slate-900">Créer un cercle privé</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div><label className={label} htmlFor="c-name">Nom du cercle</label><input id="c-name" name="name" required minLength={3} maxLength={120} placeholder="Ex. Famille Dupont" className={input} /></div>
@@ -45,7 +45,7 @@ export function InviteResponses({ invites }: { invites: Array<{ id: number; name
   return (
     <div className="space-y-2">
       {invites.map((i) => (
-        <div key={i.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm">
+        <div key={i.id} className="flex flex-wrap items-center justify-between gap-2 rounded-card border border-amber-200 bg-amber-50 p-3 text-sm">
           <span>Invitation au cercle <strong>{i.name}</strong> ({i.kind})</span>
           <span className="flex gap-2"><PrimaryButton type="button" disabled={pending} onClick={() => run(() => respondToCircleInvite(i.id, true))} className="!px-3 !py-1.5 text-xs">Accepter</PrimaryButton><SecondaryButton type="button" disabled={pending} onClick={() => run(() => respondToCircleInvite(i.id, false))} className="!px-3 !py-1.5 text-xs">Refuser</SecondaryButton></span>
         </div>
@@ -90,7 +90,7 @@ export function PostActions({ postId, visibility, mine, canDelete }: { postId: n
   return (
     <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
       <span className={`rounded-full px-2.5 py-1 font-bold ${visibility === "publie" ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-600"}`}>{visibility === "publie" ? "Publié (visible par tous)" : "Privé au cercle"}</span>
-      {mine && <button type="button" disabled={pending} onClick={() => { if (visibility === "prive" && !window.confirm("Publier ce partage ? Il sera visible par tous, sans le nom du cercle.")) return; run(() => setPostVisibility(postId, visibility === "publie" ? "prive" : "publie")); }} className="font-bold text-emerald-800 underline">{visibility === "publie" ? "Remettre en privé" : "Publier pour tous"}</button>}
+      {mine && <button type="button" disabled={pending} onClick={() => { if (visibility === "prive" && !window.confirm("Publier ce partage ? Il sera visible par tous, sans le nom du cercle.")) return; run(() => setPostVisibility(postId, visibility === "publie" ? "prive" : "publie")); }} className="font-bold text-ink underline">{visibility === "publie" ? "Remettre en privé" : "Publier pour tous"}</button>}
       {canDelete && <button type="button" disabled={pending} onClick={() => { if (window.confirm("Supprimer ce partage ?")) run(() => deleteCirclePost(postId)); }} className="font-bold text-rose-700 underline">Supprimer</button>}
       <Note value={fb} />
     </div>

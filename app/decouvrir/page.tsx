@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
-import { Card, LinkButton } from "@/components/ui";
+import { Card, Container, Hero, LinkButton } from "@/components/ui";
 import { Icon } from "@/components/icon";
+import { GuestListMock } from "@/components/marketing/mocks";
 import { loginAsDemo } from "@/lib/actions/auth";
 
 export const metadata: Metadata = {
@@ -20,51 +21,56 @@ export default async function DecouvrirPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
   return (
     <PublicPage solidHeader>
-      <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-14">
-        <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Visite guidée</p>
-          <h1 className="mt-2 text-4xl font-bold leading-tight text-slate-900">Découvrez Mon espace, le vrai — en lecture seule.</h1>
-          <p className="mt-4 text-lg leading-relaxed text-slate-600">
-            Plus d&apos;aperçu recopié : ce bouton vous connecte à un <strong>compte de démonstration</strong> dans
-            l&apos;interface réelle. Vous pouvez tout parcourir ; les actions d&apos;écriture sont désactivées,
-            et les données affichées sont fictives.
-          </p>
-        </div>
-
-        {sp.indisponible && (
-          <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-            La visite guidée n&apos;est pas disponible : la base de données n&apos;est peut-être pas configurée ou le compte de démonstration n&apos;y a pas été créé.
-            Vous pouvez <a href="/inscription" className="font-bold underline">créer un compte</a> si la base est activée.
-          </p>
-        )}
-
-        <Card className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-          <div className="flex-1">
-            <p className="font-bold text-slate-900">Entrer dans la visite</p>
-            <p className="mt-1 text-sm text-slate-600">Sans inscription ni mot de passe. Quittez à tout moment par « Se déconnecter ».</p>
-          </div>
+      <Hero
+        size="md"
+        eyebrow="Visite guidée"
+        title="Découvrez Mon espace, le vrai — en lecture seule."
+        subtitle="Plus d’aperçu recopié : cette visite vous connecte à un compte de démonstration dans l’interface réelle. Vous pouvez tout parcourir ; les actions d’écriture sont désactivées et les données affichées sont fictives."
+        media={<GuestListMock />}
+      >
+        <div className="mt-9 max-w-xl">
+          {sp.indisponible && (
+            <p
+              role="alert"
+              className="mb-5 rounded-control bg-state-danger-soft px-4 py-3 text-sm leading-relaxed text-state-danger ring-1 ring-state-danger-line"
+            >
+              La visite guidée n’est pas disponible : la base de données n’est peut-être pas configurée ou le compte de démonstration n’y a
+              pas été créé. Vous pouvez <a href="/inscription" className="font-semibold underline">créer un compte</a> si la base est activée.
+            </p>
+          )}
           <form action={loginAsDemo}>
-            <button type="submit" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-emerald-800 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-900">
-              Commencer la visite <Icon name="arrow" className="h-4 w-4" />
+            <button
+              type="submit"
+              className="inline-flex h-11 items-center gap-2 rounded-control bg-ink px-5 text-[15px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
+            >
+              Commencer la visite
+              <Icon name="arrow" className="h-4 w-4" />
             </button>
           </form>
-        </Card>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          {POINTS.map((p) => (
-            <Card key={p.title}>
-              <Icon name={p.icon} className="h-7 w-7 text-emerald-700" />
-              <p className="mt-2 font-bold text-slate-900">{p.title}</p>
-              <p className="mt-1 text-sm text-slate-600">{p.text}</p>
-            </Card>
-          ))}
+          <p className="mt-3 text-xs text-ink-4">Sans inscription ni mot de passe. Quittez à tout moment par « Se déconnecter ».</p>
         </div>
+      </Hero>
 
-        <div className="flex flex-wrap gap-3">
-          <LinkButton href="/inscription" variant="ghost">Créer mon compte gratuitement</LinkButton>
-          <LinkButton href="/connexion" variant="ghost">J&apos;ai déjà un compte</LinkButton>
-        </div>
-      </div>
+      <section className="bg-canvas">
+        <Container className="py-16 lg:py-20">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {POINTS.map((p) => (
+              <Card key={p.title}>
+                <span className="grid h-10 w-10 place-items-center rounded-control bg-muted">
+                  <Icon name={p.icon} className="h-5 w-5 text-ink" />
+                </span>
+                <p className="mt-4 text-base font-medium text-ink">{p.title}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-3">{p.text}</p>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-10 flex flex-wrap gap-3">
+            <LinkButton href="/inscription">Créer mon espace</LinkButton>
+            <LinkButton href="/connexion" variant="secondary">J’ai déjà un compte</LinkButton>
+          </div>
+        </Container>
+      </section>
     </PublicPage>
   );
 }

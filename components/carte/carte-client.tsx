@@ -105,7 +105,7 @@ export function CarteClient({
                 onClick={() => toggleLayer(layer.key)}
                 aria-pressed={active}
                 className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  active ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-600"
+                  active ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-600"
                 }`}
               >
                 <Icon name={layer.icon} className="h-4 w-4" />
@@ -128,8 +128,8 @@ export function CarteClient({
 
         {/* Légende */}
         <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
-          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-emerald-800" aria-hidden="true" /> Point d&apos;accueil (démo)</li>
-          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-emerald-300 bg-white" aria-hidden="true" /> Production locale</li>
+          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-ink" aria-hidden="true" /> Point d&apos;accueil (démo)</li>
+          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 ring-ink-4 bg-white" aria-hidden="true" /> Production locale</li>
           <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-slate-300 bg-white" aria-hidden="true" /> Présence / entraide</li>
           <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-amber-400" aria-hidden="true" /> Jeune disponible</li>
         </ul>
@@ -137,15 +137,15 @@ export function CarteClient({
         {/* Liste accessible des points (équivalent clavier de la carte) */}
         <div className="mt-8">
           <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">Liste des points affichés ({pins.length})</h3>
-          <ul className="mt-3 divide-y divide-slate-100 rounded-2xl border border-black/[0.06] bg-white">
+          <ul className="mt-3 divide-y divide-slate-100 rounded-card bg-canvas ring-1 ring-line">
             {pins.map((pin) => (
               <li key={pin.id}>
                 <button
                   type="button"
                   onClick={() => setSelectedId(pin.id)}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[#fafaf9]"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-subtle"
                 >
-                  <Icon name={pin.kind === "agence" ? "building" : pin.kind === "disponible" ? "velo" : pin.kind === "producteur" ? "leaf" : "entraide"} className="h-4 w-4 text-emerald-600" />
+                  <Icon name={pin.kind === "agence" ? "building" : pin.kind === "disponible" ? "velo" : pin.kind === "producteur" ? "leaf" : "entraide"} className="h-4 w-4 text-ink-3" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-slate-900">{pin.name}</span>
                     <span className="block truncate text-xs text-slate-500">{pin.subtitle}</span>
@@ -163,8 +163,8 @@ export function CarteClient({
           {placeCoords && canPlacePin && <PlacePointForm lat={placeCoords.lat} lng={placeCoords.lng} onDone={() => setPlaceCoords(null)} />}
 
           {!selected && !placeCoords && (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-[#fafaf9] p-6 text-center">
-              <Icon name="pin" className="mx-auto h-9 w-9 text-emerald-500" />
+            <div className="rounded-card border border-dashed border-slate-300 bg-subtle p-6 text-center">
+              <Icon name="pin" className="mx-auto h-9 w-9 text-ink-3" />
               <h2 className="mt-3 text-lg font-semibold text-slate-900">Sélectionnez un point</h2>
               <p className="mt-2 text-sm text-slate-600">
                 Cliquez sur une épingle pour voir le détail, les produits disponibles sur place et les actions rapides.
@@ -173,27 +173,27 @@ export function CarteClient({
                 <p className="mt-3 text-sm text-slate-600">Vous pouvez aussi cliquer directement sur la carte pour déposer votre propre point.</p>
               ) : (
                 <p className="mt-4 text-sm text-slate-600">
-                  <Link href="/connexion" className="font-semibold text-emerald-700 hover:underline">Connectez-vous</Link> pour déposer un point, commander ou vous rendre disponible.
+                  <Link href="/connexion" className="font-semibold text-ink-2 hover:underline">Connectez-vous</Link> pour déposer un point, commander ou vous rendre disponible.
                 </p>
               )}
             </div>
           )}
 
           {selectedOffice && (
-            <div className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+            <div className="rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-ink-2">
                 <Icon name="building" className="h-3.5 w-3.5" /> Point d&apos;accueil (démonstration)
               </span>
               <h2 className="mt-3 text-xl font-bold text-slate-900">{selectedOffice.name}</h2>
               <p className="text-sm text-slate-500">{selectedOffice.region}</p>
               <ul className="mt-4 space-y-2 text-sm text-slate-700">
-                <li className="flex gap-2"><Icon name="pin" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{selectedOffice.address}, {selectedOffice.postalCode} {selectedOffice.city}</li>
-                <li className="flex gap-2"><Icon name="phone" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" /><a href={`tel:${selectedOffice.phone.replace(/\s/g, "")}`} className="hover:underline">{selectedOffice.phone}</a></li>
-                <li className="flex gap-2"><Icon name="clock" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{selectedOffice.hours}</li>
+                <li className="flex gap-2"><Icon name="pin" className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" />{selectedOffice.address}, {selectedOffice.postalCode} {selectedOffice.city}</li>
+                <li className="flex gap-2"><Icon name="phone" className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" /><a href={`tel:${selectedOffice.phone.replace(/\s/g, "")}`} className="hover:underline">{selectedOffice.phone}</a></li>
+                <li className="flex gap-2"><Icon name="clock" className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" />{selectedOffice.hours}</li>
               </ul>
               <div className="mt-5 flex flex-wrap gap-3">
                 <DirectionsLink lat={Number(selectedOffice.lat)} lng={Number(selectedOffice.lng)} label="Itinéraire" />
-                <Link href="/espace/echanges" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline">
+                <Link href="/espace/echanges" className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-2 hover:underline">
                   <Icon name="calendar" className="h-4 w-4" /> Prendre rendez-vous
                 </Link>
               </div>
@@ -201,8 +201,8 @@ export function CarteClient({
           )}
 
           {selectedPoint && (
-            <div className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${selectedPoint.kind === "producteur" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+            <div className="rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${selectedPoint.kind === "producteur" ? "bg-muted text-ink-2" : "bg-slate-100 text-slate-600"}`}>
                 <Icon name={selectedPoint.kind === "producteur" ? "leaf" : "entraide"} className="h-3.5 w-3.5" />
                 {selectedPoint.kind === "producteur" ? "Production locale" : "Présence / entraide"}
               </span>
@@ -213,20 +213,20 @@ export function CarteClient({
               {selectedPoint.description && <p className="mt-3 text-sm text-slate-700">{selectedPoint.description}</p>}
               {selectedPoint.phone && (
                 <p className="mt-2 text-sm text-slate-700">
-                  <a href={`tel:${selectedPoint.phone.replace(/\s/g, "")}`} className="font-semibold text-emerald-700 hover:underline">{selectedPoint.phone}</a>
+                  <a href={`tel:${selectedPoint.phone.replace(/\s/g, "")}`} className="font-semibold text-ink-2 hover:underline">{selectedPoint.phone}</a>
                 </p>
               )}
 
               {selectedPoint.products.length > 0 ? (
                 <ul className="mt-5 flex flex-col gap-3">
                   {selectedPoint.products.map((product) => (
-                    <li key={product.id} className="rounded-xl bg-[#fafaf9] p-4">
+                    <li key={product.id} className="rounded-card bg-subtle p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-slate-900">{product.name}</p>
                           <p className="text-xs text-slate-500">{product.category} · {product.unit}</p>
                         </div>
-                        <p className="text-sm font-bold text-emerald-800">{formatAmount(product.price)}</p>
+                        <p className="text-sm font-bold text-ink">{formatAmount(product.price)}</p>
                       </div>
                       {product.description && <p className="mt-1 text-xs text-slate-600">{product.description}</p>}
                       <div className="mt-2 flex items-center justify-between gap-2">
@@ -234,7 +234,7 @@ export function CarteClient({
                         {user?.role === "membre" && selectedPoint.ownerId !== user.id && product.stock > 0 && <OrderButton productId={product.id} stock={product.stock} />}
                         {user?.role === "membre" && selectedPoint.ownerId === user.id && <OwnerProductActions productId={product.id} />}
                         {!user && (
-                          <Link href="/connexion" className="text-xs font-semibold text-emerald-700 hover:underline">Connectez-vous pour commander</Link>
+                          <Link href="/connexion" className="text-xs font-semibold text-ink-2 hover:underline">Connectez-vous pour commander</Link>
                         )}
                       </div>
                     </li>
@@ -258,7 +258,7 @@ export function CarteClient({
           )}
 
           {selectedAvailability && (
-            <div className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+            <div className="rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
                 <Icon name="velo" className="h-3.5 w-3.5" /> Jeune disponible
               </span>
@@ -269,7 +269,7 @@ export function CarteClient({
               </p>
               <ul className="mt-4 flex flex-wrap gap-2">
                 {selectedAvailability.skills.map((skill) => (
-                  <li key={skill} className="rounded-full bg-[#fafaf9] px-3 py-1 text-xs font-medium text-slate-700">{skill}</li>
+                  <li key={skill} className="rounded-full bg-subtle px-3 py-1 text-xs font-medium text-slate-700">{skill}</li>
                 ))}
               </ul>
               {selectedAvailability.availabilityNote && <p className="mt-3 text-sm text-slate-700">{selectedAvailability.availabilityNote}</p>}
@@ -277,7 +277,7 @@ export function CarteClient({
                 Mise en relation fictive : dans ce prototype, aucun contact n&apos;est transmis automatiquement. Passez par la messagerie de votre espace pour échanger.
               </p>
               {user?.role === "membre" && (
-                <Link href="/espace/echanges" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline">
+                <Link href="/espace/echanges" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-2 hover:underline">
                   <Icon name="echanges" className="h-4 w-4" /> Écrire un message
                 </Link>
               )}
@@ -307,7 +307,7 @@ export function MonEspaceCarte({
   const ORDER_LABEL: Record<string, string> = { commandee: "En attente", prete: "Prête", recuperee: "Récupérée", annulee: "Annulée" };
 
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-white p-6">
+    <div className="rounded-card bg-canvas ring-1 ring-line p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-bold text-slate-900">Mon espace local</h2>
         <div className="flex gap-2" role="tablist" aria-label="Sections de mon espace local">
@@ -317,7 +317,7 @@ export function MonEspaceCarte({
             ["dispo", "Ma disponibilité"],
           ] as const).map(([key, label]) => (
             <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold ${tab === key ? "bg-emerald-800 text-white" : "bg-[#fafaf9] text-slate-600"}`}>
+              className={`rounded-full px-4 py-2 text-sm font-semibold ${tab === key ? "bg-ink text-white" : "bg-subtle text-slate-600"}`}>
               {label}
             </button>
           ))}
@@ -331,7 +331,7 @@ export function MonEspaceCarte({
           ) : (
             <ul className="flex flex-col gap-4">
               {myPoints.map((point) => (
-                <li key={point.id} className="rounded-xl bg-[#fafaf9] p-4">
+                <li key={point.id} className="rounded-card bg-subtle p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold text-slate-900">{point.name}</p>
@@ -344,7 +344,7 @@ export function MonEspaceCarte({
                   {point.products.length > 0 && (
                     <ul className="mt-3 flex flex-wrap gap-2">
                       {point.products.map((product) => (
-                        <li key={product.id} className="rounded-lg bg-white px-3 py-2 text-xs text-slate-700">
+                        <li key={product.id} className="rounded-control bg-canvas px-3 py-2 text-xs text-slate-700">
                           {product.name} · {formatAmount(product.price)} / {product.unit} · stock {product.stock}
                         </li>
                       ))}
@@ -367,7 +367,7 @@ export function MonEspaceCarte({
             ) : (
               <ul className="mt-3 flex flex-col gap-3">
                 {purchases.map((order) => (
-                  <li key={order.id} className="rounded-xl bg-[#fafaf9] p-4 text-sm">
+                  <li key={order.id} className="rounded-card bg-subtle p-4 text-sm">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold text-slate-900">{order.quantity} × {order.productName}</p>
                       <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">{ORDER_LABEL[order.status]}</span>
@@ -386,7 +386,7 @@ export function MonEspaceCarte({
             ) : (
               <ul className="mt-3 flex flex-col gap-3">
                 {sales.map((order) => (
-                  <li key={order.id} className="rounded-xl bg-[#fafaf9] p-4 text-sm">
+                  <li key={order.id} className="rounded-card bg-subtle p-4 text-sm">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold text-slate-900">{order.quantity} × {order.productName}</p>
                       <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">{ORDER_LABEL[order.status]}</span>
@@ -403,7 +403,7 @@ export function MonEspaceCarte({
       {tab === "dispo" && (
         <div className="mt-5">
           {availability ? (
-            <div className="rounded-xl bg-[#fafaf9] p-4">
+            <div className="rounded-card bg-subtle p-4">
               <p className="text-sm font-semibold text-slate-900">
                 {availability.status === "disponible" ? "Vous êtes visible sur la carte." : "Votre disponibilité est suspendue."}
               </p>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
+import { Icon } from "@/components/icon";
 import { acceptWeddingAccessLink } from "@/lib/actions/wedding-access";
 import { getWeddingAccessInvite } from "@/lib/wedding-access";
 
@@ -24,32 +25,59 @@ export default async function WeddingAccessInvitationPage({ params, searchParams
   const invite = query.expired ? null : await getWeddingAccessInvite(token);
   return (
     <PublicPage solidHeader>
-      <main className="min-h-[70vh] bg-[#fafaf9] px-4 py-10 sm:px-6">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm sm:p-8">
+      <main className="min-h-[70vh] bg-subtle px-5 py-12 sm:px-8">
+        <div className="mx-auto max-w-2xl rounded-panel bg-canvas p-7 shadow-rested ring-1 ring-line sm:p-9">
           {invite ? (
             <>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-rose-700">Invitation temporaire</p>
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">Un proche vous invite à aider</h1>
-              <p className="mt-3 text-slate-700"><strong>{invite.label}</strong> vous propose un accès limité au projet « {invite.projectTitle} », à {invite.city}.</p>
-              <div className="mt-5 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-950">
-                <p className="font-bold">Votre rôle</p>
-                <p className="mt-1">{roleLabel(invite.role)}</p>
-                <p className="mt-2 text-xs">Le lien expire le {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(invite.expiresAt)}. Il peut aussi être révoqué à tout moment par une personne organisatrice.</p>
+              <p className="eyebrow">
+                <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
+                Invitation temporaire
+              </p>
+              <h1 className="mt-4 text-3xl leading-tight text-ink">Un proche vous invite à aider</h1>
+              <p className="mt-4 text-base leading-relaxed text-ink-2">
+                <strong>{invite.label}</strong> vous propose un accès limité au projet « {invite.projectTitle} », à {invite.city}.
+              </p>
+
+              <div className="mt-6 rounded-card bg-muted p-5">
+                <p className="text-sm font-medium text-ink">Votre rôle</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-2">{roleLabel(invite.role)}</p>
+                <p className="mt-3 text-xs leading-relaxed text-ink-4">
+                  Le lien expire le {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(invite.expiresAt)}. Il peut aussi être
+                  révoqué à tout moment par une personne organisatrice.
+                </p>
               </div>
-              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-600">
-                <p>Ce lien ne crée pas de compte et n&apos;ouvre pas l&apos;espace personnel complet. Il ne permet pas de consulter les documents, les échanges privés, le budget ni d&apos;autres projets. N&apos;acceptez que si vous connaissez la personne qui vous l&apos;a transmis ; toute personne disposant du lien peut exercer ce rôle limité.</p>
+
+              <div className="mt-4 flex gap-3 rounded-card bg-subtle p-5 text-xs leading-relaxed text-ink-3 ring-1 ring-line-soft">
+                <Icon name="lock" className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" />
+                <p>
+                  Ce lien ne crée pas de compte et n’ouvre pas l’espace personnel complet. Il ne permet pas de consulter les documents, les
+                  échanges privés, le budget ni d’autres projets. N’acceptez que si vous connaissez la personne qui vous l’a transmis ;
+                  toute personne disposant du lien peut exercer ce rôle limité.
+                </p>
               </div>
+
               <form action={acceptWeddingAccessLink} className="mt-6">
                 <input type="hidden" name="token" value={token} />
-                <button type="submit" className="rounded-lg bg-emerald-800 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-900">Ouvrir l&apos;espace partagé</button>
+                <button
+                  type="submit"
+                  className="inline-flex h-11 items-center gap-2 rounded-control bg-ink px-5 text-[15px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
+                >
+                  Ouvrir l’espace partagé
+                  <Icon name="arrow" className="h-4 w-4" />
+                </button>
               </form>
-              <p className="mt-4 text-xs text-slate-500">Après ouverture, une session limitée et sécurisée sera conservée sur cet appareil jusqu&apos;à expiration ou révocation.</p>
+              <p className="mt-4 text-xs leading-relaxed text-ink-4">
+                Après ouverture, une session limitée et sécurisée sera conservée sur cet appareil jusqu’à expiration ou révocation.
+              </p>
             </>
           ) : (
             <>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Lien indisponible</p>
-              <h1 className="mt-2 text-3xl font-bold text-slate-900">Cette invitation n&apos;est plus valide</h1>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">Le lien a peut-être expiré, été révoqué ou remplacé. Demandez aux personnes qui organisent le mariage de vous transmettre une nouvelle invitation.</p>
+              <p className="eyebrow">Lien indisponible</p>
+              <h1 className="mt-4 text-3xl leading-tight text-ink">Cette invitation n’est plus valide</h1>
+              <p className="mt-4 text-sm leading-relaxed text-ink-3">
+                Le lien a peut-être expiré, été révoqué ou remplacé. Demandez aux personnes qui organisent le mariage de vous transmettre
+                une nouvelle invitation.
+              </p>
             </>
           )}
         </div>

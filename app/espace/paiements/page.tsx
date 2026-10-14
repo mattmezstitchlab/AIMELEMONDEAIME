@@ -31,7 +31,7 @@ export default async function PaiementsPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle image="/images/hero-retraite.jpg" eyebrow="Paiements" title="Mes paiements" description="Historique fictif de vos prestations, remboursements et cotisations." />
+      <SectionTitle eyebrow="Paiements" title="Mes paiements" description="Historique fictif de vos prestations, remboursements et cotisations." />
 
       <Card className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -40,21 +40,21 @@ export default async function PaiementsPage({ searchParams }: { searchParams: Pr
         </div>
         <form className="flex flex-wrap gap-2" role="search">
           <label htmlFor="q" className="sr-only">Rechercher un paiement</label>
-          <input id="q" name="q" defaultValue={q} data-assistant-id="payments-search" placeholder="Rechercher un libellé" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-          <select name="type" defaultValue={type || ""} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <input id="q" name="q" defaultValue={q} data-assistant-id="payments-search" placeholder="Rechercher un libellé" className="rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm" />
+          <select name="type" defaultValue={type || ""} className="rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm">
             <option value="">Tous types</option>
             {Object.entries(PAYMENT_TYPE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
           </select>
-          <button type="submit" className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-900">Filtrer</button>
+          <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-2">Filtrer</button>
         </form>
       </Card>
 
       {items.length === 0 ? (
         <EmptyState title="Aucun paiement trouvé" />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="overflow-hidden rounded-card ring-1 ring-line bg-white">
           <table data-assistant-id="payments-table" className="w-full text-left text-sm">
             <caption className="sr-only">Historique de mes paiements</caption>
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">

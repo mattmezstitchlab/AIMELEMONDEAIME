@@ -19,17 +19,17 @@ export function AppointmentActions({ appointmentId, status }: { appointmentId: n
   return (
     <div className="flex gap-2">
       {status === "demandee" && (
-        <button onClick={() => update("confirmee")} disabled={isPending} className="rounded-lg bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-900">
+        <button onClick={() => update("confirmee")} disabled={isPending} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink-2">
           Confirmer
         </button>
       )}
       {(status === "demandee" || status === "confirmee") && (
-        <button onClick={() => update("annulee")} disabled={isPending} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+        <button onClick={() => update("annulee")} disabled={isPending} className="rounded-lg ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
           Annuler
         </button>
       )}
       {status === "confirmee" && (
-        <button onClick={() => update("terminee")} disabled={isPending} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+        <button onClick={() => update("terminee")} disabled={isPending} className="rounded-lg ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
           Marquer terminé
         </button>
       )}

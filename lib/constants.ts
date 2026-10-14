@@ -28,12 +28,13 @@ export const CASE_STATUS_LABELS: Record<string, string> = {
   terminee: "Terminée",
 };
 
+/** Styles des pastilles d'état : une couleur uniquement pour l'état (Cal.com). */
 export const CASE_STATUS_STYLES: Record<string, string> = {
-  brouillon: "bg-slate-100 text-slate-700 border-slate-200",
-  envoyee: "bg-sky-50 text-sky-700 border-sky-200",
-  en_cours: "bg-amber-50 text-amber-700 border-amber-200",
-  piece_manquante: "bg-rose-50 text-rose-700 border-rose-200",
-  terminee: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  brouillon: "bg-muted text-ink-2 ring-line",
+  envoyee: "bg-state-info-soft text-state-info ring-state-info-line",
+  en_cours: "bg-state-warning-soft text-state-warning ring-state-warning-line",
+  piece_manquante: "bg-state-danger-soft text-state-danger ring-state-danger-line",
+  terminee: "bg-state-success-soft text-state-success ring-state-success-line",
 };
 
 export const PAYMENT_TYPE_LABELS: Record<string, string> = {
