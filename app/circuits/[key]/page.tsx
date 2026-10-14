@@ -1,0 +1,291 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Check, Info } from "lucide-react";
+import { PublicPage } from "@/components/public-shell";
+import { Container, Hero, SectionHeading, Tag } from "@/components/ui";
+import { Icon } from "@/components/icon";
+import { CircuitBoard } from "@/components/circuits/circuit-board";
+import {
+  CIRCUITS, ORDER_STATUS_LABELS, circuitFor,
+  type Circuit, type CircuitHandRow, type CircuitMine, type CircuitOrderRow, type CircuitStructureRow,
+} from "@/lib/circuits";
+import { getCurrentUser } from "@/lib/auth";
+import { getAvailableHands, getLocalStructures, getMemberCircuitData } from "@/lib/queries";
+import { splitCommuneLabel } from "@/lib/point";
+
+/*
+ * Un circuit, en listes.
+ *
+ * Aucune carte : la commune, le code postal et le mot-clé suffisent. Le
+ * serveur assemble ici des lignes simples, le tableau (client) ne s'occupe que
+ * des filtres et des formulaires.
+ */
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ key: string }> }): Promise<Metadata> {
+  const circuit = circuitFor((await params).key);
+  if (!circuit) return { title: "Circuit introuvable — AIME®" };
+  return { title: `${circuit.label} — AIME®`, description: circuit.tagline };
+}
+
+function publicName(display: string | null, full: string) {
+  return display?.trim() || full.split(" ")[0];
+}
+
+function orderRow(raw: {
+  id: number; reference: string; quantity: number; status: string; pickupAt: Date | string | null;
+  productName: string; pointName: string; city: string; counterparty: string; isSeller: boolean;
+}): CircuitOrderRow {
+  return {
+    id: raw.id,
+    reference: raw.reference,
+    quantity: raw.quantity,
+    status: raw.status,
+    statusLabel: ORDER_STATUS_LABELS[raw.status as keyof typeof ORDER_STATUS_LABELS] ?? raw.status,
+    itemName: raw.productName,
+    structureName: raw.pointName,
+    city: raw.city,
+    counterparty: raw.counterparty,
+    pickupAt: raw.pickupAt
+      ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(raw.pickupAt))
+      : null,
+    isSeller: raw.isSeller,
+  };
+}
+
+export default async function CircuitPage({ params }: { params: Promise<{ key: string }> }) {
+  const circuit = circuitFor((await params).key);
+  if (!circuit) notFound();
+
+  const user = await getCurrentUser();
+  const isMember = user?.role === "membre";
+
+  let structures: CircuitStructureRow[] = [];
+  let hands: CircuitHandRow[] = [];
+  let mine: CircuitMine | null = null;
+
+  if (circuit.status === "ouvert" && circuit.board === "structures") {
+    const points = await getLocalStructures().catch(() => []);
+    structures = points
+      .filter((point) => point.kind === circuit.pointKind)
+      .map((point) => ({
+        id: point.id,
+        name: point.name,
+        description: point.description,
+        city: point.city,
+        kind: point.kind,
+        ownerName: point.ownerName,
+        phone: point.phone,
+        isMine: user?.id === point.ownerId,
+        items: point.products.map((item) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          category: item.category,
+          price: item.price,
+          unit: item.unit,
+          stock: item.stock,
+          isMine: user?.id === point.ownerId,
+        })),
+      }));
+  }
+
+  if (circuit.status === "ouvert" && circuit.board === "hands") {
+    const rows = await getAvailableHands().catch(() => []);
+    hands = rows.map((row) => ({
+      id: row.id,
+      userId: row.userId,
+      name: row.person ? publicName(row.person.displayName, row.person.fullName) : "Habitant de la commune",
+      city: row.city,
+      skills: row.skills,
+      note: row.availabilityNote,
+      since: new Date(row.createdAt).toISOString(),
+      isMine: user?.id === row.userId,
+      hasProfile: row.person?.profileVisible === true,
+    }));
+  }
+
+  if (isMember && user && circuit.status === "ouvert") {
+    const raw = await getMemberCircuitData(user.id).catch(() => null);
+    if (raw) {
+      const myStructures: CircuitStructureRow[] = raw.myPoints
+        .filter((point) => point.kind === circuit.pointKind)
+        .map((point) => ({
+          id: point.id,
+          name: point.name,
+          description: point.description,
+          city: point.city,
+          kind: point.kind,
+          ownerName: publicName(user.displayName, user.fullName),
+          phone: point.phone,
+          isMine: true,
+          items: point.products.map((item) => ({
+            id: item.id, name: item.name, description: item.description, category: item.category,
+            price: item.price, unit: item.unit, stock: item.stock, isMine: true,
+          })),
+        }));
+      mine = {
+        isMember: true,
+        structures: myStructures,
+        received: raw.sales.map((sale) => orderRow({
+          id: sale.id, reference: sale.reference, quantity: sale.quantity, status: sale.status, pickupAt: sale.pickupAt,
+          productName: sale.productName, pointName: sale.pointName, city: "", counterparty: sale.buyerName, isSeller: true,
+        })),
+        placed: raw.purchases.map((purchase) => orderRow({
+          id: purchase.id, reference: purchase.reference, quantity: purchase.quantity, status: purchase.status, pickupAt: purchase.pickupAt,
+          productName: purchase.productName, pointName: purchase.pointName, city: purchase.pointCity, counterparty: purchase.pointName, isSeller: false,
+        })),
+        availability: raw.availability
+          ? {
+              skills: raw.availability.skills,
+              city: splitCommuneLabel(raw.availability.city).commune,
+              note: raw.availability.availabilityNote,
+              status: raw.availability.status,
+            }
+          : null,
+      };
+    }
+  }
+
+  const closed = circuit.status !== "ouvert";
+
+  return (
+    <PublicPage>
+      <Hero
+        size="md"
+        eyebrow={`Circuit · ${circuit.status === "ouvert" ? "ouvert" : "en préparation"}`}
+        title={`${circuit.label}.`}
+        subtitle={circuit.intro}
+        actions={
+          closed ? (
+            <Link href="/circuits" className="inline-flex h-11 items-center gap-2 rounded-control bg-canvas px-5 text-[15px] font-medium text-ink-2 ring-1 ring-line transition hover:bg-subtle hover:text-ink">
+              Voir les circuits ouverts
+            </Link>
+          ) : (
+            <Link href="#tableau" className="inline-flex h-11 items-center gap-2 rounded-control bg-ink px-5 text-[15px] font-medium text-canvas shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2">
+              Voir les fiches
+            </Link>
+          )
+        }
+      />
+
+      <section className="border-b border-line bg-subtle">
+        <Container className="py-14">
+          <div className="grid gap-4 md:grid-cols-3">
+            {circuit.steps.map((step, index) => (
+              <div key={step.title} className="rounded-card bg-canvas p-6 shadow-rested ring-1 ring-line">
+                <span className="font-display text-xs tracking-[0.14em] text-ink-4">0{index + 1}</span>
+                <h2 className="mt-4 text-lg leading-snug text-ink">{step.title}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-ink-2">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {closed ? (
+        <section className="bg-canvas">
+          <Container className="py-16 lg:py-20">
+            <SectionHeading
+              eyebrow="Pas encore ouvert"
+              title="Ce circuit est préparé, pas accessible."
+              description={circuit.pending}
+            />
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              <ul className="space-y-3 rounded-card bg-subtle p-5 ring-1 ring-line-soft">
+                <li className="text-xs font-bold uppercase tracking-wide text-ink-3">Déjà décidé</li>
+                {circuit.guarantees.map((line) => (
+                  <li key={line} className="flex gap-3 text-sm leading-relaxed text-ink-2">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-ink" strokeWidth={1.8} aria-hidden="true" />
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              <ul className="space-y-3 rounded-card bg-subtle p-5 ring-1 ring-line-soft">
+                <li className="text-xs font-bold uppercase tracking-wide text-ink-3">Limites annoncées d&apos;avance</li>
+                {circuit.limits.map((line) => (
+                  <li key={line} className="flex gap-3 text-sm leading-relaxed text-ink-2">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" strokeWidth={1.8} aria-hidden="true" />
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <p className="mt-6 max-w-3xl text-sm leading-relaxed text-ink-2">
+              En attendant, ce que vous cherchez se publie dans Le Monde Aime — une proposition, un besoin, un projet, un trajet.{" "}
+              <Link href="/le-monde-aime?onglet=publier" className="font-semibold text-ink underline">Publier une demande</Link>
+            </p>
+          </Container>
+        </section>
+      ) : (
+        <section id="tableau" className="bg-canvas">
+          <Container className="py-14 lg:py-16">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
+              <SectionHeading
+                eyebrow={circuit.board === "hands" ? `${hands.length} disponibilité(s)` : `${structures.length} fiche(s)`}
+                title={circuit.board === "hands" ? "Qui peut donner un coup de main." : "Ce qui se produit dans le secteur."}
+                description={circuit.deposit.text}
+              />
+              <span className="inline-flex items-center gap-2 text-xs text-ink-3">
+                <Icon name={circuit.icon} className="h-4 w-4" />
+                {circuit.short}
+              </span>
+            </div>
+            <div className="mt-8">
+              <CircuitBoard circuit={circuit} structures={structures} hands={hands} mine={mine} signedIn={Boolean(user)} />
+            </div>
+          </Container>
+        </section>
+      )}
+
+      <section className="border-t border-line bg-subtle">
+        <Container className="py-14">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div>
+              <h2 className="text-xl leading-tight tracking-[-0.02em] text-ink">Ce que ce circuit garantit.</h2>
+              <ul className="mt-4 space-y-3">
+                {circuit.guarantees.map((line) => (
+                  <li key={line} className="flex gap-3 text-sm leading-relaxed text-ink-2">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-ink" strokeWidth={1.8} aria-hidden="true" />
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h2 className="text-xl leading-tight tracking-[-0.02em] text-ink">Ce qu&apos;il ne fait pas.</h2>
+              <ul className="mt-4 space-y-3">
+                {circuit.limits.map((line) => (
+                  <li key={line} className="flex gap-3 text-sm leading-relaxed text-ink-2">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-ink-3" strokeWidth={1.8} aria-hidden="true" />
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-4 text-xs leading-relaxed text-ink-4">
+                Prototype indépendant, non affilié à un organisme. Les fiches sont déclaratives et signalées comme fictives lorsqu&apos;elles servent la démonstration.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 border-t border-line pt-6">
+            <h2 className="text-sm font-bold text-ink">Les autres circuits</h2>
+            <ul className="mt-3 flex flex-wrap gap-3">
+              {CIRCUITS.filter((item) => item.key !== circuit.key).map((item) => (
+                <li key={item.key}>
+                  <Link href={`/circuits/${item.key}`} className="inline-flex items-center gap-2 rounded-full ring-1 ring-line px-4 py-2 text-sm font-semibold text-ink-2 transition hover:text-ink">
+                    <Icon name={item.icon} className="h-4 w-4" />
+                    {item.label}
+                    {item.status === "prevu" && <Tag tone="outline">En préparation</Tag>}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Container>
+      </section>
+    </PublicPage>
+  );
+}

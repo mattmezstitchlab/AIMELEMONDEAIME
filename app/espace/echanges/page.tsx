@@ -35,10 +35,11 @@ export default async function EchangesPage() {
       <SectionTitle eyebrow="Mes échanges & projets" title="Conversations, projets, cercles, dons et prêts" description="Tout ce que vous échangez, organisez et partagez — avec le voisinage, vos cercles et l’équipe d’accompagnement."
         actions={<LinkButton href="/le-monde-aime?onglet=publier"><Icon name="filePlus" className="h-4 w-4" /> Créer un projet</LinkButton>} />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/espace/profil" className="rounded-card bg-canvas ring-1 ring-line p-4 shadow-rested hover:ring-ink-4"><Icon name="user" className="h-6 w-6 text-ink-2" /><strong className="mt-2 block text-ink">Mon profil</strong><span className="text-xs text-ink-3">Activités, ce que je propose, recherche ou transmets, zone et disponibilités.</span></Link>
         <Link href="/le-monde-aime/artiste" className="rounded-card bg-canvas ring-1 ring-line p-4 shadow-rested hover:ring-ink-4"><Icon name="music" className="h-6 w-6 text-ink-2" /><strong className="mt-2 block text-ink">Espace artiste</strong><span className="text-xs text-ink-3">{links.hasArtist ? "Prestations, demandes reçues, fiche technique." : "Disciplines, prestations et fiche technique."}</span></Link>
         <Link href="/le-monde-aime" className="rounded-card bg-canvas ring-1 ring-line p-4 shadow-rested hover:ring-ink-4"><Icon name="pin" className="h-6 w-6 text-ink-2" /><strong className="mt-2 block text-ink">Explorer Le Monde Aime</strong><span className="text-xs text-ink-3">Personnes, offres, besoins et projets près de vous.</span></Link>
+        <Link href="/circuits" className="rounded-card bg-canvas ring-1 ring-line p-4 shadow-rested hover:ring-ink-4"><Icon name="sprout" className="h-6 w-6 text-ink-2" /><strong className="mt-2 block text-ink">Mes circuits</strong><span className="text-xs text-ink-3">Ma production, mes réservations, ma disponibilité pour un coup de main.</span></Link>
       </div>
 
       <InviteResponses invites={links.invites.map((i) => ({ id: i.id, name: i.name, kind: i.kind }))} />

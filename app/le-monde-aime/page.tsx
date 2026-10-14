@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth";
 import { getCommunityExplorerData, getMyCommunityData } from "@/lib/community-queries";
-import { getMapLocalPoints } from "@/lib/queries";
+import { getLocalStructures } from "@/lib/queries";
 import { getExplorerExtras } from "@/lib/lma-queries";
 import { CommunityApp } from "@/components/community/lma-app";
 import { PublicPage } from "@/components/public-shell";
@@ -17,18 +17,22 @@ export const metadata: Metadata = {
 export default async function LeMondeAimePage({ searchParams }: { searchParams: Promise<{ onglet?: string }> }) {
   // « Mes liens » est intégré à l’espace personnel unique.
   if ((await searchParams).onglet === "liens") redirect("/espace");
-  const [explorer, user, legacyPoints, extras] = await Promise.all([
+  const [explorer, user, structures, extras] = await Promise.all([
     getCommunityExplorerData().catch(() => ({ listings: [], trips: [], servicePins: [], agencies: [] })),
     getCurrentUser(),
-    getMapLocalPoints().catch(() => []),
+    getLocalStructures().catch(() => []),
     getExplorerExtras().catch(() => ({ people: [], projects: [], stories: [] })),
   ]);
   const isMember = user?.role === "membre";
   const mine = isMember ? await getMyCommunityData(user!.id) : null;
-  const servicePins = legacyPoints.map((p) => ({
-    id: p.id, name: p.name, city: p.city, lat: Number(p.lat), lng: Number(p.lng),
-    products: p.products.map((x) => ({ id: x.id, name: x.name, description: x.description, price: x.price, unit: x.unit, stock: x.stock })),
-  }));
+  // Les fiches de producteurs viennent du circuit des producteurs : la même
+  // liste, ici en résumé, avec un lien vers leur tableau complet.
+  const servicePins = structures
+    .filter((p) => p.kind === "producteur")
+    .map((p) => ({
+      id: p.id, name: p.name, city: p.city, lat: Number(p.lat), lng: Number(p.lng),
+      products: p.products.map((x) => ({ id: x.id, name: x.name, description: x.description, price: x.price, unit: x.unit, stock: x.stock })),
+    }));
   return (
     <PublicPage>
       <Suspense fallback={<div className="mx-auto max-w-[1200px] px-4 py-16 text-sm text-ink-3 sm:px-6">Chargement des publications…</div>}>

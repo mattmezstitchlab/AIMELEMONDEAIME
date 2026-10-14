@@ -166,8 +166,20 @@ export function AgencyCard({ agency }: { agency: Agency }) {
   </article>;
 }
 
-export function LegacyPointCard({ point }: { point: ServicePin }) {
-  return <article className="rounded-card bg-canvas p-5 ring-1 ring-line shadow-rested"><span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">Producteur local</span><h3 className="mt-2 font-bold text-ink">{point.name}</h3><p className="text-sm text-ink-3">{point.city} · position approximative, déduite de la commune</p><p className="mt-2 text-xs text-ink-3">Les produits, les quantités et le retrait se conviennent directement avec le producteur.</p></article>;
+/** Résumé d'une fiche de producteur dans la liste du Monde Aime : le détail vit dans le circuit. */
+export function ProducerCard({ point }: { point: ServicePin }) {
+  const count = point.products?.length ?? 0;
+  return (
+    <article className="animate-fade-up rounded-card bg-canvas p-5 ring-1 ring-line shadow-rested">
+      <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">Producteur local</span>
+      <h3 className="mt-2 font-bold text-ink">{point.name}</h3>
+      <p className="text-sm text-ink-3">{point.city} · position approximative, déduite de la commune</p>
+      <p className="mt-2 text-xs text-ink-3">
+        {count > 0 ? `${count} ligne(s) publiée(s) sur sa fiche` : "Aucun produit publié pour l'instant"} · les quantités et le retrait se conviennent directement avec le producteur.
+      </p>
+      <Link href="/circuits/producteurs" className="mt-3 inline-flex h-10 items-center rounded-full bg-ink px-4 text-xs font-semibold text-canvas">Voir la fiche dans son circuit</Link>
+    </article>
+  );
 }
 
 export function TripCard({ trip, userId, canRequest, linkedRequests }: { trip: Trip; userId: number | null; canRequest: boolean; linkedRequests: Request[] }) {

@@ -58,6 +58,31 @@ Les préférences d'affichage (taille du texte, contraste, animations) sont pos�
 sur `<html>` (`data-text-scale`, `data-contrast`, `data-motion`) et lues par
 `app/globals.css`.
 
+### Les circuits — un cadre réutilisable
+
+Un **circuit** est un cadre de confiance autour d'un même geste : on dépose une fiche située
+par sa commune, on dit ce qu'on propose, et l'accord se fait entre les personnes. Le
+catalogue vit dans `lib/circuits.ts` : chaque entrée porte ses mots (fiche, produit,
+réservation), ses étapes, ses garanties, ses limites et **son tableau**
+(`structures` ou `hands`). Les pages sont génériques : `app/circuits/page.tsx` (index) et
+`app/circuits/[key]/page.tsx` (un circuit, en listes), avec
+`components/circuits/circuit-board.tsx` (filtres, fiches, « Mon atelier ») et
+`components/circuits/circuit-forms.tsx` (dépôt d'une fiche, ajout d'une ligne, réservation,
+statuts, disponibilité). Les actions correspondantes vivent dans `lib/actions/circuits.ts` et
+servent tous les circuits : le circuit visé arrive en clair dans le formulaire.
+
+Circuits ouverts aujourd'hui : **producteurs** (`local_points.kind = "producteur"`, avec
+`local_products` et `local_orders`) et **coups de main** (`worker_availabilities`).
+`associations` est **déclaré mais non ouvert** : il décrit ses règles, refuse toute écriture
+et attend son tableau.
+
+**Ajouter un circuit** (par exemple « associations ») demande donc trois choses : une entrée
+dans `lib/circuits.ts` (avec `status: "ouvert"`), son tableau dans
+`components/circuits/`, et le type de fiche correspondant — rien d'autre n'est à recopier.
+Les tests de `lib/circuits.test.ts` vérifient les invariants à respecter : clé d'adresse
+valide, trois étapes et trois garanties au minimum, limites écrites, pas de promesse de
+paiement en ligne, et aucun retour du vocabulaire de la carte.
+
 
 ## Démarrage
 
@@ -146,6 +171,8 @@ Après toute modification de `db/schema.ts` : `npm run db:generate`, relire le S
 - `lib/` — logique serveur : `actions/` (Server Actions, **toujours authentifiées**), requêtes (`*-queries.ts`), auth, validation Zod
 - `db/` — schéma Drizzle (`schema.ts`), scripts d'amorçage (`seed*.ts`)
 - `lib/point.ts` — point d'une publication déduit de la commune et du code postal (sans carte)
+- `lib/circuits.ts` — le catalogue des circuits (mots, étapes, garanties, limites, tableau) ; `lib/actions/circuits.ts` — les actions partagées par tous les circuits
+- `app/circuits/` + `components/circuits/` — l'index des circuits, un circuit par adresse, tableau et formulaires
 - `drizzle/` — migrations SQL versionnées
 
 ## Sécurité — règles du projet

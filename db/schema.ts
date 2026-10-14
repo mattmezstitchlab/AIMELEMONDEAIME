@@ -249,13 +249,14 @@ export const notifications = pgTable("notifications", {
 });
 
 // ---------------------------------------------------------------------------
-// Carte de France : agences, production locale de proximité et disponibilités
+// Circuits : fiches de proximité (producteurs, associations) et coups de main
 // ---------------------------------------------------------------------------
 
-export const localPointKindEnum = ["producteur", "presence"] as const;
+/** Type d'une fiche. « association » est déclaré pour le circuit à venir. */
+export const localPointKindEnum = ["producteur", "presence", "association"] as const;
 export type LocalPointKind = (typeof localPointKindEnum)[number];
 
-/** Point déposé sur la carte par un adhérent : lieu de production ou simple présence. */
+/** Fiche déposée par un adhérent : lieu de production, association ou présence. */
 export const localPoints = pgTable("local_points", {
   id: serial("id").primaryKey(),
   ownerId: integer("owner_id")

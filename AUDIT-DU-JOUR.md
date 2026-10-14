@@ -46,18 +46,27 @@ Tout est dans le dépôt, vérifié, et poussé sur la branche.
   « Chartres (28000) ».
 - **Le nettoyage du code mort** : tracés SVG de la carte supprimés (413 lignes), 8 règles
   CSS et 28 jetons de couleur jamais utilisés retirés, code de la carte retiré.
-- **La documentation** : `README.md` (design, point sans carte, tests, partage) et
+- **La documentation** : `README.md` (design, point sans carte, circuits, tests, partage) et
   `.env.example` (adresse du site) à jour.
+- **Les circuits (14 octobre, soir).** Le circuit des producteurs est ouvert :
+  `/circuits`, `/circuits/producteurs` (fiches, produits, réservation en retrait sur place,
+  « Mon atelier » pour le producteur) et `/circuits/coups-de-main` (savoirs-faire déclarés,
+  disponibilité qu'on suspend d'un interrupteur). Un circuit « associations » est **déclaré
+  et décrit, pas ouvert** : il refuse toute écriture et indique ce qu'il reste à construire.
+  Les huit actions serveur qui dormaient depuis le retrait de la carte sont toutes
+  rebranchées (vérifié : chacune a un écran). `lib/actions/local.ts` a disparu au profit de
+  `lib/actions/circuits.ts`, qui sert tous les circuits. Seize tests passent, dont huit
+  nouveaux sur les invariants d'un circuit (clé d'adresse, étapes, garanties, limites,
+  absence de promesse de paiement en ligne, aucun retour du mot « carte »).
 
 ## 3. Ce qui manque — par ordre d'importance
 
 ### À décider (produit)
 
-1. **Le circuit « producteur » n'a plus d'écran.** Avant, on déposait un point de
-   production sur la carte, on ajoutait des produits, on pouvait commander. Huit actions
-   serveur existent toujours mais **plus aucun écran ne les appelle** depuis le retrait de
-   la carte. Deux options : les rebrancher en listes (fiche producteur + « déposer ma
-   production »), ou les retirer proprement. **J'attends votre choix.**
+1. ~~**Le circuit « producteur » n'a plus d'écran.**~~ **Réglé le 14 octobre au soir, à
+   votre demande** : les huit actions serveur sont rebranchées dans un vrai circuit, en
+   listes (voir la section 2). Le même moule sert déjà à un deuxième circuit et attend les
+   suivants.
 2. **« Affiner le point plus tard ».** Aujourd'hui le point vient de la commune et du code
    postal : c'est approximatif (échelle de la commune, pas de la rue). Le serveur accepte
    déjà un point précis, mais rien n'est proposé à l'utilisateur. À faire quand vous voudrez.

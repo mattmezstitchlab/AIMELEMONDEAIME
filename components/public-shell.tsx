@@ -16,9 +16,10 @@ import { AUTH_ENABLED } from "@/lib/auth-mode";
  * partagent la même surface claire : les deux contextes ne se mélangent pas.
  */
 
-/** Navigation courte du haut : trois entrées, rien de plus. */
+/** Navigation courte du haut : quatre entrées, rien de plus. */
 const PRIMARY = [
   { href: "/accompagnement?besoin=mariage", label: "Parcours" },
+  { href: "/circuits", label: "Circuits" },
   { href: "/informations", label: "Guides" },
   { href: "/le-monde-aime", label: "Entraide" },
 ];
