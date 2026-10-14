@@ -40,7 +40,7 @@ export default async function Apercu() {
         </Link>
       ) : null}
 
-      <section aria-labelledby="besoin" className="space-y-4">
+      <section aria-labelledby="besoin" className="space-y-4" data-assistant-id="espace-quick-actions">
         <div>
           <h2 id="besoin" className="text-2xl text-ink">De quoi avez-vous besoin aujourd&apos;hui ?</h2>
           <p className="mt-1.5 text-sm text-ink-3">Décrivez votre besoin : nous proposons un parcours, vous gardez le choix.</p>
@@ -66,7 +66,8 @@ export default async function Apercu() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        <div className="lg:col-span-2" data-assistant-id="espace-cases">
+        <Card className="h-full">
           <h2 className="text-lg text-ink">Démarches en cours</h2>
           {o.active.length + o.drafts.length === 0 ? <div className="mt-4"><EmptyState title="Aucune démarche en cours" description="Choisissez une situation ci-dessus pour commencer." /></div> : (
             <ul className="mt-4 space-y-3">
@@ -92,6 +93,7 @@ export default async function Apercu() {
             </ul>
           )}
         </Card>
+        </div>
         <Card>
           <h2 className="text-lg text-ink">À traiter</h2>
           {toAnswer === 0 ? <p className="mt-3 text-sm text-ink-3">Aucune demande ne nécessite votre réponse.</p> : (
@@ -116,10 +118,12 @@ export default async function Apercu() {
           <h2 className="text-lg text-ink">Mes projets</h2>
           {o.myProjects.length === 0 ? <p className="mt-3 text-sm text-ink-3">Aucun projet. <Link href="/le-monde-aime?onglet=publier" className="font-medium text-ink underline underline-offset-4">Créer un projet</Link></p> : <ul className="mt-3 space-y-2 text-sm">{o.myProjects.slice(0, 5).map((p) => <li key={p.id}><Link href={`/le-monde-aime/projets/${p.id}`} className="font-medium text-ink underline underline-offset-4">{p.title}</Link><span className="block text-xs text-ink-4">{p.city} · {formatDate(p.startsAt)} · {p.role === "organisateur" ? "organisateur" : "participant"}</span></li>)}</ul>}
         </Card>
-        <Card>
+        <div data-assistant-id="espace-activity">
+        <Card className="h-full">
           <h2 className="text-lg text-ink">Notifications</h2>
           <NotificationList items={notifs.map((n) => ({ id: n.id, title: n.title, body: n.body, link: n.link, isRead: n.isRead }))} />
         </Card>
+        </div>
       </div>
     </div>
   );
