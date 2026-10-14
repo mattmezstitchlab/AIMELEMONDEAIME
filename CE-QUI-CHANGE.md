@@ -82,21 +82,33 @@ Sur l'organisme d'origine : **rien n'est nommé**. La mention reste « prototype
 indépendant, non affilié à un organisme », comme avant — l'esprit rural et agricole est
 présent dans les exemples et les chiffres, pas dans une signature.
 
-## 5. Les circuits : trois cadres ouverts, écrits un par un
+## 5. Les circuits : sept cadres ouverts, écrits un par un
 
-Trois circuits sont ouverts, et tous les trois disent la même chose en clair : on se situe
-par sa commune, on dit ce qu'on propose, et l'accord se fait entre les personnes.
+Sept circuits sont ouverts, et tous disent la même chose en clair : on se situe par sa
+commune, on dit ce qu'on propose, et l'accord se fait entre les personnes. Ils se sont
+écrits un par un, dans cet ordre, chacun sur les données et les gestes qui existaient
+déjà :
 
-- **Producteurs** : la ferme, l'atelier ou le jardin dépose sa fiche ; ce qui est
-  disponible s'y ajoute, avec un prix indicatif et un stock. On réserve, le producteur
-  confirme, on règle au retrait.
-- **Coups de main** : on déclare ce qu'on sait faire et dans quelle commune, et un
-  interrupteur suffit à se retirer de la liste immédiatement.
-- **Associations et collectifs** *(nouveau)* : la même mécanique que les producteurs, avec
-  les mots du monde associatif — adhésion, atelier, prêt de salle ou de matériel,
-  participation indicative. Les besoins ponctuels (bénévoles, matériel, covoiturage)
-  restent publiés dans Le Monde Aime, avec leur date : le circuit ne double pas cet
-  affichage, il y renvoie.
+- **Producteurs et produits locaux** : la ferme, l'atelier ou le jardin dépose sa fiche ;
+  ce qui est disponible s'y ajoute, avec un prix indicatif et un stock. On réserve, le
+  producteur confirme, on règle au retrait.
+- **Coups de main et disponibilités** : on déclare ce qu'on sait faire et dans quelle
+  commune, et un interrupteur suffit à se retirer de la liste immédiatement.
+- **Associations et collectifs** : la même mécanique que les producteurs, avec les mots du
+  monde associatif — adhésion, atelier, prêt de salle ou de matériel, participation
+  indicative. Les besoins ponctuels (bénévoles, matériel, covoiturage) restent publiés
+  dans Le Monde Aime, avec leur date : le circuit ne double pas cet affichage, il y
+  renvoie.
+- **Artisans et savoir-faire** : les métiers du secteur, avec un tarif indicatif et le
+  règlement sur place.
+- **Logements et hébergement** : les annonces du secteur — chambre, gîte, colocation,
+  sous-location — sans adresse dans la liste, retirables en un geste.
+- **Trajets et covoiturage** : les trajets proposés, avec les places restantes, les
+  demandes rattachées au trajet, et rien de réservé avant l'accord explicite du
+  conducteur.
+- **Transmission et mémoire** *(nouveau)* : ce qu'une personne accepte de transmettre —
+  un geste, un métier, une recette, une mémoire de famille ou de village — et dans quelle
+  commune. Rien ne s'affiche sans son accord, et se retire en un geste.
 
 Ce qui est **le même partout**, et vérifié par des tests : aucun paiement en ligne, rien
 qui se conclut sans l'accord de la personne concernée, une fiche située par la commune et
@@ -104,8 +116,8 @@ le code postal — jamais une adresse —, et chaque circuit écrit ses propres 
 association ne parle pas de « retrait », un producteur ne parle pas de « mise en
 relation »).
 
-Et **plus aucun circuit « déclaré mais fermé »** : les trois sont ouverts parce que les
-trois sont écrits et testés. Le prochain le sera de la même façon.
+Et **plus aucun circuit « déclaré mais fermé »** : les sept sont ouverts parce que les
+sept sont écrits et testés. Le prochain le sera de la même façon.
 
 ## 6. Ce qui reste ouvert
 

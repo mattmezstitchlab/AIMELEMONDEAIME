@@ -18,7 +18,7 @@ import type { LocalOrderStatus, LocalPointKind } from "@/db/schema";
 export type CircuitStatus = "ouvert" | "prevu";
 
 /** Le tableau que le circuit affiche : des fiches, des disponibilités, des annonces. */
-export type CircuitBoard = "structures" | "hands" | "annonces" | "trajets";
+export type CircuitBoard = "structures" | "hands" | "annonces" | "trajets" | "personnes";
 
 export type CircuitStep = { title: string; text: string };
 
@@ -501,7 +501,56 @@ export const TRANSPORTS: Circuit = {
   empty: "Aucun trajet proposé dans ce secteur pour l'instant. Le premier peut être le vôtre.",
 };
 
-export const CIRCUITS: Circuit[] = [PRODUCTEURS, COUPS_DE_MAIN, ASSOCIATIONS, ARTISANS, LOGEMENTS, TRANSPORTS];
+export const TRANSMISSION: Circuit = {
+  key: "transmission",
+  label: "Transmission et mémoire",
+  short: "Transmission",
+  icon: "graduation",
+  status: "ouvert",
+  tagline: "Un geste, un métier, une recette, une langue : ce que des personnes acceptent de transmettre autour de chez elles.",
+  intro:
+    "Ici, on déclare ce qu'on accepte de transmettre — un savoir-faire, une mémoire, un geste — et dans quelle commune. La fiche n'apparaît que si vous l'avez décidée, et elle se retire en un geste. La rencontre se convient ensuite entre vous : aucun paiement ne passe par le site.",
+  deposit: {
+    label: "Déclarer ce que je transmets",
+    text: "Quelques mots sur ce que vous acceptez de transmettre, et votre commune. Vous pouvez retirer votre proposition quand vous voulez, sans vous justifier.",
+  },
+  words: {
+    boardTitle: "Qui accepte de transmettre, dans le secteur.",
+    searchLabel: "Quel savoir, quelle mémoire ?",
+    searchHint: "couture, greffage, contes, cuisine…",
+    demandWord: "Demande",
+    demandDone: "La personne répond seulement si cela lui convient.",
+    statusUpdateTitle: "Votre proposition a changé",
+    dateLabel: "Jour souhaité",
+    ordersTitle: "Ma proposition de transmission",
+    orderNoteLabel: "Un mot à la personne",
+    orderNoteHint: "Ce que vous aimeriez apprendre, quand vous êtes disponible…",
+    paymentNote: "Aucun paiement ne passe par AIME® : la transmission se convient directement entre les personnes, et le site n'encaisse rien.",
+    stockWord: "personne(s)",
+    soldOut: "Plus disponible pour l'instant",
+    counterpartyWord: "auprès de",
+    demandTitle: "Nouvelle demande de transmission",
+    demandSent: "La personne vous répond directement.",
+  },
+  board: "personnes",
+  steps: [
+    { title: "Ce que vous acceptez de transmettre", text: "Un geste, un métier, une recette, une langue, une mémoire de famille ou de village : quelques mots suffisent pour commencer." },
+    { title: "Une fiche visible seulement si vous le décidez", text: "Votre commune suffit à situer la proposition, sans adresse. Rien n'apparaît tant que vous ne l'avez pas voulu, et tout se retire en un geste." },
+    { title: "La rencontre se convient entre vous", text: "Une personne écrit parce qu'elle veut apprendre : vous répondez si cela vous convient. Le lieu, le rythme et la suite ne regardent que vous." },
+  ],
+  guarantees: [
+    "Aucun paiement en ligne : l'argent ne circule jamais sur AIME®, même pour un atelier ou une leçon.",
+    "Votre proposition n'apparaît dans la liste que si vous l'avez décidée, et se retire immédiatement.",
+    "Personne n'est mis en relation sans son accord : vous répondez seulement si cela vous convient.",
+  ],
+  limits: [
+    "AIME® ne vérifie pas les personnes et n'organise ni les rencontres, ni les ateliers, ni les lieux.",
+    "Ce circuit n'est ni un organisme de formation, ni un service de garde : aucun diplôme, aucune certification, aucune assurance n'y est délivré.",
+  ],
+  empty: "Personne ne s'est encore proposé pour transmettre dans ce secteur. La première peut être la vôtre.",
+};
+
+export const CIRCUITS: Circuit[] = [PRODUCTEURS, COUPS_DE_MAIN, ASSOCIATIONS, ARTISANS, LOGEMENTS, TRANSPORTS, TRANSMISSION];
 
 /** Le repli des libellés de statut reste celui des producteurs, premier circuit à fiches. */
 export const DEFAULT_ORDER_STATUS_LABELS: Record<LocalOrderStatus, string> =

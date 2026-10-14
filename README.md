@@ -63,21 +63,24 @@ sur `<html>` (`data-text-scale`, `data-contrast`, `data-motion`) et lues par
 Un **circuit** est un cadre de confiance autour d'un même geste : on dépose une fiche située
 par sa commune, on dit ce qu'on propose, et l'accord se fait entre les personnes. Le
 catalogue vit dans `lib/circuits.ts` : chaque entrée porte ses mots (fiche, produit,
-réservation), ses étapes, ses garanties, ses limites et **son tableau**
-(`structures` ou `hands`). Les pages sont génériques : `app/circuits/page.tsx` (index) et
-`app/circuits/[key]/page.tsx` (un circuit, en listes), avec
-`components/circuits/circuit-board.tsx` (filtres, fiches, « Mon atelier ») et
-`components/circuits/circuit-forms.tsx` (dépôt d'une fiche, ajout d'une ligne, réservation,
-statuts, disponibilité). Les actions correspondantes vivent dans `lib/actions/circuits.ts` et
-servent tous les circuits : le circuit visé arrive en clair dans le formulaire.
+réservation), ses étapes, ses garanties, ses limites et **son tableau** (`structures` —
+fiches et propositions —, `hands` — disponibilités —, `annonces`, `trajets` ou `personnes`).
+Les pages sont génériques : `app/circuits/page.tsx` (index) et `app/circuits/[key]/page.tsx`
+(un circuit, en listes). Un tableau = un composant : `components/circuits/circuit-board.tsx`
+(structures et coups de main), `circuit-listings.tsx` (annonces), `circuit-trips.tsx`
+(trajets), `circuit-people.tsx` (personnes), plus `circuit-forms.tsx` (dépôt d'une fiche,
+ajout d'une ligne, réservation, statuts, disponibilité). Les actions correspondantes vivent
+dans `lib/actions/circuits.ts` et servent tous les circuits : le circuit visé arrive en clair
+dans le formulaire.
 
 Circuits ouverts aujourd'hui : **producteurs** (`local_points.kind = "producteur"`, avec
-`local_products` et `local_orders`), **coups de main** (`worker_availabilities`, tableau de
-disponibilités) et **associations et collectifs** (`local_points.kind = "association"` : la
-même mécanique que les producteurs, avec les mots du monde associatif — adhésions, ateliers,
-prêts de salle ou de matériel — et un lien vers Le Monde Aime pour les besoins datés publiés
-là-bas). Rien n'est « prévu mais fermé » aujourd'hui : un circuit est ouvert quand il est
-écrit, testé et relu.
+`local_products` et `local_orders`), **coups de main** (`worker_availabilities`),
+**associations et collectifs** (`local_points.kind = "association"`), **artisans**
+(`local_points.kind = "artisan"`), **logements** (`community_listings`, catégorie
+`logements`), **trajets** (`community_trips` + `community_transport_requests`) et
+**transmission** (`users.transmit_text`, un tableau de personnes et non de fiches). Rien
+n'est « prévu mais fermé » aujourd'hui : un circuit est ouvert quand il est écrit, testé et
+relu.
 
 **Ajouter un circuit** demande donc trois choses : une entrée dans `lib/circuits.ts` (avec
 `status: "ouvert"`, ses `words`, et son `catalogue` si le circuit a des fiches), son tableau
@@ -85,7 +88,7 @@ dans `components/circuits/`, et le type de fiche correspondant — rien d'autre 
 recopier. Les tests de `lib/circuits.test.ts` vérifient les invariants à respecter : clé
 d'adresse valide, trois étapes et trois garanties au minimum, limites écrites, mots et
 statuts écrits pour chaque circuit ouvert, un catalogue dès qu'il y a des fiches (et aucun
-sinon), un seul circuit par type de fiche, pas de promesse de paiement en ligne ni de
+sinon), un seul circuit par type de fiche, un tableau qui existe vraiment, pas de promesse de paiement en ligne ni de
 messagerie, et aucun retour du vocabulaire de la carte.
 
 

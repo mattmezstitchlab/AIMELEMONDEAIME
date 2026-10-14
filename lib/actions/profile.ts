@@ -70,6 +70,36 @@ export async function updateMyProfile(form: FormData): Promise<ProfileResult> {
   }
 }
 
+/**
+ * Ce qu'une personne accepte de transmettre (circuit « transmission »).
+ *
+ * On ne touche qu'à ce champ : le reste du profil (nom, commune, visibilité)
+ * se règle dans Mon espace, et un formulaire partiel ne doit rien effacer.
+ */
+export async function saveTransmissionOffer(form: FormData): Promise<ProfileResult> {
+  try {
+    const user = await requireRole(["membre"]);
+    const text = str(form, "transmitText").slice(0, 300);
+    if (text.length > 0 && text.length < 4) return { ok: false, error: "Dites en quelques mots ce que vous acceptez de transmettre." };
+    if (text.length === 0) {
+      await db.update(users).set({ transmitText: null }).where(eq(users.id, user.id));
+      await logAudit({ actorId: user.id, action: "retrait_transmission", entityType: "user", entityId: String(user.id) });
+      revalidatePath("/le-monde-aime");
+      revalidatePath("/espace/profil");
+      revalidatePath("/circuits", "layout");
+      return { ok: true, message: "Votre proposition de transmission est retirée des listes." };
+    }
+    await db.update(users).set({ transmitText: text }).where(eq(users.id, user.id));
+    await logAudit({ actorId: user.id, action: "maj_transmission", entityType: "user", entityId: String(user.id) });
+    revalidatePath("/le-monde-aime");
+    revalidatePath("/espace/profil");
+    revalidatePath("/circuits", "layout");
+    return { ok: true, message: "C'est enregistré : votre proposition apparaît dans le circuit si votre profil est visible." };
+  } catch (error) {
+    return fail(error, "L'enregistrement n'a pas abouti.");
+  }
+}
+
 /** Espace artiste : disciplines, zone, disponibilités et fiche technique (texte). */
 export async function saveArtistProfile(form: FormData): Promise<ProfileResult> {
   try {

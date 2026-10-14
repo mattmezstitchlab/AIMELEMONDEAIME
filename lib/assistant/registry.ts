@@ -280,6 +280,21 @@ export const SCENARIOS: AssistantScenario[] = [
     ],
   },
 
+  {
+    id: "transmission",
+    roles: ["membre"],
+    pages: ["/le-monde-aime", "/circuits/transmission"],
+    question: "Transmettre un savoir-faire ou apprendre de quelqu'un",
+    keywords: ["transmission", "transmettre", "memoire", "memoires", "apprendre", "savoir-faire", "atelier", "recette", "conte", "couture", "greffage", "circuit", "circuits"],
+    answer: "La transmission a son circuit : des personnes y disent ce qu'elles acceptent de transmettre — un geste, un métier, une recette — et dans quelle commune. La proposition n'apparaît que si la personne l'a décidée, et se retire en un geste. La rencontre se convient ensuite entre vous, sans paiement sur le site.",
+    steps: [
+      { text: "J'ouvre le circuit de la transmission et de la mémoire.", navigate: "/circuits/transmission" },
+      { text: "Filtrez par commune ou par savoir : le point est déduit de la commune, jamais une adresse.", highlight: "circuit-filters" },
+      { text: "Ouvrez la personne qui vous intéresse et écrivez-lui depuis son profil.", action: "Elle répond seulement si cela lui convient." },
+      { text: "Pour proposer à votre tour, déclarez dans ce circuit ce que vous acceptez de transmettre.", highlight: "circuit-mine" },
+    ],
+  },
+
   // ------------------------------------------------------------------ Employés
   {
     id: "retrouver-dossier",
@@ -526,6 +541,7 @@ const PAGE_SPECIFIC: Record<string, Suggestion[]> = {
     { label: "Trouver une association", kind: "scenario", scenarioId: "associations" },
     { label: "Trouver un artisan", kind: "scenario", scenarioId: "artisans" },
     { label: "Trouver un trajet", kind: "scenario", scenarioId: "transports" },
+    { label: "Transmettre un savoir-faire", kind: "scenario", scenarioId: "transmission" },
   ],
   "/back-office": [
     { label: "Retrouver un dossier", kind: "scenario", scenarioId: "retrouver-dossier" },

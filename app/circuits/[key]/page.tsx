@@ -8,6 +8,7 @@ import { Icon } from "@/components/icon";
 import { CircuitBoard } from "@/components/circuits/circuit-board";
 import { CircuitListings } from "@/components/circuits/circuit-listings";
 import { CircuitTrips, type CircuitTripRow } from "@/components/circuits/circuit-trips";
+import { CircuitPeople, type CircuitPersonRow } from "@/components/circuits/circuit-people";
 import {
   CIRCUITS, DEFAULT_ORDER_STATUS_LABELS, circuitFor,
   type Circuit, type CircuitHandRow, type CircuitMine, type CircuitOrderRow, type CircuitStructureRow,
@@ -15,6 +16,7 @@ import {
 import { getCurrentUser } from "@/lib/auth";
 import { getAvailableHands, getLocalStructures, getMemberCircuitData } from "@/lib/queries";
 import { getCircuitListings, getCircuitTrips, getMyCommunityData } from "@/lib/community-queries";
+import { getTransmitters } from "@/lib/lma-queries";
 import { communityCategoryEnum, type CommunityCategory } from "@/db/schema";
 import type { Listing, OwnListing, TripRequest } from "@/components/community/community-app";
 import { splitCommuneLabel } from "@/lib/point";
@@ -82,6 +84,14 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
   let myListings: OwnListing[] = [];
   if (isListings && listingCategory) {
     listings = await getCircuitListings(listingCategory).catch(() => []);
+  }
+
+  // Circuit de personnes : celles et ceux qui acceptent de transmettre.
+  const isPeople = circuit.status === "ouvert" && circuit.board === "personnes";
+  let people: CircuitPersonRow[] = [];
+  if (isPeople) {
+    const rows = await getTransmitters().catch(() => []);
+    people = rows.map((row) => ({ ...row, isMine: user?.id === row.id }));
   }
 
   // Circuit de trajets : les trajets publiés dans Le Monde Aime, les mêmes ici.
@@ -264,7 +274,9 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
                     ? `${listings.length} annonce(s)`
                     : circuit.board === "trajets"
                       ? `${trips.length} trajet(s)`
-                      : `${structures.length} fiche(s)`}
+                      : circuit.board === "personnes"
+                        ? `${people.length} personne(s)`
+                        : `${structures.length} fiche(s)`}
                 title={circuit.words.boardTitle}
                 description={circuit.deposit.text}
               />
@@ -274,7 +286,14 @@ export default async function CircuitPage({ params }: { params: Promise<{ key: s
               </span>
             </div>
             <div className="mt-8">
-              {isTrips ? (
+              {isPeople ? (
+                <CircuitPeople
+                  circuit={circuit}
+                  people={people}
+                  isMember={isMember}
+                  inlineOffer={user?.transmitText ?? null}
+                />
+              ) : isTrips ? (
                 <CircuitTrips
                   circuit={circuit}
                   trips={trips}

@@ -37,9 +37,12 @@ test("chaque circuit dit ce qu'il promet, ce qu'il garantit et ce qu'il ne fait 
   }
 });
 
+const TABLEAUX_CONNUS = ["structures", "hands", "annonces", "trajets", "personnes"];
+
 test("un circuit ouvert a un tableau ; un circuit prévu dit ce qu'il reste à faire", () => {
   for (const circuit of openCircuits()) {
     assert.ok(circuit.board, `le circuit ouvert « ${circuit.key} » n'a pas de tableau`);
+    assert.ok(TABLEAUX_CONNUS.includes(circuit.board), `le circuit « ${circuit.key} » demande un tableau qui n'existe pas : ${circuit.board}`);
   }
   for (const circuit of plannedCircuits()) {
     assert.equal(circuit.board, null, `le circuit « ${circuit.key} » est prévu : son tableau ne doit pas être annoncé`);

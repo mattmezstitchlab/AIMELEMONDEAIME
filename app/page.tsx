@@ -252,8 +252,8 @@ export default async function HomePage() {
         <section className="mt-8">
           <TileHeading>Les circuits.</TileHeading>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-3">
-            Une ferme, un atelier, une association, un logement, un trajet, un coup de main : chaque circuit cadre un type
-            de fiche, avec ses mots, ses règles et son tableau. Partout la même règle : votre commune suffit, aucune adresse n&apos;est publiée, et rien
+            Une ferme, un atelier, une association, un logement, un trajet, une mémoire à transmettre : chaque circuit
+            cadre un type de fiche, avec ses mots, ses règles et son tableau. Partout la même règle : votre commune suffit, aucune adresse n&apos;est publiée, et rien
             ne se conclut sans l&apos;accord des personnes.
           </p>
           <div className="mt-3">
