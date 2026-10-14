@@ -6,10 +6,10 @@ import type { LocalOrderStatus, LocalPointKind } from "@/db/schema";
  *
  * Un circuit, c'est un cadre de confiance autour d'un même geste : on dépose
  * une fiche située par sa commune, on dit ce qu'on propose, et l'accord se
- * fait entre les personnes. Trois circuits sont ouverts : les producteurs,
- * les coups de main, les associations et collectifs. Ils réutilisent tous
- * exactement la même mécanique : une entrée dans ce fichier, un tableau à
- * l'écran, les mêmes garde-fous. Un circuit de plus ne demande rien d'autre.
+ * fait entre les personnes. Les sept circuits écrits ici sont ouverts, et ils
+ * réutilisent exactement la même mécanique : une entrée dans ce fichier, un
+ * tableau à l'écran, les mêmes garde-fous. Un circuit de plus ne demande rien
+ * d'autre — c'est ainsi qu'ils se sont ajoutés, un par un.
  *
  * Rien n'est inventé ici : chaque promesse écrite ci-dessous doit être vraie
  * dans le code, sinon elle n'a pas sa place sur le site.

@@ -6,13 +6,8 @@ import { getAssistantSummary } from "@/lib/journey-queries";
 import { getYearEvents } from "@/lib/annee-queries";
 import { AssistantWidget } from "@/components/assistant/assistant";
 import type { AssistantRole } from "@/lib/assistant/registry";
+import { SITE_URL } from "@/lib/site";
 
-/**
- * Adresse publique du site : sert aux URL canoniques, au sitemap et aux
- * aperçus de partage. À définir en production (`NEXT_PUBLIC_SITE_URL`) ;
- * à défaut, l’adresse locale évite un avertissement de build.
- */
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const SITE_DESCRIPTION =
   "Le fil s’était perdu : démarches civiles, mariage, transmissions entre générations et entraide de proximité. Des repères clairs pour les moments de vie. Prototype indépendant, non affilié à un organisme public.";
 
