@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { getJourneyDetail, searchArtists } from "@/lib/journey-queries";
 import { Card, SectionTitle, formatDate, formatDateTime } from "@/components/ui";
 import { ORGANISM_CATEGORY_LABEL, SITUATION_BY_KEY, TASK_STATUS_LABEL } from "@/lib/situations";
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SuiviDemarche({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ erreur?: string }> }) {
   const id = Number((await params).id);
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["membre"]);
   if (!Number.isSafeInteger(id)) notFound();
   const d = await getJourneyDetail(id, user.id);
   const erreur = (await searchParams).erreur;
@@ -43,11 +43,11 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
       <SectionTitle eyebrow={`Mes démarches · ${def.short}`} title={j.title} description={def.description} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link href="/espace/demarches" className="text-sm font-semibold text-ink underline">← Mes démarches</Link>
-        <div className="flex flex-wrap gap-3"><a href={`/api/demarches/${j.id}/recapitulatif`} className="rounded-control ring-1 ring-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700">Télécharger le récapitulatif</a><JourneyStatusButton journeyId={j.id} status={j.status} /></div>
+        <div className="flex flex-wrap gap-3"><a href={`/api/demarches/${j.id}/recapitulatif`} className="rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-2 text-xs font-bold text-slate-700">Télécharger le récapitulatif</a><JourneyStatusButton journeyId={j.id} status={j.status} /></div>
       </div>
       {j.status === "questionnaire" && <Card><p className="text-sm">Le questionnaire n&apos;est pas terminé. <Link className="font-bold text-ink underline" href={`/espace/demarches/nouvelle?reprendre=${j.id}`}>Reprendre</Link></p></Card>}
 
-      {next && <div className="rounded-card bg-ink p-5 text-white"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">Prochaine action</p><p className="mt-1 text-lg font-semibold">{next.label}</p><p className="text-sm text-white/85">{next.reason}</p></div>}
+      {next && <div className="rounded-card bg-ink p-5 text-canvas"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-canvas/80">Prochaine action</p><p className="mt-1 text-lg font-semibold">{next.label}</p><p className="text-sm text-canvas/85">{next.reason}</p></div>}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
@@ -82,7 +82,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
                   {artists.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucun artiste visible pour l&apos;instant. <Link href="/le-monde-aime?univers=arts" className="font-semibold text-ink underline">Explorer l&apos;univers Arts sur la carte</Link></p> : (
                     <ul className="mt-3 grid gap-3 sm:grid-cols-2">
                       {artists.slice(0, 8).map((a) => (
-                        <li key={a.id} className={`rounded-card border p-4 ${a.matches ? "ring-line bg-white" : "border-slate-200 bg-slate-50"}`}>
+                        <li key={a.id} className={`rounded-card border p-4 ${a.matches ? "ring-line bg-canvas" : "border-slate-200 bg-slate-50"}`}>
                           <p className="font-semibold text-slate-900">{a.name}{a.isDemo ? <span className="ml-2 text-[10px] font-bold uppercase text-slate-500">fictif</span> : null}</p>
                           <p className="text-xs text-slate-500">{a.disciplines.join(" · ")}{a.distance !== null ? ` · à ~${a.distance} km` : ""}{!a.matches ? " · autre discipline" : ""}</p>
                           {a.presentation && <p className="mt-1 line-clamp-2 text-sm text-slate-600">{a.presentation}</p>}
@@ -101,7 +101,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
             <Card>
               <h2 className="text-lg font-semibold text-slate-900">Projet et ressources locales</h2>
               <p className="mt-1 text-sm text-slate-600">Le projet <Link className="font-semibold text-ink underline" href={`/le-monde-aime/projets/${project.id}`}>{project.title}</Link> rassemble le programme, les besoins et les contributions confirmées. Les participants y voient l&apos;organisation, jamais votre démarche ni vos documents personnels.</p>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs">{[["produits locaux", "terre"], ["mobilier et vaisselle", "terre"], ["décoration", "terre"], ["matériel technique", "arts"], ["transport", "terre"], ["ateliers de transmission", "savoirs"]].map(([t, u]) => <Link key={t} href={`/le-monde-aime?univers=${u}&q=${encodeURIComponent(t.split(" ")[0])}`} className="rounded-full ring-1 ring-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:ring-ink-3">Chercher : {t}</Link>)}</div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">{[["produits locaux", "terre"], ["mobilier et vaisselle", "terre"], ["décoration", "terre"], ["matériel technique", "arts"], ["transport", "terre"], ["ateliers de transmission", "savoirs"]].map(([t, u]) => <Link key={t} href={`/le-monde-aime?univers=${u}&q=${encodeURIComponent(t.split(" ")[0])}`} className="rounded-full ring-1 ring-slate-300 bg-canvas px-3 py-1.5 font-semibold text-slate-700 hover:ring-ink-3">Chercher : {t}</Link>)}</div>
               <p className="mt-2 text-xs text-slate-500">Chaque réservation est acceptée explicitement par son propriétaire ; les quantités et dates sont vérifiées côté serveur.</p>
             </Card>
           )}
@@ -139,7 +139,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
               <div className="mt-2 text-sm text-slate-700">
                 <p><span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">Transmis à votre bureau</span></p>
                 <p className="mt-2">Ce parcours est devenu le dossier <strong>{d.linkedCase.reference}</strong>{d.linkedCase.submittedAt ? `, transmis le ${formatDate(d.linkedCase.submittedAt)}` : ""}. Votre bureau y reprend vos étapes et vos pièces, et vous y répond.</p>
-                <Link href={`/espace/demarches/${d.linkedCase.id}`} className="mt-3 inline-block rounded-control bg-ink px-3 py-2 text-xs font-bold text-white">Ouvrir le dossier</Link>
+                <Link href={`/espace/demarches/${d.linkedCase.id}`} className="mt-3 inline-block rounded-control bg-ink px-3 py-2 text-xs font-bold text-canvas">Ouvrir le dossier</Link>
                 <p className="mt-2 text-xs text-slate-500">Ce parcours reste consultable ici, en lecture : le suivi se poursuit dans le dossier, sans rien ressaisir.</p>
               </div>
             ) : j.status === "questionnaire" ? (
@@ -149,7 +149,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
                 <p>Vous préférez être accompagné ? Transmettez ce parcours à votre bureau : il <strong>devient un dossier</strong> qui reprend vos étapes et vos pièces reliées. L&apos;équipe vous répond dans le dossier — inutile de recommencer votre histoire. Dans cette version, l&apos;équipe est simulée, aucun organisme réel n&apos;est destinataire.</p>
                 <form action={transmitJourneyToBureau} className="mt-3">
                   <input type="hidden" name="journeyId" value={j.id} />
-                  <button type="submit" className="rounded-control bg-ink px-4 py-2.5 text-sm font-bold text-white hover:bg-ink-2">Transmettre à mon bureau</button>
+                  <button type="submit" className="rounded-control bg-ink px-4 py-2.5 text-sm font-bold text-canvas hover:bg-ink-2">Transmettre à mon bureau</button>
                 </form>
               </div>
             )}

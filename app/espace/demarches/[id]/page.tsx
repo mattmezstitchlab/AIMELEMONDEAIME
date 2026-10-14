@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { getCaseDetail } from "@/lib/queries";
 import { Card, SectionTitle, StatusBadge, Tag, formatDateTime } from "@/components/ui";
 import { CASE_EVENT_LABELS, THEME_META } from "@/lib/constants";
@@ -19,7 +19,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   const caseId = Number(id);
   if (!Number.isFinite(caseId)) notFound();
 
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["membre"]);
   const detail = await getCaseDetail(caseId);
   if (!detail) notFound();
   if (detail.item.memberId !== user.id) redirect("/espace/demarches");

@@ -6,7 +6,7 @@ import { createCircle, createCirclePost, deleteCirclePost, inviteToCircle, respo
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 import { POST_KIND_LABEL } from "@/lib/lma";
 
-const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
 const Note = ({ value }: { value: Fb }) => value ? <p role={value.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-xs ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p> : null;

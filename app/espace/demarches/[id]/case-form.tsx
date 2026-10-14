@@ -122,7 +122,7 @@ export function CaseForm({
       <p className="text-xs text-slate-500" role="status">
         {saveState === "saving" && "Enregistrement du brouillon…"}
         {saveState === "saved" && "Brouillon enregistré automatiquement."}
-        {saveState === "error" && "Erreur lors de l'enregistrement automatique."}
+        {saveState === "error" && "Erreur lors de l’enregistrement automatique."}
       </p>
 
       {requiredDocuments.length > 0 && (

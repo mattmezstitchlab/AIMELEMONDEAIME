@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import type { Metadata } from "next";
 import { getOfficeAppointments } from "@/lib/queries";
 import { Card, SectionTitle, EmptyState, formatDateTime } from "@/components/ui";
@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Rendez-vous — Back-office AIME®" 
 export const dynamic = "force-dynamic";
 
 export default async function RendezVousPage() {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["gestionnaire", "administrateur"]);
   const officeId = user.role === "administrateur" ? null : user.officeId;
   const items = await getOfficeAppointments(officeId);
 

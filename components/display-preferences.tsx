@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Accessibility } from "lucide-react";
 
 /*
- * Préférences d'affichage : taille du texte, contraste, animations.
+ * Préférences d’affichage : taille du texte, contraste, animations.
  * Les valeurs sont posées sur <html> (data-*) et lues par app/globals.css.
  * Cookie de première partie uniquement — aucune donnée de parcours.
  */
@@ -62,7 +62,7 @@ function Choice<Value extends string>({
   return (
     <fieldset>
       <legend className={`text-xs font-medium ${onDark ? "text-white/60" : "text-ink-3"}`}>{legend}</legend>
-      <div className={`mt-2 inline-flex rounded-control p-0.5 ${onDark ? "bg-white/10" : "bg-muted"}`}>
+      <div className={`mt-2 inline-flex rounded-control p-0.5 ${onDark ? "bg-canvas/10" : "bg-muted"}`}>
         {options.map(([optionValue, label]) => {
           const active = value === optionValue;
           return (
@@ -71,7 +71,7 @@ function Choice<Value extends string>({
               className={`cursor-pointer rounded-[6px] px-2.5 py-1.5 text-xs font-medium transition ${
                 active
                   ? onDark
-                    ? "bg-white text-ink"
+                    ? "bg-canvas text-ink"
                     : "bg-canvas text-ink shadow-rested"
                   : onDark
                     ? "text-white/60 hover:text-white"
@@ -111,7 +111,7 @@ export function DisplayPreferences({
 
   const popover = mode === "mobile";
   const summaryTone = onDark
-    ? "text-white/70 hover:bg-white/10 hover:text-white"
+    ? "text-white/70 hover:bg-canvas/10 hover:text-white"
     : "text-ink-2 hover:bg-muted hover:text-ink";
 
   return (

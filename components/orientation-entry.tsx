@@ -3,13 +3,13 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, MessageCircle, Search } from "lucide-react";
 
-const QUICK = ["Je déménage", "Un proche est décédé", "J'organise un événement"];
+const QUICK = ["Je déménage", "Un proche est décédé", "J’organise un événement"];
 
 /**
- * Porte d'entrée unique vers l'aide (chantier 4) : ce champ ne cherche plus
- * lui-même — il ouvre l'assistant de navigation avec la question pré-remplie.
- * Il n'existe donc qu'un seul moteur d'orientation à maintenir (celui de
- * l'assistant, règles explicites, aucun traitement externe).
+ * Porte d’entrée unique vers l’aide (chantier 4) : ce champ ne cherche plus
+ * lui-même — il ouvre l’assistant de navigation avec la question pré-remplie.
+ * Il n’existe donc qu’un seul moteur d’orientation à maintenir (celui de
+ * l’assistant, règles explicites, aucun traitement externe).
  */
 export function OrientationEntry({ variant = "light" }: { variant?: "light" | "hero" }) {
   const [query, setQuery] = useState("");
@@ -27,7 +27,7 @@ export function OrientationEntry({ variant = "light" }: { variant?: "light" | "h
   return (
     <div
       data-assistant-id="orientation-entry"
-      className={`rounded-card p-5 sm:p-6 ${dark ? "bg-white/95 text-ink ring-1 ring-white/20" : "bg-canvas shadow-rested ring-1 ring-line"}`}
+      className={`rounded-card p-5 sm:p-6 ${dark ? "bg-canvas/95 text-ink ring-1 ring-white/20" : "bg-canvas shadow-rested ring-1 ring-line"}`}
     >
       <p className="text-base font-medium text-ink">Dites-nous ce que vous cherchez.</p>
       <p className="mt-1.5 text-xs leading-relaxed text-ink-3">
@@ -50,7 +50,7 @@ export function OrientationEntry({ variant = "light" }: { variant?: "light" | "h
         </span>
         <button
           type="submit"
-          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-control bg-ink px-4 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
+          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-control bg-ink px-4 text-sm font-medium text-canvas shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
         >
           <MessageCircle className="h-4 w-4" aria-hidden="true" />
           <span className="hidden sm:inline">Demander</span>

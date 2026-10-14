@@ -4,12 +4,14 @@ import { auditLogs, cases, users, offices, articles } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Card, SectionTitle, Stat, formatDateTime } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icon";
+import { requireRolePage } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Administration — AIME®" };
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
+  await requireRolePage(["administrateur"]);
   const [allUsers, allCases, allOffices, allArticles] = await Promise.all([
     db.select({ id: users.id, role: users.role, fullName: users.fullName }).from(users),
     db.select({ id: cases.id, status: cases.status }).from(cases),
@@ -29,7 +31,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle eyebrow="Administration" title="Pilotage de la plateforme" description="Rôles, bureaux, contenus publics et journal d'audit." />
+      <SectionTitle eyebrow="Administration" title="Pilotage de la plateforme" description="Rôles, bureaux, contenus publics et journal d’audit." />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {stats.map((s) => (
           <Stat key={s.label} label={s.label} value={s.value} icon={s.icon} />

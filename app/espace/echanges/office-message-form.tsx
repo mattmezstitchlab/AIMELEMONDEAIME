@@ -23,7 +23,7 @@ export function OfficeMessageForm() {
       <textarea id="body" name="body" rows={3} required className="w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink" />
       {state && !state.ok && <p role="alert" className="text-sm text-rose-700">{state.error}</p>}
       <PrimaryButton type="submit" disabled={pending} className="self-start">
-        {pending ? "Envoi…" : "Envoyer à l'équipe"}
+        {pending ? "Envoi…" : "Envoyer à l’équipe"}
       </PrimaryButton>
     </form>
   );

@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import type { Metadata } from "next";
 import { db } from "@/db";
 import { messages, appointments, offices } from "@/db/schema";
@@ -19,7 +19,7 @@ export const metadata: Metadata = { title: "Mes échanges & projets — AIME®" 
 export const dynamic = "force-dynamic";
 
 export default async function EchangesPage() {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["membre"]);
   const thread = await db
     .select()
     .from(messages)
@@ -32,7 +32,7 @@ export default async function EchangesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle eyebrow="Mes échanges & projets" title="Conversations, projets, cercles, dons et prêts" description="Tout ce que vous échangez, organisez et partagez — avec le voisinage, vos cercles et l'équipe d'accompagnement."
+      <SectionTitle eyebrow="Mes échanges & projets" title="Conversations, projets, cercles, dons et prêts" description="Tout ce que vous échangez, organisez et partagez — avec le voisinage, vos cercles et l’équipe d’accompagnement."
         actions={<LinkButton href="/le-monde-aime?onglet=publier"><Icon name="filePlus" className="h-4 w-4" /> Créer un projet</LinkButton>} />
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -53,7 +53,7 @@ export default async function EchangesPage() {
             {links.projects.map((p) => (
               <Link key={p.id} href={`/le-monde-aime/projets/${p.id}`}>
                 <Card className="h-full hover:bg-subtle">
-                  <div className="flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-rose-50 px-2.5 py-1 font-bold text-rose-800">{p.role === "organisateur" ? "Organisateur" : "Participant"}</span>{p.memberStatus === "demande" && <span className="rounded-full bg-amber-50 px-2.5 py-1 font-bold text-amber-800">Demande en attente</span>}{p.pendingRequests > 0 && <span className="rounded-full bg-ink px-2.5 py-1 font-bold text-white">{p.pendingRequests} à traiter</span>}{p.isDemo && <span className="font-bold uppercase text-slate-500">fictif</span>}</div>
+                  <div className="flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-rose-50 px-2.5 py-1 font-bold text-rose-800">{p.role === "organisateur" ? "Organisateur" : "Participant"}</span>{p.memberStatus === "demande" && <span className="rounded-full bg-amber-50 px-2.5 py-1 font-bold text-amber-800">Demande en attente</span>}{p.pendingRequests > 0 && <span className="rounded-full bg-ink px-2.5 py-1 font-bold text-canvas">{p.pendingRequests} à traiter</span>}{p.isDemo && <span className="font-bold uppercase text-slate-500">fictif</span>}</div>
                   <p className="mt-2 text-lg font-bold text-slate-900">{p.title}</p><p className="text-sm text-slate-500">{p.city} · {formatDate(p.startsAt)}</p>
                 </Card>
               </Link>
@@ -74,7 +74,7 @@ export default async function EchangesPage() {
         <Card className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold text-slate-900">Messagerie avec l&apos;équipe d&apos;accompagnement</h2>
           {thread.length === 0 ? (
-            <EmptyState title="Aucun message" description="Envoyez un message à l'équipe d'accompagnement pour une question générale." />
+            <EmptyState title="Aucun message" description="Envoyez un message à l’équipe d’accompagnement pour une question générale." />
           ) : (
             <ul className="flex max-h-80 flex-col gap-3 overflow-y-auto pr-1">
               {thread.map((m) => (

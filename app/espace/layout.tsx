@@ -6,6 +6,7 @@ import { AppShell, type NavItem } from "@/components/app-shell";
 import { db } from "@/db";
 import { notifications } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
+import { AUTH_ENABLED, loginHref } from "@/lib/auth-mode";
 
 const NAV: NavItem[] = [
   { href: "/espace", label: "Mon aperçu", icon: "home", exact: true },
@@ -27,10 +28,12 @@ const MOBILE: NavItem[] = [
 ];
 
 export default async function EspaceLayout({ children }: { children: ReactNode }) {
+  // Comptes fermés : aucune requête n’est tentée, la porte unique répond.
+  if (!AUTH_ENABLED) redirect(loginHref());
   const user = await getCurrentUser();
-  if (!user || user.role !== "membre") redirect("/connexion");
+  if (!user || user.role !== "membre") redirect(loginHref());
   // Échéances de parcours proches : créer les notifications manquantes avant
-  // de compter les non-lues (ne doit jamais empêcher l'affichage de l'espace).
+  // de compter les non-lues (ne doit jamais empêcher l’affichage de l’espace).
   await ensureDeadlineNotifications(user.id).catch(() => 0);
   const unread = await db.select({ id: notifications.id }).from(notifications).where(and(eq(notifications.userId, user.id), eq(notifications.isRead, false)));
   return (

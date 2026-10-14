@@ -36,7 +36,7 @@ type ActionState = { status: "busy" | "done" | "cancelled" | "error"; message?: 
 
 type Guide = { scenarioId: string; stepIndex: number };
 
-/** Questionnaire conversationnel : état de l'entretien en cours. */
+/** Questionnaire conversationnel : état de l’entretien en cours. */
 type Interview = {
   journeyId: number;
   situation: string;
@@ -166,7 +166,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       const chips: Suggestion[] =
         action.kind === "creer_brouillon" && result.id
           ? [
-              { label: "Répondre avec l'assistant, question par question", kind: "scenario", scenarioId: "__entretien__" },
+              { label: "Répondre avec l’assistant, question par question", kind: "scenario", scenarioId: "__entretien__" },
               { label: "Ouvrir le formulaire", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${result.id}` },
               { label: "Voir Mes démarches", kind: "link", href: "/espace/demarches" },
             ]
@@ -184,7 +184,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       pushTurn({ from: "assistant", text: result.message, chips });
       router.refresh();
     } catch {
-      setActionState((previous) => ({ ...previous, [turn.id]: { status: "error", message: "L'action n'a pas abouti. Vous pouvez la refaire depuis les formulaires habituels." } }));
+      setActionState((previous) => ({ ...previous, [turn.id]: { status: "error", message: "L’action n’a pas abouti. Vous pouvez la refaire depuis les formulaires habituels." } }));
     }
   }
 
@@ -217,8 +217,8 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     }, 400);
   }, []);
 
-  // Message d'accueil : dérivé de l'état (aucun setState dans un effet).
-  // Il s'affiche tant qu'aucun échange n'a commencé, puis disparaît du fil.
+  // Message d’accueil : dérivé de l’état (aucun setState dans un effet).
+  // Il s’affiche tant qu’aucun échange n’a commencé, puis disparaît du fil.
   const greetingTurn: Turn | null = open && turns.length === 0
     ? {
         id: "accueil",
@@ -231,7 +231,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     : null;
   const displayTurns = greetingTurn ? [greetingTurn, ...turns] : turns;
 
-  // Au changement de page, proposer l'aide contextuelle.
+  // Au changement de page, proposer l’aide contextuelle.
   // Ajout différé après le rendu de la nouvelle page (synchronisation externe).
   useEffect(() => {
     if (!open) { lastPath.current = pathname; return; }
@@ -320,7 +320,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       chips.push(...(q.options ?? []).map(([value, label]) => ({ label, kind: "reponse" as const, answerValue: value })));
     }
     if (!q.required) chips.push({ label: "Passer cette question", kind: "reponse", answerValue: "__passer__" });
-    chips.push({ label: "Arrêter là pour l'instant", kind: "scenario", scenarioId: "__stop_entretien__" });
+    chips.push({ label: "Arrêter là pour l’instant", kind: "scenario", scenarioId: "__stop_entretien__" });
     return chips;
   }
 
@@ -333,7 +333,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if (q.help) lignes.push(q.help);
     if (q.type === "date") lignes.push("Écrivez la date au format JJ/MM/AAAA (par exemple 12/10/2026), ou touchez une réponse si je vous en propose.");
     if (q.type === "number") lignes.push("Écrivez simplement un nombre.");
-    if (q.type === "time") lignes.push("Écrivez l'heure au format HH:MM (par exemple 18:30).");
+    if (q.type === "time") lignes.push("Écrivez l’heure au format HH:MM (par exemple 18:30).");
     pushTurn({ from: "assistant", text: lignes.join("\n"), chips: questionChips(q) });
   }
 
@@ -387,7 +387,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     setInterview(null);
     pushTurn({
       from: "assistant",
-      text: `On s'arrête là. Vos réponses sont enregistrées dans le brouillon « ${title} » : vous reprendrez quand vous voulez, ici ou dans le formulaire.`,
+      text: `On s’arrête là. Vos réponses sont enregistrées dans le brouillon « ${title} » : vous reprendrez quand vous voulez, ici ou dans le formulaire.`,
       chips: [
         { label: "Ouvrir le formulaire", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${journeyId}` },
         { label: "Mes démarches", kind: "link", href: "/espace/demarches" },
@@ -408,7 +408,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       return;
     }
 
-    // Normalisation selon le type de question — jamais d'interprétation libre.
+    // Normalisation selon le type de question — jamais d’interprétation libre.
     let saved: string | null = null;
     if (q.type === "select") {
       const typed = normalizeOrientation(rawValue);
@@ -443,10 +443,10 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       pushTurn({
         from: "assistant",
         text: q.type === "select"
-          ? "Je n'ai pas reconnu ce choix. Touchez l'une des réponses proposées ci-dessous, ou écrivez-la exactement."
+          ? "Je n’ai pas reconnu ce choix. Touchez l’une des réponses proposées ci-dessous, ou écrivez-la exactement."
           : q.type === "date"
-            ? "Je n'ai pas compris cette date. Écrivez-la au format JJ/MM/AAAA (par exemple 12/10/2026)."
-            : "Je n'ai pas compris. Pouvez-vous reformuler en quelques mots ?",
+            ? "Je n’ai pas compris cette date. Écrivez-la au format JJ/MM/AAAA (par exemple 12/10/2026)."
+            : "Je n’ai pas compris. Pouvez-vous reformuler en quelques mots ?",
       });
       askQuestion(interview);
       return;
@@ -456,12 +456,12 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     try {
       const result = await assistantSaveAnswer(interview.journeyId, q.key, saved as string);
       if (!result.ok) {
-        pushTurn({ from: "assistant", text: `Je n'ai pas pu enregistrer cette réponse (${result.error}). Votre brouillon reste en l'état ; nous pouvons réessayer, ou continuer dans le formulaire.` });
+        pushTurn({ from: "assistant", text: `Je n’ai pas pu enregistrer cette réponse (${result.error}). Votre brouillon reste en l’état ; nous pouvons réessayer, ou continuer dans le formulaire.` });
         askQuestion(interview);
         return;
       }
     } catch {
-      pushTurn({ from: "assistant", text: "Je n'ai pas pu enregistrer cette réponse. Votre brouillon reste en l'état ; nous pouvons réessayer, ou continuer dans le formulaire." });
+      pushTurn({ from: "assistant", text: "Je n’ai pas pu enregistrer cette réponse. Votre brouillon reste en l’état ; nous pouvons réessayer, ou continuer dans le formulaire." });
       askQuestion(interview);
       return;
     } finally {
@@ -492,7 +492,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     pushTurn({ from: "user", text: value });
 
     // Questionnaire conversationnel en cours : la saisie vaut réponse
-    // (quelques mots d'arrêt permettent d'en sortir proprement).
+    // (quelques mots d’arrêt permettent d’en sortir proprement).
     if (interview) {
       const normalized = normalizeOrientation(value);
       if (["stop", "arreter", "annuler", "plus tard", "pause", "j arrete", "on arrete"].includes(normalized)) stopInterview();
@@ -519,7 +519,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       if (intent === "point") { answerPersonal(buildPoint(summary, focusLine)); proposeReminderIfUseful(); return; }
     }
 
-    // Assistant niveau 2 : une intention d'écriture produit une proposition
+    // Assistant niveau 2 : une intention d’écriture produit une proposition
     // à confirmer (carte ci-dessous), jamais une exécution directe.
     if (summary && canAct) {
       const wIntent = writeIntent(value);
@@ -530,17 +530,17 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           pushTurn({
             from: "assistant",
             text: deja
-              ? "Votre parcours transmis a déjà son dossier auprès de votre bureau : le suivi continue là-bas, je n'ai rien à transmettre de plus."
+              ? "Votre parcours transmis a déjà son dossier auprès de votre bureau : le suivi continue là-bas, je n’ai rien à transmettre de plus."
               : summary.drafts.length
-                ? "Terminez d'abord le questionnaire de votre parcours : c'est lui qui préparera le dossier à transmettre."
-                : "Vous n'avez pas encore de parcours à transmettre. Commencez par en préparer un, par situation.",
+                ? "Terminez d’abord le questionnaire de votre parcours : c’est lui qui préparera le dossier à transmettre."
+                : "Vous n’avez pas encore de parcours à transmettre. Commencez par en préparer un, par situation.",
             chips: [{ label: "Mes démarches", kind: "link", href: "/espace/demarches" }],
           });
           return;
         }
         pushTurn({
           from: "assistant",
-          text: `Je peux transmettre le parcours « ${candidate.title} » à votre bureau d'accompagnement. Il deviendra un dossier suivi par votre bureau, qui pourra vous demander des pièces. Le parcours restera consultable, et rien ne part vers un organisme extérieur.`,
+          text: `Je peux transmettre le parcours « ${candidate.title} » à votre bureau d’accompagnement. Il deviendra un dossier suivi par votre bureau, qui pourra vous demander des pièces. Le parcours restera consultable, et rien ne part vers un organisme extérieur.`,
           action: { kind: "transmettre", journeyId: candidate.id, title: candidate.title },
         });
         return;
@@ -551,14 +551,14 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
         if (!candidate?.nextTask) {
           pushTurn({
             from: "assistant",
-            text: "Je ne vois pas d'étape ouverte sur laquelle poser un rappel pour le moment : soit vos parcours sont à jour, soit la prochaine étape porte une échéance officielle, qui ne se remplace pas. Ouvrez le suivi d'un parcours pour y voir plus clair.",
+            text: "Je ne vois pas d’étape ouverte sur laquelle poser un rappel pour le moment : soit vos parcours sont à jour, soit la prochaine étape porte une échéance officielle, qui ne se remplace pas. Ouvrez le suivi d’un parcours pour y voir plus clair.",
             chips: [{ label: "Mes démarches", kind: "link", href: "/espace/demarches" }],
           });
           return;
         }
         pushTurn({
           from: "assistant",
-          text: `Je peux poser un rappel personnel sur l'étape « ${candidate.nextTask.label} » du parcours « ${candidate.title} ».`,
+          text: `Je peux poser un rappel personnel sur l’étape « ${candidate.nextTask.label} » du parcours « ${candidate.title} ».`,
           action: { kind: "rappel", taskId: candidate.nextTask.id, journeyId: candidate.id, taskLabel: candidate.nextTask.label },
         });
         return;
@@ -590,7 +590,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             from: "assistant",
             text: `Vous aviez déjà commencé « ${situation.label} » : votre brouillon vous attend, rien à recréer. Je peux vous poser les questions une à une, ici même.`,
             chips: [
-              { label: "Répondre avec l'assistant, question par question", kind: "scenario", scenarioId: "__entretien__" },
+              { label: "Répondre avec l’assistant, question par question", kind: "scenario", scenarioId: "__entretien__" },
               { label: "Ouvrir le formulaire", kind: "link", href: `/espace/demarches/nouvelle?reprendre=${existingDraft.id}` },
               { label: "Comprendre ce parcours", kind: "link", href: `/accompagnement?besoin=${encodeURIComponent(situation.key)}` },
             ],
@@ -601,7 +601,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           from: "assistant",
           text: `Votre formulation semble concerner « ${situation.label} ». ${situation.explanation}`,
           action: { kind: "creer_brouillon", situation: situation.key, situationLabel: situation.label },
-          chips: [{ label: "Comprendre ce parcours d'abord", kind: "link", href: `/accompagnement?besoin=${encodeURIComponent(situation.key)}` }],
+          chips: [{ label: "Comprendre ce parcours d’abord", kind: "link", href: `/accompagnement?besoin=${encodeURIComponent(situation.key)}` }],
         });
         return;
       }
@@ -624,7 +624,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if (match.kind === "ambiguous") {
       pushTurn({
         from: "assistant",
-        text: "Je n'ai pas bien saisi votre demande. Souhaitez-vous plutôt :",
+        text: "Je n’ai pas bien saisi votre demande. Souhaitez-vous plutôt :",
         chips: match.scenarios.map((scenario) => ({ label: scenario.question, kind: "scenario" as const, scenarioId: scenario.id })),
       });
       return;
@@ -632,16 +632,16 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if ((role === "membre" || role === "visiteur") && orientation.matches.length) {
       pushTurn({
         from: "assistant",
-        text: orientation.kind === "ambiguous" ? "Plusieurs situations pourraient correspondre. Choisissez celle qui vous parle :" : "Cette situation semble proche de votre question. Vérifiez qu'elle vous correspond :",
+        text: orientation.kind === "ambiguous" ? "Plusieurs situations pourraient correspondre. Choisissez celle qui vous parle :" : "Cette situation semble proche de votre question. Vérifiez qu’elle vous correspond :",
         chips: orientation.matches.map((situation) => ({ label: situation.label, kind: "link" as const, href: `/accompagnement?besoin=${encodeURIComponent(situation.key)}` })),
       });
       return;
     }
     pushTurn({
       from: "assistant",
-      text: "Je n'ai pas de réponse préparée à cette question. Je ne veux pas inventer d'information réglementaire. Vous pouvez :",
+      text: "Je n’ai pas de réponse préparée à cette question. Je ne veux pas inventer d’information réglementaire. Vous pouvez :",
       chips: role === "gestionnaire" || role === "administrateur" ? [
-        { label: "Ouvrir la messagerie de l'équipe", kind: "link", href: "/back-office/messages" },
+        { label: "Ouvrir la messagerie de l’équipe", kind: "link", href: "/back-office/messages" },
         { label: "Lire les guides", kind: "link", href: `/informations?q=${encodeURIComponent(value)}` },
       ] : [
         { label: "Rechercher dans les guides", kind: "link", href: `/informations?q=${encodeURIComponent(value)}` },
@@ -665,7 +665,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     }
     if (suggestion.kind === "link" && suggestion.href) {
       router.push(suggestion.href);
-      pushTurn({ from: "assistant", text: `J'ouvre la page « ${suggestion.label} ».` });
+      pushTurn({ from: "assistant", text: `J’ouvre la page « ${suggestion.label} ».` });
       return;
     }
     if (suggestion.scenarioId === "__page__") {
@@ -697,7 +697,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             ? [
                 { label: "Parcourir les guides pratiques", kind: "link", href: "/informations?vue=guides" },
                 { label: "Voir la carte de France", kind: "link", href: "/le-monde-aime" },
-                { label: "Créer mon espace", kind: "link", href: "/inscription" },
+                { label: "Découvrir Mon espace", kind: "link", href: "/mon-espace" },
               ]
             : [{ label: "Ouvrir les dossiers", kind: "link", href: "/back-office/dossiers" }];
       pushTurn({
@@ -726,7 +726,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
 
-  /** Carte de confirmation d'une écriture (assistant niveau 2). */
+  /** Carte de confirmation d’une écriture (assistant niveau 2). */
   function renderActionCard(turn: Turn) {
     const action = turn.action;
     if (!action) return null;
@@ -747,8 +747,8 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             <p className="text-sm font-semibold text-ink">Créer le brouillon « {action.situationLabel} » ?</p>
             <p className="mt-1 text-xs leading-relaxed text-ink/75">Je crée un brouillon vide dans Mes démarches. Aucune donnée n&apos;est envoyée : vous répondrez aux questions ensuite, à votre rythme, avec la possibilité de tout relire avant la moindre transmission.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-white hover:bg-ink-2`}>{busy ? "Création…" : "Oui, créer le brouillon"}</button>
-              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-white text-ink`}>Pas maintenant</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-canvas hover:bg-ink-2`}>{busy ? "Création…" : "Oui, créer le brouillon"}</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-canvas text-ink`}>Pas maintenant</button>
             </div>
           </>
         )}
@@ -757,20 +757,20 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             <p className="text-sm font-semibold text-ink">Poser un rappel pour « {action.taskLabel} » ?</p>
             <p className="mt-1 text-xs leading-relaxed text-ink/75">Rappel personnel, sans valeur officielle : vous recevrez une notification ici à l&apos;approche de la date.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(1))} className={`${btn} bg-ink text-white hover:bg-ink-2`}>{busy ? "En cours…" : "Demain"}</button>
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(3))} className={`${btn} bg-ink text-white hover:bg-ink-2`}>Dans 3 jours</button>
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(7))} className={`${btn} bg-ink text-white hover:bg-ink-2`}>Dans 1 semaine</button>
-              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-white text-ink`}>Pas maintenant</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(1))} className={`${btn} bg-ink text-canvas hover:bg-ink-2`}>{busy ? "En cours…" : "Demain"}</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(3))} className={`${btn} bg-ink text-canvas hover:bg-ink-2`}>Dans 3 jours</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn, dateIn(7))} className={`${btn} bg-ink text-canvas hover:bg-ink-2`}>Dans 1 semaine</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-canvas text-ink`}>Pas maintenant</button>
             </div>
           </>
         )}
         {action.kind === "finaliser" && (
           <>
             <p className="text-sm font-semibold text-ink">Préparer le plan « {action.title} » à partir de ces réponses ?</p>
-            <p className="mt-1 text-xs leading-relaxed text-ink/75">Je génère vos étapes et vos pièces depuis les réponses relues ci-dessus.{action.evenement ? " Un projet partagé sera créé dans votre espace pour coordonner l'organisation, comme depuis le formulaire." : ""} Aucune transmission à votre bureau : ce sera une autre étape, seulement si vous la demandez.</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink/75">Je génère vos étapes et vos pièces depuis les réponses relues ci-dessus.{action.evenement ? " Un projet partagé sera créé dans votre espace pour coordonner l’organisation, comme depuis le formulaire." : ""} Aucune transmission à votre bureau : ce sera une autre étape, seulement si vous la demandez.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-white hover:bg-ink-2`}>{busy ? "Préparation…" : "Oui, préparer mon plan"}</button>
-              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-white text-ink`}>Pas maintenant</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-canvas hover:bg-ink-2`}>{busy ? "Préparation…" : "Oui, préparer mon plan"}</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-canvas text-ink`}>Pas maintenant</button>
             </div>
           </>
         )}
@@ -779,8 +779,8 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             <p className="text-sm font-semibold text-ink">Transmettre « {action.title} » à votre bureau ?</p>
             <p className="mt-1 text-xs leading-relaxed text-ink/75">Confirmation définitive : un dossier sera créé et suivi par votre bureau d&apos;accompagnement, à partir des réponses que vous avez relues dans ce parcours. Rien ne part vers un organisme extérieur, et le parcours reste consultable.</p>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-white hover:bg-ink-2`}>{busy ? "Transmission…" : "Oui, transmettre à mon bureau"}</button>
-              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-white text-ink`}>Pas maintenant</button>
+              <button type="button" disabled={busy} onClick={() => void executeAction(turn)} className={`${btn} bg-ink text-canvas hover:bg-ink-2`}>{busy ? "Transmission…" : "Oui, transmettre à mon bureau"}</button>
+              <button type="button" disabled={busy} onClick={() => cancelAction(turn)} className={`${btn} border ring-ink-4 bg-canvas text-ink`}>Pas maintenant</button>
             </div>
           </>
         )}
@@ -796,7 +796,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       {/* Bulle de conversation, en bas à droite */}
       <div className="fixed bottom-20 right-4 z-50 flex items-center gap-3 md:bottom-5 md:right-5">
         {!open && (
-          <span className="hidden rounded-full bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-md sm:block">
+          <span className="hidden rounded-full bg-canvas px-3 py-2 text-sm font-semibold text-slate-700 shadow-md sm:block">
             Besoin d&apos;aide ?
           </span>
         )}
@@ -806,8 +806,8 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           onClick={() => { if (open) { setOpen(false); triggerRef.current?.focus(); } else setOpen(true); }}
           aria-expanded={open}
           aria-controls="assistant-panel"
-          className="grid h-14 w-14 place-items-center rounded-full bg-ink text-white shadow-hover transition hover:bg-ink-2"
-          aria-label={open ? "Fermer l'assistant de navigation" : "Ouvrir l'assistant de navigation"}
+          className="grid h-14 w-14 place-items-center rounded-full bg-ink text-canvas shadow-hover transition hover:bg-ink-2"
+          aria-label={open ? "Fermer l’assistant de navigation" : "Ouvrir l’assistant de navigation"}
         >
           {open ? <Icon name="alert" className="h-6 w-6" /> : <Msasprout className="h-7 w-7" />}
         </button>
@@ -822,8 +822,8 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           aria-label="Assistant de navigation"
           className="fixed inset-x-3 bottom-36 z-50 flex max-h-[70vh] md:bottom-24 flex-col overflow-hidden rounded-card bg-canvas ring-1 ring-line shadow-lifted sm:inset-x-auto sm:bottom-36 sm:right-5 md:bottom-24 sm:w-[400px]"
         >
-          <header className="flex items-center gap-3 border-b border-slate-100 bg-white px-4 py-3">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-ink text-white">
+          <header className="flex items-center gap-3 border-b border-slate-100 bg-canvas px-4 py-3">
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-ink text-canvas">
               <Msasprout className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
@@ -832,7 +832,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                 Aide contextuelle, sans IA générative · {role === "visiteur" ? "visiteur" : role}
               </p>
             </div>
-            <button type="button" onClick={() => { setOpen(false); triggerRef.current?.focus(); }} className="grid h-10 w-10 place-items-center rounded-control text-slate-600 hover:bg-slate-100" aria-label="Fermer l'assistant">
+            <button type="button" onClick={() => { setOpen(false); triggerRef.current?.focus(); }} className="grid h-10 w-10 place-items-center rounded-control text-slate-600 hover:bg-slate-100" aria-label="Fermer l’assistant">
               <Icon name="alert" className="h-4 w-4 rotate-45" />
             </button>
           </header>
@@ -848,7 +848,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
               <button type="button" onClick={previousStep} disabled={guide.stepIndex === 0} className="rounded-md px-2 py-1 text-xs font-semibold text-ink disabled:opacity-40">
                 Précédent
               </button>
-              <button type="button" onClick={nextStep} className="rounded-md bg-ink px-2.5 py-1 text-xs font-semibold text-white">
+              <button type="button" onClick={nextStep} className="rounded-md bg-ink px-2.5 py-1 text-xs font-semibold text-canvas">
                 {guide.stepIndex + 1 === totalSteps ? "Terminer" : "Suivant"}
               </button>
               <button type="button" onClick={quitGuide} className="rounded-md border ring-line px-2 py-1 text-xs font-semibold text-ink">
@@ -867,7 +867,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             {displayTurns.map((turn) => (
               <div key={turn.id} className="space-y-2">
                 <div className={`flex ${turn.from === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[85%] whitespace-pre-line rounded-card px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-ink text-white" : "bg-white text-slate-800 shadow-rested"}`}>
+                  <div className={`max-w-[85%] whitespace-pre-line rounded-card px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-ink text-canvas" : "bg-canvas text-slate-800 shadow-rested"}`}>
                     {turn.text}
                   </div>
                 </div>
@@ -875,9 +875,9 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
               </div>
             ))}
             {lastSuggestions && !guide && (
-              <div role="group" aria-label="Choix proposés par l'assistant" className="flex flex-wrap gap-2">
+              <div role="group" aria-label="Choix proposés par l’assistant" className="flex flex-wrap gap-2">
                 {lastSuggestions.map((suggestion) => (
-                  <button key={`${suggestion.label}-${suggestion.href ?? suggestion.scenarioId ?? ""}`} type="button" onClick={() => handleSuggestion(suggestion)} className="min-h-9 rounded-control ring-1 ring-slate-300 bg-white px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-rested hover:border-slate-600">
+                  <button key={`${suggestion.label}-${suggestion.href ?? suggestion.scenarioId ?? ""}`} type="button" onClick={() => handleSuggestion(suggestion)} className="min-h-9 rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-rested hover:border-slate-600">
                     {suggestion.label}
                   </button>
                 ))}
@@ -886,13 +886,13 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             {turns.length === 0 && !greetingTurn && <p className="text-sm text-slate-500">Posez votre question ou choisissez une suggestion.</p>}
           </div>
 
-          <div className="border-t border-slate-100 bg-white px-3 py-3">
+          <div className="border-t border-slate-100 bg-canvas px-3 py-3">
             {!lastSuggestions && !guide && <div className="mb-2 flex flex-wrap gap-1.5">
               {summary && (
                 <button
                   type="button"
                   onClick={() => { pushTurn({ from: "user", text: "Faire le point sur mes démarches" }); answerPersonal(buildPoint(summary, focusLine)); proposeReminderIfUseful(); }}
-                  className="rounded-full border ring-ink bg-ink px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-ink-2"
+                  className="rounded-full border ring-ink bg-ink px-3 py-1.5 text-xs font-semibold text-canvas transition hover:bg-ink-2"
                 >
                   Faire le point sur mes démarches
                 </button>
@@ -902,7 +902,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                   key={suggestion.label}
                   type="button"
                   onClick={() => handleSuggestion(suggestion)}
-                  className="rounded-full ring-1 ring-line bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:ring-ink hover:text-ink"
+                  className="rounded-full ring-1 ring-line bg-canvas px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:ring-ink hover:text-ink"
                 >
                   {suggestion.label}
                 </button>
@@ -923,10 +923,10 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             </form>
             <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
               {canAct
-                ? "Avec votre confirmation explicite, je peux créer un brouillon, poser un rappel ou transmettre un parcours à votre bureau d'accompagnement. Je ne décide jamais d'un droit, ne calcule aucun montant et n'envoie rien à un organisme extérieur."
+                ? "Avec votre confirmation explicite, je peux créer un brouillon, poser un rappel ou transmettre un parcours à votre bureau d’accompagnement. Je ne décide jamais d’un droit, ne calcule aucun montant et n’envoie rien à un organisme extérieur."
                 : summary
-                  ? "Je peux faire le point sur vos démarches depuis vos données. Je ne modifie rien : aucune action n'est effectuée sans votre validation dans les formulaires habituels."
-                  : "Aide à la navigation uniquement. Aucune réponse réglementaire n'est inventée et aucune action n'est effectuée sans votre validation dans les formulaires habituels."}
+                  ? "Je peux faire le point sur vos démarches depuis vos données. Je ne modifie rien : aucune action n’est effectuée sans votre validation dans les formulaires habituels."
+                  : "Aide à la navigation uniquement. Aucune réponse réglementaire n’est inventée et aucune action n’est effectuée sans votre validation dans les formulaires habituels."}
             </p>
           </div>
         </div>

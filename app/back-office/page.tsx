@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { getOfficeCases, getOfficeById } from "@/lib/queries";
 import { Card, SectionTitle, Stat, StatusBadge, EmptyState, formatDate, daysSince } from "@/components/ui";
 import { RemindButton } from "./dossiers/remind-button";
@@ -10,14 +10,14 @@ export const metadata: Metadata = { title: "Back-office — AIME®" };
 export const dynamic = "force-dynamic";
 
 export default async function BackOfficeDashboard() {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["gestionnaire", "administrateur"]);
   const officeId = user.role === "administrateur" ? null : user.officeId;
   const office = await getOfficeById(officeId);
   const allCases = await getOfficeCases(officeId);
 
   const toTriage = allCases.filter((c) => c.status === "envoyee");
   const mine = allCases.filter((c) => c.assignedCaseworkerId === user.id && (c.status === "en_cours" || c.status === "piece_manquante"));
-  // File prioritaire : qui est bloqué, depuis quand. D'abord les membres
+  // File prioritaire : qui est bloqué, depuis quand. D’abord les membres
   // dont on attend une pièce, puis les dossiers à affecter, puis les
   // dossiers sans mouvement depuis 14 jours ou plus.
   const rank: Record<string, number> = { piece_manquante: 0, envoyee: 1, en_cours: 2 };
@@ -39,7 +39,7 @@ export default async function BackOfficeDashboard() {
       <SectionTitle
         eyebrow={office ? office.name : "Tous les bureaux"}
         title="Tableau de bord gestionnaire"
-        description="Vue d'ensemble des dossiers de votre bureau et de vos dossiers en charge."
+        description="Vue d’ensemble des dossiers de votre bureau et de vos dossiers en charge."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

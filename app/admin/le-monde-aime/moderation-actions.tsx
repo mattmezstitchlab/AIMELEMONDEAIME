@@ -17,7 +17,7 @@ export function ModerationActions({ reportId }: { reportId: number }) {
     });
   }
   return <div className="mt-4 flex flex-wrap items-center gap-2">
-    <PrimaryButton type="button" disabled={pending} onClick={() => decide("masquer")} className="!px-3 !py-2 text-xs">{pending ? "Traitement…" : "Masquer l'annonce"}</PrimaryButton>
+    <PrimaryButton type="button" disabled={pending} onClick={() => decide("masquer")} className="!px-3 !py-2 text-xs">{pending ? "Traitement…" : "Masquer l’annonce"}</PrimaryButton>
     <SecondaryButton type="button" disabled={pending} onClick={() => decide("maintenir")} className="!px-3 !py-2 text-xs">Maintenir l&apos;annonce</SecondaryButton>
     {message && <p role="status" className="text-xs text-slate-600">{message}</p>}
   </div>;

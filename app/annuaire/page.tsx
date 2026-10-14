@@ -6,7 +6,7 @@ import { db, isDatabaseConfigured } from "@/db";
 import { offices } from "@/db/schema";
 import { ilike, or } from "drizzle-orm";
 
-export const metadata: Metadata = { title: "Annuaire des points d'accueil — AIME®", description: "Trouvez un point d'accueil près de chez vous." };
+export const metadata: Metadata = { title: "Annuaire des points d’accueil — AIME®", description: "Trouvez un point d’accueil près de chez vous." };
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +28,8 @@ export default async function AnnuairePage({ searchParams }: { searchParams: Pro
     <PublicPage>
       <Hero
         size="md"
-        eyebrow="Points d'accueil AIME® · démonstration"
-        title="Un point d'accueil près de chez vous"
+        eyebrow="Points d’accueil AIME® · démonstration"
+        title="Un point d’accueil près de chez vous"
         subtitle="Lieux fictifs de démonstration. Pour les organismes officiels (MSA, CAF, CPAM…), consultez la page Accompagnement."
       >
         <form role="search" className="mt-9 flex max-w-xl items-center gap-2 rounded-card bg-canvas p-2 shadow-rested ring-1 ring-line">
@@ -46,7 +46,7 @@ export default async function AnnuairePage({ searchParams }: { searchParams: Pro
           </div>
           <button
             type="submit"
-            className="h-10 shrink-0 rounded-control bg-ink px-4 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
+            className="h-10 shrink-0 rounded-control bg-ink px-4 text-sm font-medium text-canvas shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
           >
             Rechercher
           </button>
@@ -57,7 +57,7 @@ export default async function AnnuairePage({ searchParams }: { searchParams: Pro
         <Container className="py-16 lg:py-20">
           <SectionHeading
             eyebrow="Annuaire interne"
-            title={q ? `Résultats pour « ${q} »` : "Tous les points d'accueil"}
+            title={q ? `Résultats pour « ${q} »` : "Tous les points d’accueil"}
             description="Ces fiches servent à la démonstration. Les coordonnées réelles des organismes publics se vérifient sur les sites officiels."
           />
 

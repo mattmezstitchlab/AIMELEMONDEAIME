@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { AppShell, type NavItem } from "@/components/app-shell";
 import { getOfficeById, getUnreadNotifications } from "@/lib/queries";
+import { AUTH_ENABLED, loginHref } from "@/lib/auth-mode";
 
 const NAV: NavItem[] = [
   { href: "/back-office", label: "Tableau de bord", icon: "dashboard", exact: true },
@@ -12,9 +13,10 @@ const NAV: NavItem[] = [
 ];
 
 export default async function BackOfficeLayout({ children }: { children: ReactNode }) {
+  if (!AUTH_ENABLED) redirect(loginHref());
   const user = await getCurrentUser();
   if (!user || (user.role !== "gestionnaire" && user.role !== "administrateur")) {
-    redirect("/connexion");
+    redirect(loginHref());
   }
   const office = await getOfficeById(user.officeId);
   const unread = await getUnreadNotifications(user.id);
@@ -23,7 +25,7 @@ export default async function BackOfficeLayout({ children }: { children: ReactNo
   return (
     <AppShell
       navItems={nav}
-      roleLabel="Équipe d'accompagnement AIME®"
+      roleLabel="Équipe d’accompagnement AIME®"
       userName={user.fullName}
       homeHref="/back-office"
       officeName={office?.name ?? "Tous les bureaux"}

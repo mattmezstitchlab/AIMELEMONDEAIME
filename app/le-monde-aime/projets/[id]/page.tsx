@@ -31,7 +31,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     ? await getWeddingAccessLinksForOrganizer(id, user.id)
     : [];
   return (
-    <PublicPage solidHeader>
+    <PublicPage>
       <div className="bg-subtle">
         <div className="mx-auto max-w-5xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/espace" className="text-sm font-semibold text-ink underline">← Mes liens</Link>
@@ -94,7 +94,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
           {wedding && (
             <div id="budget" className="scroll-mt-24">
-              <Section title="Budget du mariage" hint={wedding.envelopeFromJourney ? "L'enveloppe vient de la réponse donnée dans votre parcours ; elle s'ajuste ici à tout moment." : "Prévu, devis confirmés et déjà réglé, poste par poste. Aucun paiement ne transite par AIME®."}>
+              <Section title="Budget du mariage" hint={wedding.envelopeFromJourney ? "L’enveloppe vient de la réponse donnée dans votre parcours ; elle s’ajuste ici à tout moment." : "Prévu, devis confirmés et déjà réglé, poste par poste. Aucun paiement ne transite par AIME®."}>
                 <WeddingBudgetPanel projectId={id} items={wedding.budgetItems} stats={wedding.budgetStats} isOrganizer={viewer.isOrganizer} open={project.status === "ouvert"} />
               </Section>
             </div>

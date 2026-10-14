@@ -25,7 +25,7 @@ export default async function WeddingAccessInvitationPage({ params, searchParams
   const invite = query.expired ? null : await getWeddingAccessInvite(token);
   return (
     <PublicPage solidHeader>
-      <main className="min-h-[70vh] bg-subtle px-5 py-12 sm:px-8">
+      <main className="theme-light min-h-[70vh] bg-canvas px-5 py-12 text-ink-2 sm:px-8">
         <div className="mx-auto max-w-2xl rounded-panel bg-canvas p-7 shadow-rested ring-1 ring-line sm:p-9">
           {invite ? (
             <>
@@ -60,7 +60,7 @@ export default async function WeddingAccessInvitationPage({ params, searchParams
                 <input type="hidden" name="token" value={token} />
                 <button
                   type="submit"
-                  className="inline-flex h-11 items-center gap-2 rounded-control bg-ink px-5 text-[15px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
+                  className="inline-flex h-11 items-center gap-2 rounded-control bg-ink px-5 text-[15px] font-medium text-canvas shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2"
                 >
                   Ouvrir l’espace partagé
                   <Icon name="arrow" className="h-4 w-4" />

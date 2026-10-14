@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { getOverview } from "@/lib/journey-queries";
 import { getAllNotifications } from "@/lib/queries";
 import { Card, SectionTitle, EmptyState, formatDate } from "@/components/ui";
@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Mon espace — AIME®" };
 export const dynamic = "force-dynamic";
 
 export default async function Apercu() {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["membre"]);
   const o = await getOverview(user.id);
   const notifs = (await getAllNotifications(user.id)).slice(0, 5);
   const next = o.active.find((j) => j.next) ?? null;
@@ -26,9 +26,9 @@ export default async function Apercu() {
       {next?.next ? (
         <Link
           href={`/espace/demarches/suivi/${next.id}`}
-          className="group flex items-center gap-5 rounded-card bg-ink p-6 text-white transition hover:bg-ink-2"
+          className="group flex items-center gap-5 rounded-card bg-ink p-6 text-canvas transition hover:bg-ink-2"
         >
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/10">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-canvas/10">
             <Icon name="arrow" className="h-5 w-5" />
           </span>
           <span className="flex-1">
@@ -96,7 +96,7 @@ export default async function Apercu() {
           <h2 className="text-lg text-ink">À traiter</h2>
           {toAnswer === 0 ? <p className="mt-3 text-sm text-ink-3">Aucune demande ne nécessite votre réponse.</p> : (
             <ul className="mt-3 space-y-2 text-sm">
-              {o.engagementsToAnswer.map((e) => <li key={`e${e.id}`}><Link className="font-medium text-ink underline underline-offset-4" href={e.artistId === user.id ? "/le-monde-aime/artiste" : `/espace/demarches/suivi/${e.journeyId}`}>{e.artistId === user.id ? "Une demande d'engagement artistique attend votre proposition" : "Une proposition d'artiste attend votre réponse"}</Link></li>)}
+              {o.engagementsToAnswer.map((e) => <li key={`e${e.id}`}><Link className="font-medium text-ink underline underline-offset-4" href={e.artistId === user.id ? "/le-monde-aime/artiste" : `/espace/demarches/suivi/${e.journeyId}`}>{e.artistId === user.id ? "Une demande d’engagement artistique attend votre proposition" : "Une proposition d’artiste attend votre réponse"}</Link></li>)}
               {o.incomingRequests.map((r) => <li key={`r${r.id}`}><Link className="font-medium text-ink underline underline-offset-4" href="/espace/echanges">Demande reçue : {r.title}</Link></li>)}
               {o.casesToComplete.map((c) => <li key={`c${c.id}`}><Link className="font-medium text-ink underline underline-offset-4" href={`/espace/demarches/${c.id}`}>Pièce attendue — {c.title} ({c.reference})</Link></li>)}
             </ul>

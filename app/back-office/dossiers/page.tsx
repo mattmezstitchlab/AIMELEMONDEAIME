@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { getOfficeCases } from "@/lib/queries";
 import { Card, SectionTitle, StatusBadge, EmptyState, formatDate, daysSince } from "@/components/ui";
 import { CASE_STATUS_LABELS } from "@/lib/constants";
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Dossiers — Back-office AIME®" };
 export const dynamic = "force-dynamic";
 
 export default async function DossiersPage({ searchParams }: { searchParams: Promise<{ statut?: string; affectation?: string; q?: string }> }) {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["gestionnaire", "administrateur"]);
   const { statut, affectation, q } = await searchParams;
   const officeId = user.role === "administrateur" ? null : user.officeId;
 
@@ -63,14 +63,14 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
               <option value="non_affectes">Non affectés</option>
             </select>
           </div>
-          <button type="submit" className="rounded-control bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-2">Filtrer</button>
+          <button type="submit" className="rounded-control bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:bg-ink-2">Filtrer</button>
         </form>
       </Card>
 
       {items.length === 0 ? (
         <EmptyState title="Aucun dossier ne correspond aux filtres" />
       ) : (
-        <div className="overflow-hidden rounded-card ring-1 ring-line bg-white">
+        <div className="overflow-hidden rounded-card ring-1 ring-line bg-canvas">
           <table data-assistant-id="backoffice-table" className="w-full text-left text-sm">
             <caption className="sr-only">Liste des dossiers</caption>
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">

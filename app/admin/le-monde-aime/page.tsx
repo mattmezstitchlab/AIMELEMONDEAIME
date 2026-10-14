@@ -4,12 +4,14 @@ import { getContentModerationQueue } from "@/lib/lma-queries";
 import { ContentModerationActions } from "./content-actions";
 import { SectionTitle, Card, EmptyState } from "@/components/ui";
 import { ModerationActions } from "./moderation-actions";
+import { requireRolePage } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Modération — Administration AIME®" };
 
 export const dynamic = "force-dynamic";
 
 export default async function CommunityModerationPage() {
+  await requireRolePage(["administrateur"]);
   const reports = await getCommunityModerationQueue();
   const contentReports = await getContentModerationQueue();
   return <div className="flex flex-col gap-6">

@@ -19,7 +19,7 @@ export function NotificationList({ items }: { items: Item[] }) {
     <div className="mt-3">
       <ul className="flex flex-col gap-2">
         {optimistic.map((n) => (
-          <li key={n.id} className={`rounded-card px-3 py-2.5 text-sm ${n.isRead ? "bg-white" : "bg-muted"}`}>
+          <li key={n.id} className={`rounded-card px-3 py-2.5 text-sm ${n.isRead ? "bg-canvas" : "bg-muted"}`}>
             <div className="flex items-start gap-2">
               {!n.isRead && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink-2" aria-label="Non lue" />}
               <div className="min-w-0 flex-1">

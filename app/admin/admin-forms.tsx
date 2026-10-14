@@ -116,7 +116,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
             type="button"
             disabled={pending}
             onClick={() => start(async () => { const r = await updateUserRole(user.id, role as "membre", officeId ? Number(officeId) : undefined); setMsg(r.ok ? "Enregistré" : r.error); router.refresh(); })}
-            className="rounded-control bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink-2"
+            className="rounded-control bg-ink px-3 py-1.5 text-xs font-semibold text-canvas hover:bg-ink-2"
           >
             Enregistrer
           </button>

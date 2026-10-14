@@ -45,7 +45,7 @@ export function AppShell({
     <div className="flex min-h-screen flex-col bg-subtle">
       <div className="flex flex-1">
         <aside className="sticky top-0 hidden h-screen w-[17.5rem] shrink-0 flex-col border-r border-line bg-canvas px-3.5 py-6 md:flex">
-          <Link href={homeHref} className="mb-7 px-2.5" aria-label="Accueil de l'espace">
+          <Link href={homeHref} className="mb-7 px-2.5" aria-label="Accueil de l’espace">
             <Logo withMark />
           </Link>
           <p className="mb-2 px-3 font-display text-[11px] uppercase tracking-[0.14em] text-ink-4">{roleLabel}</p>
@@ -57,14 +57,14 @@ export function AppShell({
 
           <div className="mt-6 rounded-card bg-subtle p-3">
             <div className="flex items-center gap-3">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink text-xs font-medium text-white">{initials}</span>
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink text-xs font-medium text-canvas">{initials}</span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-ink">{userName}</p>
                 {officeName && <p className="truncate text-xs text-ink-3">{officeName}</p>}
               </div>
               {typeof notificationCount === "number" && notificationCount > 0 && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full bg-ink px-2 py-0.5 text-[11px] font-medium text-white"
+                  className="inline-flex items-center gap-1 rounded-full bg-ink px-2 py-0.5 text-[11px] font-medium text-canvas"
                   aria-label={`${notificationCount} notifications non lues`}
                 >
                   <Icon name="bell" className="h-3 w-3" />
@@ -84,13 +84,13 @@ export function AppShell({
 
         <div className="flex min-h-screen min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-canvas/85 px-4 py-3 backdrop-blur-xl md:hidden">
-            <Link href={homeHref} aria-label="Accueil de l'espace">
+            <Link href={homeHref} aria-label="Accueil de l’espace">
               <Logo size="sm" withMark />
             </Link>
             <div className="flex items-center gap-2">
               {typeof notificationCount === "number" && notificationCount > 0 && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full bg-ink px-2 py-1 text-[11px] font-medium text-white"
+                  className="inline-flex items-center gap-1 rounded-full bg-ink px-2 py-1 text-[11px] font-medium text-canvas"
                   aria-label={`${notificationCount} notifications non lues`}
                 >
                   <Icon name="bell" className="h-3 w-3" />

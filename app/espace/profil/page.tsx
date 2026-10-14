@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { getMyProfile } from "@/lib/lma-queries";
 import { SectionTitle, Card } from "@/components/ui";
 import { ProfileForm } from "@/components/community/profile-forms";
@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Mon profil — AIME®" };
 export const dynamic = "force-dynamic";
 
 export default async function MonProfil({ searchParams }: { searchParams: Promise<{ bienvenue?: string }> }) {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["membre"]);
   const { bienvenue } = await searchParams;
   const { user: u, hasPhoto } = (await getMyProfile(user.id))!;
   return (

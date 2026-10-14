@@ -6,13 +6,13 @@ import { Icon, type IconName } from "@/components/icon";
 
 function useActive(href: string, exact?: boolean) {
   const pathname = usePathname() ?? "";
-  // Un lien paramétré (?onglet=…) n'est jamais marqué actif : plusieurs entrées
+  // Un lien paramétré (?onglet=…) n’est jamais marqué actif : plusieurs entrées
   // partagent la même route.
   if (href.includes("?")) return false;
   return exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 }
 
-/** Entrée de barre latérale : pastille grise à l'état actif (registre Cal.com). */
+/** Entrée de barre latérale : pastille grise à l’état actif (registre Cal.com). */
 export function SidebarLink({ href, label, icon, exact }: { href: string; label: string; icon: IconName; exact?: boolean }) {
   const active = useActive(href, exact);
   return (

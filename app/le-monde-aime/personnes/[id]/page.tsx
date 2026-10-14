@@ -15,14 +15,14 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   const p = await getPersonProfile(id);
   if (!p) notFound();
   return (
-    <PublicPage solidHeader>
+    <PublicPage>
       <div className="bg-subtle">
         <div className="mx-auto max-w-3xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/le-monde-aime" className="text-sm font-semibold text-ink underline">← Retour à la carte</Link>
           <header className="flex flex-wrap items-center gap-5 rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
             {p.hasPhoto ? (
               <>
-                {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
+                {/* eslint-disable-next-line @next/next/no-img-element -- photo d’API dynamique, dimensions inconnues */}
                 <img src={`/api/profil/${p.id}/photo`} alt="" className="h-24 w-24 rounded-full object-cover" />
               </>
             ) : <span className="grid h-24 w-24 place-items-center rounded-full bg-muted text-3xl font-bold text-ink" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>}

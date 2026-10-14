@@ -9,7 +9,7 @@ const initialState: ActionResult | null = null;
 
 const CATEGORY_OPTIONS = [
   { value: "justificatif", label: "Justificatif" },
-  { value: "identite", label: "Pièce d'identité" },
+  { value: "identite", label: "Pièce d’identité" },
   { value: "revenu", label: "Justificatif de revenu" },
   { value: "logement", label: "Justificatif de logement" },
   { value: "arret_travail", label: "Arrêt de travail" },
@@ -33,7 +33,7 @@ export function DocumentUploader({ caseId, onUploaded }: { caseId?: number; onUp
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3 rounded-control border border-dashed border-slate-300 bg-white p-4">
+    <form ref={formRef} action={formAction} className="flex flex-col gap-3 rounded-control border border-dashed border-slate-300 bg-canvas p-4">
       {caseId && <input type="hidden" name="caseId" value={caseId} />}
       <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
         <div>

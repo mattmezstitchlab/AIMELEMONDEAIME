@@ -62,7 +62,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
               <p className="mt-2 text-sm leading-relaxed text-ink-3">
                 Connectez-vous à votre espace pour démarrer une démarche guidée, garder vos réponses privées et reprendre plus tard.
               </p>
-              <LinkButton href="/connexion" className="mt-6">
+              <LinkButton href="/mon-espace" className="mt-6">
                 Accéder à mon espace
                 <Icon name="arrow" className="h-4 w-4" />
               </LinkButton>

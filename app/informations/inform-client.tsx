@@ -58,7 +58,7 @@ export function InformClient({ articles, categories }: {
               type="button"
               onClick={() => setTheme("")}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
-                !theme ? "bg-ink text-white" : "text-ink-2 ring-1 ring-line hover:bg-muted"
+                !theme ? "bg-ink text-canvas" : "text-ink-2 ring-1 ring-line hover:bg-muted"
               }`}
             >
               Tout
@@ -69,7 +69,7 @@ export function InformClient({ articles, categories }: {
                 href={`#theme-${t}`}
                 onClick={() => setTheme(t)}
                 className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
-                  theme === t ? "bg-ink text-white" : "text-ink-2 ring-1 ring-line hover:bg-muted"
+                  theme === t ? "bg-ink text-canvas" : "text-ink-2 ring-1 ring-line hover:bg-muted"
                 }`}
               >
                 {categories[t]}

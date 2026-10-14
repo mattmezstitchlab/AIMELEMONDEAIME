@@ -25,7 +25,7 @@ export type MapAvailability = {
 type Layer = "agences" | "producteurs" | "disponibles";
 
 const LAYERS: { key: Layer; label: string; icon: "building" | "leaf" | "velo" }[] = [
-  { key: "agences", label: "Points d'accueil", icon: "building" },
+  { key: "agences", label: "Points d’accueil", icon: "building" },
   { key: "producteurs", label: "Production & entraide", icon: "leaf" },
   { key: "disponibles", label: "Jeunes disponibles", icon: "velo" },
 ];
@@ -105,7 +105,7 @@ export function CarteClient({
                 onClick={() => toggleLayer(layer.key)}
                 aria-pressed={active}
                 className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  active ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-600"
+                  active ? "ring-ink bg-ink text-canvas" : "border-slate-300 bg-canvas text-slate-600"
                 }`}
               >
                 <Icon name={layer.icon} className="h-4 w-4" />
@@ -129,8 +129,8 @@ export function CarteClient({
         {/* Légende */}
         <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
           <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-ink" aria-hidden="true" /> Point d&apos;accueil (démo)</li>
-          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 ring-ink-4 bg-white" aria-hidden="true" /> Production locale</li>
-          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-slate-300 bg-white" aria-hidden="true" /> Présence / entraide</li>
+          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 ring-ink-4 bg-canvas" aria-hidden="true" /> Production locale</li>
+          <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-slate-300 bg-canvas" aria-hidden="true" /> Présence / entraide</li>
           <li className="flex items-center gap-2"><span className="h-4 w-4 rounded-full bg-amber-400" aria-hidden="true" /> Jeune disponible</li>
         </ul>
 
@@ -173,7 +173,7 @@ export function CarteClient({
                 <p className="mt-3 text-sm text-slate-600">Vous pouvez aussi cliquer directement sur la carte pour déposer votre propre point.</p>
               ) : (
                 <p className="mt-4 text-sm text-slate-600">
-                  <Link href="/connexion" className="font-semibold text-ink-2 hover:underline">Connectez-vous</Link> pour déposer un point, commander ou vous rendre disponible.
+                  <Link href="/mon-espace" className="font-semibold text-ink-2 hover:underline">Les comptes ouvrent bientôt</Link> pour déposer un point, commander ou vous rendre disponible.
                 </p>
               )}
             </div>
@@ -234,7 +234,7 @@ export function CarteClient({
                         {user?.role === "membre" && selectedPoint.ownerId !== user.id && product.stock > 0 && <OrderButton productId={product.id} stock={product.stock} />}
                         {user?.role === "membre" && selectedPoint.ownerId === user.id && <OwnerProductActions productId={product.id} />}
                         {!user && (
-                          <Link href="/connexion" className="text-xs font-semibold text-ink-2 hover:underline">Connectez-vous pour commander</Link>
+                          <Link href="/mon-espace" className="text-xs font-semibold text-ink-2 hover:underline">Comptes bientôt ouverts</Link>
                         )}
                       </div>
                     </li>
@@ -251,7 +251,7 @@ export function CarteClient({
                 </div>
               ) : (
                 <div className="mt-5 border-t border-slate-100 pt-4">
-                  <DirectionsLink lat={Number(selectedPoint.lat)} lng={Number(selectedPoint.lng)} label="Voir l'itinéraire" />
+                  <DirectionsLink lat={Number(selectedPoint.lat)} lng={Number(selectedPoint.lng)} label="Voir l’itinéraire" />
                 </div>
               )}
             </div>
@@ -317,7 +317,7 @@ export function MonEspaceCarte({
             ["dispo", "Ma disponibilité"],
           ] as const).map(([key, label]) => (
             <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold ${tab === key ? "bg-ink text-white" : "bg-subtle text-slate-600"}`}>
+              className={`rounded-full px-4 py-2 text-sm font-semibold ${tab === key ? "bg-ink text-canvas" : "bg-subtle text-slate-600"}`}>
               {label}
             </button>
           ))}
@@ -370,7 +370,7 @@ export function MonEspaceCarte({
                   <li key={order.id} className="rounded-card bg-subtle p-4 text-sm">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold text-slate-900">{order.quantity} × {order.productName}</p>
-                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">{ORDER_LABEL[order.status]}</span>
+                      <span className="rounded-full bg-canvas px-2.5 py-1 text-xs font-semibold text-slate-600">{ORDER_LABEL[order.status]}</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">{order.reference} · {order.pointName} ({order.pointCity})</p>
                     {order.pickupAt && <p className="text-xs text-slate-500">Retrait prévu : {new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(order.pickupAt))}</p>}
@@ -389,7 +389,7 @@ export function MonEspaceCarte({
                   <li key={order.id} className="rounded-card bg-subtle p-4 text-sm">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold text-slate-900">{order.quantity} × {order.productName}</p>
-                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">{ORDER_LABEL[order.status]}</span>
+                      <span className="rounded-full bg-canvas px-2.5 py-1 text-xs font-semibold text-slate-600">{ORDER_LABEL[order.status]}</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">{order.reference} · {order.buyerName}</p>
                   </li>

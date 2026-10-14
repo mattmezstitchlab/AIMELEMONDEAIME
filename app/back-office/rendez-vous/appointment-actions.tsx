@@ -19,7 +19,7 @@ export function AppointmentActions({ appointmentId, status }: { appointmentId: n
   return (
     <div className="flex gap-2">
       {status === "demandee" && (
-        <button onClick={() => update("confirmee")} disabled={isPending} className="rounded-control bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink-2">
+        <button onClick={() => update("confirmee")} disabled={isPending} className="rounded-control bg-ink px-3 py-1.5 text-xs font-semibold text-canvas hover:bg-ink-2">
           Confirmer
         </button>
       )}

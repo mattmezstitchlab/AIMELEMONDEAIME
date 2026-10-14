@@ -6,9 +6,19 @@ accompagnement des démarches, et mise en relation locale (personnes, producteur
 
 Stack : Next.js 16 (App Router, Server Actions) · React 19 · TypeScript · PostgreSQL via Drizzle ORM · Tailwind CSS 4.
 
-## Design — système « encre et papier »
+## Design — deux registres : site public sombre, application claire
 
-La refonte s'inspire du système de **Cal.com** et le transpose au service public :
+Le site public suit un modèle de **portfolio à cartes** : page presque noire, une seule
+colonne centrée, grands blocs arrondis, **tuiles pastel** contenant des aperçus d'interface
+réels, et des **cartes d'action blanches** à bouton pilule noir. La couleur ne vit que dans
+les tuiles.
+
+Les espaces de travail (Mon espace, back-office, administration) gardent une surface claire
+et dense, faite pour lire et saisir des données. Le basculement est porté par les variables
+CSS : `.theme-night` inverse la palette sur tout son sous-arbre, `.theme-light` la rétablit
+pour les cartes blanches et les aperçus posés sur une tuile.
+
+Sous cette surface, l'échelle de gris vient du système **Cal.com** transposé au service public :
 
 - **Palette monochrome.** Les surfaces, textes et contours suivent une échelle de gris
   calibrée (`bg`, `bg-subtle`, `bg-muted`, `text-emphasis`, `text-subtle`, `border`,
@@ -56,7 +66,24 @@ Pour activer les comptes, les guides administrés, l'annuaire et les fonctions c
 2. Ajouter `DATABASE_URL` et un `AUTH_SECRET` aléatoire d'au moins 32 caractères dans **Vercel → Settings → Environment Variables**. Définir les variables pour chaque environnement visé (Production, Preview et/ou Development), puis redéployer.
 3. Appliquer les migrations (`npm run db:migrate`) à cette base avant d'ouvrir les fonctions connectées. Le build Vercel n'exécute volontairement pas de migration automatiquement.
 
-Sans ces variables, les routes publiques restent consultables en mode dégradé ; connexion, inscription et données en base restent indisponibles. Ne jamais publier de vrais identifiants ni committer un fichier `.env`.
+Sans ces variables, les routes publiques restent consultables en mode dégradé ; les données en base restent indisponibles. Ne jamais publier de vrais identifiants ni committer un fichier `.env`.
+
+### Comptes et connexion — interrupteur
+
+**Les comptes sont fermés par défaut.** Tant que `AIME_AUTH_ENABLED` n'est pas à `1` :
+
+- aucune inscription, aucun mot de passe, aucun formulaire de connexion ;
+- toute session déjà présente dans un navigateur est ignorée (révocation immédiate) ;
+- `/connexion` et `/inscription` renvoient vers `/mon-espace`, la page qui explique la situation ;
+- les espaces `/espace`, `/back-office` et `/admin` renvoient vers `/mon-espace` ;
+- seule la **visite guidée** reste ouverte quand une base est configurée : elle ne demande
+  aucun identifiant et s'exécute en lecture seule (le proxy refuse toutes les écritures).
+
+Pour rallumer les comptes, définir `AIME_AUTH_ENABLED=1` puis redéployer : les formulaires,
+les rôles, les sessions et les trois espaces redeviennent disponibles sans modification de
+code. Le code d'authentification n'a pas été supprimé.
+
+> Suite de travail priorisée : voir `AUDIT-REFONTE.md` (audit complet du dépôt).
 
 Pour afficher le site dans une iframe d'un domaine de prévisualisation, lister les origines
 autorisées dans `PREVIEW_FRAME_ANCESTORS` (séparées par des virgules). Sans cette variable,

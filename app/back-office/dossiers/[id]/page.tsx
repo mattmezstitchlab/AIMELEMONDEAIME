@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { getCaseDetail } from "@/lib/queries";
 import { Card, SectionTitle, StatusBadge, Tag, formatDateTime, formatDate } from "@/components/ui";
 import { CASE_EVENT_LABELS, SITUATION_LABELS, THEME_META } from "@/lib/constants";
@@ -21,7 +21,7 @@ export default async function CaseworkerCaseDetail({ params }: { params: Promise
   const caseId = Number(id);
   if (!Number.isFinite(caseId)) notFound();
 
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["gestionnaire", "administrateur"]);
   const detail = await getCaseDetail(caseId);
   if (!detail) notFound();
   if (user.role === "gestionnaire" && detail.item.officeId !== user.officeId) {
@@ -94,7 +94,7 @@ export default async function CaseworkerCaseDetail({ params }: { params: Promise
           <Card>
             <h2 className="text-lg font-semibold text-slate-900">Répondre à l&apos;adhérent</h2>
             <div className="mt-3">
-              <div data-assistant-id="case-message"><CaseMessageForm caseId={item.id} sendMessage={caseworkerReply} label="Message à l'adhérent" /></div>
+              <div data-assistant-id="case-message"><CaseMessageForm caseId={item.id} sendMessage={caseworkerReply} label="Message à l’adhérent" /></div>
             </div>
           </Card>
         </div>

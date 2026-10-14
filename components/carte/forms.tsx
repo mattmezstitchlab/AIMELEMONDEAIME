@@ -28,7 +28,7 @@ function Field({ label, name, type = "text", defaultValue, required = true, plac
   );
 }
 
-/** Formulaire de dépôt d'un point (production ou présence) à des coordonnées précises. */
+/** Formulaire de dépôt d’un point (production ou présence) à des coordonnées précises. */
 export function PlacePointForm({ lat, lng, onDone }: { lat: number; lng: number; onDone: () => void }) {
   const [state, action, pending] = useActionState<State, FormData>(async (prev, form) => {
     const result = await createLocalPoint(form);
@@ -70,7 +70,7 @@ export function PlacePointForm({ lat, lng, onDone }: { lat: number; lng: number;
   );
 }
 
-/** Ajout d'un produit sur un point appartenant au membre connecté. */
+/** Ajout d’un produit sur un point appartenant au membre connecté. */
 export function ProductForm({ pointId }: { pointId: number }) {
   const [state, action, pending] = useActionState<State, FormData>(async (_prev, form) => addLocalProduct(form), null);
   return (
@@ -80,7 +80,7 @@ export function ProductForm({ pointId }: { pointId: number }) {
       <Field label="Nom du produit" name="name" placeholder="Ex. Panier de légumes" />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Prix (€)" name="price" type="number" defaultValue="0.00" />
-        <Field label="Unité" name="unit" defaultValue="l'unité" />
+        <Field label="Unité" name="unit" defaultValue="l’unité" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Stock disponible" name="stock" type="number" defaultValue="1" />
@@ -140,7 +140,7 @@ export function AvailabilityForm({
           {skillOptions.map((skill) => {
             const active = skills.includes(skill);
             return (
-              <label key={skill} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-700"}`}>
+              <label key={skill} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "ring-ink bg-ink text-canvas" : "border-slate-300 bg-canvas text-slate-700"}`}>
                 <input type="checkbox" name="skills" value={skill} className="sr-only" checked={active} onChange={() => setSkills((prev) => prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill])} />
                 {skill}
               </label>
@@ -158,7 +158,7 @@ export function AvailabilityForm({
   );
 }
 
-/** Commande d'un produit en retrait sur place. */
+/** Commande d’un produit en retrait sur place. */
 export function OrderButton({ productId, stock, label = "Commander" }: { productId: number; stock: number; label?: string }) {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState<State, FormData>(async (_prev, form) => createLocalOrder(form), null);
@@ -195,7 +195,7 @@ export function OrderButton({ productId, stock, label = "Commander" }: { product
   );
 }
 
-/** Boutons de gestion d'un point appartenant au membre. */
+/** Boutons de gestion d’un point appartenant au membre. */
 export function OwnerPointActions({ pointId }: { pointId: number }) {
   const [state, action, pending] = useActionState<State, unknown>(async () => deleteLocalPoint(pointId), null);
   return (
@@ -219,7 +219,7 @@ export function OwnerProductActions({ productId }: { productId: number }) {
   );
 }
 
-/** Lien rapide vers l'itinéraire (service externe simulé). */
+/** Lien rapide vers l’itinéraire (service externe simulé). */
 export function DirectionsLink({ lat, lng, label }: { lat: number; lng: number; label: string }) {
   return (
     <a

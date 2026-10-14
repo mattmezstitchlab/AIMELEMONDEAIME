@@ -2,12 +2,12 @@ import { Icon, type IconName } from "@/components/icon";
 import { formatAmount } from "@/components/ui";
 
 /*
- * Fragments d'interface utilisés par les pages publiques.
+ * Fragments d’interface utilisés par les pages publiques.
  *
- * Cal.com appuie sa communication sur de vraies captures d'application plutôt
- * que sur des illustrations : chaque argument est doublé d'un aperçu crédible.
+ * Cal.com appuie sa communication sur de vraies captures d’application plutôt
+ * que sur des illustrations : chaque argument est doublé d’un aperçu crédible.
  * Ces blocs sont décoratifs (aria-hidden) — le texte qui les accompagne porte
- * le sens — et n'affichent aucune donnée réelle : uniquement de la démonstration.
+ * le sens — et n’affichent aucune donnée réelle : uniquement de la démonstration.
  */
 
 export function MockWindow({
@@ -22,7 +22,7 @@ export function MockWindow({
   className?: string;
 }) {
   return (
-    <div aria-hidden="true" className={`product-window ${className}`}>
+    <div aria-hidden="true" className={`product-window theme-light w-full ${className}`}>
       <div className="flex items-center justify-between gap-4 border-b border-line px-4 py-3">
         <span className="font-display text-[11px] uppercase tracking-[0.14em] text-ink-3">{title}</span>
         {meta && <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] text-ink-3">{meta}</span>}
@@ -174,16 +174,39 @@ export function RolesMock() {
   );
 }
 
-/** Liste de pièces courte, pour les cartes d'étape. */
+/** Liste de pièces courte, pour les cartes d’étape. */
 export function ChecklistMock({ items }: { items: Array<{ label: string; done?: boolean }> }) {
   return (
     <ul aria-hidden="true" className="space-y-2">
       {items.map((item) => (
         <li key={item.label} className="flex items-center gap-2.5 text-xs">
-          <span className={`grid h-4 w-4 shrink-0 place-items-center rounded-full ${item.done ? "bg-ink text-white" : "ring-1 ring-line"}`}>
+          <span className={`grid h-4 w-4 shrink-0 place-items-center rounded-full ${item.done ? "bg-ink text-canvas" : "ring-1 ring-line"}`}>
             {item.done && <Icon name="check" className="h-3 w-3" />}
           </span>
           <span className={item.done ? "text-ink-3 line-through decoration-line" : "text-ink-2"}>{item.label}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Points du territoire, façon liste annuaire. */
+export function MapPointsMock() {
+  const points = [
+    { name: "Ferme des Trois Saules", kind: "Producteurs · paniers hebdomadaires", distance: "12 km" },
+    { name: "Atelier céramique", kind: "Artistes · pièces sur commande", distance: "8 km" },
+    { name: "Bibliothèque municipale", kind: "Savoirs · ateliers lecture", distance: "3 km" },
+    { name: "Café associatif", kind: "Entraide · permanence jeudi", distance: "6 km" },
+  ];
+  return (
+    <ul aria-hidden="true" className="theme-light w-full divide-y divide-line-soft rounded-card bg-canvas px-4 text-sm ring-1 ring-line">
+      {points.map((point) => (
+        <li key={point.name} className="flex items-center justify-between gap-3 py-3">
+          <span className="min-w-0">
+            <span className="block truncate text-ink-2">{point.name}</span>
+            <span className="block truncate text-xs text-ink-4">{point.kind}</span>
+          </span>
+          <span className="shrink-0 text-xs text-ink-4">{point.distance}</span>
         </li>
       ))}
     </ul>

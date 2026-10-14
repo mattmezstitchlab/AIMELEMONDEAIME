@@ -4,12 +4,14 @@ import { articles } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Card, SectionTitle } from "@/components/ui";
 import { ArticleForm, ArticleRow } from "../admin-forms";
+import { requireRolePage } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Contenus — Administration AIME®" };
 
 export const dynamic = "force-dynamic";
 
 export default async function ContenusPage() {
+  await requireRolePage(["administrateur"]);
   const list = await db.select().from(articles).orderBy(desc(articles.publishedAt));
   return (
     <div className="flex flex-col gap-6">

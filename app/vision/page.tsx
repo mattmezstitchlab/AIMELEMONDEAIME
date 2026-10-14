@@ -27,7 +27,7 @@ export default function VisionPage() {
         subtitle="AIME® ne remplace aucun organisme. Nous réunissons, dans un même espace privé, la préparation des moments de vie et les ressources du territoire. Ici, vous voyez précisément ce qui fonctionne et ce qui reste à construire."
         actions={
           <>
-            <Link href="/accompagnement" className="inline-flex h-11 items-center gap-2 rounded-control bg-ink px-5 text-[15px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2">
+            <Link href="/accompagnement" className="inline-flex h-11 items-center gap-2 rounded-control bg-ink px-5 text-[15px] font-medium text-canvas shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-ink-2">
               Décrire un besoin
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
@@ -43,8 +43,8 @@ export default function VisionPage() {
           <div className="grid gap-6 md:grid-cols-3">
             {[
               { n: "01", title: "Votre histoire", text: "Saisir le strict nécessaire et pouvoir corriger, reprendre ou supprimer ce qui vous appartient.", icon: "shield" as const },
-              { n: "02", title: "Votre territoire", text: "Trouver personnes, offres, besoins et projets sur une carte, sans exposer d'adresse privée.", icon: "pin" as const },
-              { n: "03", title: "Vos décisions", text: "Distinguer ce que vous avez préparé, ce qui a été réellement envoyé et ce qu'un organisme a confirmé.", icon: "lock" as const },
+              { n: "02", title: "Votre territoire", text: "Trouver personnes, offres, besoins et projets sur une carte, sans exposer d’adresse privée.", icon: "pin" as const },
+              { n: "03", title: "Vos décisions", text: "Distinguer ce que vous avez préparé, ce qui a été réellement envoyé et ce qu’un organisme a confirmé.", icon: "lock" as const },
             ].map((item) => (
               <div key={item.n} className="rounded-card bg-canvas p-6 shadow-rested ring-1 ring-line">
                 <div className="flex items-center justify-between">
@@ -142,7 +142,7 @@ export default function VisionPage() {
                   href={source.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex h-full flex-col rounded-card bg-white/[0.04] p-5 ring-1 ring-white/10 transition hover:bg-white/[0.07] hover:ring-white/25"
+                  className="group flex h-full flex-col rounded-card bg-canvas/[0.04] p-5 ring-1 ring-white/10 transition hover:bg-canvas/[0.07] hover:ring-white/25"
                 >
                   <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white">
                     {source.name}

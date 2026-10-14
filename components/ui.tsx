@@ -29,7 +29,7 @@ export function LogoMark({ className = "h-9 w-9", tone = "ink" }: { className?: 
 
 /**
  * Wordmark « AIME® » : Cal Sans, sans icône, comme le logo Cal.com.
- * `light` s'utilise sur les surfaces sombres (pied de page).
+ * `light` s’utilise sur les surfaces sombres (pied de page).
  */
 export function Logo({ light = false, size = "md", withMark = false }: { light?: boolean; size?: "sm" | "md"; withMark?: boolean }) {
   const wordmark = size === "sm" ? "text-lg" : "text-xl";
@@ -52,9 +52,13 @@ export function Logo({ light = false, size = "md", withMark = false }: { light?:
 /* Mise en page                                                       */
 /* ------------------------------------------------------------------ */
 
-/** Conteneur de page : une seule largeur pour tout le site public. */
+/**
+ * Conteneur du site public : une colonne étroite et centrée, comme le modèle
+ * de référence. `wide` n’est utilisé que par les pages qui alignent des grilles
+ * denses (organismes, annuaire).
+ */
 export function Container({ children, className = "", wide = false }: { children: ReactNode; className?: string; wide?: boolean }) {
-  return <div className={`mx-auto w-full ${wide ? "max-w-7xl" : "max-w-6xl"} px-5 sm:px-8 ${className}`}>{children}</div>;
+  return <div className={`mx-auto w-full ${wide ? "max-w-[56rem]" : "max-w-[46rem]"} px-5 sm:px-6 ${className}`}>{children}</div>;
 }
 
 /** Titre de section : étiquette, titre display, chapô. */
@@ -85,11 +89,11 @@ export function SectionHeading({
 }
 
 /**
- * En-tête de page publique.
+ * En-tête de page publique (hors accueil).
  *
- * Hérite de la mise en page Cal.com : fond papier neutre, titre display à
- * gauche, actions alignées, et un emplacement média à droite (`media`) pour
- * montrer un fragment d'interface plutôt qu'une photo d'illustration.
+ * Langage du modèle de référence : une seule colonne, un titre display serré,
+ * un chapô court, des actions alignées à gauche. Pas de dégradé, pas de bordure
+ * décorative : la page commence par du texte, puis des tuiles.
  */
 export function Hero({
   eyebrow,
@@ -108,27 +112,26 @@ export function Hero({
   size?: "xl" | "lg" | "md";
   children?: ReactNode;
 }) {
-  const padding = size === "xl" ? "pb-16 pt-14 sm:pb-24 sm:pt-20 lg:pt-24" : size === "lg" ? "py-14 sm:py-20" : "py-12 sm:py-16";
+  const padding = size === "xl" ? "pt-8 pb-10 sm:pt-12" : size === "lg" ? "pt-6 pb-9 sm:pt-8" : "pt-5 pb-7";
+  const titleSize =
+    size === "xl"
+      ? "text-[2.5rem] leading-[1.0] sm:text-[3.25rem]"
+      : size === "lg"
+        ? "text-[2.25rem] leading-[1.02] sm:text-[2.75rem]"
+        : "text-[1.85rem] leading-[1.05] sm:text-[2.1rem]";
+
   return (
-    <section className="relative isolate overflow-hidden border-b border-line bg-canvas">
-      <div aria-hidden="true" className="cal-glow pointer-events-none absolute inset-0" />
-      <Container className={`relative ${padding}`} wide>
-        <div className={media ? "grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-16" : ""}>
-          <div className={`animate-fade-up ${media ? "" : size === "md" ? "max-w-3xl" : "max-w-3xl"}`}>
-            {eyebrow && (
-              <p className="eyebrow">
-                <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
-                {eyebrow}
-              </p>
-            )}
-            <h1 className={`mt-5 text-ink ${size === "xl" ? "text-[2.6rem] leading-[1.03] sm:text-6xl lg:text-[4rem]" : size === "lg" ? "text-4xl leading-[1.05] sm:text-5xl lg:text-[3.4rem]" : "text-3xl sm:text-4xl lg:text-[2.75rem]"}`}>
-              {title}
-            </h1>
-            {subtitle && <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-3">{subtitle}</p>}
-            {actions && <div className="mt-9 flex flex-wrap items-center gap-3">{actions}</div>}
+    <section className="bg-canvas">
+      <Container className={`animate-fade-up ${padding}`} wide>
+        <div className={media ? "grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:gap-12" : ""}>
+          <div className="max-w-2xl">
+            {eyebrow && <p className="nav-tiny text-ink-3">{eyebrow}</p>}
+            <h1 className={`mt-3 tracking-[-0.03em] text-ink ${titleSize}`}>{title}</h1>
+            {subtitle && <p className="mt-4 text-[15px] leading-relaxed text-ink-3 sm:text-base">{subtitle}</p>}
+            {actions && <div className="mt-7 flex flex-wrap items-center gap-3">{actions}</div>}
             {children}
           </div>
-          {media && <div className="animate-fade-up delay-2 relative">{media}</div>}
+          {media && <div className="animate-fade-up delay-2">{media}</div>}
         </div>
       </Container>
     </section>
@@ -136,7 +139,7 @@ export function Hero({
 }
 
 /**
- * Bandeau d'en-tête des espaces connectés (membre, gestionnaire, admin).
+ * Bandeau d’en-tête des espaces connectés (membre, gestionnaire, admin).
  * Une plaque blanche sobre : étiquette, titre, description, actions.
  */
 export function SectionTitle({
@@ -235,7 +238,7 @@ export function FeatureIcon({ name, label, text }: { name: IconName; label: stri
   );
 }
 
-/** Encart d'information (remplace les bandeaux colorés ad hoc). */
+/** Encart d’information (remplace les bandeaux colorés ad hoc). */
 export function Notice({
   tone = "info",
   title,
@@ -276,7 +279,7 @@ export function Notice({
 export function Tag({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "ink" | "outline" }) {
   const styles = {
     neutral: "bg-muted text-ink-2",
-    ink: "bg-ink text-white",
+    ink: "bg-ink text-canvas",
     outline: "bg-canvas text-ink-2 ring-1 ring-line",
   } as const;
   return (
@@ -314,14 +317,14 @@ export type ButtonSize = keyof typeof SIZES;
 
 const VARIANTS = {
   /* Action primaire : noir profond, comme le CTA Cal.com. */
-  primary: "bg-ink text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] hover:bg-ink-2 active:bg-black",
+  primary: "bg-ink text-canvas hover:opacity-90 active:opacity-95",
   /* Action secondaire : blanc, anneau discret. */
   secondary: "bg-canvas text-ink-2 ring-1 ring-line hover:bg-subtle hover:text-ink",
   /* Action tertiaire : fantôme. */
   ghost: "text-ink-2 hover:bg-muted",
   /* Action secondaire sur fond sombre. */
-  inverse: "bg-white text-ink hover:bg-white/90",
-  outlineInverse: "text-white ring-1 ring-white/30 hover:bg-white/10",
+  inverse: "bg-canvas text-ink hover:bg-canvas/90",
+  outlineInverse: "text-white ring-1 ring-white/30 hover:bg-canvas/10",
   /* Action destructive. */
   danger: "bg-state-danger text-white hover:opacity-90",
 } as const;
@@ -470,7 +473,7 @@ export function formatDateTime(value: Date | string) {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
-/** Jours entiers écoulés depuis une date (ancienneté d'un dossier, d'une attente…). */
+/** Jours entiers écoulés depuis une date (ancienneté d’un dossier, d’une attente…). */
 export function daysSince(value: Date | string) {
   const date = typeof value === "string" ? new Date(value) : value;
   return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86400000));

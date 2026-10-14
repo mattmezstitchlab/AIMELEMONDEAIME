@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import type { Metadata } from "next";
 import { db } from "@/db";
 import { messages, users } from "@/db/schema";
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Messages — Back-office AIME®" };
 export const dynamic = "force-dynamic";
 
 export default async function BackOfficeMessages() {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["gestionnaire", "administrateur"]);
   const base = db.select().from(messages);
   const rows = user.role === "administrateur" ? await base.orderBy(asc(messages.createdAt)) : await base.where(eq(messages.officeId, user.officeId ?? -1)).orderBy(asc(messages.createdAt));
 

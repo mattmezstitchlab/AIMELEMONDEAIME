@@ -20,7 +20,7 @@ import { RequestButton } from "@/components/community/forms";
 import { priceLabel } from "@/components/community/community-app";
 import { LISTING_CATEGORIES, NEED_STATUS_LABELS, UNIVERSES } from "@/lib/lma";
 
-const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
 
@@ -60,7 +60,7 @@ export function ProjectForm({ coords }: { coords: { lat: number; lng: number } |
       <div className="rounded-card bg-muted p-4 text-sm text-ink">
         <strong>Un projet</strong> rassemble une intention, un lieu, des dates, des besoins et les contributions de chacun. Exemples : une fête au village, un jardin partagé, la préparation d&apos;un mariage.
       </div>
-      <div><label className={label} htmlFor="pj-title">Nom du projet</label><input id="pj-title" name="title" required minLength={4} maxLength={140} placeholder="Ex. Fête d'été à la ferme" className={input} /></div>
+      <div><label className={label} htmlFor="pj-title">Nom du projet</label><input id="pj-title" name="title" required minLength={4} maxLength={140} placeholder="Ex. Fête d’été à la ferme" className={input} /></div>
       <div><label className={label} htmlFor="pj-intention">Intention</label><textarea id="pj-intention" name="intention" required minLength={10} maxLength={800} rows={3} placeholder="Pourquoi, avec qui, pour qui ?" className={input} /></div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div><label className={label} htmlFor="pj-city">Commune</label><input id="pj-city" name="city" required minLength={2} className={input} /></div>
@@ -68,7 +68,7 @@ export function ProjectForm({ coords }: { coords: { lat: number; lng: number } |
         <div><label className={label} htmlFor="pj-end">Fin (facultatif)</label><input id="pj-end" name="endsAt" type="datetime-local" className={input} /></div>
       </div>
       <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Univers concernés</legend>
-        <div className="flex flex-wrap gap-2">{UNIVERSES.map((u) => { const on = universes.includes(u.key); return <label key={u.key} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-700"}`}><input type="checkbox" name="universes" value={u.key} checked={on} onChange={() => setUniverses((p) => (p.includes(u.key) ? p.filter((k) => k !== u.key) : [...p, u.key]))} className="sr-only" />{u.label}</label>; })}</div>
+        <div className="flex flex-wrap gap-2">{UNIVERSES.map((u) => { const on = universes.includes(u.key); return <label key={u.key} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-canvas" : "border-slate-300 bg-canvas text-slate-700"}`}><input type="checkbox" name="universes" value={u.key} checked={on} onChange={() => setUniverses((p) => (p.includes(u.key) ? p.filter((k) => k !== u.key) : [...p, u.key]))} className="sr-only" />{u.label}</label>; })}</div>
       </fieldset>
       {!coords && <p role="alert" className="rounded-control bg-amber-50 p-3 text-sm text-amber-800">Choisissez d&apos;abord le lieu approximatif sur la carte ci-dessus.</p>}
       <p className="text-xs text-slate-500">Les activités pour enfants s&apos;organisent via les responsables légaux ou une structure encadrante.</p>
@@ -93,7 +93,7 @@ export function NeedsPanel({ projectId, needs, suggestions, isOrganizer, open, s
       <ul className="space-y-3">
         {needs.length === 0 && <li className="rounded-card border border-dashed border-slate-300 p-4 text-sm text-slate-600">Aucun besoin pour l&apos;instant.</li>}
         {needs.map((n) => (
-          <li key={n.id} className="rounded-card ring-1 ring-line bg-white p-4">
+          <li key={n.id} className="rounded-card ring-1 ring-line bg-canvas p-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div><p className="font-semibold text-slate-900">{n.quantity} × {n.text}</p><p className="text-xs text-slate-500">{LISTING_CATEGORIES.find((c) => c.value === n.category)?.label ?? "Trajet"}</p></div>
               <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_STYLE[n.status]}`}>{NEED_STATUS_LABELS[n.status]}</span>
@@ -134,7 +134,7 @@ export function JoinPanel({ projectId, viewer, loggedIn, isMemberRole }: { proje
   if (viewer.isMember) return <p className="text-sm font-semibold text-ink">Vous participez à ce projet.</p>;
   if (viewer.pending) return <p className="text-sm text-slate-600">Votre demande de participation attend la réponse des organisateurs.</p>;
   if (viewer.refused) return <p className="text-sm text-slate-600">Votre demande n&apos;a pas été retenue.</p>;
-  if (!loggedIn) return <a href="/connexion" className="text-sm font-bold text-ink underline">Connectez-vous pour participer</a>;
+  if (!loggedIn) return <a href="/mon-espace" className="text-sm font-bold text-ink underline">Les comptes ouvrent bientôt</a>;
   if (!isMemberRole) return <p className="text-sm text-slate-600">Seuls les comptes membres peuvent participer.</p>;
   return <div className="space-y-2"><PrimaryButton type="button" disabled={pending} onClick={() => run(() => requestToJoinProject(projectId))}>Demander à participer</PrimaryButton><Note value={fb} /></div>;
 }

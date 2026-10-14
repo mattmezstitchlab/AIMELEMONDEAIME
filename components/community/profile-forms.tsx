@@ -7,7 +7,7 @@ import { FranceMap } from "@/components/carte/france-map";
 import { PrimaryButton } from "@/components/ui";
 import { ARTIST_DISCIPLINES, UNIVERSES } from "@/lib/lma";
 
-const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
 const Note = ({ value }: { value: Fb }) => value ? <p role={value.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-sm ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p> : null;
@@ -40,7 +40,7 @@ export function ProfileForm({ data }: { data: ProfileData }) {
         <div className="flex flex-col items-center gap-2">
           {data.hasPhoto ? (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- photo d’API dynamique, dimensions inconnues */}
               <img src={`/api/profil/${data.userId}/photo`} alt="Votre photo" className="h-24 w-24 rounded-full object-cover" />
             </>
           ) : <span className="grid h-24 w-24 place-items-center rounded-full bg-muted text-3xl font-bold text-ink" aria-hidden="true">{(data.displayName || "?").slice(0, 1).toUpperCase()}</span>}
@@ -50,12 +50,12 @@ export function ProfileForm({ data }: { data: ProfileData }) {
           <div><label className={label} htmlFor="pf-photo">Photo (facultative · 2 Mo)</label><input id="pf-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" className={input} /></div>
         </div>
       </div>
-      <div><label className={label} htmlFor="pf-bio">Présentation</label><textarea id="pf-bio" name="bio" defaultValue={data.bio} rows={3} maxLength={600} placeholder="Qui êtes-vous, qu'aimez-vous faire ?" className={input} /></div>
+      <div><label className={label} htmlFor="pf-bio">Présentation</label><textarea id="pf-bio" name="bio" defaultValue={data.bio} rows={3} maxLength={600} placeholder="Qui êtes-vous, qu’aimez-vous faire ?" className={input} /></div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div><label className={label} htmlFor="pf-act">Activités et compétences</label><input id="pf-act" name="activities" defaultValue={data.activities} placeholder="Agriculteur, musicien, parent, bénévole…" className={input} /><p className="mt-1 text-xs text-slate-500">Séparées par des virgules. Vous pouvez en cumuler autant que vous voulez.</p></div>
         <div><label className={label} htmlFor="pf-int">Centres d&apos;intérêt</label><input id="pf-int" name="interests" defaultValue={data.interests} placeholder="Jardinage, chorale, cuisine…" className={input} /></div>
       </div>
-      <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Univers qui vous parlent</legend><div className="flex flex-wrap gap-2">{UNIVERSES.map((u) => { const on = universes.includes(u.key); return <label key={u.key} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-700"}`}><input type="checkbox" name="universes" value={u.key} checked={on} onChange={() => setUniverses((p) => (p.includes(u.key) ? p.filter((k) => k !== u.key) : [...p, u.key]))} className="sr-only" />{u.label}</label>; })}</div></fieldset>
+      <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Univers qui vous parlent</legend><div className="flex flex-wrap gap-2">{UNIVERSES.map((u) => { const on = universes.includes(u.key); return <label key={u.key} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-canvas" : "border-slate-300 bg-canvas text-slate-700"}`}><input type="checkbox" name="universes" value={u.key} checked={on} onChange={() => setUniverses((p) => (p.includes(u.key) ? p.filter((k) => k !== u.key) : [...p, u.key]))} className="sr-only" />{u.label}</label>; })}</div></fieldset>
       <div className="grid gap-4 sm:grid-cols-3">
         <div><label className={label} htmlFor="pf-off">Je propose</label><input id="pf-off" name="offersText" defaultValue={data.offersText} maxLength={300} className={input} placeholder="Légumes, concerts…" /></div>
         <div><label className={label} htmlFor="pf-need">Je recherche</label><input id="pf-need" name="needsText" defaultValue={data.needsText} maxLength={300} className={input} placeholder="Un lieu de répétition…" /></div>
@@ -88,14 +88,14 @@ export function ArtistForm({ data }: { data: ArtistData }) {
   const others = data.disciplines.filter((d) => !ARTIST_DISCIPLINES.includes(d)).join(", ");
   return (
     <form onSubmit={(e) => submit(e)} className="space-y-5">
-      <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Disciplines</legend><div className="flex flex-wrap gap-2">{ARTIST_DISCIPLINES.map((d) => { const on = chosen.includes(d); return <label key={d} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-700"}`}><input type="checkbox" name="disciplines" value={d} checked={on} onChange={() => setChosen((p) => (p.includes(d) ? p.filter((x) => x !== d) : [...p, d]))} className="sr-only" />{d}</label>; })}</div></fieldset>
+      <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Disciplines</legend><div className="flex flex-wrap gap-2">{ARTIST_DISCIPLINES.map((d) => { const on = chosen.includes(d); return <label key={d} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-canvas" : "border-slate-300 bg-canvas text-slate-700"}`}><input type="checkbox" name="disciplines" value={d} checked={on} onChange={() => setChosen((p) => (p.includes(d) ? p.filter((x) => x !== d) : [...p, d]))} className="sr-only" />{d}</label>; })}</div></fieldset>
       <div><label className={label} htmlFor="ar-other">Autres disciplines</label><input id="ar-other" name="otherDisciplines" defaultValue={others} maxLength={120} className={input} placeholder="Séparées par des virgules" /></div>
       <div><label className={label} htmlFor="ar-pres">Présentation artistique</label><textarea id="ar-pres" name="presentation" defaultValue={data.presentation} rows={4} maxLength={800} className={input} /></div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div><label className={label} htmlFor="ar-zone">Zone de déplacement</label><input id="ar-zone" name="zoneNote" defaultValue={data.zoneNote} maxLength={200} placeholder="Ex. Eure-et-Loir et départements voisins" className={input} /></div>
         <div><label className={label} htmlFor="ar-avail">Disponibilités</label><input id="ar-avail" name="availabilityNote" defaultValue={data.availabilityNote} maxLength={300} placeholder="Ex. week-ends, été" className={input} /></div>
       </div>
-      <div><label className={label} htmlFor="ar-tech">Fiche technique</label><textarea id="ar-tech" name="techSheet" defaultValue={data.techSheet} rows={6} maxLength={4000} className={input} placeholder="Besoins en son, lumière, espace, électricité, durée, temps d'installation…" /><p className="mt-1 text-xs text-slate-500">Texte libre. Vos prestations (avec tarif indicatif ou « Sur devis ») se publient avec le bouton « Publier » → Proposition → « Je propose une prestation ».</p></div>
+      <div><label className={label} htmlFor="ar-tech">Fiche technique</label><textarea id="ar-tech" name="techSheet" defaultValue={data.techSheet} rows={6} maxLength={4000} className={input} placeholder="Besoins en son, lumière, espace, électricité, durée, temps d’installation…" /><p className="mt-1 text-xs text-slate-500">Texte libre. Vos prestations (avec tarif indicatif ou « Sur devis ») se publient avec le bouton « Publier » → Proposition → « Je propose une prestation ».</p></div>
       <Note value={fb} /><PrimaryButton type="submit" disabled={pending}>{pending ? "Enregistrement…" : "Enregistrer mon espace artiste"}</PrimaryButton>
     </form>
   );

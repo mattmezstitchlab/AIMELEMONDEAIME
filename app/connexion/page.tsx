@@ -1,14 +1,23 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AuthSplit } from "@/components/public-shell";
+import { redirect } from "next/navigation";
+import { AuthSplit } from "@/components/auth-shell";
 import { LoginForm } from "./login-form";
 import { Notice } from "@/components/ui";
 import { isDatabaseConfigured } from "@/db";
+import { AUTH_ENABLED } from "@/lib/auth-mode";
 
 export const metadata: Metadata = { title: "Connexion — AIME®", description: "Connectez-vous à votre espace AIME® : démarches, projets, échanges et documents au même endroit." };
 
+/*
+ * Les comptes sont fermés tant que `AIME_AUTH_ENABLED` n’est pas à 1 : la page
+ * redirige alors vers l’explication publique. Le formulaire reste en place,
+ * prêt pour la réactivation (voir lib/auth-mode.ts).
+ */
 export default async function ConnexionPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  if (!AUTH_ENABLED) redirect("/mon-espace");
   const { next } = await searchParams;
+
   return (
     <AuthSplit title="Bon retour parmi nous." subtitle="Retrouvez vos démarches, vos projets, vos échanges et vos documents dans un seul espace.">
       <h1 className="text-3xl text-ink">Connexion à AIME®</h1>
@@ -23,19 +32,9 @@ export default async function ConnexionPage({ searchParams }: { searchParams: Pr
       <LoginForm next={next} available={isDatabaseConfigured} />
       <p className="mt-6 text-sm text-ink-3">
         Pas encore de compte ?{" "}
-        <Link
-          href={next ? `/inscription?next=${encodeURIComponent(next)}` : "/inscription"}
-          className="font-medium text-ink underline underline-offset-4"
-        >
+        <Link href={next ? `/inscription?next=${encodeURIComponent(next)}` : "/inscription"} className="font-medium text-ink underline underline-offset-4">
           Créer mon espace
         </Link>
-      </p>
-      <p className="mt-10 rounded-card bg-muted p-5 text-sm leading-relaxed text-ink-3">
-        Vous découvrez AIME® ?{" "}
-        <Link href="/decouvrir" className="font-medium text-ink underline underline-offset-4">
-          Visitez l’espace en lecture seule
-        </Link>
-        , sans créer de compte.
       </p>
     </AuthSplit>
   );

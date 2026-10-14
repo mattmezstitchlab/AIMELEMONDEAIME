@@ -2,7 +2,7 @@ import { db } from "@/db";
 import type { Metadata } from "next";
 import { users, offices } from "@/db/schema";
 import { asc } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth";
+import { requireUserPage } from "@/lib/auth";
 import { Card, SectionTitle } from "@/components/ui";
 import { CreateStaffForm, UserRow } from "../admin-forms";
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Utilisateurs — Administration AIME
 export const dynamic = "force-dynamic";
 
 export default async function UtilisateursPage() {
-  const me = (await getCurrentUser())!;
+  const me = (await requireUserPage());
   const list = await db
     .select({ id: users.id, fullName: users.fullName, email: users.email, role: users.role, officeId: users.officeId, isActive: users.isActive })
     .from(users)

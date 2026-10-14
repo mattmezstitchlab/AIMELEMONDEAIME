@@ -39,7 +39,7 @@ import {
   type TableStats,
 } from "@/lib/wedding";
 
-const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
 
@@ -64,7 +64,7 @@ function useRun() {
   return { fb, pending, run };
 }
 
-/** Texte préparé à relire puis à copier ou télécharger : AIME® ne l'envoie jamais à la place des mariés. */
+/** Texte préparé à relire puis à copier ou télécharger : AIME® ne l’envoie jamais à la place des mariés. */
 function CopyText({ text, filename }: { text: string; filename: string }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
@@ -86,8 +86,8 @@ function CopyText({ text, filename }: { text: string; filename: string }) {
   };
   return (
     <span className="flex flex-wrap gap-2">
-      <button type="button" onClick={() => void copy()} className="rounded-control bg-ink px-3 py-1.5 text-xs font-bold text-white hover:bg-ink-2">{copied ? "Copié ✓" : "Copier le texte"}</button>
-      <button type="button" onClick={download} className="rounded-control ring-1 ring-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700">Télécharger (.txt)</button>
+      <button type="button" onClick={() => void copy()} className="rounded-control bg-ink px-3 py-1.5 text-xs font-bold text-canvas hover:bg-ink-2">{copied ? "Copié ✓" : "Copier le texte"}</button>
+      <button type="button" onClick={download} className="rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-1.5 text-xs font-bold text-slate-700">Télécharger (.txt)</button>
     </span>
   );
 }
@@ -144,14 +144,14 @@ export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, w
         <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-800">{stats.enAttente} en attente de réponse</span>
         <span className="rounded-full bg-sky-50 px-3 py-1 text-sky-800">{stats.aInviter} à inviter</span>
         {stats.declines > 0 && <span className="rounded-full bg-rose-50 px-3 py-1 text-rose-700">{stats.declines} ne viendront pas</span>}
-        {invitesEstimes > 0 && <span className="rounded-full bg-white px-3 py-1 text-slate-500 ring-1 ring-slate-200">Estimation du parcours : ~{invitesEstimes} invités</span>}
+        {invitesEstimes > 0 && <span className="rounded-full bg-canvas px-3 py-1 text-slate-500 ring-1 ring-slate-200">Estimation du parcours : ~{invitesEstimes} invités</span>}
       </div>
       <p className="mt-2 text-xs text-slate-500">Le nombre de <strong>personnes confirmées</strong> est celui qui partira au traiteur ou au restaurant trois semaines avant le mariage. Les réponses se notent ici, au fil de l&apos;eau : AIME® n&apos;envoie aucune relance à votre place.</p>
 
       <ul className="mt-4 space-y-2">
         {guests.length === 0 && <li className="rounded-card border border-dashed border-slate-300 p-4 text-sm text-slate-600">Aucun invité pour l&apos;instant. Commencez par les deux familles, puis les témoins, puis les amis : foyer par foyer, avec le nombre de personnes.</li>}
         {guests.map((g) => (
-          <li key={g.id} className="rounded-card ring-1 ring-line bg-white p-3">
+          <li key={g.id} className="rounded-card ring-1 ring-line bg-canvas p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="font-semibold text-slate-900">{g.name} <span className="text-xs font-normal text-slate-500">· {g.persons} personne(s) · {guestGroupLabel(g.groupe)}</span></p>
@@ -161,7 +161,7 @@ export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, w
             </div>
             {editable && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <select aria-label={`Réponse de ${g.name}`} value={g.status} disabled={pending} onChange={(e) => run(() => setWeddingGuestStatus(g.id, e.target.value))} className="rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs">
+                <select aria-label={`Réponse de ${g.name}`} value={g.status} disabled={pending} onChange={(e) => run(() => setWeddingGuestStatus(g.id, e.target.value))} className="rounded-control ring-1 ring-slate-300 bg-canvas px-2 py-1.5 text-xs">
                   {GUEST_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
                 <button type="button" disabled={pending} onClick={() => startEdit(g)} className="text-xs font-semibold text-ink underline">Modifier</button>
@@ -218,12 +218,12 @@ function RelanceBlock({ weddingDate, enAttenteFoyers }: { weddingDate: string; e
   const [templateId, setTemplateId] = useState<string>(MESSAGE_TEMPLATES[0].id);
   const text = buildMessage(templateId, weddingDate);
   return (
-    <div className="mt-5 rounded-card ring-1 ring-line bg-white p-4">
+    <div className="mt-5 rounded-card ring-1 ring-line bg-canvas p-4">
       <h3 className="text-sm font-bold text-slate-900">Relancer les invités sans réponse</h3>
       <p className="mt-1 text-xs text-slate-600">{enAttenteFoyers} foyer(s) encore sans réponse définitive. Choisissez un modèle, personnalisez les crochets, puis envoyez-le par vos canaux habituels (SMS, messagerie, courriel) : c&apos;est vous qui écrivez à vos invités.</p>
       <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Choisir un modèle de relance">
         {MESSAGE_TEMPLATES.map((t) => (
-          <button key={t.id} type="button" onClick={() => setTemplateId(t.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${templateId === t.id ? "bg-ink text-white" : "ring-1 ring-slate-300 bg-white text-slate-700"}`}>{t.title}</button>
+          <button key={t.id} type="button" onClick={() => setTemplateId(t.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${templateId === t.id ? "bg-ink text-canvas" : "ring-1 ring-slate-300 bg-canvas text-slate-700"}`}>{t.title}</button>
         ))}
       </div>
       <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-control bg-slate-50 p-3 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200">{text}</pre>
@@ -267,7 +267,7 @@ function ThanksBlock({ confirmes, weddingDate, isOrganizer, pending, run }: {
       </ul>
       <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Choisir un modèle de remerciement">
         {THANK_YOU_TEMPLATES.map((t) => (
-          <button key={t.id} type="button" onClick={() => setTemplateId(t.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${templateId === t.id ? "bg-rose-700 text-white" : "ring-1 ring-slate-300 bg-white text-slate-700"}`}>{t.title}</button>
+          <button key={t.id} type="button" onClick={() => setTemplateId(t.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${templateId === t.id ? "bg-rose-700 text-white" : "ring-1 ring-slate-300 bg-canvas text-slate-700"}`}>{t.title}</button>
         ))}
       </div>
       <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-control bg-canvas p-3 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200">{text}</pre>
@@ -285,7 +285,7 @@ function BudgetItemRow({ item, editable, pending, run }: { item: BudgetItemView;
   const [actual, setActual] = useState(item.actualCents !== null ? String(item.actualCents / 100).replace(".", ",") : "");
   const [settled, setSettled] = useState(item.settled);
   return (
-    <li className="rounded-card ring-1 ring-line bg-white p-3">
+    <li className="rounded-card ring-1 ring-line bg-canvas p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="font-semibold text-slate-900">{item.label}</p>
@@ -298,7 +298,7 @@ function BudgetItemRow({ item, editable, pending, run }: { item: BudgetItemView;
       </div>
       {editable && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <input aria-label={`Montant confirmé pour ${item.label}`} value={actual} onChange={(e) => setActual(e.target.value)} placeholder="Devis confirmé, ex. 1 850" className="w-44 rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs" />
+          <input aria-label={`Montant confirmé pour ${item.label}`} value={actual} onChange={(e) => setActual(e.target.value)} placeholder="Devis confirmé, ex. 1 850" className="w-44 rounded-control ring-1 ring-slate-300 bg-canvas px-2 py-1.5 text-xs" />
           <label className="flex items-center gap-1.5 text-xs text-slate-600"><input type="checkbox" checked={settled} onChange={(e) => setSettled(e.target.checked)} className="h-3.5 w-3.5" /> Réglé</label>
           <button type="button" disabled={pending} onClick={() => run(() => setWeddingBudgetActual(item.id, actual, settled))} className="text-xs font-semibold text-ink underline">Noter</button>
           <button type="button" disabled={pending} onClick={() => run(() => removeWeddingBudgetItem(item.id))} className="text-xs font-semibold text-rose-700 underline">Retirer</button>
@@ -333,7 +333,7 @@ export function WeddingBudgetPanel({ projectId, items, stats, isOrganizer, open 
         <div className="rounded-card bg-slate-50 p-3"><p className="text-xs font-bold uppercase tracking-wide text-slate-500">Reste à régler</p><p className="mt-1 text-lg font-bold text-slate-900">{formatEuro(stats.resteAReglerCents)}</p></div>
       </div>
 
-      <div className="mt-3 rounded-card ring-1 ring-line bg-white p-3">
+      <div className="mt-3 rounded-card ring-1 ring-line bg-canvas p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold text-slate-800">Enveloppe globale : {stats.enveloppeCents !== null ? formatEuro(stats.enveloppeCents) : "non définie"}</p>
           {stats.ecartEnveloppeCents !== null && (
@@ -345,7 +345,7 @@ export function WeddingBudgetPanel({ projectId, items, stats, isOrganizer, open 
         {pct !== null && <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${stats.depasseEnveloppe ? "bg-rose-400" : "bg-ink-3"}`} style={{ width: `${pct}%` }} /></div>}
         {editable ? (
           <form onSubmit={(e) => { e.preventDefault(); run(() => setWeddingEnvelope(projectId, envelope)); }} className="mt-2 flex flex-wrap items-center gap-2">
-            <input aria-label="Enveloppe globale en euros" value={envelope} onChange={(e) => setEnvelope(e.target.value)} placeholder="Ex. 12 000" className="w-40 rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs" />
+            <input aria-label="Enveloppe globale en euros" value={envelope} onChange={(e) => setEnvelope(e.target.value)} placeholder="Ex. 12 000" className="w-40 rounded-control ring-1 ring-slate-300 bg-canvas px-2 py-1.5 text-xs" />
             <span className="text-xs text-slate-500">€</span>
             <button type="submit" disabled={pending} className="text-xs font-semibold text-ink underline">Enregistrer l&apos;enveloppe</button>
           </form>
@@ -427,7 +427,7 @@ export function WeddingTablesPanel({ projectId, tables, guests, stats, isOrganiz
                 <span><strong>{g.name}</strong> <span className="text-xs text-slate-500">· {g.persons} personne(s) · {guestGroupLabel(g.groupe)}</span></span>
                 {editable && tables.length > 0 && (
                   <span className="flex items-center gap-2">
-                    <select aria-label={`Table pour ${g.name}`} value={choice[g.id] ?? tables[0].id} onChange={(e) => setChoice((c) => ({ ...c, [g.id]: Number(e.target.value) }))} className="rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs">
+                    <select aria-label={`Table pour ${g.name}`} value={choice[g.id] ?? tables[0].id} onChange={(e) => setChoice((c) => ({ ...c, [g.id]: Number(e.target.value) }))} className="rounded-control ring-1 ring-slate-300 bg-canvas px-2 py-1.5 text-xs">
                       {tables.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
                     <button type="button" disabled={pending} onClick={() => run(() => assignWeddingGuestTable(g.id, choice[g.id] ?? tables[0].id))} className="text-xs font-bold text-ink underline">Placer</button>
@@ -446,7 +446,7 @@ export function WeddingTablesPanel({ projectId, tables, guests, stats, isOrganiz
           const st = parTable.get(t.id);
           const placed = confirmes.filter((g) => g.tableId === t.id);
           return (
-            <li key={t.id} className="rounded-card ring-1 ring-line bg-white p-4">
+            <li key={t.id} className="rounded-card ring-1 ring-line bg-canvas p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-semibold text-slate-900">{t.name}</p>
                 <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${st?.depasse ? "bg-rose-50 text-rose-700" : "bg-slate-100 text-slate-700"}`}>
@@ -483,7 +483,7 @@ export function WeddingTablesPanel({ projectId, tables, guests, stats, isOrganiz
           }}
           className="mt-4 grid gap-3 rounded-card bg-slate-50 p-4 sm:grid-cols-[1fr_150px_auto] sm:items-end"
         >
-          <div><label className={label} htmlFor="wt-name">{editingTableId ? "Modifier la table" : "Nouvelle table"}</label><input id="wt-name" value={tableName} onChange={(e) => setTableName(e.target.value)} placeholder="Ex. Table d'honneur, Les cousins, Collègues" className={input} /></div>
+          <div><label className={label} htmlFor="wt-name">{editingTableId ? "Modifier la table" : "Nouvelle table"}</label><input id="wt-name" value={tableName} onChange={(e) => setTableName(e.target.value)} placeholder="Ex. Table d’honneur, Les cousins, Collègues" className={input} /></div>
           <div><label className={label} htmlFor="wt-cap">Places (facultatif)</label><input id="wt-cap" value={tableCapacity} onChange={(e) => setTableCapacity(e.target.value)} placeholder="Ex. 8" className={input} /></div>
           <div className="flex gap-2">
             <PrimaryButton type="submit" disabled={pending || tableName.trim().length < 2}>{editingTableId ? "Enregistrer" : "Créer"}</PrimaryButton>

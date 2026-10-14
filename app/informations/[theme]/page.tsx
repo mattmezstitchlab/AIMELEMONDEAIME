@@ -37,7 +37,7 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
         title={label}
         subtitle={meta.tagline}
         actions={
-          <LinkButton href="/connexion" size="lg">
+          <LinkButton href="/mon-espace" size="lg">
             Faire une démarche
             <Icon name="arrow" className="h-4 w-4" />
           </LinkButton>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { SectionTitle, EmptyState } from "@/components/ui";
 import { PrintButton } from "@/components/community/print-button";
 import { buildYear, relativeLabel, YEAR_EVENT_LABELS, type YearEvent, type YearEventKind } from "@/lib/annee";
@@ -46,7 +46,7 @@ function EventRow({ e, now }: { e: YearEvent; now: Date }) {
 }
 
 export default async function MonAnnee() {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["membre"]);
   const now = new Date();
   const events = await getYearEvents(user.id, user.birthDate);
   const year = buildYear(events, now);
@@ -57,8 +57,8 @@ export default async function MonAnnee() {
     <div className="flex flex-col gap-8">
       <SectionTitle
         eyebrow="Mon année à préparer"
-        title="Votre année, d'un coup d'œil"
-        description="Toutes les dates de votre espace, réunies : échéances de vos parcours, rendez-vous, projets, et votre anniversaire. Rien n'est inventé — chaque date vient d'un parcours, d'un rendez-vous, d'un projet ou de votre profil."
+        title="Votre année, d’un coup d'œil"
+        description="Toutes les dates de votre espace, réunies : échéances de vos parcours, rendez-vous, projets, et votre anniversaire. Rien n’est inventé — chaque date vient d’un parcours, d’un rendez-vous, d’un projet ou de votre profil."
         actions={
           <span className="print:hidden">
             <PrintButton />
@@ -92,7 +92,7 @@ export default async function MonAnnee() {
       {year.total === 0 ? (
         <EmptyState
           title="Votre année est encore vierge"
-          description="Dès qu'un parcours pose un rappel, qu'un rendez-vous est demandé ou qu'un projet prend date, tout apparaît ici, mois par mois."
+          description="Dès qu’un parcours pose un rappel, qu’un rendez-vous est demandé ou qu’un projet prend date, tout apparaît ici, mois par mois."
           action={
             <span className="flex flex-wrap justify-center gap-3">
               <Link href="/espace/demarches/nouvelle" className="font-semibold text-ink underline">Commencer un parcours</Link>

@@ -20,7 +20,7 @@ export default async function CirclePage({ params }: { params: Promise<{ id: str
   const detail = await getCircleDetail(id, user.id);
   if (!detail) notFound();
   return (
-    <PublicPage solidHeader>
+    <PublicPage>
       <div className="bg-subtle">
         <div className="mx-auto max-w-4xl space-y-5 px-4 py-8 sm:px-6">
           <Link href="/espace" className="text-sm font-semibold text-ink underline">← Mes liens</Link>
@@ -43,7 +43,7 @@ export default async function CirclePage({ params }: { params: Promise<{ id: str
                   <h3 className="mt-1 text-lg font-bold text-slate-900">{p.title}</h3>
                   {p.hasPhoto && (
                     <>
-                      {/* eslint-disable-next-line @next/next/no-img-element -- photo d'API dynamique, dimensions inconnues */}
+                      {/* eslint-disable-next-line @next/next/no-img-element -- photo d’API dynamique, dimensions inconnues */}
                       <img src={`/api/cercles/posts/${p.id}/photo`} alt="" className="mt-3 max-h-72 w-full rounded-card object-cover" loading="lazy" />
                     </>
                   )}

@@ -1,16 +1,23 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AuthSplit } from "@/components/public-shell";
+import { redirect } from "next/navigation";
+import { AuthSplit } from "@/components/auth-shell";
 import { RegisterForm } from "./register-form";
 import { Notice } from "@/components/ui";
 import { db, isDatabaseConfigured } from "@/db";
 import { offices } from "@/db/schema";
+import { AUTH_ENABLED } from "@/lib/auth-mode";
 
 export const metadata: Metadata = { title: "Créer mon espace — AIME®", description: "Créez votre espace AIME® pour être accompagné dans vos démarches et rencontrer les personnes près de vous." };
 
 export const dynamic = "force-dynamic";
 
+/*
+ * Comptes fermés tant que `AIME_AUTH_ENABLED` n’est pas à 1 : l’explication
+ * publique prend le relais. Le formulaire reste en place pour la réactivation.
+ */
 export default async function InscriptionPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  if (!AUTH_ENABLED) redirect("/mon-espace");
   const { next } = await searchParams;
   const officeList = isDatabaseConfigured
     ? await db.select().from(offices).catch(() => [])

@@ -126,6 +126,147 @@
   --cal-highlight-dark: inset 0 1px 0 rgba(17, 17, 16, 0.06);
 }
 
+/*
+ * Thème sombre du site public (langage du modèle de référence) : la page est
+ * presque noire, les surfaces se détachent par paliers, et la couleur est
+ * portée par les tuiles pastel. Toutes les utilitaires (`bg-canvas`,
+ * `text-ink-2`, `ring-line`…) lisent ces variables : poser la classe sur un
+ * conteneur suffit à inverser tout son sous-arbre.
+ */
+.theme-night {
+  color-scheme: dark;
+
+  --color-canvas: #0a0a0a;
+  --color-subtle: #121211;
+  --color-muted: #1b1b1a;
+  --color-emphasis: #242423;
+  --color-ink: #ffffff;
+  --color-ink-2: #dcdbd7;
+  --color-ink-3: #9d9c98;
+  --color-ink-4: #807f7b;
+  --color-line: #2c2c2a;
+  --color-line-soft: #1f1f1e;
+  --color-night: #050505;
+  --color-night-2: #141413;
+  --color-night-3: #2c2c2a;
+
+  --cal-bg: #0a0a0a;
+  --cal-bg-subtle: #121211;
+  --cal-bg-muted: #1b1b1a;
+  --cal-bg-emphasis: #242423;
+  --cal-text-emphasis: #ffffff;
+  --cal-text: #dcdbd7;
+  --cal-text-subtle: #9d9c98;
+  --cal-text-muted: #807f7b;
+  --cal-border: #2c2c2a;
+  --cal-border-subtle: #1f1f1e;
+  --cal-border-emphasis: #4a4a47;
+  --cal-brand: #ffffff;
+  --cal-brand-emphasis: #e6e5e2;
+  --cal-shadow-rested: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --cal-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --cal-shadow-lifted: 0 24px 60px rgba(0, 0, 0, 0.6);
+
+  /* Échelles héritées : les composants écrits avant la refonte utilisent
+     encore `slate-*` et les fonds d'état clairs. On les retourne ici, sans
+     toucher à leur code, pour qu'ils restent lisibles sur fond sombre. */
+  --color-slate-50: #121211;
+  --color-slate-100: #1b1b1a;
+  --color-slate-200: #2c2c2a;
+  --color-slate-300: #3a3a38;
+  --color-slate-400: #807f7b;
+  --color-slate-500: #9d9c98;
+  --color-slate-600: #bdbbb5;
+  --color-slate-700: #dcdbd7;
+  --color-slate-800: #ecebe8;
+  --color-slate-900: #ffffff;
+  --color-slate-950: #ffffff;
+
+  --color-state-info-soft: #10243a;
+  --color-state-info: #84caff;
+  --color-state-info-line: #1d3f63;
+  --color-state-success-soft: #0c2a1c;
+  --color-state-success: #75e0a7;
+  --color-state-success-line: #1b4a33;
+  --color-state-warning-soft: #2b1f0d;
+  --color-state-warning: #fec84b;
+  --color-state-warning-line: #533a12;
+  --color-state-danger-soft: #2d1513;
+  --color-state-danger: #fda29b;
+  --color-state-danger-line: #5a2723;
+}
+
+/*
+ * Bloc clair : à poser sur les cartes blanches et les aperçus d'interface qui
+ * vivent à l'intérieur du thème sombre (mêmes valeurs que `:root`).
+ */
+.theme-light {
+  color-scheme: light;
+
+  --color-canvas: #ffffff;
+  --color-subtle: #f9f9f8;
+  --color-muted: #f5f5f4;
+  --color-emphasis: #eeedeb;
+  --color-ink: #111110;
+  --color-ink-2: #242422;
+  --color-ink-3: #6f6e6b;
+  --color-ink-4: #7a7873;
+  --color-line: #e7e5e4;
+  --color-line-soft: #f0efed;
+
+  --cal-bg: #ffffff;
+  --cal-bg-subtle: #f9f9f8;
+  --cal-bg-muted: #f5f5f4;
+  --cal-text-emphasis: #111110;
+  --cal-text: #242422;
+  --cal-text-subtle: #6f6e6b;
+  --cal-text-muted: #7a7873;
+  --cal-border: #e7e5e4;
+  --cal-border-subtle: #f0efed;
+  --cal-brand: #111110;
+  --cal-shadow-rested: 0 1px 2px rgba(17, 17, 16, 0.06), 0 1px 1px rgba(17, 17, 16, 0.03);
+  --cal-shadow-lifted: 0 2px 6px rgba(17, 17, 16, 0.08), 0 18px 40px rgba(17, 17, 16, 0.12);
+}
+
+/* Tuile pastel : grand rayon, texte encre foncée, jamais de bordure. */
+.tile {
+  border-radius: 1.5rem;
+  color: var(--color-tile-ink);
+  padding: 1.25rem;
+  overflow: hidden;
+}
+
+.tile-sky { background: var(--color-tile-sky); }
+.tile-coral { background: var(--color-tile-coral); }
+.tile-amber { background: var(--color-tile-amber); }
+.tile-sand { background: var(--color-tile-sand); }
+.tile-sage { background: var(--color-tile-sage); }
+.tile-lilac { background: var(--color-tile-lilac); }
+
+/* Carte d'action blanche sur fond sombre, avec bouton pilule noir. */
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  color: #12100e;
+  padding: 1.5rem;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.action-row:hover {
+  transform: translateY(-1px);
+}
+
+/* Lien de navigation minuscule en capitales espacées (haut de page). */
+.nav-tiny {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 @theme {
   /* Typographie : Cal Sans pour le display, Inter pour le corps. */
   --font-sans: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -148,6 +289,16 @@
   --color-night-3: #2c2c2a;
   --color-accent-soft: #f5f5f4;
   --color-accent: #111110;
+
+  /* Tuiles pastel : le seul endroit coloré du site public. Elles portent les
+     aperçus d'interface, comme les vignettes du modèle de référence. */
+  --color-tile-sky: #a9c0d8;
+  --color-tile-coral: #e4705a;
+  --color-tile-amber: #f0a936;
+  --color-tile-sand: #d3ae72;
+  --color-tile-sage: #a3b79c;
+  --color-tile-lilac: #b3a8d6;
+  --color-tile-ink: #12100e;
 
   /* États */
   --color-state-info-soft: #eff8ff;

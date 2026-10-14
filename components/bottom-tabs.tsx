@@ -9,7 +9,7 @@ const TABS: Array<{ key: string; label: string; href: string; icon: IconName }> 
   { key: "accueil", label: "Accueil", href: "/", icon: "home" },
   { key: "parcours", label: "Parcours", href: "/accompagnement?besoin=mariage", icon: "demarches" },
   { key: "guides", label: "Guides", href: "/informations/mariage", icon: "book" },
-  { key: "espace", label: "Mon espace", href: "/connexion", icon: "user" },
+  { key: "espace", label: "Mon espace", href: "/mon-espace", icon: "user" },
 ];
 
 function activeKey(pathname: string): string {

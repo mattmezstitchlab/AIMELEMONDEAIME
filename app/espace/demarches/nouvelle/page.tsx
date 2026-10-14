@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { journeys, projectMembers, projects } from "@/db/schema";
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import { getActiveProcedureTypes } from "@/lib/queries";
 import { SectionTitle, Card } from "@/components/ui";
 import { Icon } from "@/components/icon";
@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Nouvelle démarche — AIME®" };
 export const dynamic = "force-dynamic";
 
 export default async function NouvelleDemarche({ searchParams }: { searchParams: Promise<{ situation?: string; reprendre?: string; q?: string; erreur?: string }> }) {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["membre"]);
   const sp = await searchParams;
   let journey: typeof journeys.$inferSelect | null = null;
   if (sp.reprendre) {
@@ -46,8 +46,8 @@ export default async function NouvelleDemarche({ searchParams }: { searchParams:
   const procedures = q ? allProcedures.filter((p) => normalize(`${p.title} ${p.description}`).includes(q)) : allProcedures;
   return (
     <div className="flex flex-col gap-8">
-      <SectionTitle eyebrow="Nouvelle démarche" title="De quoi avez-vous besoin aujourd'hui ?" description="Un parcours guidé pour préparer vous-même, ou un dossier suivi par un bureau : tout commence ici. Quelques questions suffisent ; vous pourrez enregistrer et reprendre plus tard." />
-      <form role="search" className="flex max-w-xl gap-2"><label htmlFor="sq" className="sr-only">Chercher une situation</label><input id="sq" name="q" defaultValue={sp.q} placeholder="Ex. naissance, logement, concert, retraite…" className="min-w-0 flex-1 rounded-control ring-1 ring-slate-300 px-4 py-2.5 text-sm" /><button className="rounded-control bg-ink px-4 text-sm font-bold text-white">Chercher</button></form>
+      <SectionTitle eyebrow="Nouvelle démarche" title="De quoi avez-vous besoin aujourd’hui ?" description="Un parcours guidé pour préparer vous-même, ou un dossier suivi par un bureau : tout commence ici. Quelques questions suffisent ; vous pourrez enregistrer et reprendre plus tard." />
+      <form role="search" className="flex max-w-xl gap-2"><label htmlFor="sq" className="sr-only">Chercher une situation</label><input id="sq" name="q" defaultValue={sp.q} placeholder="Ex. naissance, logement, concert, retraite…" className="min-w-0 flex-1 rounded-control ring-1 ring-slate-300 px-4 py-2.5 text-sm" /><button className="rounded-control bg-ink px-4 text-sm font-bold text-canvas">Chercher</button></form>
       <p className="-mt-6 text-xs text-slate-500">La recherche porte sur les mots des situations proposées : elle ne comprend pas librement toutes les demandes. En cas de doute, un conseiller France services peut vous orienter.</p>
       {sp.erreur && <p role="alert" className="-mb-2 rounded-control bg-rose-50 px-4 py-2 text-sm text-rose-700">{sp.erreur}</p>}
       <section>
@@ -62,7 +62,7 @@ export default async function NouvelleDemarche({ searchParams }: { searchParams:
                 ? "Parcours événement : artiste et organisation, si utile"
                 : s.pilot
                   ? "Parcours guidé : projet et ressources"
-                  : "Orientation sourcée et liste d'actions";
+                  : "Orientation sourcée et liste d’actions";
             return (
               <Link key={s.key} href={`/espace/demarches/nouvelle?situation=${s.key}`} className="group flex gap-4 rounded-card bg-canvas ring-1 ring-line p-5 shadow-rested hover:ring-ink-4">
                 <Icon name={s.icon} className="h-8 w-8 shrink-0 text-ink-3" />
@@ -82,7 +82,7 @@ export default async function NouvelleDemarche({ searchParams }: { searchParams:
               <input type="hidden" name="procedureTypeId" value={p.id} />
               <Icon name="building" className="h-8 w-8 shrink-0 text-ink-3" />
               <span><span className="block font-bold text-slate-900">{p.title}</span><span className="mt-1 block text-sm text-slate-600">{p.description}</span>
-              <button type="submit" className="mt-3 rounded-control bg-ink px-3 py-2 text-xs font-bold text-white">Commencer ce dossier</button></span>
+              <button type="submit" className="mt-3 rounded-control bg-ink px-3 py-2 text-xs font-bold text-canvas">Commencer ce dossier</button></span>
             </form>
           ))}</div>
         </section>

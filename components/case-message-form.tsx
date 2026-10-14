@@ -36,7 +36,7 @@ export function CaseMessageForm({
         setSuccess(true);
         router.refresh();
       } else {
-        setError(result.error || "Erreur lors de l'envoi.");
+        setError(result.error || "Erreur lors de l’envoi.");
       }
     });
   }

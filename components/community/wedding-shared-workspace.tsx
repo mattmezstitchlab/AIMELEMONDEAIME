@@ -12,7 +12,7 @@ type SharedTable = { id: number; name: string; capacity: number | null };
 
 type Feedback = { ok: boolean; text: string } | null;
 const button = "rounded-control px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
-const input = "w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2 text-sm text-slate-900";
+const input = "w-full rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-2 text-sm text-slate-900";
 
 function fmtDate(value: string) {
   if (!value) return "Date à confirmer";
@@ -82,7 +82,7 @@ export function WeddingSharedWorkspace({
               <p className="mt-2 text-sm text-slate-600">{fmtDate(weddingDate)} · {city}</p>
             </div>
             <form action={leaveWeddingAccess}>
-              <button type="submit" className={`${button} ring-1 ring-slate-300 bg-white text-slate-700`}>Quitter cet accès</button>
+              <button type="submit" className={`${button} ring-1 ring-slate-300 bg-canvas text-slate-700`}>Quitter cet accès</button>
             </form>
           </div>
           <div className="mt-4 rounded-card bg-muted p-3 text-xs text-ink">
@@ -117,8 +117,8 @@ export function WeddingSharedWorkspace({
           </ol>
           {isCoordinator && canEdit && (
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" disabled={pending || program.length >= 25} onClick={() => setProgram((previous) => [...previous, { time: "", label: "" }])} className={`${button} ring-1 ring-slate-300 bg-white text-slate-700`}>Ajouter une étape</button>
-              <button type="button" disabled={pending} onClick={saveProgram} className={`${button} bg-ink text-white hover:bg-ink-2`}>{pending ? "Enregistrement…" : "Enregistrer le déroulé"}</button>
+              <button type="button" disabled={pending || program.length >= 25} onClick={() => setProgram((previous) => [...previous, { time: "", label: "" }])} className={`${button} ring-1 ring-slate-300 bg-canvas text-slate-700`}>Ajouter une étape</button>
+              <button type="button" disabled={pending} onClick={saveProgram} className={`${button} bg-ink text-canvas hover:bg-ink-2`}>{pending ? "Enregistrement…" : "Enregistrer le déroulé"}</button>
             </div>
           )}
         </section>
@@ -134,7 +134,7 @@ export function WeddingSharedWorkspace({
                     <span className="text-sm font-semibold text-slate-800">{guest.name} <span className="font-normal text-slate-500">· {guest.persons} personne(s)</span></span>
                     {canEdit ? (
                       <label className="text-xs font-semibold text-slate-600">Réponse
-                        <select value={guest.status} disabled={pending} onChange={(event) => updateGuest(guest.id, event.target.value)} className="ml-2 rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800">
+                        <select value={guest.status} disabled={pending} onChange={(event) => updateGuest(guest.id, event.target.value)} className="ml-2 rounded-control ring-1 ring-slate-300 bg-canvas px-2 py-1.5 text-xs text-slate-800">
                           {guest.status === "a_inviter" && <option value="a_inviter" disabled>À inviter</option>}
                           {GUEST_STATUSES.filter((status) => status.value !== "a_inviter").map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
                         </select>

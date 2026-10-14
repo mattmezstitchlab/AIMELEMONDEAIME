@@ -1,0 +1,209 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { Icon, type IconName } from "@/components/icon";
+
+/*
+ * Briques du site public, calquées sur le modèle de référence :
+ *  · `HeroCard`  — grande carte pastel avec le nom, l’accroche et un portrait ;
+ *  · `ActionRow` — carte blanche avec un intitulé et un bouton pilule noir ;
+ *  · `Tile`      — tuile pastel qui contient un aperçu d’interface ;
+ *  · `LinkRow`   — ligne de texte sobre, pour les listes longues.
+ *
+ * La couleur vient uniquement des tuiles : le reste de la page reste
+ * monochrome, comme dans le modèle.
+ */
+
+export type TileTone = "sky" | "coral" | "amber" | "sand" | "sage" | "lilac";
+
+export function HeroCard({
+  title,
+  subtitle,
+  eyebrow,
+  image,
+  imageAlt = "",
+  footer,
+}: {
+  title: ReactNode;
+  subtitle: string;
+  eyebrow?: string;
+  /** Visuel carré ou portrait affiché à droite de la carte (WebP, 620 × 775). */
+  image?: { src: string; srcSet?: string; type?: string };
+  imageAlt?: string;
+  footer?: ReactNode;
+}) {
+  return (
+    <section className="tile tile-sky animate-fade-up">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-8">
+        <div className="flex min-w-0 flex-1 flex-col justify-between">
+          <div>
+            {eyebrow && <p className="nav-tiny text-tile-ink/60">{eyebrow}</p>}
+            <h1 className="mt-3 text-[2.5rem] leading-[0.98] tracking-[-0.03em] text-tile-ink sm:text-[3.25rem]">{title}</h1>
+            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-tile-ink/80">{subtitle}</p>
+          </div>
+          {footer && <div className="mt-6">{footer}</div>}
+        </div>
+
+        {image && (
+          <div className="shrink-0 sm:w-[9.5rem]">
+            <picture>
+              <source srcSet={image.srcSet} type={image.type} />
+              <img
+                src={image.src}
+                alt={imageAlt}
+                width={620}
+                height={775}
+                className="h-[11rem] w-full rounded-[1.25rem] object-cover sm:h-full sm:min-h-[11rem]"
+                loading="eager"
+              />
+            </picture>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/** Carte blanche avec intitulé et bouton pilule : l’action principale d’une section. */
+export function ActionRow({
+  title,
+  hint,
+  href,
+  label,
+  icon = "arrow",
+}: {
+  title: string;
+  hint?: string;
+  href: string;
+  label: string;
+  icon?: IconName;
+}) {
+  return (
+    <Link href={href} className="action-row justify-between">
+      <span className="min-w-0">
+        <span className="block text-[1.6rem] leading-tight tracking-[-0.02em] text-[#12100e]" style={{ fontFamily: "var(--font-display)" }}>
+          {title}
+        </span>
+        {hint && <span className="mt-1 block text-sm text-[#12100e]/60">{hint}</span>}
+      </span>
+      <span className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-[#12100e] px-5 text-sm font-medium text-white">
+        {label}
+        <Icon name={icon} className="h-4 w-4" />
+      </span>
+    </Link>
+  );
+}
+
+/**
+ * Tuile pastel contenant un aperçu d’interface. L’aperçu est rendu dans un
+ * bloc clair (`theme-light`) afin de rester lisible sur la couleur.
+ */
+export function Tile({
+  tone,
+  label,
+  detail,
+  children,
+  className = "",
+  wide = false,
+}: {
+  tone: TileTone;
+  label?: string;
+  detail?: string;
+  children: ReactNode;
+  className?: string;
+  wide?: boolean;
+}) {
+  return (
+    <section className={`tile tile-${tone} flex flex-col ${wide ? "sm:col-span-2" : ""} ${className}`}>
+      {label && (
+        <header className="mb-4 flex items-baseline justify-between gap-3">
+          <h3 className="text-lg leading-tight tracking-[-0.02em] text-tile-ink">{label}</h3>
+          {detail && <span className="nav-tiny text-tile-ink/55">{detail}</span>}
+        </header>
+      )}
+      <div className="theme-light flex flex-1 items-start justify-center">{children}</div>
+    </section>
+  );
+}
+
+/** Ligne sobre pour les listes longues (guides, thèmes, ressources). */
+export function LinkRow({
+  href,
+  title,
+  meta,
+  external = false,
+}: {
+  href: string;
+  title: string;
+  meta?: string;
+  external?: boolean;
+}) {
+  const content = (
+    <>
+      <span className="min-w-0">
+        <span className="block truncate text-[15px] text-ink">{title}</span>
+        {meta && <span className="mt-0.5 block truncate text-xs text-ink-3">{meta}</span>}
+      </span>
+      <Icon
+        name={external ? "external" : "arrow"}
+        className="h-4 w-4 shrink-0 text-ink-4 transition group-hover:translate-x-0.5 group-hover:text-ink"
+      />
+    </>
+  );
+
+  const className =
+    "group flex items-center justify-between gap-4 border-b border-line py-3.5 transition last:border-b-0";
+
+  return external ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      {content}
+    </a>
+  ) : (
+    <Link href={href} className={className}>
+      {content}
+    </Link>
+  );
+}
+
+/**
+ * En-tête de page publique (hors accueil) : étiquette, titre, chapô, actions.
+ * Même registre typographique que la carte du hero, sans visuel.
+ */
+export function PageIntro({
+  eyebrow,
+  title,
+  text,
+  actions,
+  image,
+}: {
+  eyebrow?: string;
+  title: string;
+  text?: string;
+  actions?: ReactNode;
+  image?: string;
+}) {
+  return (
+    <section className="animate-fade-up border-b border-line pb-8">
+      {eyebrow && <p className="nav-tiny text-ink-3">{eyebrow}</p>}
+      <div className="mt-3 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl">
+          <h1 className="text-[2.25rem] leading-[1.02] tracking-[-0.03em] text-ink sm:text-[2.75rem]">{title}</h1>
+          {text && <p className="mt-4 text-[15px] leading-relaxed text-ink-3">{text}</p>}
+        </div>
+        {image && (
+          // eslint-disable-next-line @next/next/no-img-element -- visuel local
+          <img src={image} alt="" className="h-28 w-full rounded-[1.25rem] object-cover sm:h-28 sm:w-40" />
+        )}
+      </div>
+      {actions && <div className="mt-7 flex flex-wrap items-center gap-3">{actions}</div>}
+    </section>
+  );
+}
+
+/** Titre de section du site public. */
+export function TileHeading({ children, id }: { children: ReactNode; id?: string }) {
+  return (
+    <h2 id={id} className="text-[1.75rem] leading-tight tracking-[-0.02em] text-ink">
+      {children}
+    </h2>
+  );
+}

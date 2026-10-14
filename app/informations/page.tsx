@@ -9,14 +9,14 @@ import { eq } from "drizzle-orm";
 import { ARTICLE_CATEGORY_LABELS, THEME_META } from "@/lib/constants";
 import { InformClient } from "./inform-client";
 
-export const metadata: Metadata = { title: "Informations par thématique — AIME®", description: "Santé, famille, logement, retraite, emploi : l'information classée par sujet de la vie quotidienne." };
+export const metadata: Metadata = { title: "Informations par thématique — AIME®", description: "Santé, famille, logement, retraite, emploi : l’information classée par sujet de la vie quotidienne." };
 
 export const dynamic = "force-dynamic";
 
 /**
- * Porte unique « s'informer » : thématiques, recherche et lecture au même endroit.
+ * Porte unique « s’informer » : thématiques, recherche et lecture au même endroit.
  * `?vue=guides` ne montre que les guides pratiques (ancienne page /guides).
- * Le détail d'un guide reste sur /guides/[slug].
+ * Le détail d’un guide reste sur /guides/[slug].
  */
 export default async function InformationsHub({ searchParams }: { searchParams: Promise<{ vue?: string }> }) {
   const { vue } = await searchParams;
@@ -31,7 +31,7 @@ export default async function InformationsHub({ searchParams }: { searchParams: 
       <Hero
         size="md"
         eyebrow="Informations"
-        title={guidesOnly ? "Guides pratiques" : "Tout ce qu'il faut savoir, au même endroit"}
+        title={guidesOnly ? "Guides pratiques" : "Tout ce qu’il faut savoir, au même endroit"}
         subtitle={guidesOnly
           ? "Les guides pas à pas, toutes thématiques confondues."
           : "Santé, famille, mariage, argent et difficultés, logement, retraite, cotisations, emploi : articles et guides pratiques, regroupés par thématique."}

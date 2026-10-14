@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/auth";
+import { requireRolePage } from "@/lib/auth";
 import type { Metadata } from "next";
 import { db } from "@/db";
 import { payments } from "@/db/schema";
@@ -18,7 +18,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default async function PaiementsPage({ searchParams }: { searchParams: Promise<{ q?: string; type?: string }> }) {
-  const user = (await getCurrentUser())!;
+  const user = await requireRolePage(["membre"]);
   const { q, type } = await searchParams;
 
   const conditions = [eq(payments.memberId, user.id)];
@@ -47,14 +47,14 @@ export default async function PaiementsPage({ searchParams }: { searchParams: Pr
               <option key={value} value={value}>{label}</option>
             ))}
           </select>
-          <button type="submit" className="rounded-control bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-2">Filtrer</button>
+          <button type="submit" className="rounded-control bg-ink px-4 py-2 text-sm font-semibold text-canvas hover:bg-ink-2">Filtrer</button>
         </form>
       </Card>
 
       {items.length === 0 ? (
         <EmptyState title="Aucun paiement trouvé" />
       ) : (
-        <div className="overflow-hidden rounded-card ring-1 ring-line bg-white">
+        <div className="overflow-hidden rounded-card ring-1 ring-line bg-canvas">
           <table data-assistant-id="payments-table" className="w-full text-left text-sm">
             <caption className="sr-only">Historique de mes paiements</caption>
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
