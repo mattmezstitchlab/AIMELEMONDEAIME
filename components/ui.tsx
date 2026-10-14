@@ -326,8 +326,12 @@ const VARIANTS = {
   /* Actions posées sur un fond encre (bandeaux, entêtes d'espace). */
   inverse: "bg-canvas text-ink hover:bg-canvas/90",
   outlineInverse: "text-canvas ring-1 ring-canvas/30 hover:bg-canvas/10",
-  /* Action destructive. */
-  danger: "bg-ink text-canvas hover:opacity-90",
+  /*
+   * Action destructive : cerclée d'encre plutôt que pleine, pour ne pas se
+   * confondre avec l'action principale. Sans couleur, c'est le contour qui
+   * porte l'avertissement — et la suppression demande toujours confirmation.
+   */
+  danger: "bg-canvas text-ink ring-1 ring-ink hover:bg-muted",
 } as const;
 
 export type ButtonVariant = keyof typeof VARIANTS;
