@@ -252,9 +252,9 @@ export default async function HomePage() {
         <section className="mt-8">
           <TileHeading>Les circuits.</TileHeading>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-3">
-            Un circuit, c&apos;est un cadre précis pour un type de fiche : une ferme et ce qu&apos;elle produit, un coup de main
-            qu&apos;on peut donner. Partout la même règle : votre commune suffit, aucune adresse n&apos;est publiée, et rien ne se
-            conclut sans l&apos;accord des personnes.
+            Un circuit, c&apos;est un cadre précis pour un type de fiche : une ferme et ce qu&apos;elle produit, une association
+            et ce qu&apos;elle propose, un coup de main qu&apos;on peut donner. Partout la même règle : votre commune suffit, aucune
+            adresse n&apos;est publiée, et rien ne se conclut sans l&apos;accord des personnes.
           </p>
           <div className="mt-3">
             {openCircuits().map((circuit) => (
