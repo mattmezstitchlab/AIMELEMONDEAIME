@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 
 type Ctx = { params: Promise<{ id: string }> };
 
-/** Photo de profil : publique seulement si la personne a choisi d'apparaître sur la carte. */
+/** Photo de profil : publique seulement si la personne a choisi d'apparaître dans l'annuaire. */
 export async function GET(_req: Request, { params }: Ctx) {
   const id = Number((await params).id);
   if (!Number.isSafeInteger(id)) return new Response("Introuvable", { status: 404 });

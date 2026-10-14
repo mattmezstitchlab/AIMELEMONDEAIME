@@ -25,7 +25,7 @@ export default async function WeddingAccessInvitationPage({ params, searchParams
   const invite = query.expired ? null : await getWeddingAccessInvite(token);
   return (
     <PublicPage solidHeader>
-      <main className="theme-light min-h-[70vh] bg-canvas px-5 py-12 text-ink-2 sm:px-8">
+      <main className="min-h-[70vh] bg-canvas px-5 py-12 text-ink-2 sm:px-8">
         <div className="mx-auto max-w-2xl rounded-panel bg-canvas p-7 shadow-rested ring-1 ring-line sm:p-9">
           {invite ? (
             <>

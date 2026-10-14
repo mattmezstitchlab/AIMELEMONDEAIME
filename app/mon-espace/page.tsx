@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicPage, PageColumn } from "@/components/public-shell";
-import { HeroCard, LinkRow, Tile, TileHeading } from "@/components/marketing/tiles";
+import { HeroCard, LinkRow, Panel, TileHeading } from "@/components/marketing/tiles";
 import { Icon } from "@/components/icon";
 import { LinkButton } from "@/components/ui";
 import { GuestListMock } from "@/components/marketing/mocks";
@@ -12,7 +12,7 @@ import { AUTH_ENABLED } from "@/lib/auth-mode";
 export const metadata: Metadata = {
   title: "Mon espace — AIME®",
   description:
-    "Les comptes AIME® sont en préparation. En attendant, parcourez librement les parcours, les guides et la carte du territoire.",
+    "Les comptes AIME® sont en préparation. En attendant, parcourez librement les parcours, les guides et les transmissions du territoire.",
 };
 
 const COMING = [
@@ -61,18 +61,18 @@ export default function MonEspacePage() {
           </div>
         </section>
 
-        <Tile tone="coral" label="Aperçu de Mon espace" detail="Lecture seule">
+        <Panel label="Aperçu de Mon espace" detail="Lecture seule">
           <div className="w-full">
             <GuestListMock />
           </div>
-        </Tile>
+        </Panel>
 
         <section className="mt-4">
           <TileHeading>En attendant, tout cela est ouvert :</TileHeading>
           <div className="mt-3">
             <LinkRow href="/accompagnement?besoin=mariage" title="Le parcours mariage" meta="Étapes, pièces, repères de délais" />
             <LinkRow href="/informations" title="Les guides et sujets" meta="Santé, famille, logement, retraite, emploi" />
-            <LinkRow href="/le-monde-aime" title="La carte du territoire" meta="Producteurs, artistes, associations, entraide" />
+            <LinkRow href="/le-monde-aime" title="L’entraide et les transmissions" meta="Producteurs, artistes, associations, entraide" />
             <LinkRow href="/annuaire" title="Les points d’accueil" meta="Lieux de démonstration" />
             <LinkRow href="/vision" title="Notre méthode et nos limites" meta="Ce qui fonctionne, ce qui reste à construire" />
           </div>

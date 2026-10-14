@@ -43,7 +43,7 @@ export function RemindButton({ caseId, compact = false }: { caseId: number; comp
       >
         {state.kind === "busy" ? "Envoi…" : "Relancer le membre"}
       </button>
-      {state.kind === "error" && <span className="text-xs font-medium text-red-700">{state.message}</span>}
+      {state.kind === "error" && <span className="text-xs font-medium text-ink-2">{state.message}</span>}
     </span>
   );
 }

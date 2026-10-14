@@ -43,16 +43,16 @@ export function CaseMessageForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-      <label htmlFor={`msg-${caseId}`} className="text-sm font-medium text-slate-700">{label}</label>
+      <label htmlFor={`msg-${caseId}`} className="text-sm font-medium text-ink-2">{label}</label>
       <textarea
         id={`msg-${caseId}`}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
+        className="w-full rounded-control ring-1 ring-line px-3 py-2 text-sm focus:ring-ink"
       />
-      {error && <p role="alert" className="text-sm text-rose-700">{error}</p>}
+      {error && <p role="alert" className="text-sm text-ink-2">{error}</p>}
       {success && <p role="status" className="text-sm text-ink-2">Message envoyé.</p>}
       <PrimaryButton type="submit" disabled={isPending} className="self-start">
         {isPending ? "Envoi…" : "Envoyer"}

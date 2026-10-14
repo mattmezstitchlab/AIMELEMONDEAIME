@@ -35,7 +35,7 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
       <Card>
         <form className="flex flex-wrap items-end gap-3">
           <div className="min-w-[220px] flex-1">
-            <label htmlFor="q" className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Recherche</label>
+            <label htmlFor="q" className="block text-xs font-semibold uppercase tracking-wide text-ink-3">Recherche</label>
             <input
               id="q"
               name="q"
@@ -43,12 +43,12 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
               defaultValue={q ?? ""}
               data-assistant-id="backoffice-search"
               placeholder="Référence, titre ou adhérent"
-              className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-control ring-1 ring-line px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label htmlFor="statut" className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Statut</label>
-            <select id="statut" name="statut" data-assistant-id="backoffice-filters" defaultValue={statut || ""} className="mt-1 rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm">
+            <label htmlFor="statut" className="block text-xs font-semibold uppercase tracking-wide text-ink-3">Statut</label>
+            <select id="statut" name="statut" data-assistant-id="backoffice-filters" defaultValue={statut || ""} className="mt-1 rounded-control ring-1 ring-line px-3 py-2 text-sm">
               <option value="">Tous les statuts</option>
               {Object.entries(CASE_STATUS_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -56,8 +56,8 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
             </select>
           </div>
           <div>
-            <label htmlFor="affectation" className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Affectation</label>
-            <select id="affectation" name="affectation" defaultValue={affectation || ""} className="mt-1 rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm">
+            <label htmlFor="affectation" className="block text-xs font-semibold uppercase tracking-wide text-ink-3">Affectation</label>
+            <select id="affectation" name="affectation" defaultValue={affectation || ""} className="mt-1 rounded-control ring-1 ring-line px-3 py-2 text-sm">
               <option value="">Tous</option>
               <option value="moi">Mes dossiers</option>
               <option value="non_affectes">Non affectés</option>
@@ -73,7 +73,7 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
         <div className="overflow-hidden rounded-card ring-1 ring-line bg-canvas">
           <table data-assistant-id="backoffice-table" className="w-full text-left text-sm">
             <caption className="sr-only">Liste des dossiers</caption>
-            <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-muted text-xs uppercase tracking-wide text-ink-3">
               <tr>
                 <th scope="col" className="px-4 py-3">Référence</th>
                 <th scope="col" className="px-4 py-3">Adhérent</th>
@@ -84,26 +84,26 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
                 <th scope="col" className="px-4 py-3">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {items.map((c) => (
                 <tr key={c.id} className="hover:bg-muted/40">
                   <td className="px-4 py-3">
                     <Link href={`/back-office/dossiers/${c.id}`} className="font-semibold text-ink hover:underline">{c.reference}</Link>
                   </td>
-                  <td className="px-4 py-3 text-slate-700">{c.memberName}</td>
-                  <td className="px-4 py-3 text-slate-700">{c.title}</td>
-                  <td className="px-4 py-3 text-slate-500">{formatDate(c.updatedAt)}</td>
+                  <td className="px-4 py-3 text-ink-2">{c.memberName}</td>
+                  <td className="px-4 py-3 text-ink-2">{c.title}</td>
+                  <td className="px-4 py-3 text-ink-3">{formatDate(c.updatedAt)}</td>
                   <td className="px-4 py-3">
                     {c.status === "terminee" || c.status === "brouillon" ? (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-ink-4">—</span>
                     ) : (
-                      <span className={`text-xs font-semibold ${daysSince(c.updatedAt) >= 14 ? "text-red-700" : daysSince(c.updatedAt) >= 7 ? "text-amber-700" : "text-slate-500"}`}>
+                      <span className={`text-xs font-semibold ${daysSince(c.updatedAt) >= 14 ? "text-ink-2" : daysSince(c.updatedAt) >= 7 ? "text-ink-2" : "text-ink-3"}`}>
                         {daysSince(c.updatedAt)} j sans mouvement
                       </span>
                     )}
                   </td>
                   <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
-                  <td className="px-4 py-3">{c.status === "piece_manquante" ? <RemindButton caseId={c.id} compact /> : <span className="text-slate-400">—</span>}</td>
+                  <td className="px-4 py-3">{c.status === "piece_manquante" ? <RemindButton caseId={c.id} compact /> : <span className="text-ink-4">—</span>}</td>
                 </tr>
               ))}
             </tbody>

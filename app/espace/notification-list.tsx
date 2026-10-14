@@ -12,7 +12,7 @@ export function NotificationList({ items }: { items: Item[] }) {
   );
   const [, startTransition] = useTransition();
 
-  if (optimistic.length === 0) return <p className="mt-3 text-sm text-slate-600">Aucune notification.</p>;
+  if (optimistic.length === 0) return <p className="mt-3 text-sm text-ink-3">Aucune notification.</p>;
   const unread = optimistic.some((n) => !n.isRead);
 
   return (
@@ -23,8 +23,8 @@ export function NotificationList({ items }: { items: Item[] }) {
             <div className="flex items-start gap-2">
               {!n.isRead && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink-2" aria-label="Non lue" />}
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-slate-900">{n.title}</p>
-                <p className="text-slate-600">{n.body}</p>
+                <p className="font-semibold text-ink">{n.title}</p>
+                <p className="text-ink-3">{n.body}</p>
                 <div className="mt-1 flex gap-3 text-xs">
                   {n.link && (
                     <Link href={n.link} className="font-semibold text-ink-2 hover:underline" onClick={() => startTransition(async () => { setOptimistic(n.id); await markNotificationRead(n.id); })}>
@@ -32,7 +32,7 @@ export function NotificationList({ items }: { items: Item[] }) {
                     </Link>
                   )}
                   {!n.isRead && (
-                    <button type="button" className="font-medium text-slate-500 hover:underline" onClick={() => startTransition(async () => { setOptimistic(n.id); await markNotificationRead(n.id); })}>
+                    <button type="button" className="font-medium text-ink-3 hover:underline" onClick={() => startTransition(async () => { setOptimistic(n.id); await markNotificationRead(n.id); })}>
                       Marquer comme lue
                     </button>
                   )}

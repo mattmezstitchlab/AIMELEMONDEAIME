@@ -32,11 +32,11 @@ export default async function Apercu() {
             <Icon name="arrow" className="h-5 w-5" />
           </span>
           <span className="flex-1">
-            <span className="eyebrow text-white/60">Prochaine action · {next.title}</span>
-            <span className="mt-2 block text-lg text-white">{next.next.label}</span>
-            <span className="block text-sm text-white/65">{TASK_STATUS_LABEL[next.next.status]}</span>
+            <span className="eyebrow text-canvas/60">Prochaine action · {next.title}</span>
+            <span className="mt-2 block text-lg text-canvas">{next.next.label}</span>
+            <span className="block text-sm text-canvas/65">{TASK_STATUS_LABEL[next.next.status]}</span>
           </span>
-          <Icon name="arrow" className="h-4 w-4 shrink-0 text-white/60 transition group-hover:translate-x-1" />
+          <Icon name="arrow" className="h-4 w-4 shrink-0 text-canvas/60 transition group-hover:translate-x-1" />
         </Link>
       ) : null}
 

@@ -227,3 +227,37 @@ Pages appelées réellement (mode dégradé, sans base de données) :
 ```
 
 Contrôles supplémentaires : chaque classe CSS utilisée existe dans la feuille générée ; les jetons du thème sombre et les utilitaires de tuiles sont présents ; les polices se servent en local ; les aperçus d'interface sont bien rendus dans un contexte clair à l'intérieur d'une tuile pastel.
+
+---
+
+## Mise à jour — 14 octobre 2026 (soir) : fond blanc, monochrome, sans carte
+
+Trois décisions ont été prises après la première livraison, qui modifient la feuille de
+route ci-dessus. Elles sont toutes appliquées dans cette version.
+
+1. **Retour au fond blanc et passage intégral au monochrome.** Le registre « page sombre »
+   a été retiré (`theme-night`, `theme-light`, `--color-night*`), les tuiles pastel
+   supprimées, et **aucune classe chromatique ne subsiste** dans le projet
+   (`bg-rose-*`, `text-sky-*`, `bg-slate-*`… → jetons `ink`/`canvas`/`muted`/`line`).
+   La différenciation d'état passe par le contraste, plus par la couleur.
+   Vérifié dans la feuille de style servie : 0 utilitaire coloré, 0 pastel, 0 `.tile`.
+
+2. **Suppression de la carte interactive** (et non du Monde Aime). `components/carte/`
+   est supprimé ; `/le-monde-aime` affiche des listes filtrables ; `components/marketing/mocks.tsx`
+   expose `TransmissionsMock` à la place de `MapPointsMock` ; l'assistant ne référence plus
+   de cibles cartographiques (`carte-map`, `carte-filters`, `carte-place`, `lma-map`,
+   `lma-detail`) ni le scénario `carte-produits` (remplacé par `producteurs`, en liste).
+
+3. **Nouvelle source de coordonnées : commune + code postal.** `lib/point.ts` en déduit un
+   point (centre du département via `lib/departements.ts`, décalage stable sur le nom de la
+   commune, bornes 41–51,5 / −5,5–9,8). Les actions serveur (`community`, `projects`,
+   `profile`) résolvent ce point quand aucun point explicite n'est fourni : la porte
+   « affiner le point plus tard » reste ouverte. Le code postal est conservé avec la commune
+   (« Chartres (28000) »), sans changement de schéma ni migration.
+
+4. **Récit réécrit** autour des fractures et de la transmission, le mariage comme porte
+   d'entrée ; l'organisme de tutelle reste implicite (« prototype indépendant, non affilié
+   à un organisme »).
+
+Contrôles de cette version : `tsc` ✓, `eslint` ✓, `next build` ✓, 14 routes appelées
+(public 200, `/espace` `/admin` `/connexion` `/carte` 307).

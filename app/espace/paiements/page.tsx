@@ -35,13 +35,13 @@ export default async function PaiementsPage({ searchParams }: { searchParams: Pr
 
       <Card className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">Solde net (prestations + remboursements − cotisations)</p>
-          <p className="text-2xl font-bold text-slate-900">{formatAmount(total)}</p>
+          <p className="text-sm text-ink-3">Solde net (prestations + remboursements − cotisations)</p>
+          <p className="text-2xl font-bold text-ink">{formatAmount(total)}</p>
         </div>
         <form className="flex flex-wrap gap-2" role="search">
           <label htmlFor="q" className="sr-only">Rechercher un paiement</label>
-          <input id="q" name="q" defaultValue={q} data-assistant-id="payments-search" placeholder="Rechercher un libellé" className="rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm" />
-          <select name="type" defaultValue={type || ""} className="rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm">
+          <input id="q" name="q" defaultValue={q} data-assistant-id="payments-search" placeholder="Rechercher un libellé" className="rounded-control ring-1 ring-line px-3 py-2 text-sm" />
+          <select name="type" defaultValue={type || ""} className="rounded-control ring-1 ring-line px-3 py-2 text-sm">
             <option value="">Tous types</option>
             {Object.entries(PAYMENT_TYPE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
@@ -57,7 +57,7 @@ export default async function PaiementsPage({ searchParams }: { searchParams: Pr
         <div className="overflow-hidden rounded-card ring-1 ring-line bg-canvas">
           <table data-assistant-id="payments-table" className="w-full text-left text-sm">
             <caption className="sr-only">Historique de mes paiements</caption>
-            <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-muted text-xs uppercase tracking-wide text-ink-3">
               <tr>
                 <th scope="col" className="px-4 py-3">Date</th>
                 <th scope="col" className="px-4 py-3">Libellé</th>
@@ -67,15 +67,15 @@ export default async function PaiementsPage({ searchParams }: { searchParams: Pr
                 <th scope="col" className="px-4 py-3 text-right">Montant</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {items.map((p) => (
                 <tr key={p.id}>
-                  <td className="px-4 py-3 text-slate-700">{formatDate(p.date)}</td>
-                  <td className="px-4 py-3 font-medium text-slate-900">{p.label}</td>
+                  <td className="px-4 py-3 text-ink-2">{formatDate(p.date)}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{p.label}</td>
                   <td className="px-4 py-3"><Tag>{PAYMENT_TYPE_LABELS[p.type] ?? p.type}</Tag></td>
-                  <td className="px-4 py-3 text-slate-500">{p.reference}</td>
-                  <td className="px-4 py-3 text-slate-700">{STATUS_LABELS[p.status] ?? p.status}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-slate-900">
+                  <td className="px-4 py-3 text-ink-3">{p.reference}</td>
+                  <td className="px-4 py-3 text-ink-2">{STATUS_LABELS[p.status] ?? p.status}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-ink">
                     {p.type === "cotisation" ? "− " : ""}{formatAmount(p.amount)}
                   </td>
                 </tr>
@@ -84,7 +84,7 @@ export default async function PaiementsPage({ searchParams }: { searchParams: Pr
           </table>
         </div>
       )}
-      <p className="text-xs text-slate-500">Données fictives à but de démonstration — aucun paiement réel n&apos;est effectué.</p>
+      <p className="text-xs text-ink-3">Données fictives à but de démonstration — aucun paiement réel n&apos;est effectué.</p>
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default async function ContenusPage() {
     <div className="flex flex-col gap-6">
       <SectionTitle eyebrow="Administration" title="Contenus publics" description="Rédigez, publiez ou retirez les articles et guides pratiques du site public." />
       <Card>
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Nouveau contenu</h2>
+        <h2 className="mb-4 text-lg font-semibold text-ink">Nouveau contenu</h2>
         <ArticleForm />
       </Card>
       <ul className="flex flex-col gap-3">

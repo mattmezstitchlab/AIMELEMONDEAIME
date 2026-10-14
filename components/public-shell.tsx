@@ -9,18 +9,18 @@ import { AUTH_ENABLED } from "@/lib/auth-mode";
 /*
  * Coquille du site public.
  *
- * Langage visuel : celui du modèle de référence — page presque noire, une
- * colonne étroite et centrée, navigation en capitales minuscules, tuiles
- * pastel. Les espaces de travail (Mon espace, back-office, administration)
- * gardent, eux, la surface claire dense définie dans app-shell.tsx : les deux
- * contextes ne se mélangent pas.
+ * Langage visuel : encre et papier. Fond blanc, une colonne étroite et centrée,
+ * navigation en capitales minuscules, cartes blanches cerclées d’un filet,
+ * boutons noirs. Aucune couleur décorative : le rythme vient des surfaces et
+ * des contours. Les espaces de travail (Mon espace, back-office, administration)
+ * partagent la même surface claire : les deux contextes ne se mélangent pas.
  */
 
 /** Navigation courte du haut : trois entrées, rien de plus. */
 const PRIMARY = [
   { href: "/accompagnement?besoin=mariage", label: "Parcours" },
   { href: "/informations", label: "Guides" },
-  { href: "/le-monde-aime", label: "Carte" },
+  { href: "/le-monde-aime", label: "Entraide" },
 ];
 
 /** Colonne principale du site public : une seule largeur, centrée. */
@@ -81,7 +81,7 @@ export function PublicHeader() {
 const FOOTER_LINKS: Array<{ href: string; label: string }> = [
   { href: "/accompagnement", label: "Accompagnement" },
   { href: "/informations", label: "Guides et sujets" },
-  { href: "/le-monde-aime", label: "Carte et entraide" },
+  { href: "/le-monde-aime", label: "Entraide et transmission" },
   { href: "/annuaire", label: "Points d’accueil" },
   { href: "/vision", label: "Notre méthode" },
   { href: "/mon-espace", label: "Mon espace" },
@@ -119,7 +119,7 @@ export function PublicFooter() {
 /** `solidHeader` n’a plus d’effet : l’en-tête public est opaque en permanence. */
 export function PublicPage({ children }: { children: ReactNode; solidHeader?: boolean }) {
   return (
-    <div className="theme-night flex min-h-screen flex-col bg-canvas pb-20 text-ink-2 md:pb-0">
+    <div className="flex min-h-screen flex-col bg-canvas pb-20 text-ink-2 md:pb-0">
       <PublicHeader />
       <main id="contenu-principal" className="flex-1">
         {children}

@@ -33,11 +33,11 @@ export function DocumentUploader({ caseId, onUploaded }: { caseId?: number; onUp
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3 rounded-control border border-dashed border-slate-300 bg-canvas p-4">
+    <form ref={formRef} action={formAction} className="flex flex-col gap-3 rounded-control border border-dashed border-line bg-canvas p-4">
       {caseId && <input type="hidden" name="caseId" value={caseId} />}
       <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
         <div>
-          <label htmlFor={`file-${caseId ?? "general"}`} className="block text-sm font-medium text-slate-700">
+          <label htmlFor={`file-${caseId ?? "general"}`} className="block text-sm font-medium text-ink-2">
             Ajouter un document (PDF, JPG, PNG ou Word — 8 Mo max.)
           </label>
           <input
@@ -46,17 +46,17 @@ export function DocumentUploader({ caseId, onUploaded }: { caseId?: number; onUp
             type="file"
             required
             accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-            className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink"
+            className="mt-1 w-full rounded-control ring-1 ring-line px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink"
           />
         </div>
         <div>
-          <label htmlFor={`category-${caseId ?? "general"}`} className="block text-sm font-medium text-slate-700">Catégorie</label>
-          <select id={`category-${caseId ?? "general"}`} name="category" className="mt-1 rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm">
+          <label htmlFor={`category-${caseId ?? "general"}`} className="block text-sm font-medium text-ink-2">Catégorie</label>
+          <select id={`category-${caseId ?? "general"}`} name="category" className="mt-1 rounded-control ring-1 ring-line px-3 py-2 text-sm">
             {CATEGORY_OPTIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
       </div>
-      {state && !state.ok && <p role="alert" className="text-sm text-rose-700">{state.error}</p>}
+      {state && !state.ok && <p role="alert" className="text-sm text-ink-2">{state.error}</p>}
       {state && state.ok && <p role="status" className="text-sm text-ink-2">Document ajouté avec succès.</p>}
       <PrimaryButton type="submit" disabled={pending} className="self-start">
         {pending ? "Envoi…" : "Téléverser le document"}

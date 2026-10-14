@@ -38,11 +38,11 @@ export function Logo({ light = false, size = "md", withMark = false }: { light?:
       {withMark && <LogoMark className={size === "sm" ? "h-7 w-7" : "h-8 w-8"} tone={light ? "light" : "ink"} />}
       <span className="flex items-baseline gap-1">
         <span
-          className={`font-display ${wordmark} leading-none tracking-[-0.01em] ${light ? "text-white" : "text-ink"}`}
+          className={`font-display ${wordmark} leading-none tracking-[-0.01em] ${light ? "text-canvas" : "text-ink"}`}
         >
           AIME
         </span>
-        <span className={`text-[9px] font-medium leading-none ${light ? "text-white/60" : "text-ink-4"}`}>®</span>
+        <span className={`text-[9px] font-medium leading-none ${light ? "text-canvas/60" : "text-ink-4"}`}>®</span>
       </span>
     </span>
   );
@@ -215,7 +215,7 @@ export function Stat({ label, value, hint, icon }: { label: string; value: React
 
 export function EmptyState({ title, description, action, icon = "sparkles" }: { title: string; description?: string; action?: ReactNode; icon?: IconName }) {
   return (
-    <div className="rounded-card border border-dashed border-slate-300 bg-subtle px-6 py-14 text-center">
+    <div className="rounded-card border border-dashed border-line bg-subtle px-6 py-14 text-center">
       <span className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-canvas ring-1 ring-line">
         <Icon name={icon} className="h-5 w-5 text-ink-3" />
       </span>
@@ -322,11 +322,11 @@ const VARIANTS = {
   secondary: "bg-canvas text-ink-2 ring-1 ring-line hover:bg-subtle hover:text-ink",
   /* Action tertiaire : fantôme. */
   ghost: "text-ink-2 hover:bg-muted",
-  /* Action secondaire sur fond sombre. */
+  /* Actions posées sur un fond encre (bandeaux, entêtes d'espace). */
   inverse: "bg-canvas text-ink hover:bg-canvas/90",
-  outlineInverse: "text-white ring-1 ring-white/30 hover:bg-canvas/10",
+  outlineInverse: "text-canvas ring-1 ring-canvas/30 hover:bg-canvas/10",
   /* Action destructive. */
-  danger: "bg-state-danger text-white hover:opacity-90",
+  danger: "bg-state-danger text-canvas hover:opacity-90",
 } as const;
 
 export type ButtonVariant = keyof typeof VARIANTS;

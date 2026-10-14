@@ -61,7 +61,7 @@ function Choice<Value extends string>({
 }) {
   return (
     <fieldset>
-      <legend className={`text-xs font-medium ${onDark ? "text-white/60" : "text-ink-3"}`}>{legend}</legend>
+      <legend className={`text-xs font-medium ${onDark ? "text-canvas/60" : "text-ink-3"}`}>{legend}</legend>
       <div className={`mt-2 inline-flex rounded-control p-0.5 ${onDark ? "bg-canvas/10" : "bg-muted"}`}>
         {options.map(([optionValue, label]) => {
           const active = value === optionValue;
@@ -74,7 +74,7 @@ function Choice<Value extends string>({
                     ? "bg-canvas text-ink"
                     : "bg-canvas text-ink shadow-rested"
                   : onDark
-                    ? "text-white/60 hover:text-white"
+                    ? "text-canvas/60 hover:text-canvas"
                     : "text-ink-3 hover:text-ink"
               }`}
             >
@@ -111,7 +111,7 @@ export function DisplayPreferences({
 
   const popover = mode === "mobile";
   const summaryTone = onDark
-    ? "text-white/70 hover:bg-canvas/10 hover:text-white"
+    ? "text-canvas/70 hover:bg-canvas/10 hover:text-canvas"
     : "text-ink-2 hover:bg-muted hover:text-ink";
 
   return (

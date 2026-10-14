@@ -3,17 +3,17 @@ import type { ReactNode } from "react";
 import { Icon, type IconName } from "@/components/icon";
 
 /*
- * Briques du site public, calquées sur le modèle de référence :
- *  · `HeroCard`  — grande carte pastel avec le nom, l’accroche et un portrait ;
- *  · `ActionRow` — carte blanche avec un intitulé et un bouton pilule noir ;
- *  · `Tile`      — tuile pastel qui contient un aperçu d’interface ;
- *  · `LinkRow`   — ligne de texte sobre, pour les listes longues.
+ * Briques du site public : encre et papier, aucune couleur décorative.
  *
- * La couleur vient uniquement des tuiles : le reste de la page reste
- * monochrome, comme dans le modèle.
+ *  · `HeroCard`  — la carte d'ouverture : un titre display, un chapô, un portrait ;
+ *  · `ActionRow` — la carte d'action : un intitulé et un bouton pilule noir ;
+ *  · `Panel`     — une carte qui contient un aperçu d'interface ;
+ *  · `LinkRow`   — une ligne de texte sobre, pour les listes longues.
+ *
+ * Le rythme vient des surfaces (blanc, gris très clair) et des contours fins,
+ * jamais de la teinte. Les couleurs sémantiques d'état restent réservées aux
+ * informations qui en ont besoin (alerte, succès).
  */
-
-export type TileTone = "sky" | "coral" | "amber" | "sand" | "sage" | "lilac";
 
 export function HeroCard({
   title,
@@ -26,19 +26,19 @@ export function HeroCard({
   title: ReactNode;
   subtitle: string;
   eyebrow?: string;
-  /** Visuel carré ou portrait affiché à droite de la carte (WebP, 620 × 775). */
+  /** Portrait affiché à droite de la carte (WebP, 620 × 775). */
   image?: { src: string; srcSet?: string; type?: string };
   imageAlt?: string;
   footer?: ReactNode;
 }) {
   return (
-    <section className="tile tile-sky animate-fade-up">
+    <section className="animate-fade-up rounded-[1.5rem] bg-subtle p-6 ring-1 ring-line sm:p-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-8">
         <div className="flex min-w-0 flex-1 flex-col justify-between">
           <div>
-            {eyebrow && <p className="nav-tiny text-tile-ink/60">{eyebrow}</p>}
-            <h1 className="mt-3 text-[2.5rem] leading-[0.98] tracking-[-0.03em] text-tile-ink sm:text-[3.25rem]">{title}</h1>
-            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-tile-ink/80">{subtitle}</p>
+            {eyebrow && <p className="nav-tiny text-ink-3">{eyebrow}</p>}
+            <h1 className="mt-3 text-[2.5rem] leading-[0.98] tracking-[-0.03em] text-ink sm:text-[3.25rem]">{title}</h1>
+            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-ink-2">{subtitle}</p>
           </div>
           {footer && <div className="mt-6">{footer}</div>}
         </div>
@@ -52,7 +52,7 @@ export function HeroCard({
                 alt={imageAlt}
                 width={620}
                 height={775}
-                className="h-[11rem] w-full rounded-[1.25rem] object-cover sm:h-full sm:min-h-[11rem]"
+                className="h-[11rem] w-full rounded-[1.25rem] object-cover ring-1 ring-line sm:h-full sm:min-h-[11rem]"
                 loading="eager"
               />
             </picture>
@@ -63,7 +63,7 @@ export function HeroCard({
   );
 }
 
-/** Carte blanche avec intitulé et bouton pilule : l’action principale d’une section. */
+/** Carte d'action : un intitulé et un bouton pilule noir. */
 export function ActionRow({
   title,
   hint,
@@ -80,12 +80,12 @@ export function ActionRow({
   return (
     <Link href={href} className="action-row justify-between">
       <span className="min-w-0">
-        <span className="block text-[1.6rem] leading-tight tracking-[-0.02em] text-[#12100e]" style={{ fontFamily: "var(--font-display)" }}>
+        <span className="block text-[1.6rem] leading-tight tracking-[-0.02em] text-ink" style={{ fontFamily: "var(--font-display)" }}>
           {title}
         </span>
-        {hint && <span className="mt-1 block text-sm text-[#12100e]/60">{hint}</span>}
+        {hint && <span className="mt-1 block text-sm text-ink-3">{hint}</span>}
       </span>
-      <span className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-[#12100e] px-5 text-sm font-medium text-white">
+      <span className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-canvas">
         {label}
         <Icon name={icon} className="h-4 w-4" />
       </span>
@@ -94,18 +94,16 @@ export function ActionRow({
 }
 
 /**
- * Tuile pastel contenant un aperçu d’interface. L’aperçu est rendu dans un
- * bloc clair (`theme-light`) afin de rester lisible sur la couleur.
+ * Carte qui contient un aperçu d'interface. L'aperçu porte sa propre surface
+ * claire, pour se détacher du fond de la carte.
  */
-export function Tile({
-  tone,
+export function Panel({
   label,
   detail,
   children,
   className = "",
   wide = false,
 }: {
-  tone: TileTone;
   label?: string;
   detail?: string;
   children: ReactNode;
@@ -113,14 +111,14 @@ export function Tile({
   wide?: boolean;
 }) {
   return (
-    <section className={`tile tile-${tone} flex flex-col ${wide ? "sm:col-span-2" : ""} ${className}`}>
+    <section className={`flex flex-col rounded-[1.5rem] bg-subtle p-5 ring-1 ring-line ${wide ? "sm:col-span-2" : ""} ${className}`}>
       {label && (
         <header className="mb-4 flex items-baseline justify-between gap-3">
-          <h3 className="text-lg leading-tight tracking-[-0.02em] text-tile-ink">{label}</h3>
-          {detail && <span className="nav-tiny text-tile-ink/55">{detail}</span>}
+          <h3 className="text-lg leading-tight tracking-[-0.02em] text-ink">{label}</h3>
+          {detail && <span className="nav-tiny text-ink-4">{detail}</span>}
         </header>
       )}
-      <div className="theme-light flex flex-1 items-start justify-center">{children}</div>
+      <div className="flex flex-1 items-start justify-center">{children}</div>
     </section>
   );
 }
@@ -166,7 +164,6 @@ export function LinkRow({
 
 /**
  * En-tête de page publique (hors accueil) : étiquette, titre, chapô, actions.
- * Même registre typographique que la carte du hero, sans visuel.
  */
 export function PageIntro({
   eyebrow,
@@ -191,7 +188,7 @@ export function PageIntro({
         </div>
         {image && (
           // eslint-disable-next-line @next/next/no-img-element -- visuel local
-          <img src={image} alt="" className="h-28 w-full rounded-[1.25rem] object-cover sm:h-28 sm:w-40" />
+          <img src={image} alt="" className="h-28 w-full rounded-[1.25rem] object-cover ring-1 ring-line sm:h-28 sm:w-40" />
         )}
       </div>
       {actions && <div className="mt-7 flex flex-wrap items-center gap-3">{actions}</div>}

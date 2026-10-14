@@ -43,7 +43,7 @@ export default function VisionPage() {
           <div className="grid gap-6 md:grid-cols-3">
             {[
               { n: "01", title: "Votre histoire", text: "Saisir le strict nécessaire et pouvoir corriger, reprendre ou supprimer ce qui vous appartient.", icon: "shield" as const },
-              { n: "02", title: "Votre territoire", text: "Trouver personnes, offres, besoins et projets sur une carte, sans exposer d’adresse privée.", icon: "pin" as const },
+              { n: "02", title: "Votre territoire", text: "Trouver personnes, offres, besoins et projets près de chez soi, sans exposer d’adresse privée.", icon: "pin" as const },
               { n: "03", title: "Vos décisions", text: "Distinguer ce que vous avez préparé, ce qui a été réellement envoyé et ce qu’un organisme a confirmé.", icon: "lock" as const },
             ].map((item) => (
               <div key={item.n} className="rounded-card bg-canvas p-6 shadow-rested ring-1 ring-line">
@@ -127,11 +127,11 @@ export default function VisionPage() {
         </Container>
       </section>
 
-      <section className="bg-night text-white/70">
+      <section className="bg-ink text-canvas/70">
         <Container className="py-16 lg:py-20">
-          <p className="eyebrow text-white/55">Sources primaires consultées</p>
-          <h2 className="mt-4 max-w-3xl text-3xl leading-tight text-white sm:text-4xl">Vérifier chaque proposition à sa source.</h2>
-          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-white/60">
+          <p className="eyebrow text-canvas/55">Sources primaires consultées</p>
+          <h2 className="mt-4 max-w-3xl text-3xl leading-tight text-canvas sm:text-4xl">Vérifier chaque proposition à sa source.</h2>
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-canvas/60">
             Les liens suivants documentent notre positionnement. Ils ne valent pas partenariat ni intégration. Les contenus réglementaires
             doivent être révisés avant tout usage réel.
           </p>
@@ -144,18 +144,18 @@ export default function VisionPage() {
                   rel="noopener noreferrer"
                   className="group flex h-full flex-col rounded-card bg-canvas/[0.04] p-5 ring-1 ring-white/10 transition hover:bg-canvas/[0.07] hover:ring-white/25"
                 >
-                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-canvas">
                     {source.name}
                     <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                   </span>
-                  <span className="mt-2 text-xs leading-relaxed text-white/60">{source.lesson}</span>
+                  <span className="mt-2 text-xs leading-relaxed text-canvas/60">{source.lesson}</span>
                 </a>
               </li>
             ))}
           </ul>
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <Tag tone="outline">Prototype indépendant</Tag>
-            <p className="text-xs text-white/55">Dernière revue des repères réglementaires : voir les dates citées dans les fiches.</p>
+            <p className="text-xs text-canvas/55">Dernière revue des repères réglementaires : voir les dates citées dans les fiches.</p>
           </div>
         </Container>
       </section>

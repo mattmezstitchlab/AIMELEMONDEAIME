@@ -569,7 +569,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if ((role === "membre" || role === "visiteur") && orientation.kind === "single" && orientation.matches[0].score >= 12) {
       const situation = orientation.matches[0];
       // Niveau 2 : au membre connecté, proposer de créer le brouillon tout de
-      // suite (toujours après confirmation sur la carte).
+      // suite (toujours après confirmation explicite).
       if (canAct && summary) {
         const existingJourney = summary.journeys.find((j) => j.situation === situation.key);
         if (existingJourney) {
@@ -732,7 +732,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if (!action) return null;
     const state = actionState[turn.id];
     if (state?.status === "cancelled") {
-      return <p className="px-1 text-xs text-slate-500">D&apos;accord, je ne fais rien. Vous pourrez toujours le faire depuis les pages habituelles.</p>;
+      return <p className="px-1 text-xs text-ink-3">D&apos;accord, je ne fais rien. Vous pourrez toujours le faire depuis les pages habituelles.</p>;
     }
     if (state?.status === "done") return null;
     const busy = state?.status === "busy";
@@ -740,7 +740,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     return (
       <div className="rounded-card border ring-line bg-muted/80 px-3.5 py-3">
         {state?.status === "error" && (
-          <p className="mb-2 text-xs font-medium text-red-700">{state.message}</p>
+          <p className="mb-2 text-xs font-medium text-ink-2">{state.message}</p>
         )}
         {action.kind === "creer_brouillon" && (
           <>
@@ -796,7 +796,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       {/* Bulle de conversation, en bas à droite */}
       <div className="fixed bottom-20 right-4 z-50 flex items-center gap-3 md:bottom-5 md:right-5">
         {!open && (
-          <span className="hidden rounded-full bg-canvas px-3 py-2 text-sm font-semibold text-slate-700 shadow-md sm:block">
+          <span className="hidden rounded-full bg-canvas px-3 py-2 text-sm font-semibold text-ink-2 shadow-md sm:block">
             Besoin d&apos;aide ?
           </span>
         )}
@@ -822,23 +822,23 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           aria-label="Assistant de navigation"
           className="fixed inset-x-3 bottom-36 z-50 flex max-h-[70vh] md:bottom-24 flex-col overflow-hidden rounded-card bg-canvas ring-1 ring-line shadow-lifted sm:inset-x-auto sm:bottom-36 sm:right-5 md:bottom-24 sm:w-[400px]"
         >
-          <header className="flex items-center gap-3 border-b border-slate-100 bg-canvas px-4 py-3">
+          <header className="flex items-center gap-3 border-b border-line bg-canvas px-4 py-3">
             <span className="grid h-9 w-9 place-items-center rounded-full bg-ink text-canvas">
               <Msasprout className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-900">Assistant de navigation</p>
-              <p className="truncate text-xs text-slate-500">
+              <p className="truncate text-sm font-semibold text-ink">Assistant de navigation</p>
+              <p className="truncate text-xs text-ink-3">
                 Aide contextuelle, sans IA générative · {role === "visiteur" ? "visiteur" : role}
               </p>
             </div>
-            <button type="button" onClick={() => { setOpen(false); triggerRef.current?.focus(); }} className="grid h-10 w-10 place-items-center rounded-control text-slate-600 hover:bg-slate-100" aria-label="Fermer l’assistant">
+            <button type="button" onClick={() => { setOpen(false); triggerRef.current?.focus(); }} className="grid h-10 w-10 place-items-center rounded-control text-ink-3 hover:bg-muted" aria-label="Fermer l’assistant">
               <Icon name="alert" className="h-4 w-4 rotate-45" />
             </button>
           </header>
 
           {guide && (
-            <div className="flex items-center gap-2 border-b border-slate-100 bg-muted px-4 py-2.5">
+            <div className="flex items-center gap-2 border-b border-line bg-muted px-4 py-2.5">
               <span className="text-xs font-semibold text-ink">
                 Étape {guide.stepIndex + 1} sur {totalSteps}
               </span>
@@ -858,8 +858,8 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
           )}
 
           {highlightLabel && (
-            <p className="border-b border-slate-100 bg-subtle px-4 py-2 text-xs text-slate-600">
-              Élément mis en évidence : <strong className="text-slate-900">{highlightLabel}</strong>
+            <p className="border-b border-line bg-subtle px-4 py-2 text-xs text-ink-3">
+              Élément mis en évidence : <strong className="text-ink">{highlightLabel}</strong>
             </p>
           )}
 
@@ -867,7 +867,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             {displayTurns.map((turn) => (
               <div key={turn.id} className="space-y-2">
                 <div className={`flex ${turn.from === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[85%] whitespace-pre-line rounded-card px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-ink text-canvas" : "bg-canvas text-slate-800 shadow-rested"}`}>
+                  <div className={`max-w-[85%] whitespace-pre-line rounded-card px-3.5 py-2.5 text-sm ${turn.from === "user" ? "bg-ink text-canvas" : "bg-canvas text-ink-2 shadow-rested"}`}>
                     {turn.text}
                   </div>
                 </div>
@@ -877,16 +877,16 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             {lastSuggestions && !guide && (
               <div role="group" aria-label="Choix proposés par l’assistant" className="flex flex-wrap gap-2">
                 {lastSuggestions.map((suggestion) => (
-                  <button key={`${suggestion.label}-${suggestion.href ?? suggestion.scenarioId ?? ""}`} type="button" onClick={() => handleSuggestion(suggestion)} className="min-h-9 rounded-control ring-1 ring-slate-300 bg-canvas px-3 py-2 text-left text-xs font-semibold text-slate-800 shadow-rested hover:border-slate-600">
+                  <button key={`${suggestion.label}-${suggestion.href ?? suggestion.scenarioId ?? ""}`} type="button" onClick={() => handleSuggestion(suggestion)} className="min-h-9 rounded-control ring-1 ring-line bg-canvas px-3 py-2 text-left text-xs font-semibold text-ink-2 shadow-rested hover:border-line">
                     {suggestion.label}
                   </button>
                 ))}
               </div>
             )}
-            {turns.length === 0 && !greetingTurn && <p className="text-sm text-slate-500">Posez votre question ou choisissez une suggestion.</p>}
+            {turns.length === 0 && !greetingTurn && <p className="text-sm text-ink-3">Posez votre question ou choisissez une suggestion.</p>}
           </div>
 
-          <div className="border-t border-slate-100 bg-canvas px-3 py-3">
+          <div className="border-t border-line bg-canvas px-3 py-3">
             {!lastSuggestions && !guide && <div className="mb-2 flex flex-wrap gap-1.5">
               {summary && (
                 <button
@@ -902,7 +902,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                   key={suggestion.label}
                   type="button"
                   onClick={() => handleSuggestion(suggestion)}
-                  className="rounded-full ring-1 ring-line bg-canvas px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:ring-ink hover:text-ink"
+                  className="rounded-full ring-1 ring-line bg-canvas px-3 py-1.5 text-xs font-medium text-ink-2 transition hover:ring-ink hover:text-ink"
                 >
                   {suggestion.label}
                 </button>
@@ -917,11 +917,11 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                 maxLength={120}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder="Ex. je déménage, je cherche mon attestation"
-                className="min-w-0 flex-1 rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm outline-none focus:ring-ink"
+                className="min-w-0 flex-1 rounded-control ring-1 ring-line px-3 py-2 text-sm outline-none focus:ring-ink"
               />
               <PrimaryButton type="submit" className="!px-3 !py-2 text-xs">Envoyer</PrimaryButton>
             </form>
-            <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
+            <p className="mt-2 text-[11px] leading-relaxed text-ink-4">
               {canAct
                 ? "Avec votre confirmation explicite, je peux créer un brouillon, poser un rappel ou transmettre un parcours à votre bureau d’accompagnement. Je ne décide jamais d’un droit, ne calcule aucun montant et n’envoie rien à un organisme extérieur."
                 : summary

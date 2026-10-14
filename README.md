@@ -1,44 +1,52 @@
 # AIME® — Le Monde Aime
 
-« La terre, les arts et les générations. » Plateforme indépendante qui réunit informations du quotidien,
-accompagnement des démarches, et mise en relation locale (personnes, producteurs, artistes, associations).
+« Le fil s'était perdu. On le reprend. » Plateforme indépendante qui réunit les informations du quotidien,
+l'accompagnement des démarches — à commencer par le mariage — et la mise en relation locale (personnes,
+producteurs, artistes, associations, transmissions entre générations).
 **Prototype — non affilié à un organisme public.**
 
 Stack : Next.js 16 (App Router, Server Actions) · React 19 · TypeScript · PostgreSQL via Drizzle ORM · Tailwind CSS 4.
 
-## Design — deux registres : site public sombre, application claire
+## Design — encre et papier, une seule surface
 
-Le site public suit un modèle de **portfolio à cartes** : page presque noire, une seule
-colonne centrée, grands blocs arrondis, **tuiles pastel** contenant des aperçus d'interface
-réels, et des **cartes d'action blanches** à bouton pilule noir. La couleur ne vit que dans
-les tuiles.
+Le site est **monochrome** : aucune couleur décorative. Fond blanc, une seule colonne centrée
+sur le site public, cartes blanches cerclées d'un filet, boutons noirs en pilule, capitales
+minuscules pour la navigation. Le rythme vient des surfaces (`canvas`, `subtle`, `muted`) et
+des contours (`line`, `line-soft`), jamais de la teinte. Cette règle vaut pour tout le site,
+y compris les espaces de travail (Mon espace, back-office, administration).
 
-Les espaces de travail (Mon espace, back-office, administration) gardent une surface claire
-et dense, faite pour lire et saisir des données. Le basculement est porté par les variables
-CSS : `.theme-night` inverse la palette sur tout son sous-arbre, `.theme-light` la rétablit
-pour les cartes blanches et les aperçus posés sur une tuile.
+Ce qui reste coloré est **sémantique** et réservé aux états qui en ont besoin ; partout ailleurs,
+un avancement se lit au contraste (fond noir / fond gris / filet), pas à la couleur.
 
-Sous cette surface, l'échelle de gris vient du système **Cal.com** transposé au service public :
+- **Palette.** Échelle de gris calibrée définie dans `app/globals.css` (`--color-canvas`,
+  `--color-subtle`, `--color-muted`, `--color-ink`…`--color-ink-4`, `--color-line`).
+  Aucune classe chromatique (`bg-rose-*`, `text-sky-*`, `bg-slate-*`…) ne subsiste dans le
+  projet ; tout passe par ces jetons.
+- **Deux familles typographiques.** *Cal Sans* (display, un seul poids) pour les titres,
+  *Inter* pour tout le texte d'interface. Les deux sont **auto-hébergées** dans `public/fonts/`
+  (aucune requête vers un tiers, compatible avec la CSP `font-src 'self'`). Cal Sans est
+  distribuée sous SIL Open Font License — voir `public/fonts/CalSans-OFL.txt`.
+- **Contenants.** Rayons 8 px (contrôles) et 12-16 px (conteneurs) ; les blocs sont délimités
+  par un **anneau** discret et une ombre courte plutôt que par une bordure lourde. Les
+  arguments marketing montrent de vrais fragments d'interface (`components/marketing/mocks.tsx`)
+  plutôt que des illustrations.
+- **Points d'entrée.** `app/globals.css` porte les jetons et les polices ; `components/ui.tsx`
+  porte les primitives (boutons, cartes, champs, pastilles) ; `components/marketing/tiles.tsx`
+  porte les briques du site public (`HeroCard`, `ActionRow`, `Panel`, `LinkRow`) ;
+  `components/public-shell.tsx` porte l'en-tête et le pied de page.
 
-- **Palette monochrome.** Les surfaces, textes et contours suivent une échelle de gris
-  calibrée (`bg`, `bg-subtle`, `bg-muted`, `text-emphasis`, `text-subtle`, `border`,
-  `border-subtle`). La couleur est réservée aux **états** (information, succès,
-  attention, erreur) et aux **marqueurs de la carte** : jamais décorative.
-- **Deux familles typographiques.** *Cal Sans* (display, un seul poids) pour les
-  titres, *Inter* pour tout le texte d'interface. Les deux sont **auto-hébergées**
-  dans `public/fonts/` (aucune requête vers un tiers, compatible avec la CSP
-  `font-src 'self'`). Cal Sans est distribuée sous SIL Open Font License — voir
-  `public/fonts/CalSans-OFL.txt`.
-- **Contenants.** Rayons 8 px (contrôles) et 12-16 px (conteneurs) ; les blocs sont
-  délimités par un **anneau** discret et une ombre courte plutôt que par une bordure
-  lourde. Les arguments marketing montrent de vrais fragments d'interface
-  (`components/marketing/mocks.tsx`) plutôt que des illustrations.
-- **Points d'entrée.** `app/globals.css` porte les jetons et les polices ;
-  `components/ui.tsx` porte les primitives (boutons, cartes, champs, pastilles) ;
-  `components/public-shell.tsx` porte l'en-tête et le pied de page sombre.
+### Pas de carte interactive : la commune suffit
 
-Les anciennes palettes `emerald-*` et `slate-*` sont remappées dans `globals.css`
-afin que les composants historiques héritent du même langage sans réécriture.
+La carte de France a été retirée. Tout se parcourt **en listes** (filtres par univers, type,
+commune, distance, date) dans `/le-monde-aime`.
+
+Le point d'une publication reste obligatoire en base (`lat`/`lng` `numeric(8,2)`), mais il
+n'est plus choisi à la main : il est **déduit de la commune et du code postal** par
+`lib/point.ts` (centre du département via `lib/departements.ts`, puis décalage stable calculé
+sur le nom de la commune, borné à la France métropolitaine). Le code postal est conservé avec
+le nom de la commune (« Chartres (28000) »), sans changement de schéma. Les actions serveur
+acceptent toujours un point explicite : c'est la porte laissée ouverte pour un affinage
+ultérieur (« affiner le point plus tard »).
 
 Les préférences d'affichage (taille du texte, contraste, animations) sont posées
 sur `<html>` (`data-text-scale`, `data-contrast`, `data-motion`) et lues par
@@ -127,9 +135,10 @@ Après toute modification de `db/schema.ts` : `npm run db:generate`, relire le S
 ## Organisation
 
 - `app/` — routes (site public, `/espace` membre, `/back-office`, `/admin`, `/le-monde-aime`, API dans `app/api/`)
-- `components/` — composants partagés (coquilles, carte, communauté, assistant local)
+- `components/` — composants partagés (coquilles, marketing, communauté, assistant local)
 - `lib/` — logique serveur : `actions/` (Server Actions, **toujours authentifiées**), requêtes (`*-queries.ts`), auth, validation Zod
 - `db/` — schéma Drizzle (`schema.ts`), scripts d'amorçage (`seed*.ts`)
+- `lib/point.ts` — point d'une publication déduit de la commune et du code postal (sans carte)
 - `drizzle/` — migrations SQL versionnées
 
 ## Sécurité — règles du projet

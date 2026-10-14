@@ -36,12 +36,12 @@ export default async function BackOfficeMessages() {
         <div className="grid gap-6 lg:grid-cols-2">
           {Array.from(threads.entries()).map(([memberId, list]) => (
             <Card key={memberId} className="flex flex-col gap-4">
-              <h2 className="text-lg font-semibold text-slate-900">{userMap.get(memberId)?.fullName ?? "Adhérent"}</h2>
+              <h2 className="text-lg font-semibold text-ink">{userMap.get(memberId)?.fullName ?? "Adhérent"}</h2>
               <ul className="flex max-h-72 flex-col gap-2 overflow-y-auto">
                 {list.map((m) => (
                   <li key={m.id} className={`rounded-card px-3 py-2 text-sm ${m.senderId === memberId ? "mr-6 bg-subtle" : "ml-6 bg-muted"}`}>
-                    <p className="text-slate-800">{m.body}</p>
-                    <p className="mt-1 text-xs text-slate-500">{userMap.get(m.senderId)?.fullName} · {formatDateTime(m.createdAt)}</p>
+                    <p className="text-ink-2">{m.body}</p>
+                    <p className="mt-1 text-xs text-ink-3">{userMap.get(m.senderId)?.fullName} · {formatDateTime(m.createdAt)}</p>
                   </li>
                 ))}
               </ul>

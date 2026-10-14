@@ -270,7 +270,7 @@ export default async function Accompagnement({ searchParams }: { searchParams: P
             })}
 
             <p className="mt-10 text-sm text-ink-3">
-              Les points d’accueil affichés sur la carte sont des lieux de démonstration fictifs.{" "}
+              Les points d’accueil listés sont des lieux de démonstration fictifs.{" "}
               <Link href="/annuaire" className="font-medium text-ink underline underline-offset-4">
                 Voir les points d’accueil
               </Link>

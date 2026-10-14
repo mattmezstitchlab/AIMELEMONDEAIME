@@ -27,7 +27,7 @@ function inFrance(lat: number, lng: number) {
   return lat >= 41 && lat <= 51.5 && lng >= -5.5 && lng <= 9.8;
 }
 
-/** Dépose un point (production ou présence) sur la carte. Réservé aux adhérents. */
+/** Dépose un point de production ou de présence (situé par la commune). Réservé aux adhérents. */
 export async function createLocalPoint(form: FormData): Promise<ActionResult> {
   try {
     const user = await requireRole(["membre"]);
@@ -46,7 +46,7 @@ export async function createLocalPoint(form: FormData): Promise<ActionResult> {
     await db.insert(localPoints).values({ ownerId: user.id, kind: kind as "producteur", name, description, city, phone, lat: String(lat), lng: String(lng) });
     await logAudit({ actorId: user.id, action: "creation_point_local", entityType: "local_point" });
     revalidatePath("/carte");
-    return { ok: true, message: "Votre point est visible sur la carte." };
+    return { ok: true, message: "Votre point est visible dans la liste des producteurs." };
   } catch (error) {
     if (error instanceof AuthError) return { ok: false, error: "Connectez-vous pour déposer un point." };
     return { ok: false, error: "Le point n'a pas pu être enregistré." };
@@ -241,7 +241,7 @@ export async function setWorkerAvailability(form: FormData): Promise<ActionResul
     }
     await logAudit({ actorId: user.id, action: "maj_disponibilite", entityType: "worker_availability" });
     revalidatePath("/carte");
-    return { ok: true, message: "Votre disponibilité est publiée sur la carte." };
+    return { ok: true, message: "Votre disponibilité est publiée dans la liste." };
   } catch (error) {
     if (error instanceof AuthError) return { ok: false, error: "Connectez-vous pour vous rendre disponible." };
     return { ok: false, error: "Enregistrement impossible." };
@@ -257,7 +257,7 @@ export async function toggleWorkerAvailability(status: "disponible" | "indisponi
     await db.update(workerAvailabilities).set({ status }).where(eq(workerAvailabilities.id, existing.id));
     await logAudit({ actorId: user.id, action: "statut_disponibilite", entityType: "worker_availability" });
     revalidatePath("/carte");
-    return { ok: true, message: status === "disponible" ? "Vous êtes visible sur la carte." : "Votre disponibilité est suspendue." };
+    return { ok: true, message: status === "disponible" ? "Vous êtes visible dans la liste." : "Votre disponibilité est suspendue." };
   } catch (error) {
     if (error instanceof AuthError) return { ok: false, error: "Connexion requise." };
     return { ok: false, error: "Mise à jour impossible." };

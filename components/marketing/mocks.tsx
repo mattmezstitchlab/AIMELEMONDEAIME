@@ -22,7 +22,7 @@ export function MockWindow({
   className?: string;
 }) {
   return (
-    <div aria-hidden="true" className={`product-window theme-light w-full ${className}`}>
+    <div aria-hidden="true" className={`product-window w-full ${className}`}>
       <div className="flex items-center justify-between gap-4 border-b border-line px-4 py-3">
         <span className="font-display text-[11px] uppercase tracking-[0.14em] text-ink-3">{title}</span>
         {meta && <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] text-ink-3">{meta}</span>}
@@ -190,23 +190,23 @@ export function ChecklistMock({ items }: { items: Array<{ label: string; done?: 
   );
 }
 
-/** Points du territoire, façon liste annuaire. */
-export function MapPointsMock() {
-  const points = [
-    { name: "Ferme des Trois Saules", kind: "Producteurs · paniers hebdomadaires", distance: "12 km" },
-    { name: "Atelier céramique", kind: "Artistes · pièces sur commande", distance: "8 km" },
-    { name: "Bibliothèque municipale", kind: "Savoirs · ateliers lecture", distance: "3 km" },
-    { name: "Café associatif", kind: "Entraide · permanence jeudi", distance: "6 km" },
+/** Transmissions en circulation : ce qui cherche à être repris, passé, appris. */
+export function TransmissionsMock() {
+  const items = [
+    { name: "Exploitation céréalière", kind: "Transmission · cherche repreneur", distance: "14 km" },
+    { name: "Atelier de couture", kind: "Savoir-faire · patrons et gestes", distance: "9 km" },
+    { name: "Verger de deux hectares", kind: "Terre · à remettre en culture", distance: "21 km" },
+    { name: "Recettes de famille", kind: "Mémoire · à écrire ensemble", distance: "4 km" },
   ];
   return (
-    <ul aria-hidden="true" className="theme-light w-full divide-y divide-line-soft rounded-card bg-canvas px-4 text-sm ring-1 ring-line">
-      {points.map((point) => (
-        <li key={point.name} className="flex items-center justify-between gap-3 py-3">
+    <ul aria-hidden="true" className="w-full divide-y divide-line-soft rounded-card bg-canvas px-4 text-sm ring-1 ring-line">
+      {items.map((item) => (
+        <li key={item.name} className="flex items-center justify-between gap-3 py-3">
           <span className="min-w-0">
-            <span className="block truncate text-ink-2">{point.name}</span>
-            <span className="block truncate text-xs text-ink-4">{point.kind}</span>
+            <span className="block truncate text-ink-2">{item.name}</span>
+            <span className="block truncate text-xs text-ink-4">{item.kind}</span>
           </span>
-          <span className="shrink-0 text-xs text-ink-4">{point.distance}</span>
+          <span className="shrink-0 text-xs text-ink-4">{item.distance}</span>
         </li>
       ))}
     </ul>

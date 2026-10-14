@@ -9,7 +9,7 @@ import { Icon } from "@/components/icon";
  * Elle n’est plus utilisée tant que les comptes sont fermés
  * (`AIME_AUTH_ENABLED` absent, voir lib/auth-mode.ts) mais reste en place et
  * testée : réactiver l’authentification rebranche ces pages sans réécriture.
- * Registre clair, comme les espaces de travail — pas le thème sombre public.
+ * Même surface claire que le reste du site : encre et papier, sans registre séparé.
  */
 export function AuthSplit({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
@@ -26,17 +26,17 @@ export function AuthSplit({ title, subtitle, children }: { title: string; subtit
         </p>
       </div>
 
-      <aside className="relative hidden overflow-hidden bg-night px-12 py-14 text-white lg:flex lg:flex-col lg:justify-between">
+      <aside className="relative hidden overflow-hidden bg-ink px-12 py-14 text-canvas lg:flex lg:flex-col lg:justify-between">
         <div className="relative">
-          <p className="eyebrow text-white/55">AIME® · Mon espace</p>
-          <h2 className="mt-5 max-w-md text-4xl leading-tight text-white">{title}</h2>
-          <p className="mt-5 max-w-md text-base leading-relaxed text-white/70">{subtitle}</p>
+          <p className="eyebrow text-canvas/55">AIME® · Mon espace</p>
+          <h2 className="mt-5 max-w-md text-4xl leading-tight text-canvas">{title}</h2>
+          <p className="mt-5 max-w-md text-base leading-relaxed text-canvas/70">{subtitle}</p>
         </div>
 
         <div className="product-window relative mt-12 bg-canvas/[0.06] shadow-none ring-1 ring-white/10">
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
-            <span className="font-display text-xs uppercase tracking-[0.14em] text-white/60">Dossier civil</span>
-            <span className="rounded-full bg-canvas/10 px-2.5 py-1 text-[11px] text-white/70">En cours</span>
+          <div className="flex items-center justify-between border-b border-canvas/10 px-5 py-3">
+            <span className="font-display text-xs uppercase tracking-[0.14em] text-canvas/60">Dossier civil</span>
+            <span className="rounded-full bg-canvas/10 px-2.5 py-1 text-[11px] text-canvas/70">En cours</span>
           </div>
           <ul className="divide-y divide-white/10">
             {[
@@ -45,12 +45,12 @@ export function AuthSplit({ title, subtitle, children }: { title: string; subtit
               { label: "Publication des bans", state: "À confirmer en mairie" },
             ].map((row) => (
               <li key={row.label} className="flex items-center justify-between gap-4 px-5 py-3.5 text-sm">
-                <span className="text-white/80">{row.label}</span>
-                <span className="text-xs text-white/55">{row.state}</span>
+                <span className="text-canvas/80">{row.label}</span>
+                <span className="text-xs text-canvas/55">{row.state}</span>
               </li>
             ))}
           </ul>
-          <div className="flex items-center gap-2 border-t border-white/10 px-5 py-3 text-[11px] text-white/55">
+          <div className="flex items-center gap-2 border-t border-canvas/10 px-5 py-3 text-[11px] text-canvas/55">
             <Icon name="lock" className="h-3.5 w-3.5" />
             Vos réponses restent privées. AIME® ne transmet rien à une mairie.
           </div>

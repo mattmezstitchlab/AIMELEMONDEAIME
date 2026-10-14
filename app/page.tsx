@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { PublicPage, PageColumn } from "@/components/public-shell";
-import { HeroCard, ActionRow, Tile, LinkRow, TileHeading } from "@/components/marketing/tiles";
+import { HeroCard, ActionRow, Panel, LinkRow, TileHeading } from "@/components/marketing/tiles";
 import { Icon } from "@/components/icon";
 import { LinkButton } from "@/components/ui";
-import { BudgetMock, GuestListMock, RolesMock, WeddingDossierMock, TimelineMock, ChecklistMock, MapPointsMock } from "@/components/marketing/mocks";
+import { BudgetMock, GuestListMock, RolesMock, WeddingDossierMock, TimelineMock, ChecklistMock, TransmissionsMock } from "@/components/marketing/mocks";
 import { db, isDatabaseConfigured } from "@/db";
 import { articles } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
@@ -13,11 +13,22 @@ export const dynamic = "force-dynamic";
 
 type ArticleRow = typeof articles.$inferSelect;
 
+/*
+ * Page d'accueil : le récit d'abord, la mécanique ensuite.
+ *
+ * L'idée tient en trois temps. Les familles se sont éclatées, les liens se sont
+ * distendus, et ce qui se transmettait de génération en génération s'est perdu.
+ * On commence par le mariage parce que c'est le moment où deux histoires se
+ * rejoignent, où l'on voit précisément ce qu'on veut se passer — un nom, une
+ * maison, une terre, un savoir-faire. AIME® prend les choses en main : le
+ * dossier civil, les proches, la fête, puis ce qui se transmet autour.
+ */
+
 /** Les trois engagements qui tiennent toute la page — et rien de plus. */
 const PROMISES = [
-  "Rien n’est transmis à une mairie ni à un organisme.",
-  "Les liens des invités et des proches sont temporaires et révocables.",
-  "Les sources officielles restent la référence : AIME® ne décide rien.",
+  "Prototype indépendant : aucun organisme, aucune administration ne décide ici.",
+  "Vos données restent les vôtres : rien n’est transmis sans votre accord.",
+  "Les démarches officielles se font en mairie ; AIME® donne des repères, jamais de décision.",
 ];
 
 const STEPS = [
@@ -25,23 +36,27 @@ const STEPS = [
     number: "01",
     title: "Le dossier civil, d’abord",
     text: "Date, commune, pièces, témoins, publication des bans : un fil unique pour ne rien relancer.",
-    tone: "coral" as const,
     mock: <WeddingDossierMock />,
   },
   {
     number: "02",
     title: "La fête, si vous en voulez une",
     text: "Réception, repas, musique, photos — ou rien du tout. Aucune option n’est obligatoire.",
-    tone: "amber" as const,
     mock: <GuestListMock />,
   },
   {
     number: "03",
     title: "Le jour J et les proches",
     text: "Rôles limités pour la coordination et les témoins, révocables à tout moment.",
-    tone: "sand" as const,
     mock: <RolesMock />,
   },
+];
+
+/** Ce qui se perd quand une famille se sépare — la raison d’être du reste. */
+const FRACTURES = [
+  "Des fermes s’arrêtent faute de repreneur identifié.",
+  "Des ateliers ferment avec des gestes que personne n’a appris.",
+  "Des aînés ont quelque chose à passer, et plus personne à qui le passer.",
 ];
 
 const WEDDING_GUIDES_FALLBACK = [
@@ -51,12 +66,12 @@ const WEDDING_GUIDES_FALLBACK = [
 ];
 
 const THEMES = [
+  { href: "/le-monde-aime?univers=savoirs", title: "Transmettre un savoir-faire", meta: "Ce qui cherche à être repris ou appris" },
+  { href: "/le-monde-aime?univers=terre", title: "Terre et quotidien", meta: "Producteurs, dons, prêts, trajets" },
+  { href: "/le-monde-aime?univers=arts", title: "Arts et rencontres", meta: "Ateliers, concerts, lieux de répétition" },
   { href: "/informations/famille", title: "Famille et naissance", meta: "Allocations, mariage, Pacs" },
-  { href: "/informations/sante", title: "Santé", meta: "Remboursements, arrêts de travail" },
+  { href: "/informations/retraite", title: "Retraite et transmission", meta: "Relevé, demande, repreneur" },
   { href: "/informations/argent", title: "Argent et difficultés", meta: "Factures, loyer, crédits" },
-  { href: "/informations/logement", title: "Logement", meta: "Aides et déménagement" },
-  { href: "/informations/retraite", title: "Retraite et carrière", meta: "Relevé, demande, cotisations" },
-  { href: "/informations/emploi", title: "Emploi et activité", meta: "Recherche, création, transmission" },
 ];
 
 async function getWeddingGuides(): Promise<ArticleRow[]> {
@@ -80,17 +95,24 @@ export default async function HomePage() {
     <PublicPage>
       <PageColumn className="flex flex-col gap-4 pt-4 sm:gap-5 sm:pt-6">
         <HeroCard
-          eyebrow="Le Monde Aime"
-          title="Votre mariage, étape par étape."
-          subtitle="Les démarches civiles conduites proprement, la fête si vous en voulez une, les repères après l’union — et les ressources du territoire pour tout ce qui entoure."
+          eyebrow="AIME® — Le Monde Aime"
+          title="Le fil s’était perdu. On le reprend."
+          subtitle="Les familles se sont éclatées, les transmissions se sont arrêtées, les campagnes se sont vidées. AIME® prend les choses en main — et tout commence par un mariage, le moment où deux histoires décident de ce qu’elles se passent."
           image={{ src: "/images/hero-mariage-portrait.webp", type: "image/webp" }}
         />
 
         <ActionRow
-          title="Préparer mon mariage"
-          hint="Dossier civil, invités, budget, jour J"
+          title="Commencer par mon mariage"
+          hint="Dossier civil, invités, budget, jour J — puis ce qui se transmet"
           href="/accompagnement?besoin=mariage"
           label="Commencer"
+        />
+
+        <ActionRow
+          title="Créer un espace privé"
+          hint="Votre dossier, vos proches, vos échanges. Les comptes ouvrent bientôt."
+          href="/mon-espace"
+          label="Ouvrir"
         />
 
         <ul className="grid gap-3 sm:grid-cols-3 sm:gap-4">
@@ -102,64 +124,95 @@ export default async function HomePage() {
           ))}
         </ul>
 
-        <section className="mt-6">
-          <TileHeading>Le parcours, dans l’ordre.</TileHeading>
-          <p className="mt-2 max-w-lg text-sm leading-relaxed text-ink-3">
-            Commencez par la mairie. La fête, les prestataires et les services autour ne sont jamais des conditions pour avancer.
-          </p>
+        <section className="mt-8">
+          <TileHeading>Pourquoi commencer par un mariage.</TileHeading>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <p className="text-sm leading-relaxed text-ink-2">
+              Parce que c’est le seul moment où une famille décide de ce qu’elle devient. Deux histoires se rejoignent, deux
+              territoires aussi : un nom, une maison, parfois une exploitation, et des savoir-faire qui attendent d’être repris.
+            </p>
+            <p className="text-sm leading-relaxed text-ink-3">
+              Commencez par la mairie. La fête, les prestataires et les services autour ne sont jamais des conditions pour avancer.
+            </p>
+          </div>
         </section>
 
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
           {STEPS.map((step, index) => (
-            <Tile key={step.number} tone={step.tone} label={step.title} detail={step.number} wide={index === 0}>
+            <Panel key={step.number} label={step.title} detail={step.number} wide={index === 0}>
               <div className="w-full">{step.mock}</div>
-            </Tile>
+            </Panel>
           ))}
-          <Tile tone="sage" label="Après l’union" detail="04">
+          <Panel label="Après l’union" detail="04">
             <div className="w-full px-1 py-2">
               <ChecklistMock
                 items={[
                   { label: "Livret de famille remis", done: true },
                   { label: "Organismes à prévenir" },
                   { label: "Changement de nom, si souhaité" },
-                  { label: "Remerciements" },
+                  { label: "Ce qui se transmet, à décider ensemble" },
                 ]}
               />
             </div>
-          </Tile>
+          </Panel>
         </div>
 
-        <ActionRow
-          title="Organiser la fête à plusieurs"
-          hint="Invités, budget, programme, plan de table"
-          href="/le-monde-aime"
-          label="Voir l’espace"
-        />
+        <section className="mt-10 rounded-card bg-subtle p-6 ring-1 ring-line-soft sm:p-8">
+          <TileHeading>Ce qui se perd quand les familles se séparent.</TileHeading>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-2">
+            Ce ne sont pas seulement des liens qui se cassent. Ce sont des transmissions qui n’ont pas lieu : des fermes sans
+            repreneur, des ateliers qui ferment, des gestes que personne n’a appris, des aînés qui ne trouvent plus à qui passer
+            le relais. En France, un tiers des exploitants agricoles n’ont pas identifié de repreneur dans les trois ans qui
+            précèdent leur retraite.
+          </p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-3">
+            {FRACTURES.map((line) => (
+              <li key={line} className="rounded-card bg-canvas p-4 text-[13px] leading-relaxed text-ink-2 ring-1 ring-line">
+                {line}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <LinkButton href="/le-monde-aime?univers=savoirs">
+              Explorer les transmissions
+              <Icon name="arrow" className="h-4 w-4" />
+            </LinkButton>
+            <LinkButton href="/vision" variant="secondary">
+              Notre méthode
+            </LinkButton>
+          </div>
+        </section>
 
-        <section className="mt-6">
-          <TileHeading>Ce qui vit autour.</TileHeading>
-          <p className="mt-2 max-w-lg text-sm leading-relaxed text-ink-3">
-            Facultatif, au même endroit, sans jamais conditionner l’avancement des démarches civiles.
+        <section className="mt-8">
+          <TileHeading>Ce qu’on remet en circulation.</TileHeading>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-3">
+            Tout se parcourt en listes claires, commune par commune : ce qui cherche à être repris, appris, prêté ou donné. Pas
+            de carte à déplacer, pas d’adresse à publier — votre commune suffit.
           </p>
         </section>
 
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
-          <Tile tone="sky" label="La carte du territoire" detail="Communes voisines">
-            <MapPointsMock />
-          </Tile>
-          <Tile tone="lilac" label="Budget et contributions" detail="Suivi par poste">
+          <Panel label="Transmissions en cours" detail="Communes voisines">
+            <TransmissionsMock />
+          </Panel>
+          <Panel label="Budget et contributions" detail="Suivi par poste">
             <div className="w-full">
               <BudgetMock />
             </div>
-          </Tile>
+          </Panel>
         </div>
+
+        <ActionRow
+          title="Se relier autour de soi"
+          hint="Propositions, besoins, trajets, projets et personnes"
+          href="/le-monde-aime"
+          label="Explorer"
+        />
 
         <section className="mt-8">
           <TileHeading>Le rétroplanning.</TileHeading>
           <div className="mt-4 rounded-card bg-subtle p-6 ring-1 ring-line-soft">
-            <div className="theme-light">
-              <TimelineMock />
-            </div>
+            <TimelineMock />
           </div>
         </section>
 
@@ -196,9 +249,10 @@ export default async function HomePage() {
         </section>
 
         <section className="mt-10 rounded-card bg-subtle p-7 text-center ring-1 ring-line-soft sm:p-10">
-          <h2 className="text-[2rem] leading-tight tracking-[-0.02em] text-ink">Commencez par la prochaine étape.</h2>
+          <h2 className="text-[2rem] leading-tight tracking-[-0.02em] text-ink">Commencez par un mariage. Le reste suivra.</h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-3">
-            Le parcours garde le fil du dossier civil, des options de fête que vous choisissez et des repères après l’union.
+            Le parcours garde le fil du dossier civil, des proches, de la fête si vous en voulez une — et de ce que vous décidez
+            de transmettre.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <LinkButton href="/accompagnement?besoin=mariage" size="lg">

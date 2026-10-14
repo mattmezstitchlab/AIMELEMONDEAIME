@@ -18,10 +18,10 @@ export function OfficeMessageForm() {
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-2 border-t border-slate-100 pt-4">
-      <label htmlFor="body" className="text-sm font-medium text-slate-700">Nouveau message</label>
-      <textarea id="body" name="body" rows={3} required className="w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink" />
-      {state && !state.ok && <p role="alert" className="text-sm text-rose-700">{state.error}</p>}
+    <form ref={formRef} action={formAction} className="flex flex-col gap-2 border-t border-line pt-4">
+      <label htmlFor="body" className="text-sm font-medium text-ink-2">Nouveau message</label>
+      <textarea id="body" name="body" rows={3} required className="w-full rounded-control ring-1 ring-line px-3 py-2 text-sm focus:ring-ink" />
+      {state && !state.ok && <p role="alert" className="text-sm text-ink-2">{state.error}</p>}
       <PrimaryButton type="submit" disabled={pending} className="self-start">
         {pending ? "Envoi…" : "Envoyer à l’équipe"}
       </PrimaryButton>

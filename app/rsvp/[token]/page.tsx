@@ -24,7 +24,7 @@ export default async function WeddingRsvpPage({ params }: { params: Promise<{ to
 
   return (
     <PublicPage solidHeader>
-      <main className="theme-light min-h-[70vh] bg-canvas px-5 py-12 text-ink-2 sm:px-8">
+      <main className="min-h-[70vh] bg-canvas px-5 py-12 text-ink-2 sm:px-8">
         <div className="mx-auto max-w-2xl">
           <p className="eyebrow">
             <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />

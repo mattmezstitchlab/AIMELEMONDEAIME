@@ -22,13 +22,13 @@ export default async function UtilisateursPage() {
     <div className="flex flex-col gap-6">
       <SectionTitle eyebrow="Administration" title="Utilisateurs et rôles" description="Attribuez les rôles et les bureaux autorisés. Les gestionnaires ne voient que les dossiers de leur bureau." />
       <Card>
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Créer un compte agent</h2>
+        <h2 className="mb-4 text-lg font-semibold text-ink">Créer un compte agent</h2>
         <CreateStaffForm offices={officeList} />
       </Card>
       <div className="overflow-x-auto rounded-card bg-canvas ring-1 ring-line shadow-rested">
         <table data-assistant-id="admin-users-table" className="w-full text-left text-sm">
           <caption className="sr-only">Liste des utilisateurs</caption>
-          <thead className="bg-subtle text-xs uppercase tracking-wide text-slate-500">
+          <thead className="bg-subtle text-xs uppercase tracking-wide text-ink-3">
             <tr>
               <th scope="col" className="px-4 py-3">Utilisateur</th>
               <th scope="col" className="px-4 py-3">Rôle</th>
@@ -36,7 +36,7 @@ export default async function UtilisateursPage() {
               <th scope="col" className="px-4 py-3">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-line">
             {list.map((u) => <UserRow key={u.id} user={u} offices={officeList} isSelf={u.id === me.id} />)}
           </tbody>
         </table>

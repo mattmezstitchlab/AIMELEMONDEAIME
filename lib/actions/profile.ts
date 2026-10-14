@@ -8,6 +8,7 @@ import { AuthError, requireRole } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { IMAGE_TYPES, readUpload } from "@/lib/uploads";
 import { splitList } from "@/lib/lma";
+import { communeLabel, pointFromCommune, splitCommuneLabel } from "@/lib/point";
 
 export type ProfileResult = { ok: true; message: string } | { ok: false; error: string };
 
@@ -24,16 +25,21 @@ export async function updateMyProfile(form: FormData): Promise<ProfileResult> {
     const user = await requireRole(["membre"]);
     const displayName = str(form, "displayName").slice(0, 80);
     const bio = str(form, "bio").slice(0, 600);
-    const city = str(form, "profileCity").slice(0, 120);
-    const lat = Number(str(form, "profileLat"));
-    const lng = Number(str(form, "profileLng"));
+    const city = str(form, "profileCity").slice(0, 100);
+    const postalCode = str(form, "postalCode");
+    const explicitLat = Number(str(form, "profileLat"));
+    const explicitLng = Number(str(form, "profileLng"));
     const radius = Math.round(Number(str(form, "travelRadiusKm") || 20));
-    const hasPoint = str(form, "profileLat") !== "" && Number.isFinite(lat) && Number.isFinite(lng);
-    if (hasPoint && !(lat >= 41 && lat <= 51.5 && lng >= -5.5 && lng <= 9.8)) return { ok: false, error: "Placez votre commune en France métropolitaine." };
+    const explicitPoint = str(form, "profileLat") !== "" && Number.isFinite(explicitLat) && Number.isFinite(explicitLng)
+      && explicitLat >= 41 && explicitLat <= 51.5 && explicitLng >= -5.5 && explicitLng <= 9.8;
+    const cityParts = splitCommuneLabel(city);
+    const derived = pointFromCommune(cityParts.commune, postalCode || cityParts.postalCode);
+    const point = explicitPoint ? { lat: explicitLat, lng: explicitLng } : derived;
+    const hasPoint = point !== null;
     if (!Number.isInteger(radius) || radius < 0 || radius > 300) return { ok: false, error: "La zone de déplacement doit être comprise entre 0 et 300 km." };
     const visible = form.get("profileVisible") === "on";
-    if (visible && !hasPoint && user.profileLat === null) return { ok: false, error: "Pour apparaître sur la carte, placez d'abord votre commune." };
-    if (visible && displayName.length < 2) return { ok: false, error: "Indiquez un nom d'affichage pour apparaître sur la carte." };
+    if (visible && !hasPoint && user.profileLat === null) return { ok: false, error: "Pour apparaître dans l'annuaire, indiquez votre commune et son code postal." };
+    if (visible && displayName.length < 2) return { ok: false, error: "Indiquez un nom d'affichage pour apparaître dans l'annuaire." };
     const universes = form.getAll("universes").map(String).filter((u) => (universeEnum as readonly string[]).includes(u));
     const photo = await readUpload(form, "photo", IMAGE_TYPES, 2_000_000);
     if (photo && !photo.ok) return photo;
@@ -49,8 +55,8 @@ export async function updateMyProfile(form: FormData): Promise<ProfileResult> {
       availabilityNote: str(form, "availabilityNote").slice(0, 300) || null,
       travelRadiusKm: radius,
       profileVisible: visible,
-      profileCity: city || null,
-      ...(hasPoint ? { profileLat: Number(lat.toFixed(2)).toFixed(2), profileLng: Number(lng.toFixed(2)).toFixed(2) } : {}),
+      profileCity: city ? communeLabel(cityParts.commune, postalCode || cityParts.postalCode) : null,
+      ...(point ? { profileLat: Number(point.lat.toFixed(2)).toFixed(2), profileLng: Number(point.lng.toFixed(2)).toFixed(2) } : {}),
     }).where(eq(users.id, user.id));
     if (photo?.ok) {
       await db.insert(profilePhotos).values({ userId: user.id, data: photo.data, mime: photo.mime })
@@ -58,7 +64,7 @@ export async function updateMyProfile(form: FormData): Promise<ProfileResult> {
     }
     await logAudit({ actorId: user.id, action: "maj_profil", entityType: "user", entityId: String(user.id) });
     revalidatePath("/le-monde-aime");
-    return { ok: true, message: visible ? "Profil enregistré. Il apparaît sur la carte avec une position approximative." : "Profil enregistré. Il reste privé." };
+    return { ok: true, message: visible ? "Profil enregistré. Il apparaît dans l'annuaire, situé à sa commune près." : "Profil enregistré. Il reste privé." };
   } catch (error) {
     return fail(error, "Le profil n'a pas pu être enregistré.");
   }

@@ -79,9 +79,9 @@ export function CaseForm({
       <div className="grid gap-4 sm:grid-cols-2">
         {fields.map((field) => (
           <div key={field.name} className={field.type === "textarea" ? "sm:col-span-2" : ""}>
-            <label htmlFor={field.name} className="block text-sm font-medium text-slate-700">
+            <label htmlFor={field.name} className="block text-sm font-medium text-ink-2">
               {field.label}
-              {field.required && <span aria-hidden="true" className="text-rose-600"> *</span>}
+              {field.required && <span aria-hidden="true" className="text-ink-2"> *</span>}
             </label>
             {field.type === "textarea" ? (
               <textarea
@@ -90,7 +90,7 @@ export function CaseForm({
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
                 rows={4}
-                className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
+                className="mt-1 w-full rounded-control ring-1 ring-line px-3 py-2 text-sm focus:ring-ink"
               />
             ) : field.type === "select" ? (
               <select
@@ -98,7 +98,7 @@ export function CaseForm({
                 required={field.required}
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
-                className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
+                className="mt-1 w-full rounded-control ring-1 ring-line px-3 py-2 text-sm focus:ring-ink"
               >
                 <option value="" disabled>Choisissez une option</option>
                 {field.options?.map((opt) => (
@@ -112,34 +112,34 @@ export function CaseForm({
                 required={field.required}
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
-                className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
+                className="mt-1 w-full rounded-control ring-1 ring-line px-3 py-2 text-sm focus:ring-ink"
               />
             )}
           </div>
         ))}
       </div>
 
-      <p className="text-xs text-slate-500" role="status">
+      <p className="text-xs text-ink-3" role="status">
         {saveState === "saving" && "Enregistrement du brouillon…"}
         {saveState === "saved" && "Brouillon enregistré automatiquement."}
         {saveState === "error" && "Erreur lors de l’enregistrement automatique."}
       </p>
 
       {requiredDocuments.length > 0 && (
-        <div className="rounded-control ring-1 ring-line bg-slate-50 p-4 text-sm">
-          <p className="font-semibold text-slate-800">Pièces justificatives nécessaires</p>
-          <ul className="mt-1 list-inside list-disc text-slate-600">
+        <div className="rounded-control ring-1 ring-line bg-muted p-4 text-sm">
+          <p className="font-semibold text-ink-2">Pièces justificatives nécessaires</p>
+          <ul className="mt-1 list-inside list-disc text-ink-3">
             {requiredDocuments.map((doc) => <li key={doc}>{doc}</li>)}
           </ul>
           {!hasUploadedDocument && (
-            <p className="mt-2 text-xs font-medium text-amber-700">
+            <p className="mt-2 text-xs font-medium text-ink-2">
               Pensez à joindre au moins un justificatif ci-dessous avant l&apos;envoi.
             </p>
           )}
         </div>
       )}
 
-      {submitError && <p role="alert" className="rounded-control bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>}
+      {submitError && <p role="alert" className="rounded-control bg-muted px-3 py-2 text-sm text-ink-2">{submitError}</p>}
 
       {canSubmit && (
         <div className="flex flex-wrap gap-3">

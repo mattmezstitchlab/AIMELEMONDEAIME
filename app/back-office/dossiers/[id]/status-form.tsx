@@ -40,39 +40,39 @@ export function StatusForm({ caseId, currentStatus, currentRequested }: { caseId
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div>
-        <label htmlFor="status" className="block text-sm font-medium text-slate-700">Nouveau statut</label>
+        <label htmlFor="status" className="block text-sm font-medium text-ink-2">Nouveau statut</label>
         <select
           id="status"
           value={status}
           onChange={(e) => setStatus(e.target.value as CaseStatus)}
-          className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-control ring-1 ring-line px-3 py-2 text-sm"
         >
           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{CASE_STATUS_LABELS[s]}</option>)}
         </select>
       </div>
       {status === "piece_manquante" && (
         <div>
-          <label htmlFor="requested" className="block text-sm font-medium text-slate-700">Pièce(s) demandée(s) (séparées par une virgule)</label>
+          <label htmlFor="requested" className="block text-sm font-medium text-ink-2">Pièce(s) demandée(s) (séparées par une virgule)</label>
           <input
             id="requested"
             value={requested}
             onChange={(e) => setRequested(e.target.value)}
-            className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-control ring-1 ring-line px-3 py-2 text-sm"
             placeholder="Ex : Attestation de salaire, Justificatif de domicile"
           />
         </div>
       )}
       <div>
-        <label htmlFor="statusMessage" className="block text-sm font-medium text-slate-700">Message associé (visible par l&apos;adhérent)</label>
+        <label htmlFor="statusMessage" className="block text-sm font-medium text-ink-2">Message associé (visible par l&apos;adhérent)</label>
         <textarea
           id="statusMessage"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={3}
-          className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-control ring-1 ring-line px-3 py-2 text-sm"
         />
       </div>
-      {error && <p role="alert" className="text-sm text-rose-700">{error}</p>}
+      {error && <p role="alert" className="text-sm text-ink-2">{error}</p>}
       {success && <p role="status" className="text-sm text-ink-2">Statut mis à jour.</p>}
       <PrimaryButton type="submit" disabled={isPending} className="self-start">
         {isPending ? "Mise à jour…" : "Mettre à jour le statut"}

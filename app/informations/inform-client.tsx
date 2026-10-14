@@ -92,7 +92,7 @@ export function InformClient({ articles, categories }: {
 
       <section className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
         {grouped.length === 0 ? (
-          <div className="rounded-card border border-dashed border-slate-300 bg-subtle p-12 text-center">
+          <div className="rounded-card border border-dashed border-line bg-subtle p-12 text-center">
             <Search className="mx-auto h-7 w-7 text-ink-4" aria-hidden="true" />
             <p className="mt-4 text-base font-medium text-ink">Aucun article ne correspond</p>
             <p className="mt-1 text-sm text-ink-3">Essayez un autre mot-clé ou une autre thématique.</p>
@@ -134,7 +134,7 @@ export function InformClient({ articles, categories }: {
 
       {opened && (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-night/60 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 overflow-y-auto bg-ink/60 p-4 backdrop-blur-sm"
           role="presentation"
           onClick={(e) => { if (e.target === e.currentTarget) setOpened(null); }}
         >

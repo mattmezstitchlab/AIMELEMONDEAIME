@@ -19,10 +19,10 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-/** Barre du navigateur : elle reprend le fond sombre du site public. */
+/** Barre du navigateur : elle reprend le fond papier du site. */
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
-  colorScheme: "dark light",
+  themeColor: "#ffffff",
+  colorScheme: "light",
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

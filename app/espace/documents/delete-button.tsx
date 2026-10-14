@@ -21,7 +21,7 @@ export function DeleteDocumentButton({ documentId }: { documentId: number }) {
   }
 
   return (
-    <button type="button" onClick={handleDelete} disabled={isPending} className="text-sm font-semibold text-rose-700 hover:underline disabled:opacity-60">
+    <button type="button" onClick={handleDelete} disabled={isPending} className="text-sm font-semibold text-ink-2 hover:underline disabled:opacity-60">
       {isPending ? "Suppression…" : "Supprimer"}
     </button>
   );

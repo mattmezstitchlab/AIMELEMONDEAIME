@@ -20,7 +20,7 @@ export const AUTH_ENABLED = process.env.AIME_AUTH_ENABLED === "1";
 /** Message unique affiché partout où une action demande normalement un compte. */
 export const AUTH_DISABLED_NOTICE =
   "Les comptes AIME® sont fermés pour le moment : la plateforme est en cours de préparation. " +
-  "Vous pouvez consulter librement les parcours, les guides et la carte du territoire.";
+  "Vous pouvez consulter librement les parcours, les guides et les transmissions du territoire.";
 
 /** Routes réservées aux personnes connectées : fermées tant que l'auth est coupée. */
 export const PROTECTED_PREFIXES = ["/espace", "/back-office", "/admin"] as const;

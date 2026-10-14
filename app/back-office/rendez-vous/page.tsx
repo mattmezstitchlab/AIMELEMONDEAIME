@@ -24,8 +24,8 @@ export default async function RendezVousPage() {
           {items.map((a) => (
             <Card key={a.id} className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-slate-900">{a.reason}</p>
-                <p className="text-xs text-slate-500">{a.memberName} · {formatDateTime(a.requestedSlot)}</p>
+                <p className="text-sm font-semibold text-ink">{a.reason}</p>
+                <p className="text-xs text-ink-3">{a.memberName} · {formatDateTime(a.requestedSlot)}</p>
                 <span className="mt-1 inline-block text-xs font-medium text-ink">{APPOINTMENT_STATUS_LABELS[a.status] ?? a.status}</span>
               </div>
               <AppointmentActions appointmentId={a.id} status={a.status} />

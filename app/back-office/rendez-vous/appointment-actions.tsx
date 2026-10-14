@@ -24,12 +24,12 @@ export function AppointmentActions({ appointmentId, status }: { appointmentId: n
         </button>
       )}
       {(status === "demandee" || status === "confirmee") && (
-        <button onClick={() => update("annulee")} disabled={isPending} className="rounded-control ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+        <button onClick={() => update("annulee")} disabled={isPending} className="rounded-control ring-1 ring-line px-3 py-1.5 text-xs font-semibold text-ink-2 hover:bg-muted">
           Annuler
         </button>
       )}
       {status === "confirmee" && (
-        <button onClick={() => update("terminee")} disabled={isPending} className="rounded-control ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+        <button onClick={() => update("terminee")} disabled={isPending} className="rounded-control ring-1 ring-line px-3 py-1.5 text-xs font-semibold text-ink-2 hover:bg-muted">
           Marquer terminé
         </button>
       )}

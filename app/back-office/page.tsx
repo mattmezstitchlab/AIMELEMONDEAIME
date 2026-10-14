@@ -70,7 +70,7 @@ export default async function BackOfficeDashboard() {
                 <span className="min-w-0 flex-1">
                   <Link href={`/back-office/dossiers/${c.id}`} className="font-semibold text-ink hover:underline">{c.reference}</Link>
                   <span className="text-ink-2"> — {c.memberName}</span>
-                  <span className="block truncate text-xs text-slate-500">{c.title}</span>
+                  <span className="block truncate text-xs text-ink-3">{c.title}</span>
                 </span>
                 <span className={`text-xs font-medium ${c.attente >= 14 ? "text-state-danger" : c.attente >= 7 ? "text-state-warning" : "text-ink-4"}`}>
                   sans mouvement depuis {c.attente} j

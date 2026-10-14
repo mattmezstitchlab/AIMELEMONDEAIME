@@ -46,17 +46,17 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           {item.status === "piece_manquante" && item.requestedDocuments.length > 0 && (
-            <Card className="border-rose-200 bg-rose-50">
-              <p className="text-sm font-semibold text-rose-800">Pièce(s) manquante(s)</p>
-              <ul className="mt-1 list-inside list-disc text-sm text-rose-800">
+            <Card className="border-line bg-muted">
+              <p className="text-sm font-semibold text-ink">Pièce(s) manquante(s)</p>
+              <ul className="mt-1 list-inside list-disc text-sm text-ink">
                 {item.requestedDocuments.map((doc) => <li key={doc}>{doc}</li>)}
               </ul>
-              <p className="mt-2 text-sm text-rose-700">Déposez le document demandé ci-dessous et/ou répondez à votre gestionnaire.</p>
+              <p className="mt-2 text-sm text-ink-2">Déposez le document demandé ci-dessous et/ou répondez à votre gestionnaire.</p>
             </Card>
           )}
 
           <Card>
-            <h2 className="text-lg font-semibold text-slate-900">Informations transmises</h2>
+            <h2 className="text-lg font-semibold text-ink">Informations transmises</h2>
             {editable ? (
               <div className="mt-4">
                 <CaseForm
@@ -74,8 +74,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                   const field = procedureType?.fields.find((f) => f.name === key);
                   return (
                     <div key={key}>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">{field?.label ?? key}</dt>
-                      <dd className="text-sm text-slate-800">{value || "—"}</dd>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-ink-3">{field?.label ?? key}</dt>
+                      <dd className="text-sm text-ink-2">{value || "—"}</dd>
                     </div>
                   );
                 })}
@@ -84,9 +84,9 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
           </Card>
 
           <Card>
-            <h2 className="text-lg font-semibold text-slate-900">Documents du dossier</h2>
+            <h2 className="text-lg font-semibold text-ink">Documents du dossier</h2>
             {caseDocuments.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-600">Aucun document déposé pour l&apos;instant.</p>
+              <p className="mt-2 text-sm text-ink-3">Aucun document déposé pour l&apos;instant.</p>
             ) : (
               <ul className="mt-3 flex flex-col gap-2">
                 {caseDocuments.map((doc) => (
@@ -108,8 +108,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
 
           {item.status !== "brouillon" && (
             <Card>
-              <h2 className="text-lg font-semibold text-slate-900">Échanger avec mon bureau</h2>
-              <p className="mt-1 text-sm text-slate-600">Répondez directement sur ce dossier, par exemple pour confirmer l&apos;envoi d&apos;une pièce.</p>
+              <h2 className="text-lg font-semibold text-ink">Échanger avec mon bureau</h2>
+              <p className="mt-1 text-sm text-ink-3">Répondez directement sur ce dossier, par exemple pour confirmer l&apos;envoi d&apos;une pièce.</p>
               <div className="mt-3">
                 <div data-assistant-id="case-message"><CaseMessageForm caseId={item.id} sendMessage={respondToMissingDocument} /></div>
               </div>
@@ -119,14 +119,14 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
 
         <div className="flex flex-col gap-6">
           <Card>
-            <h2 className="text-lg font-semibold text-slate-900">Historique du dossier</h2>
+            <h2 className="text-lg font-semibold text-ink">Historique du dossier</h2>
             <ol className="mt-3 flex flex-col gap-4 border-l-2 ring-line-soft pl-4">
               {events.map((event) => (
                 <li key={event.id} className="relative">
                   <span className="absolute -left-[22px] top-1 h-2.5 w-2.5 rounded-full bg-ink-2" aria-hidden="true" />
                   <p className="text-xs font-semibold uppercase tracking-wide text-ink">{CASE_EVENT_LABELS[event.type] ?? event.type}</p>
-                  <p className="text-sm text-slate-700">{event.message}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-sm text-ink-2">{event.message}</p>
+                  <p className="text-xs text-ink-3">
                     {event.actorId ? actorMap.get(event.actorId)?.fullName ?? "Utilisateur" : "Système"} · {formatDateTime(event.createdAt)}
                   </p>
                 </li>
