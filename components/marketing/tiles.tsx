@@ -32,15 +32,21 @@ export function HeroCard({
   footer?: ReactNode;
 }) {
   return (
-    <section className="animate-fade-up rounded-[1.5rem] bg-subtle p-6 ring-1 ring-line sm:p-8">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-8">
+    <section className="animate-fade-up rounded-[1.5rem] bg-subtle p-5 ring-1 ring-line sm:p-7">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-stretch sm:gap-7">
         <div className="flex min-w-0 flex-1 flex-col justify-between">
           <div>
             {eyebrow && <p className="nav-tiny text-ink-3">{eyebrow}</p>}
-            <h1 className="mt-3 text-[2.5rem] leading-[0.98] tracking-[-0.03em] text-ink sm:text-[3.25rem]">{title}</h1>
-            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-ink-2">{subtitle}</p>
+            {/*
+             * Le titre se rétracte avec la largeur de l'écran : deux lignes,
+             * jamais trois, du plus petit téléphone au grand écran.
+             */}
+            <h1 className="mt-2.5 text-[clamp(1.55rem,6.2vw,3.25rem)] leading-[1.0] tracking-[-0.03em] text-ink sm:mt-3">
+              {title}
+            </h1>
+            <p className="mt-2.5 max-w-md text-[14.5px] leading-relaxed text-ink-2 sm:mt-3 sm:text-[15px]">{subtitle}</p>
           </div>
-          {footer && <div className="mt-6">{footer}</div>}
+          {footer && <div className="mt-5">{footer}</div>}
         </div>
 
         {image && (
@@ -52,7 +58,7 @@ export function HeroCard({
                 alt={imageAlt}
                 width={620}
                 height={775}
-                className="h-[11rem] w-full rounded-[1.25rem] object-cover ring-1 ring-line sm:h-full sm:min-h-[11rem]"
+                className="h-[8.25rem] w-full rounded-[1.25rem] object-cover ring-1 ring-line sm:h-full sm:min-h-[11rem]"
                 loading="eager"
               />
             </picture>
@@ -80,7 +86,7 @@ export function ActionRow({
   return (
     <Link href={href} className="action-row justify-between">
       <span className="min-w-0">
-        <span className="block text-[1.6rem] leading-tight tracking-[-0.02em] text-ink" style={{ fontFamily: "var(--font-display)" }}>
+        <span className="block text-[clamp(1.3rem,5vw,1.6rem)] leading-tight tracking-[-0.02em] text-ink" style={{ fontFamily: "var(--font-display)" }}>
           {title}
         </span>
         {hint && <span className="mt-1 block text-sm text-ink-3">{hint}</span>}

@@ -96,7 +96,6 @@ export default async function HomePage() {
     <PublicPage>
       <PageColumn className="flex flex-col gap-4 pt-4 sm:gap-5 sm:pt-6">
         <HeroCard
-          eyebrow="AIME® — Le Monde Aime"
           title="Le fil s’était perdu. On le reprend."
           subtitle="Les familles se sont éclatées, les transmissions se sont arrêtées, les campagnes se sont vidées. AIME® prend les choses en main — et tout commence par un mariage, le moment où deux histoires décident de ce qu’elles se passent."
           image={{ src: "/images/hero-mariage-portrait.webp", type: "image/webp" }}

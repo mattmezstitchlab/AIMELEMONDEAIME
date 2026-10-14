@@ -114,13 +114,19 @@
   border-radius: 1.25rem;
   background: var(--color-canvas);
   color: var(--color-ink);
-  padding: 1.5rem;
+  padding: 1.15rem 1.25rem;
   box-shadow:
     0 0 0 1px var(--color-line),
     var(--cal-shadow-rested);
   transition:
     transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.18s ease;
+}
+
+@media (min-width: 40rem) {
+  .action-row {
+    padding: 1.5rem;
+  }
 }
 
 .action-row:hover {
