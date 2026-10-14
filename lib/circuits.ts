@@ -607,6 +607,21 @@ export function circuitForPointKind(kind: string): Circuit | undefined {
   return CIRCUITS.find((circuit) => circuit.board === "structures" && circuit.pointKind === kind);
 }
 
+/**
+ * Les circuits qui entourent un mariage.
+ *
+ * Le mariage est la porte d'entrée du site : cette liste dit, sans détour, ce
+ * que les circuits peuvent y apporter. Elle sert à l'accueil, au parcours
+ * mariage et aux guides de la thématique.
+ */
+export const WEDDING_CIRCUITS: Array<{ key: string; why: string }> = [
+  { key: "producteurs", why: "Le repas, les fleurs, un panier pour les invités : en vente directe, sans intermédiaire." },
+  { key: "artisans", why: "Une robe à reprendre, un bijou à réparer, un meuble à retaper pour la salle." },
+  { key: "logements", why: "Pour les invités qui viennent de loin et restent dormir." },
+  { key: "transports", why: "Des places en voiture entre celles et ceux qui montent et celles et ceux qui rentrent." },
+  { key: "transmission", why: "Ce que le mariage rend possible ensuite : un savoir, une mémoire, un geste qui se passe." },
+];
+
 export function openCircuits(): Circuit[] {
   return CIRCUITS.filter((circuit) => circuit.status === "ouvert");
 }

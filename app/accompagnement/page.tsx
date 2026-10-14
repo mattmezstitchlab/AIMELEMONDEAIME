@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
 import { Container, EmptyState, Hero, LinkButton, SectionHeading, Tag, formatDate } from "@/components/ui";
 import { Icon } from "@/components/icon";
+import { CircuitLinks } from "@/components/marketing/tiles";
+import { WEDDING_CIRCUITS, circuitFor } from "@/lib/circuits";
 import { MockWindow, TimelineMock } from "@/components/marketing/mocks";
 import { getOrganisms } from "@/lib/journey-queries";
 import { ORGANISM_CATEGORY_LABEL, SITUATIONS, SITUATION_BY_KEY, RULES_REVIEWED_AT } from "@/lib/situations";
@@ -97,6 +99,17 @@ export default async function Accompagnement({ searchParams }: { searchParams: P
               <Link href="/informations/mariage" className="text-sm font-medium text-ink underline underline-offset-4">
                 Consulter les guides mariage
               </Link>
+            </div>
+            <div className="mt-10">
+              <CircuitLinks
+                title="Ce dont un mariage a besoin, près de chez vous."
+                text="Le parcours s'occupe du dossier et du jour J ; les circuits s'occupent du reste — avec la même règle partout : votre commune suffit, aucune adresse n'est publiée, rien ne se conclut sans l'accord des personnes."
+                items={WEDDING_CIRCUITS.map((item) => ({
+                  href: `/circuits/${item.key}`,
+                  label: circuitFor(item.key)?.label ?? item.key,
+                  why: item.why,
+                }))}
+              />
             </div>
             <p className="mt-6 max-w-3xl text-sm leading-relaxed text-ink-3">
               Le projet partagé aide à organiser la fête si vous en prévoyez une. Les artistes ne sont proposés que si vous choisissez un

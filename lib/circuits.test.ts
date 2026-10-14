@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ASSOCIATIONS, CIRCUITS, DEFAULT_ORDER_STATUS_LABELS, PRODUCTEURS, circuitFor, circuitForPointKind, openCircuits, plannedCircuits } from "@/lib/circuits";
+import { ASSOCIATIONS, CIRCUITS, DEFAULT_ORDER_STATUS_LABELS, PRODUCTEURS, WEDDING_CIRCUITS, circuitFor, circuitForPointKind, openCircuits, plannedCircuits } from "@/lib/circuits";
 import { LISTING_CATEGORIES } from "@/lib/lma";
 
 /*
@@ -72,6 +72,15 @@ test("chaque circuit dit ses voisins, et ces voisins existent", () => {
       assert.ok(voisin.why.trim().length > 20, `${circuit.key} → ${voisin.key} : la raison d'y aller tient en trois mots, ce n'est pas une raison`);
       assert.ok(voisin.why.endsWith("."), `${circuit.key} → ${voisin.key} : la raison d'y aller n'est pas une phrase`);
     }
+  }
+});
+
+test("les circuits du mariage existent tous", () => {
+  const keys = new Set(CIRCUITS.map((circuit) => circuit.key));
+  assert.ok(WEDDING_CIRCUITS.length >= 3, "un mariage a besoin de plusieurs circuits");
+  for (const item of WEDDING_CIRCUITS) {
+    assert.ok(keys.has(item.key), `« ${item.key} » n'est pas un circuit`);
+    assert.ok(item.why.trim().length > 20, `l'entrée « ${item.key} » ne dit pas pourquoi y aller`);
   }
 });
 

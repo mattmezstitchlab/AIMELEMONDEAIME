@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PublicPage } from "@/components/public-shell";
+import { CircuitLinks } from "@/components/marketing/tiles";
+import { WEDDING_CIRCUITS, circuitFor } from "@/lib/circuits";
 import { Container, EmptyState, Hero, LinkButton, SectionHeading, Tag } from "@/components/ui";
 import { Icon } from "@/components/icon";
 import { db, isDatabaseConfigured } from "@/db";
@@ -76,6 +78,20 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
               </div>
             )}
           </div>
+        {theme === "mariage" && (
+          <div className="mt-12">
+            <CircuitLinks
+              title="Après le guide, les circuits."
+              text="Ce que vous venez de lire se prépare ; les circuits, eux, trouvent les personnes : le repas, les retouches, les invités qui restent dormir, celles et ceux qui montent en voiture."
+              items={WEDDING_CIRCUITS.map((item) => ({
+                href: `/circuits/${item.key}`,
+                label: circuitFor(item.key)?.label ?? item.key,
+                why: item.why,
+              }))}
+            />
+          </div>
+        )}
+
         </Container>
       </section>
     </PublicPage>

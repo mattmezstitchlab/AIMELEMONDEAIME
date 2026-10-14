@@ -202,6 +202,40 @@ export function PageIntro({
   );
 }
 
+/**
+ * Les circuits autour d'un moment de vie : chaque lien dit la raison d'y aller.
+ * Le libellé vient du catalogue — un circuit renommé se renomme ici aussi.
+ */
+export function CircuitLinks({
+  title,
+  text,
+  items,
+}: {
+  title: string;
+  text?: string;
+  items: Array<{ label: string; href: string; why: string }>;
+}) {
+  return (
+    <section className="rounded-card bg-subtle p-6 ring-1 ring-line sm:p-7">
+      <h2 className="text-[1.3rem] leading-tight tracking-[-0.02em] text-ink">{title}</h2>
+      {text && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-3">{text}</p>}
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        {items.map((item) => (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              className="group flex h-full flex-col rounded-control bg-canvas p-4 ring-1 ring-line transition hover:shadow-rested"
+            >
+              <span className="text-sm font-semibold text-ink">{item.label}</span>
+              <span className="mt-1 text-xs leading-relaxed text-ink-3">{item.why}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /** Titre de section du site public. */
 export function TileHeading({ children, id }: { children: ReactNode; id?: string }) {
   return (
