@@ -83,6 +83,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
             )}
           </Card>
 
+          <div data-assistant-id="case-attachments">
           <Card>
             <h2 className="text-lg font-semibold text-ink">Documents du dossier</h2>
             {caseDocuments.length === 0 ? (
@@ -105,6 +106,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
               </div>
             )}
           </Card>
+          </div>
 
           {item.status !== "brouillon" && (
             <Card>

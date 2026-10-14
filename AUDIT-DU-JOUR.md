@@ -76,9 +76,17 @@ Tout est dans le dépôt, vérifié, et poussé sur la branche.
 
 ### Finitions
 
-7. **Assistant** : dix cibles d'aide contextuelle pointent vers des éléments qui n'existent
-   plus dans les pages (dette antérieure à ce soir). L'assistant répond, mais son bouton
-   « montrer » ne surligne rien sur ces pages-là.
+7. **Assistant** : sur 23 cibles d'aide, **8 ne trouvaient aucun élément** dans les pages.
+   Rien de cassé — le panneau écrit alors honnêtement « élément absent de cette page » — mais
+   l'aide était muette. **J'en ai reconnecté 5** (choix du motif d'une démarche, pièces à
+   préparer, bouton d'envoi d'un dossier, pièces jointes d'un dossier, formulaire d'article
+   en administration). Les formulaires du Monde Aime, eux, étaient déjà branchés (mon
+   détecteur les avait signalés à tort, vérification faite).
+   Il reste **3 cibles** : elles décrivent une **recherche et des filtres de dossiers** et une
+   **section d'attestations d'exemple** qui **n'ont jamais existé** dans cette version
+   (vérifié dans l'historique du dépôt, ce n'est pas venu de la refonte). À construire ou à
+   reformuler — c'est votre choix, ce n'est pas un défaut.
+
 8. **Pas de HSTS** dans les en-têtes (à activer chez l'hébergeur), **pas d'adresse
    canonique** par page (SEO fin), **pas de tests** au-delà du calcul de point.
 

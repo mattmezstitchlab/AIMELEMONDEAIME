@@ -67,7 +67,7 @@ export const TARGETS: TargetEntry[] = [
   { id: "demarches-filters", label: "Filtres de statut", description: "Affiche seulement les brouillons, les dossiers en cours ou terminés.", roles: ["membre"] },
   { id: "nouvelle-kind", label: "Type de démarche", description: "Choisissez d'abord le motif : changement de situation, famille, logement, santé, retraite, cotisations, emploi.", roles: ["membre"] },
   { id: "nouvelle-required", label: "Pièces à préparer", description: "La liste des justificatifs utiles apparaît ici avant l'envoi.", roles: ["membre"] },
-  { id: "nouvelle-submit", label: "Bouton Envoyer ma demande", description: "Envoie la demande à votre bureau. Un brouillon est enregistré automatiquement avant.", roles: ["membre"] },
+  { id: "nouvelle-submit", label: "Bouton Envoyer le dossier", description: "Envoie la demande à votre bureau. Un brouillon est enregistré automatiquement avant.", roles: ["membre"] },
   { id: "case-message", label: "Zone de message du dossier", description: "Permet de répondre au gestionnaire et de joindre un justificatif.", roles: ["membre", "gestionnaire"] },
   { id: "case-attachments", label: "Pièces jointes du dossier", description: "Les documents déjà transmis, téléchargeables.", roles: ["membre", "gestionnaire"] },
   { id: "case-status-form", label: "Formulaire de gestion du dossier", description: "Change le statut, affecte un agent et demande une pièce manquante.", roles: ["gestionnaire"] },
@@ -189,7 +189,7 @@ export const SCENARIOS: AssistantScenario[] = [
       { text: "Choisissez le motif correspondant à votre situation.", highlight: "nouvelle-kind", action: "Sélectionnez « Changement de situation », « Famille » ou « Logement » selon le cas." },
       { text: "Vos informations connues sont déjà préremplies : vous n'avez rien à ressaisir.", action: "Complétez seulement ce qui a changé." },
       { text: "La liste des pièces utiles s'affiche avant l'envoi.", highlight: "nouvelle-required" },
-      { text: "Vous pouvez envoyer tout de suite ou laisser le brouillon se sauvegarder.", highlight: "nouvelle-submit", action: "Cliquez sur « Envoyer ma demande » quand tout est prêt." },
+      { text: "Vous pouvez envoyer tout de suite ou laisser le brouillon se sauvegarder.", highlight: "nouvelle-submit", action: "Cliquez sur « Envoyer le dossier » quand tout est prêt." },
     ],
   },
   {

@@ -50,7 +50,7 @@ export default async function NouvelleDemarche({ searchParams }: { searchParams:
       <form role="search" className="flex max-w-xl gap-2"><label htmlFor="sq" className="sr-only">Chercher une situation</label><input id="sq" name="q" defaultValue={sp.q} placeholder="Ex. naissance, logement, concert, retraite…" className="min-w-0 flex-1 rounded-control ring-1 ring-line px-4 py-2.5 text-sm" /><button className="rounded-control bg-ink px-4 text-sm font-bold text-canvas">Chercher</button></form>
       <p className="-mt-6 text-xs text-ink-3">La recherche porte sur les mots des situations proposées : elle ne comprend pas librement toutes les demandes. En cas de doute, un conseiller France services peut vous orienter.</p>
       {sp.erreur && <p role="alert" className="-mb-2 rounded-control bg-muted px-4 py-2 text-sm text-ink-2">{sp.erreur}</p>}
-      <section>
+      <section data-assistant-id="nouvelle-kind">
         <h2 className="mb-3 text-lg font-bold text-ink">Moments de vie — parcours guidés</h2>
         <p className="-mt-2 mb-4 text-sm text-ink-3">Vous préparez vous-même, pas à pas : questions, étapes, pièces et rappels. Rien n&apos;est transmis sans votre accord.</p>
       {list.length === 0 ? <Card><p className="text-sm text-ink-2">Aucune situation ne correspond à « {sp.q} ». Essayez un autre mot, ou rendez-vous dans un <a className="font-semibold text-ink underline" href="https://www.france-services.gouv.fr" target="_blank" rel="noreferrer">espace France services</a> pour un accompagnement humain.</p></Card> : (

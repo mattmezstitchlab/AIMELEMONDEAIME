@@ -57,7 +57,7 @@ function F({ label, name, defaultValue, type = "text", required = true }: { labe
 export function CreateStaffForm({ offices }: { offices: { id: number; name: string }[] }) {
   const f = useFormAction(createStaffUser);
   return (
-    <form onSubmit={f.onSubmit} className="grid gap-3 sm:grid-cols-2">
+    <form onSubmit={f.onSubmit} data-assistant-id="admin-content-form" className="grid gap-3 sm:grid-cols-2">
       <F label="Nom complet" name="fullName" />
       <F label="E-mail" name="email" type="email" />
       <F label="Mot de passe initial" name="password" type="password" />

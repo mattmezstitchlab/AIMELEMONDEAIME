@@ -126,7 +126,7 @@ export function CaseForm({
       </p>
 
       {requiredDocuments.length > 0 && (
-        <div className="rounded-control ring-1 ring-line bg-muted p-4 text-sm">
+        <div data-assistant-id="nouvelle-required" className="rounded-control ring-1 ring-line bg-muted p-4 text-sm">
           <p className="font-semibold text-ink-2">Pièces justificatives nécessaires</p>
           <ul className="mt-1 list-inside list-disc text-ink-3">
             {requiredDocuments.map((doc) => <li key={doc}>{doc}</li>)}
@@ -143,7 +143,7 @@ export function CaseForm({
 
       {canSubmit && (
         <div className="flex flex-wrap gap-3">
-          <PrimaryButton onClick={handleSubmit} disabled={isPending}>
+          <PrimaryButton data-assistant-id="nouvelle-submit" onClick={handleSubmit} disabled={isPending}>
             {isPending ? "Envoi en cours…" : "Envoyer le dossier"}
           </PrimaryButton>
           <SecondaryButton onClick={handleDeleteDraft} disabled={isPending}>
