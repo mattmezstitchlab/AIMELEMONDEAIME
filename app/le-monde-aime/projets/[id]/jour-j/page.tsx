@@ -60,7 +60,7 @@ export default async function WeddingDayPage({ params }: { params: Promise<{ id:
           ) : (
             <ol className="mt-3 space-y-2">
               {project.program.map((item, i) => (
-                <li key={i} className="flex gap-4 rounded-lg bg-subtle px-3 py-2 text-sm print:bg-white print:ring-1 print:ring-slate-200">
+                <li key={i} className="flex gap-4 rounded-control bg-subtle px-3 py-2 text-sm print:bg-white print:ring-1 print:ring-slate-200">
                   <span className="w-20 shrink-0 font-bold text-ink">{item.time || "—"}</span>
                   <span className="text-slate-800">{item.label}</span>
                 </li>
@@ -92,7 +92,7 @@ export default async function WeddingDayPage({ params }: { params: Promise<{ id:
             </div>
           )}
           {aPlacer.length > 0 && (
-            <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 print:hidden">
+            <p className="mt-3 rounded-control bg-amber-50 px-3 py-2 text-xs text-amber-800 print:hidden">
               Attention, {aPlacer.length} foyer(s) confirmé(s) ne sont pas encore placés : {aPlacer.map((g) => g.name).join(", ")}. Complétez le plan dans le projet avant d&apos;imprimer.
             </p>
           )}
@@ -105,13 +105,13 @@ export default async function WeddingDayPage({ params }: { params: Promise<{ id:
           ) : (
             <ul className="mt-3 space-y-2 text-sm">
               {contacts.engagements.map((e, i) => (
-                <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-subtle px-3 py-2 print:bg-white print:ring-1 print:ring-slate-200">
+                <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-subtle px-3 py-2 print:bg-white print:ring-1 print:ring-slate-200">
                   <span className="font-semibold text-slate-900">{e.artistName}</span>
                   <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">{ENGAGEMENT_STATUS_LABEL[e.status as keyof typeof ENGAGEMENT_STATUS_LABEL] ?? e.status}</span>
                 </li>
               ))}
               {contacts.organizers.map((name) => (
-                <li key={name} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-subtle px-3 py-2 print:bg-white print:ring-1 print:ring-slate-200">
+                <li key={name} className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-subtle px-3 py-2 print:bg-white print:ring-1 print:ring-slate-200">
                   <span className="font-semibold text-slate-900">{name}</span>
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">Organisation</span>
                 </li>

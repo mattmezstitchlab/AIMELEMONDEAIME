@@ -90,7 +90,7 @@ export function CaseForm({
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
                 rows={4}
-                className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
+                className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
               />
             ) : field.type === "select" ? (
               <select
@@ -98,7 +98,7 @@ export function CaseForm({
                 required={field.required}
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
-                className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
+                className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
               >
                 <option value="" disabled>Choisissez une option</option>
                 {field.options?.map((opt) => (
@@ -112,7 +112,7 @@ export function CaseForm({
                 required={field.required}
                 value={values[field.name] ?? ""}
                 onChange={(e) => update(field.name, e.target.value)}
-                className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
+                className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm focus:ring-ink"
               />
             )}
           </div>
@@ -139,7 +139,7 @@ export function CaseForm({
         </div>
       )}
 
-      {submitError && <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>}
+      {submitError && <p role="alert" className="rounded-control bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>}
 
       {canSubmit && (
         <div className="flex flex-wrap gap-3">

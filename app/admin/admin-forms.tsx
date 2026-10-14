@@ -42,7 +42,7 @@ function useFormAction(fn: (fd: FormData) => Promise<Result>, resetOnSuccess = t
   return { error, success, pending, onSubmit };
 }
 
-const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm";
 
 function F({ label, name, defaultValue, type = "text", required = true }: { label: string; name: string; defaultValue?: string; type?: string; required?: boolean }) {
   const id = `${name}-${useId()}`;
@@ -97,7 +97,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
       </td>
       <td className="px-4 py-3">
         <label className="sr-only" htmlFor={`role-${user.id}`}>Rôle de {user.fullName}</label>
-        <select id={`role-${user.id}`} value={role} disabled={isSelf} onChange={(e) => setRole(e.target.value)} className="rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm">
+        <select id={`role-${user.id}`} value={role} disabled={isSelf} onChange={(e) => setRole(e.target.value)} className="rounded-control ring-1 ring-slate-300 px-2 py-1.5 text-sm">
           <option value="membre">Membre</option>
           <option value="gestionnaire">Gestionnaire</option>
           <option value="administrateur">Administrateur</option>
@@ -105,7 +105,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
       </td>
       <td className="px-4 py-3">
         <label className="sr-only" htmlFor={`office-${user.id}`}>Bureau de {user.fullName}</label>
-        <select id={`office-${user.id}`} value={officeId} onChange={(e) => setOfficeId(e.target.value)} className="rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm">
+        <select id={`office-${user.id}`} value={officeId} onChange={(e) => setOfficeId(e.target.value)} className="rounded-control ring-1 ring-slate-300 px-2 py-1.5 text-sm">
           <option value="">—</option>
           {offices.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
         </select>
@@ -116,7 +116,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
             type="button"
             disabled={pending}
             onClick={() => start(async () => { const r = await updateUserRole(user.id, role as "membre", officeId ? Number(officeId) : undefined); setMsg(r.ok ? "Enregistré" : r.error); router.refresh(); })}
-            className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink-2"
+            className="rounded-control bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink-2"
           >
             Enregistrer
           </button>
@@ -125,7 +125,7 @@ export function UserRow({ user, offices, isSelf }: { user: { id: number; fullNam
               type="button"
               disabled={pending}
               onClick={() => start(async () => { const r = await toggleUserActive(user.id, !user.isActive); setMsg(r.ok ? null : r.error); router.refresh(); })}
-              className="rounded-lg ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-control ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
               {user.isActive ? "Désactiver" : "Réactiver"}
             </button>

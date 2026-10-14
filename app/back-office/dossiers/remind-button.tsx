@@ -39,7 +39,7 @@ export function RemindButton({ caseId, compact = false }: { caseId: number; comp
         type="button"
         onClick={() => void onClick()}
         disabled={state.kind === "busy"}
-        className={`rounded-lg bg-ink font-semibold text-white transition hover:bg-ink-2 disabled:opacity-50 ${compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs"}`}
+        className={`rounded-control bg-ink font-semibold text-white transition hover:bg-ink-2 disabled:opacity-50 ${compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs"}`}
       >
         {state.kind === "busy" ? "Envoi…" : "Relancer le membre"}
       </button>

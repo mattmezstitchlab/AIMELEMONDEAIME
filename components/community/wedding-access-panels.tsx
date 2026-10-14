@@ -13,8 +13,8 @@ import {
 import type { WeddingAccessLinkSummary } from "@/lib/wedding-queries";
 import type { WeddingAccessRole } from "@/db/schema";
 
-const button = "rounded-lg px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
-const input = "rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2 text-sm text-slate-900";
+const button = "rounded-control px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
+const input = "rounded-control ring-1 ring-slate-300 bg-white px-3 py-2 text-sm text-slate-900";
 
 type Feedback = { ok: boolean; text: string } | null;
 
@@ -30,7 +30,7 @@ function LinkField({ value, label, id }: { value: string; label: string; id: str
     }
   }
   return (
-    <div className="mt-3 rounded-lg border ring-line bg-white p-3">
+    <div className="mt-3 rounded-control border ring-line bg-white p-3">
       <label className="block text-xs font-semibold text-slate-700" htmlFor={id}>{label}</label>
       <div className="mt-1 flex flex-wrap gap-2">
         <input id={id} readOnly value={value} onFocus={(event) => event.currentTarget.select()} className={`${input} min-w-0 flex-1 text-xs`} />
@@ -87,7 +87,7 @@ export function WeddingRsvpLinkButton({ guestId, guestName, expiresAt, active, c
         {expanded ? "Fermer les options RSVP" : active ? "Gérer le lien RSVP" : "Créer un lien RSVP individuel"}
       </button>
       {expanded && (
-        <div className="mt-2 rounded-lg bg-slate-50 p-3">
+        <div className="mt-2 rounded-control bg-slate-50 p-3">
           <p className="text-xs text-slate-600">Le foyer « {guestName} » pourra uniquement consulter et modifier sa propre réponse. Aucun nom des autres invités, note, budget ou document n&apos;est partagé.</p>
           {active && <p className="mt-2 text-xs font-semibold text-ink">Un lien est actif jusqu&apos;au {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(expiresAt!)}. Le lien secret existant n&apos;est pas récupérable après sa création.</p>}
           <div className="mt-3 flex flex-wrap gap-2">
@@ -183,7 +183,7 @@ export function WeddingAccessLinksPanel({ projectId, links, open }: {
           {feedback && <p role={feedback.ok ? "status" : "alert"} className={`mt-2 text-xs ${feedback.ok ? "text-ink" : "text-rose-700"}`}>{feedback.text}</p>}
           {url && <LinkField id={`access-link-${projectId}`} value={url} label="Lien secret pour le proche" />}
         </div>
-      ) : <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">Le projet est fermé : aucun nouveau lien ne peut être créé.</p>}
+      ) : <p className="rounded-control bg-slate-50 p-3 text-xs text-slate-600">Le projet est fermé : aucun nouveau lien ne peut être créé.</p>}
 
       <div>
         <h3 className="text-sm font-bold text-slate-900">Liens créés</h3>

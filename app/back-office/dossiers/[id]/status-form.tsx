@@ -45,7 +45,7 @@ export function StatusForm({ caseId, currentStatus, currentRequested }: { caseId
           id="status"
           value={status}
           onChange={(e) => setStatus(e.target.value as CaseStatus)}
-          className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"
         >
           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{CASE_STATUS_LABELS[s]}</option>)}
         </select>
@@ -57,7 +57,7 @@ export function StatusForm({ caseId, currentStatus, currentRequested }: { caseId
             id="requested"
             value={requested}
             onChange={(e) => setRequested(e.target.value)}
-            className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"
             placeholder="Ex : Attestation de salaire, Justificatif de domicile"
           />
         </div>
@@ -69,7 +69,7 @@ export function StatusForm({ caseId, currentStatus, currentRequested }: { caseId
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={3}
-          className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"
         />
       </div>
       {error && <p role="alert" className="text-sm text-rose-700">{error}</p>}

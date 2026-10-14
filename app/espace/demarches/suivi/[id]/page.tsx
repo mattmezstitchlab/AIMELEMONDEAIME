@@ -43,7 +43,7 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
       <SectionTitle eyebrow={`Mes démarches · ${def.short}`} title={j.title} description={def.description} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link href="/espace/demarches" className="text-sm font-semibold text-ink underline">← Mes démarches</Link>
-        <div className="flex flex-wrap gap-3"><a href={`/api/demarches/${j.id}/recapitulatif`} className="rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700">Télécharger le récapitulatif</a><JourneyStatusButton journeyId={j.id} status={j.status} /></div>
+        <div className="flex flex-wrap gap-3"><a href={`/api/demarches/${j.id}/recapitulatif`} className="rounded-control ring-1 ring-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700">Télécharger le récapitulatif</a><JourneyStatusButton journeyId={j.id} status={j.status} /></div>
       </div>
       {j.status === "questionnaire" && <Card><p className="text-sm">Le questionnaire n&apos;est pas terminé. <Link className="font-bold text-ink underline" href={`/espace/demarches/nouvelle?reprendre=${j.id}`}>Reprendre</Link></p></Card>}
 
@@ -134,12 +134,12 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
           <Card><h2 className="text-lg font-semibold text-slate-900">Ma situation</h2><div className="mt-3"><SummaryEditor journeyId={j.id} summary={j.summary} /></div></Card>
           <Card>
             <h2 className="text-lg font-semibold text-slate-900">Transmettre à mon bureau</h2>
-            {erreur && <p role="alert" className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{erreur}</p>}
+            {erreur && <p role="alert" className="mt-2 rounded-control bg-rose-50 px-3 py-2 text-sm text-rose-700">{erreur}</p>}
             {d.linkedCase ? (
               <div className="mt-2 text-sm text-slate-700">
                 <p><span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-ink">Transmis à votre bureau</span></p>
                 <p className="mt-2">Ce parcours est devenu le dossier <strong>{d.linkedCase.reference}</strong>{d.linkedCase.submittedAt ? `, transmis le ${formatDate(d.linkedCase.submittedAt)}` : ""}. Votre bureau y reprend vos étapes et vos pièces, et vous y répond.</p>
-                <Link href={`/espace/demarches/${d.linkedCase.id}`} className="mt-3 inline-block rounded-lg bg-ink px-3 py-2 text-xs font-bold text-white">Ouvrir le dossier</Link>
+                <Link href={`/espace/demarches/${d.linkedCase.id}`} className="mt-3 inline-block rounded-control bg-ink px-3 py-2 text-xs font-bold text-white">Ouvrir le dossier</Link>
                 <p className="mt-2 text-xs text-slate-500">Ce parcours reste consultable ici, en lecture : le suivi se poursuit dans le dossier, sans rien ressaisir.</p>
               </div>
             ) : j.status === "questionnaire" ? (
@@ -149,14 +149,14 @@ export default async function SuiviDemarche({ params, searchParams }: { params: 
                 <p>Vous préférez être accompagné ? Transmettez ce parcours à votre bureau : il <strong>devient un dossier</strong> qui reprend vos étapes et vos pièces reliées. L&apos;équipe vous répond dans le dossier — inutile de recommencer votre histoire. Dans cette version, l&apos;équipe est simulée, aucun organisme réel n&apos;est destinataire.</p>
                 <form action={transmitJourneyToBureau} className="mt-3">
                   <input type="hidden" name="journeyId" value={j.id} />
-                  <button type="submit" className="rounded-lg bg-ink px-4 py-2.5 text-sm font-bold text-white hover:bg-ink-2">Transmettre à mon bureau</button>
+                  <button type="submit" className="rounded-control bg-ink px-4 py-2.5 text-sm font-bold text-white hover:bg-ink-2">Transmettre à mon bureau</button>
                 </form>
               </div>
             )}
           </Card>
           <Card>
             <h2 className="text-lg font-semibold text-slate-900">Pièces à préparer</h2>
-            {pieces.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucune pièce identifiée.</p> : <ul className="mt-3 space-y-3">{pieces.map((t) => <li key={t.id} className="rounded-lg bg-subtle p-3 text-sm"><p className="font-semibold">{t.label}</p><p className="text-xs text-slate-500">{t.reason}</p><TaskControls task={{ id: t.id, status: t.status, dueAt: ser(t.dueAt), dueKind: t.dueKind, documentId: t.documentId, kind: t.kind }} docs={d.myDocs} /></li>)}</ul>}
+            {pieces.length === 0 ? <p className="mt-2 text-sm text-slate-600">Aucune pièce identifiée.</p> : <ul className="mt-3 space-y-3">{pieces.map((t) => <li key={t.id} className="rounded-control bg-subtle p-3 text-sm"><p className="font-semibold">{t.label}</p><p className="text-xs text-slate-500">{t.reason}</p><TaskControls task={{ id: t.id, status: t.status, dueAt: ser(t.dueAt), dueKind: t.dueKind, documentId: t.documentId, kind: t.kind }} docs={d.myDocs} /></li>)}</ul>}
             <p className="mt-3 text-xs text-slate-500">Relier un document le garde privé. Pour en déposer un nouveau : <Link href="/espace/documents" className="underline">Mes documents</Link>.</p>
           </Card>
           <Card>

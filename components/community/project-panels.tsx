@@ -20,13 +20,13 @@ import { RequestButton } from "@/components/community/forms";
 import { priceLabel } from "@/components/community/community-app";
 import { LISTING_CATEGORIES, NEED_STATUS_LABELS, UNIVERSES } from "@/lib/lma";
 
-const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
 
 function Note({ value }: { value: Fb }) {
   if (!value) return null;
-  return <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-xs ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p>;
+  return <p role={value.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-xs ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p>;
 }
 
 function useRun() {
@@ -70,7 +70,7 @@ export function ProjectForm({ coords }: { coords: { lat: number; lng: number } |
       <fieldset><legend className="mb-1 text-sm font-semibold text-slate-800">Univers concernés</legend>
         <div className="flex flex-wrap gap-2">{UNIVERSES.map((u) => { const on = universes.includes(u.key); return <label key={u.key} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${on ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white text-slate-700"}`}><input type="checkbox" name="universes" value={u.key} checked={on} onChange={() => setUniverses((p) => (p.includes(u.key) ? p.filter((k) => k !== u.key) : [...p, u.key]))} className="sr-only" />{u.label}</label>; })}</div>
       </fieldset>
-      {!coords && <p role="alert" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">Choisissez d&apos;abord le lieu approximatif sur la carte ci-dessus.</p>}
+      {!coords && <p role="alert" className="rounded-control bg-amber-50 p-3 text-sm text-amber-800">Choisissez d&apos;abord le lieu approximatif sur la carte ci-dessus.</p>}
       <p className="text-xs text-slate-500">Les activités pour enfants s&apos;organisent via les responsables légaux ou une structure encadrante.</p>
       <Note value={fb} />
       <PrimaryButton type="submit" disabled={pending || !coords}>{pending ? "Création…" : "Créer le projet"}</PrimaryButton>
@@ -98,13 +98,13 @@ export function NeedsPanel({ projectId, needs, suggestions, isOrganizer, open, s
               <div><p className="font-semibold text-slate-900">{n.quantity} × {n.text}</p><p className="text-xs text-slate-500">{LISTING_CATEGORIES.find((c) => c.value === n.category)?.label ?? "Trajet"}</p></div>
               <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_STYLE[n.status]}`}>{NEED_STATUS_LABELS[n.status]}</span>
             </div>
-            {n.contribution && <p className="mt-2 rounded-lg bg-slate-50 p-2 text-xs text-slate-700">{n.status === "confirme" ? "Confirmé par son propriétaire" : "Proposé — en attente de réponse du propriétaire"} : <strong>{n.contribution.title}</strong> ({n.contribution.quantity}) · {n.contribution.ownerName}</p>}
+            {n.contribution && <p className="mt-2 rounded-control bg-slate-50 p-2 text-xs text-slate-700">{n.status === "confirme" ? "Confirmé par son propriétaire" : "Proposé — en attente de réponse du propriétaire"} : <strong>{n.contribution.title}</strong> ({n.contribution.quantity}) · {n.contribution.ownerName}</p>}
             {n.status === "propose" && !n.contribution && <p className="mt-2 text-xs text-slate-500">Une proposition est en attente de réponse du propriétaire.</p>}
             {isOrganizer && open && n.status === "recherche" && (
               <div className="mt-3 space-y-2">
                 {suggestions.filter((s) => s.needId === n.id).length > 0 && <p className="text-xs font-semibold text-slate-700">Propositions proches qui pourraient convenir :</p>}
                 {suggestions.filter((s) => s.needId === n.id).map(({ listing }) => (
-                  <div key={listing.id} className="rounded-lg bg-slate-50 p-3">
+                  <div key={listing.id} className="rounded-control bg-slate-50 p-3">
                     <p className="text-sm font-semibold text-slate-900">{listing.title} <span className="text-xs font-normal text-slate-500">· {listing.ownerName} · {listing.city} ({listing.distance} km) · {priceLabel({ priceMode: listing.priceMode, price: listing.price, action: listing.action })}</span></p>
                     <RequestButton listing={listing} projectNeedId={n.id} defaultQuantity={n.quantity} defaultStart={toLocalInput(startsAt)} defaultEnd={toLocalInput(endsAt ?? startsAt)} label="Demander pour le projet" />
                   </div>
@@ -146,7 +146,7 @@ export function PendingMembers({ projectId, pendingMembers }: { projectId: numbe
     <div className="mt-3 space-y-2">
       <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Demandes à traiter</p>
       {pendingMembers.map((m) => (
-        <div key={m.userId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-50 p-2 text-sm"><span>{m.name}</span>
+        <div key={m.userId} className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-amber-50 p-2 text-sm"><span>{m.name}</span>
           <span className="flex gap-2"><PrimaryButton type="button" disabled={pending} onClick={() => run(() => decideProjectMember(projectId, m.userId, true))} className="!px-3 !py-1.5 text-xs">Accepter</PrimaryButton><SecondaryButton type="button" disabled={pending} onClick={() => run(() => decideProjectMember(projectId, m.userId, false))} className="!px-3 !py-1.5 text-xs">Refuser</SecondaryButton></span></div>
       ))}
       <Note value={fb} />
@@ -183,7 +183,7 @@ export function ProjectChat({ projectId, messages, userId }: { projectId: number
       <div className="max-h-64 space-y-2 overflow-y-auto">
         {messages.length === 0 && <p className="text-sm text-slate-600">Aucun message pour l&apos;instant.</p>}
         {messages.map((m) => (
-          <div key={m.id} className={`rounded-lg p-2 text-sm ${m.senderId === userId ? "ml-6 bg-muted" : "mr-6 bg-slate-100"}`}>
+          <div key={m.id} className={`rounded-control p-2 text-sm ${m.senderId === userId ? "ml-6 bg-muted" : "mr-6 bg-slate-100"}`}>
             <strong className="text-xs">{m.senderId === userId ? "Vous" : m.senderName}</strong><p>{m.body}</p>
             <time className="text-[10px] text-slate-400">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(m.createdAt))}</time>
           </div>
@@ -205,7 +205,7 @@ export function DocumentsPanel({ projectId, documents, canUpload, isOrganizer }:
       <ul className="space-y-2">
         {documents.length === 0 && <li className="text-sm text-slate-600">Aucun document.</li>}
         {documents.map((d) => (
-          <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 p-2 text-sm">
+          <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-slate-50 p-2 text-sm">
             <span>{d.filename} <span className="text-xs text-slate-500">· {Math.max(1, Math.round(d.sizeBytes / 1024))} Ko · {d.access === "organisateurs" ? "organisateurs" : "participants"}</span></span>
             <a href={`/api/projets/${projectId}/documents/${d.id}`} className="text-xs font-bold text-ink underline">Télécharger</a>
           </li>
@@ -228,7 +228,7 @@ export function StatusControl({ projectId, status }: { projectId: number; status
   return (
     <div className="flex flex-wrap items-center gap-2">
       <label htmlFor="pj-status" className="text-sm font-semibold text-slate-700">Statut du projet</label>
-      <select id="pj-status" defaultValue={status} onChange={(e) => { if (window.confirm("Changer le statut du projet ?")) run(() => setProjectStatus(projectId, e.target.value as "ouvert" | "termine" | "annule")); }} disabled={pending} className="rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm"><option value="ouvert">Ouvert</option><option value="termine">Terminé</option><option value="annule">Annulé</option></select>
+      <select id="pj-status" defaultValue={status} onChange={(e) => { if (window.confirm("Changer le statut du projet ?")) run(() => setProjectStatus(projectId, e.target.value as "ouvert" | "termine" | "annule")); }} disabled={pending} className="rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"><option value="ouvert">Ouvert</option><option value="termine">Terminé</option><option value="annule">Annulé</option></select>
       <Note value={fb} />
     </div>
   );
@@ -240,11 +240,11 @@ export function ReportContent({ type, id }: { type: "projet" | "recit"; id: numb
   const [pending, start] = useTransition();
   if (!open) return <button type="button" onClick={() => setOpen(true)} className="text-xs font-medium text-slate-500 underline">Signaler ce contenu</button>;
   return (
-    <form onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); start(async () => { const r = await reportPublicContent(type, id, String(f.get("reason")), String(f.get("details") ?? "")); setFb({ ok: r.ok, text: r.ok ? r.message : r.error }); if (r.ok) setOpen(false); }); }} className="space-y-2 rounded-lg bg-slate-50 p-3">
+    <form onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); start(async () => { const r = await reportPublicContent(type, id, String(f.get("reason")), String(f.get("details") ?? "")); setFb({ ok: r.ok, text: r.ok ? r.message : r.error }); if (r.ok) setOpen(false); }); }} className="space-y-2 rounded-control bg-slate-50 p-3">
       <label htmlFor={`rp-${type}-${id}`} className="block text-xs font-semibold">Motif</label>
-      <select id={`rp-${type}-${id}`} name="reason" className="w-full rounded-lg ring-1 ring-slate-300 p-2 text-xs"><option value="contenu_inapproprie">Contenu inapproprié</option><option value="contenu_trompeur">Contenu trompeur</option><option value="atteinte_vie_privee">Atteinte à la vie privée</option><option value="mineur_en_danger">Mineur concerné</option><option value="autre">Autre</option></select>
-      <input name="details" maxLength={500} placeholder="Précision facultative" className="w-full rounded-lg ring-1 ring-slate-300 p-2 text-xs" />
-      <Note value={fb} /><div className="flex gap-2"><button disabled={pending} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">Envoyer</button><button type="button" onClick={() => setOpen(false)} className="text-xs text-slate-600">Annuler</button></div>
+      <select id={`rp-${type}-${id}`} name="reason" className="w-full rounded-control ring-1 ring-slate-300 p-2 text-xs"><option value="contenu_inapproprie">Contenu inapproprié</option><option value="contenu_trompeur">Contenu trompeur</option><option value="atteinte_vie_privee">Atteinte à la vie privée</option><option value="mineur_en_danger">Mineur concerné</option><option value="autre">Autre</option></select>
+      <input name="details" maxLength={500} placeholder="Précision facultative" className="w-full rounded-control ring-1 ring-slate-300 p-2 text-xs" />
+      <Note value={fb} /><div className="flex gap-2"><button disabled={pending} className="rounded-control bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">Envoyer</button><button type="button" onClick={() => setOpen(false)} className="text-xs text-slate-600">Annuler</button></div>
     </form>
   );
 }

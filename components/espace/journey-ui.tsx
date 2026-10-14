@@ -10,12 +10,12 @@ import {
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 import { ENGAGEMENT_STATUS_LABEL, FRAMEWORK_LABEL, TASK_STATUS_LABEL, type Question } from "@/lib/situations";
 
-const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
 export function Note({ value }: { value: Fb }) {
   if (!value) return null;
-  return <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-xs ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p>;
+  return <p role={value.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-xs ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p>;
 }
 function useRun() {
   const [fb, setFb] = useState<Fb>(null);
@@ -47,7 +47,7 @@ export function JourneyWizard({ situation, questions, initial, journeyId, projec
       {!done && q && (
         <form onSubmit={(e) => { e.preventDefault(); if (q.required && !answers[q.key]) return; save(step + 1); }} className="space-y-3">
           <label id={`q-label-${q.key}`} htmlFor={q.type === "select" ? undefined : `q-${q.key}`} className="block text-lg font-bold text-slate-900">{q.label}{q.required ? "" : <span className="ml-2 text-xs font-normal text-slate-500">(facultatif)</span>}</label>
-          {q.why && <p className="rounded-lg bg-sky-50 p-3 text-xs text-sky-900"><strong>Pourquoi cette question ?</strong> {q.why}</p>}
+          {q.why && <p className="rounded-control bg-sky-50 p-3 text-xs text-sky-900"><strong>Pourquoi cette question ?</strong> {q.why}</p>}
           {q.type === "select" ? (
             <div role="radiogroup" aria-labelledby={`q-label-${q.key}`} className="grid gap-2 sm:grid-cols-2">
               {q.options!.map(([v, t]) => <label key={v} className={`min-h-11 cursor-pointer rounded-card border p-3 text-sm focus-within:ring-2 focus-within:ring-slate-900 focus-within:ring-offset-2 ${answers[q.key] === v ? "ring-ink bg-muted font-semibold text-ink" : "border-slate-200 bg-white"}`}><input type="radio" name={q.key} value={v} checked={answers[q.key] === v} onChange={() => setAnswers((a) => ({ ...a, [q.key]: v }))} className="sr-only" />{t}</label>)}
@@ -116,7 +116,7 @@ export function TaskControls({ task, docs }: { task: { id: number; status: strin
 export function AddTask({ journeyId }: { journeyId: number }) {
   const [text, setText] = useState("");
   const { fb, pending, run } = useRun();
-  return <form onSubmit={(e) => { e.preventDefault(); run(() => addPersonalTask(journeyId, text), (r) => { if (r.ok) setText(""); }); }} className="mt-3 flex flex-wrap gap-2"><label htmlFor="add-task" className="sr-only">Ajouter une action</label><input id="add-task" value={text} onChange={(e) => setText(e.target.value)} placeholder="Ajouter une action personnelle" className="min-w-0 flex-1 rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm" /><PrimaryButton type="submit" disabled={pending || text.trim().length < 3} className="!px-3 !py-2 text-xs">Ajouter</PrimaryButton><div className="w-full"><Note value={fb} /></div></form>;
+  return <form onSubmit={(e) => { e.preventDefault(); run(() => addPersonalTask(journeyId, text), (r) => { if (r.ok) setText(""); }); }} className="mt-3 flex flex-wrap gap-2"><label htmlFor="add-task" className="sr-only">Ajouter une action</label><input id="add-task" value={text} onChange={(e) => setText(e.target.value)} placeholder="Ajouter une action personnelle" className="min-w-0 flex-1 rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm" /><PrimaryButton type="submit" disabled={pending || text.trim().length < 3} className="!px-3 !py-2 text-xs">Ajouter</PrimaryButton><div className="w-full"><Note value={fb} /></div></form>;
 }
 
 export function JourneyStatusButton({ journeyId, status }: { journeyId: number; status: string }) {
@@ -159,7 +159,7 @@ export function OrganizerEngagement({ e, artistName, docs }: { e: Eng; artistNam
       <div className="flex flex-wrap items-center justify-between gap-2"><strong className="text-slate-900">{artistName}</strong><span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">{ENGAGEMENT_STATUS_LABEL[e.status]}</span></div>
       <ol className="mt-3 grid gap-1 text-[11px] sm:grid-cols-5" aria-label="Étapes de l'engagement">{["Demande envoyée", "Proposition reçue", "Devis accepté", "Contrat signé (déclaré)", "Embauche déclarée"].map((t, i) => <li key={t} className={`rounded-md px-2 py-1 text-center ${idx >= i && idx >= 0 ? "bg-ink text-white" : "bg-slate-100 text-slate-500"}`}>{t}</li>)}</ol>
       {proposalText(e) && <p className="mt-3 text-sm text-slate-700"><strong>Proposition :</strong> {proposalText(e)}{e.proposalNote ? ` — « ${e.proposalNote} »` : ""}</p>}
-      {e.proposalFramework && <p className="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-900"><strong>Cadre à vérifier.</strong> {e.proposalFramework === "facture" ? "L'artiste indique pouvoir facturer. Pour le spectacle vivant, l'artiste rémunéré est présumé salarié : un Siret ne suffit pas à le confirmer." : e.proposalFramework === "salarie" ? "Un engagement salarié implique un contrat de travail et des déclarations, par exemple via le Guso si vous n'êtes pas un professionnel du spectacle." : "Le cadre n'est pas encore établi : clarifiez-le avec l'artiste."}</p>}
+      {e.proposalFramework && <p className="mt-2 rounded-control bg-amber-50 p-2 text-xs text-amber-900"><strong>Cadre à vérifier.</strong> {e.proposalFramework === "facture" ? "L'artiste indique pouvoir facturer. Pour le spectacle vivant, l'artiste rémunéré est présumé salarié : un Siret ne suffit pas à le confirmer." : e.proposalFramework === "salarie" ? "Un engagement salarié implique un contrat de travail et des déclarations, par exemple via le Guso si vous n'êtes pas un professionnel du spectacle." : "Le cadre n'est pas encore établi : clarifiez-le avec l'artiste."}</p>}
       <div className="mt-3 flex flex-wrap gap-2">
         {e.status === "proposition_recue" && <><PrimaryButton type="button" disabled={pending} onClick={() => run(() => advanceEngagement(e.id, "accepter"))} className="!px-3 !py-2 text-xs">Accepter la proposition</PrimaryButton><SecondaryButton type="button" disabled={pending} onClick={() => run(() => advanceEngagement(e.id, "decliner"))} className="!px-3 !py-2 text-xs">Décliner</SecondaryButton></>}
         {e.status === "devis_accepte" && <div className="flex flex-wrap items-end gap-2"><div><label htmlFor={`ct-${e.id}`} className="text-xs font-semibold text-slate-600">Contrat (document privé, facultatif)</label><select id={`ct-${e.id}`} value={doc} onChange={(ev) => setDoc(ev.target.value)} className={input}><option value="">Sans document</option>{docs.map((d) => <option key={d.id} value={d.id}>{d.filename}</option>)}</select></div><PrimaryButton type="button" disabled={pending} onClick={() => { if (window.confirm("Confirmez-vous que le contrat a été signé par les deux parties, en dehors d'AIME® ?")) run(() => advanceEngagement(e.id, "contrat", doc ? Number(doc) : null)); }} className="!px-3 !py-2 text-xs">Déclarer le contrat signé</PrimaryButton></div>}
@@ -187,7 +187,7 @@ export function ArtistEngagement({ e, organizerName, lieu, horaires, technique, 
       {e.requestMessage && <p className="mt-2 text-slate-700">« {e.requestMessage} »</p>}
       {proposalText(e) && <p className="mt-2 text-slate-700"><strong>Votre proposition :</strong> {proposalText(e)}</p>}
       {e.status === "demande_envoyee" && (
-        <form onSubmit={submit} className="mt-3 space-y-2 rounded-lg bg-slate-50 p-3">
+        <form onSubmit={submit} className="mt-3 space-y-2 rounded-control bg-slate-50 p-3">
           <fieldset><legend className="text-xs font-semibold text-slate-600">Votre proposition</legend><div className="mt-1 flex flex-wrap gap-2">{[["gratuit", "Gratuit"], ["montant", "Montant"], ["devis", "Sur devis"]].map(([v, t]) => <label key={v} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${mode === v ? "ring-ink bg-ink text-white" : "border-slate-300 bg-white"}`}><input type="radio" name="mode" checked={mode === v} onChange={() => setMode(v)} className="sr-only" />{t}</label>)}</div></fieldset>
           {mode === "montant" && <div><label htmlFor={`am-${e.id}`} className="text-xs font-semibold text-slate-600">Montant (€)</label><input id={`am-${e.id}`} name="amount" type="number" min={1} step="0.01" required className={input} /></div>}
           <div><label htmlFor={`fw-${e.id}`} className="text-xs font-semibold text-slate-600">Cadre d&apos;engagement</label><select id={`fw-${e.id}`} name="framework" defaultValue="inconnu" className={input}>{Object.entries(FRAMEWORK_LABEL).map(([v, t]) => <option key={v} value={v}>{t}</option>)}</select></div>
@@ -210,10 +210,10 @@ export function ShareControls({ documentId, shares, projects }: { documentId: nu
     <div className="mt-2 text-xs">
       {shares.length > 0 && <ul className="mb-2 space-y-1">{shares.map((s) => <li key={s.id} className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-900">Partagé avec : {s.to}</span><button type="button" disabled={pending} onClick={() => run(() => revokeShare(s.id))} className="font-bold text-rose-700 underline">Révoquer</button></li>)}</ul>}
       {!open ? <button type="button" onClick={() => setOpen(true)} className="font-bold text-ink underline">Partager…</button> : (
-        <div className="space-y-2 rounded-lg bg-slate-50 p-3">
+        <div className="space-y-2 rounded-control bg-slate-50 p-3">
           <p className="text-slate-600">Choisissez précisément qui peut ouvrir ce document. Vous pourrez révoquer l&apos;accès à tout moment.</p>
-          <div className="flex flex-wrap gap-2"><label htmlFor={`se-${documentId}`} className="sr-only">E-mail</label><input id={`se-${documentId}`} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail d'une personne" className="min-w-0 flex-1 rounded-lg ring-1 ring-slate-300 px-2 py-1.5" /><PrimaryButton type="button" disabled={pending || !email} onClick={() => run(() => shareDocument(documentId, { email }), (r) => { if (r.ok) setEmail(""); })} className="!px-3 !py-1.5 text-xs">Partager avec cette personne</PrimaryButton></div>
-          {projects.length > 0 && <div className="flex flex-wrap gap-2"><label htmlFor={`sp-${documentId}`} className="sr-only">Projet</label><select id={`sp-${documentId}`} value={project} onChange={(e) => setProject(e.target.value)} className="min-w-0 flex-1 rounded-lg ring-1 ring-slate-300 px-2 py-1.5"><option value="">Un de mes projets…</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}</select><PrimaryButton type="button" disabled={pending || !project} onClick={() => run(() => shareDocument(documentId, { projectId: Number(project) }))} className="!px-3 !py-1.5 text-xs">Partager avec les participants</PrimaryButton></div>}
+          <div className="flex flex-wrap gap-2"><label htmlFor={`se-${documentId}`} className="sr-only">E-mail</label><input id={`se-${documentId}`} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail d'une personne" className="min-w-0 flex-1 rounded-control ring-1 ring-slate-300 px-2 py-1.5" /><PrimaryButton type="button" disabled={pending || !email} onClick={() => run(() => shareDocument(documentId, { email }), (r) => { if (r.ok) setEmail(""); })} className="!px-3 !py-1.5 text-xs">Partager avec cette personne</PrimaryButton></div>
+          {projects.length > 0 && <div className="flex flex-wrap gap-2"><label htmlFor={`sp-${documentId}`} className="sr-only">Projet</label><select id={`sp-${documentId}`} value={project} onChange={(e) => setProject(e.target.value)} className="min-w-0 flex-1 rounded-control ring-1 ring-slate-300 px-2 py-1.5"><option value="">Un de mes projets…</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}</select><PrimaryButton type="button" disabled={pending || !project} onClick={() => run(() => shareDocument(documentId, { projectId: Number(project) }))} className="!px-3 !py-1.5 text-xs">Partager avec les participants</PrimaryButton></div>}
           <button type="button" onClick={() => setOpen(false)} className="text-slate-600 underline">Fermer</button>
         </div>
       )}

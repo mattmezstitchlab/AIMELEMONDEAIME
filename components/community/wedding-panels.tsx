@@ -39,13 +39,13 @@ import {
   type TableStats,
 } from "@/lib/wedding";
 
-const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
 
 function Note({ value }: { value: Fb }) {
   if (!value) return null;
-  return <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-xs ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p>;
+  return <p role={value.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-xs ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p>;
 }
 
 function useRun() {
@@ -86,8 +86,8 @@ function CopyText({ text, filename }: { text: string; filename: string }) {
   };
   return (
     <span className="flex flex-wrap gap-2">
-      <button type="button" onClick={() => void copy()} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-bold text-white hover:bg-ink-2">{copied ? "Copié ✓" : "Copier le texte"}</button>
-      <button type="button" onClick={download} className="rounded-lg ring-1 ring-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700">Télécharger (.txt)</button>
+      <button type="button" onClick={() => void copy()} className="rounded-control bg-ink px-3 py-1.5 text-xs font-bold text-white hover:bg-ink-2">{copied ? "Copié ✓" : "Copier le texte"}</button>
+      <button type="button" onClick={download} className="rounded-control ring-1 ring-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700">Télécharger (.txt)</button>
     </span>
   );
 }
@@ -161,7 +161,7 @@ export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, w
             </div>
             {editable && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <select aria-label={`Réponse de ${g.name}`} value={g.status} disabled={pending} onChange={(e) => run(() => setWeddingGuestStatus(g.id, e.target.value))} className="rounded-lg ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs">
+                <select aria-label={`Réponse de ${g.name}`} value={g.status} disabled={pending} onChange={(e) => run(() => setWeddingGuestStatus(g.id, e.target.value))} className="rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs">
                   {GUEST_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
                 <button type="button" disabled={pending} onClick={() => startEdit(g)} className="text-xs font-semibold text-ink underline">Modifier</button>
@@ -226,7 +226,7 @@ function RelanceBlock({ weddingDate, enAttenteFoyers }: { weddingDate: string; e
           <button key={t.id} type="button" onClick={() => setTemplateId(t.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${templateId === t.id ? "bg-ink text-white" : "ring-1 ring-slate-300 bg-white text-slate-700"}`}>{t.title}</button>
         ))}
       </div>
-      <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200">{text}</pre>
+      <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-control bg-slate-50 p-3 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200">{text}</pre>
       <div className="mt-2"><CopyText text={text} filename="relance-invites.txt" /></div>
     </div>
   );
@@ -298,7 +298,7 @@ function BudgetItemRow({ item, editable, pending, run }: { item: BudgetItemView;
       </div>
       {editable && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <input aria-label={`Montant confirmé pour ${item.label}`} value={actual} onChange={(e) => setActual(e.target.value)} placeholder="Devis confirmé, ex. 1 850" className="w-44 rounded-lg ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs" />
+          <input aria-label={`Montant confirmé pour ${item.label}`} value={actual} onChange={(e) => setActual(e.target.value)} placeholder="Devis confirmé, ex. 1 850" className="w-44 rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs" />
           <label className="flex items-center gap-1.5 text-xs text-slate-600"><input type="checkbox" checked={settled} onChange={(e) => setSettled(e.target.checked)} className="h-3.5 w-3.5" /> Réglé</label>
           <button type="button" disabled={pending} onClick={() => run(() => setWeddingBudgetActual(item.id, actual, settled))} className="text-xs font-semibold text-ink underline">Noter</button>
           <button type="button" disabled={pending} onClick={() => run(() => removeWeddingBudgetItem(item.id))} className="text-xs font-semibold text-rose-700 underline">Retirer</button>
@@ -345,7 +345,7 @@ export function WeddingBudgetPanel({ projectId, items, stats, isOrganizer, open 
         {pct !== null && <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${stats.depasseEnveloppe ? "bg-rose-400" : "bg-ink-3"}`} style={{ width: `${pct}%` }} /></div>}
         {editable ? (
           <form onSubmit={(e) => { e.preventDefault(); run(() => setWeddingEnvelope(projectId, envelope)); }} className="mt-2 flex flex-wrap items-center gap-2">
-            <input aria-label="Enveloppe globale en euros" value={envelope} onChange={(e) => setEnvelope(e.target.value)} placeholder="Ex. 12 000" className="w-40 rounded-lg ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs" />
+            <input aria-label="Enveloppe globale en euros" value={envelope} onChange={(e) => setEnvelope(e.target.value)} placeholder="Ex. 12 000" className="w-40 rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs" />
             <span className="text-xs text-slate-500">€</span>
             <button type="submit" disabled={pending} className="text-xs font-semibold text-ink underline">Enregistrer l&apos;enveloppe</button>
           </form>
@@ -427,7 +427,7 @@ export function WeddingTablesPanel({ projectId, tables, guests, stats, isOrganiz
                 <span><strong>{g.name}</strong> <span className="text-xs text-slate-500">· {g.persons} personne(s) · {guestGroupLabel(g.groupe)}</span></span>
                 {editable && tables.length > 0 && (
                   <span className="flex items-center gap-2">
-                    <select aria-label={`Table pour ${g.name}`} value={choice[g.id] ?? tables[0].id} onChange={(e) => setChoice((c) => ({ ...c, [g.id]: Number(e.target.value) }))} className="rounded-lg ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs">
+                    <select aria-label={`Table pour ${g.name}`} value={choice[g.id] ?? tables[0].id} onChange={(e) => setChoice((c) => ({ ...c, [g.id]: Number(e.target.value) }))} className="rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs">
                       {tables.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
                     <button type="button" disabled={pending} onClick={() => run(() => assignWeddingGuestTable(g.id, choice[g.id] ?? tables[0].id))} className="text-xs font-bold text-ink underline">Placer</button>
@@ -456,7 +456,7 @@ export function WeddingTablesPanel({ projectId, tables, guests, stats, isOrganiz
               {placed.length === 0 ? <p className="mt-1 text-xs text-slate-500">Aucun foyer placé pour l&apos;instant.</p> : (
                 <ul className="mt-2 space-y-1.5">
                   {placed.map((g) => (
-                    <li key={g.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-sm">
+                    <li key={g.id} className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-slate-50 px-2.5 py-1.5 text-sm">
                       <span>{g.name} <span className="text-xs text-slate-500">· {g.persons} personne(s)</span></span>
                       {editable && <button type="button" disabled={pending} onClick={() => run(() => assignWeddingGuestTable(g.id, null))} className="text-xs font-semibold text-rose-700 underline">Retirer</button>}
                     </li>

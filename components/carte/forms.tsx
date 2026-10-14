@@ -15,7 +15,7 @@ import { PrimaryButton, SecondaryButton } from "@/components/ui";
 
 type State = { ok: boolean; message?: string; error?: string } | null;
 
-const inputCls = "mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm";
+const inputCls = "mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm";
 const labelCls = "block text-sm font-medium text-slate-700";
 
 function Field({ label, name, type = "text", defaultValue, required = true, placeholder }: { label: string; name: string; type?: string; defaultValue?: string; required?: boolean; placeholder?: string }) {
@@ -176,14 +176,14 @@ export function OrderButton({ productId, stock, label = "Commander" }: { product
       <div className="flex items-end gap-2">
         <div>
           <label className="block text-xs font-medium text-slate-700" htmlFor={`qty-${productId}`}>Quantité</label>
-          <input id={`qty-${productId}`} name="quantity" type="number" min={1} max={Math.max(1, stock)} defaultValue={1} className="mt-1 w-20 rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
+          <input id={`qty-${productId}`} name="quantity" type="number" min={1} max={Math.max(1, stock)} defaultValue={1} className="mt-1 w-20 rounded-control ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-700" htmlFor={`pickup-${productId}`}>Retrait souhaité</label>
-          <input id={`pickup-${productId}`} name="pickupAt" type="datetime-local" className="mt-1 rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
+          <input id={`pickup-${productId}`} name="pickupAt" type="datetime-local" className="mt-1 rounded-control ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
         </div>
       </div>
-      <input name="note" maxLength={300} placeholder="Précision pour le retrait (facultatif)" className="rounded-lg ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
+      <input name="note" maxLength={300} placeholder="Précision pour le retrait (facultatif)" className="rounded-control ring-1 ring-slate-300 px-2 py-1.5 text-sm" />
       <p className="text-xs text-slate-500">Stock disponible : {stock}. Le retrait se fait sur place, sans paiement en ligne.</p>
       {state?.error && <p role="alert" className="text-xs text-rose-700">{state.error}</p>}
       {state?.ok && <p role="status" className="text-xs text-ink-2">{state.message}</p>}

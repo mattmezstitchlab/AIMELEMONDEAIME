@@ -33,7 +33,7 @@ export function DocumentUploader({ caseId, onUploaded }: { caseId?: number; onUp
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3 rounded-lg border border-dashed border-slate-300 bg-white p-4">
+    <form ref={formRef} action={formAction} className="flex flex-col gap-3 rounded-control border border-dashed border-slate-300 bg-white p-4">
       {caseId && <input type="hidden" name="caseId" value={caseId} />}
       <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
         <div>
@@ -46,12 +46,12 @@ export function DocumentUploader({ caseId, onUploaded }: { caseId?: number; onUp
             type="file"
             required
             accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-            className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink"
+            className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink"
           />
         </div>
         <div>
           <label htmlFor={`category-${caseId ?? "general"}`} className="block text-sm font-medium text-slate-700">Catégorie</label>
-          <select id={`category-${caseId ?? "general"}`} name="category" className="mt-1 rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm">
+          <select id={`category-${caseId ?? "general"}`} name="category" className="mt-1 rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm">
             {CATEGORY_OPTIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>

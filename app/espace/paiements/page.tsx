@@ -40,14 +40,14 @@ export default async function PaiementsPage({ searchParams }: { searchParams: Pr
         </div>
         <form className="flex flex-wrap gap-2" role="search">
           <label htmlFor="q" className="sr-only">Rechercher un paiement</label>
-          <input id="q" name="q" defaultValue={q} data-assistant-id="payments-search" placeholder="Rechercher un libellé" className="rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm" />
-          <select name="type" defaultValue={type || ""} className="rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm">
+          <input id="q" name="q" defaultValue={q} data-assistant-id="payments-search" placeholder="Rechercher un libellé" className="rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm" />
+          <select name="type" defaultValue={type || ""} className="rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm">
             <option value="">Tous types</option>
             {Object.entries(PAYMENT_TYPE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
           </select>
-          <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-2">Filtrer</button>
+          <button type="submit" className="rounded-control bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-2">Filtrer</button>
         </form>
       </Card>
 

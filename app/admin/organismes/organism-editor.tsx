@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateOrganism } from "@/lib/actions/journeys";
 import { PrimaryButton } from "@/components/ui";
 
-const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm";
 export function OrganismEditor({ o }: { o: { id: number; name: string; role: string; audience: string; territory: string; url: string; source: string } }) {
   const [open, setOpen] = useState(false);
   const [msg, setMsg] = useState("");

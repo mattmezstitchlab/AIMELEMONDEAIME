@@ -78,7 +78,7 @@ export default async function EchangesPage() {
           ) : (
             <ul className="flex max-h-80 flex-col gap-3 overflow-y-auto pr-1">
               {thread.map((m) => (
-                <li key={m.id} className={`rounded-lg px-3 py-2 text-sm ${m.senderId === user.id ? "ml-6 bg-muted text-ink" : "mr-6 bg-slate-100 text-slate-800"}`}>
+                <li key={m.id} className={`rounded-control px-3 py-2 text-sm ${m.senderId === user.id ? "ml-6 bg-muted text-ink" : "mr-6 bg-slate-100 text-slate-800"}`}>
                   <p>{m.body}</p>
                   <p className="mt-1 text-xs text-slate-500">{formatDateTime(m.createdAt)}</p>
                 </li>

@@ -43,12 +43,12 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
               defaultValue={q ?? ""}
               data-assistant-id="backoffice-search"
               placeholder="Référence, titre ou adhérent"
-              className="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm"
             />
           </div>
           <div>
             <label htmlFor="statut" className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Statut</label>
-            <select id="statut" name="statut" data-assistant-id="backoffice-filters" defaultValue={statut || ""} className="mt-1 rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm">
+            <select id="statut" name="statut" data-assistant-id="backoffice-filters" defaultValue={statut || ""} className="mt-1 rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm">
               <option value="">Tous les statuts</option>
               {Object.entries(CASE_STATUS_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -57,13 +57,13 @@ export default async function DossiersPage({ searchParams }: { searchParams: Pro
           </div>
           <div>
             <label htmlFor="affectation" className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Affectation</label>
-            <select id="affectation" name="affectation" defaultValue={affectation || ""} className="mt-1 rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm">
+            <select id="affectation" name="affectation" defaultValue={affectation || ""} className="mt-1 rounded-control ring-1 ring-slate-300 px-3 py-2 text-sm">
               <option value="">Tous</option>
               <option value="moi">Mes dossiers</option>
               <option value="non_affectes">Non affectés</option>
             </select>
           </div>
-          <button type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-2">Filtrer</button>
+          <button type="submit" className="rounded-control bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-2">Filtrer</button>
         </form>
       </Card>
 

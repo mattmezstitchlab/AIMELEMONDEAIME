@@ -53,7 +53,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
           )}
           <section className="rounded-card bg-canvas ring-1 ring-line p-6 shadow-rested">
             <h2 className="text-lg font-bold text-slate-900">Ses propositions et besoins</h2>
-            {p.listings.length === 0 ? <p className="mt-2 text-sm text-slate-600">Rien de publié pour l&apos;instant.</p> : <ul className="mt-3 space-y-2">{p.listings.map((l) => <li key={l.id} className="rounded-lg bg-slate-50 p-3 text-sm"><strong>{l.title}</strong> · {ACTION_LABELS[l.action] ?? l.action} · {l.city}{l.isDemo ? " · exemple fictif" : ""}</li>)}</ul>}
+            {p.listings.length === 0 ? <p className="mt-2 text-sm text-slate-600">Rien de publié pour l&apos;instant.</p> : <ul className="mt-3 space-y-2">{p.listings.map((l) => <li key={l.id} className="rounded-control bg-slate-50 p-3 text-sm"><strong>{l.title}</strong> · {ACTION_LABELS[l.action] ?? l.action} · {l.city}{l.isDemo ? " · exemple fictif" : ""}</li>)}</ul>}
             <p className="mt-4 text-xs text-slate-500">Pour contacter cette personne, faites une demande depuis l&apos;une de ses annonces : l&apos;échange reste privé entre vous, et rien n&apos;est réservé sans son accord.</p>
           </section>
         </div>

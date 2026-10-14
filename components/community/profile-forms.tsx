@@ -7,10 +7,10 @@ import { FranceMap } from "@/components/carte/france-map";
 import { PrimaryButton } from "@/components/ui";
 import { ARTIST_DISCIPLINES, UNIVERSES } from "@/lib/lma";
 
-const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 type Fb = { ok: boolean; text: string } | null;
-const Note = ({ value }: { value: Fb }) => value ? <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-sm ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p> : null;
+const Note = ({ value }: { value: Fb }) => value ? <p role={value.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-sm ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p> : null;
 
 function useSave(action: (f: FormData) => Promise<ProfileResult>) {
   const [fb, setFb] = useState<Fb>(null);
@@ -113,7 +113,7 @@ export function ArtistRequestActions({ requestId, status }: { requestId: number;
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2">
       <PrimaryButton type="button" disabled={pending} onClick={() => go("accepter")} className="!px-3 !py-1.5 text-xs">Accepter</PrimaryButton>
-      <button type="button" disabled={pending} onClick={() => go("refuser")} className="rounded-lg ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700">Refuser</button>
+      <button type="button" disabled={pending} onClick={() => go("refuser")} className="rounded-control ring-1 ring-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700">Refuser</button>
       <Note value={fb} />
     </div>
   );

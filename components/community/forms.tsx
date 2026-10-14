@@ -11,7 +11,7 @@ import { Icon } from "@/components/icon";
 import { LISTING_CATEGORIES, PROPOSITION_ACTIONS, UNIVERSES, defaultUniverses } from "@/lib/lma";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
 
-const input = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
+const input = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400";
 const label = "block text-sm font-semibold text-slate-700";
 const ACTION_OPTIONS = [
   ["don", "Je donne"], ["pret", "Je prête"], ["loue", "Je loue"], ["vends", "Je vends"], ["cherche", "Je cherche"],
@@ -24,7 +24,7 @@ const CATEGORIES = [
 type FeedbackValue = { ok: boolean; text: string } | null;
 function Feedback({ value }: { value: FeedbackValue }) {
   if (!value) return null;
-  return <p role={value.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-sm ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p>;
+  return <p role={value.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-sm ${value.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{value.text}</p>;
 }
 function useAction(action: (form: FormData) => Promise<CommunityResult>, onSuccess?: () => void) {
   const [feedback, setFeedback] = useState<FeedbackValue>(null);
@@ -81,7 +81,7 @@ export function PublishListingForm({ coords, type, onPublished }: { coords: { la
     {(category==="besoins_essentiels"||category==="objets_materiel") && <div className="grid gap-4 sm:grid-cols-2"><div><label className={label} htmlFor="lm-size">Taille ou pointure (facultatif)</label><input id="lm-size" name="size" maxLength={24} placeholder="Ex. 38, M, 140 × 70 cm" className={input}/></div></div>}
     <div className="grid gap-4 sm:grid-cols-2"><div><label className={label} htmlFor="lm-city">Commune</label><input id="lm-city" name="city" required minLength={2} maxLength={120} placeholder="Ex. Chartres" className={input}/></div>{!isNeed && <div><label className={label} htmlFor="lm-pickup">Retrait ou lieu de rendez-vous</label><input id="lm-pickup" name="pickupDetails" maxLength={240} defaultValue="À convenir après accord" className={input}/></div>}</div>
     {!isNeed && <div><label className={label} htmlFor="lm-photo">Photo (facultative)</label><input id="lm-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" className={`${input} file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1 file:text-xs file:font-semibold file:text-ink`}/><p className="mt-1 text-xs text-slate-500">JPEG, PNG ou WebP · 3 Mo maximum.</p></div>}
-    {!coords&&<p role="alert" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">Choisissez un point approximatif sur la carte (ci-dessus) ou utilisez la géolocalisation facultative.</p>}
+    {!coords&&<p role="alert" className="rounded-control bg-amber-50 p-3 text-sm text-amber-800">Choisissez un point approximatif sur la carte (ci-dessus) ou utilisez la géolocalisation facultative.</p>}
     <div className="rounded-card bg-slate-50 p-3 text-xs text-slate-600"><Icon name="lock" className="mr-1 inline h-4 w-4 text-ink-2"/>La position affichée est approximative. L&apos;adresse précise n&apos;est partagée qu&apos;avec les personnes concernées, après accord.</div>
     <Feedback value={state.feedback}/><PrimaryButton type="submit" disabled={state.pending||!coords} className="w-full sm:w-auto">{state.pending?"Publication…":isNeed?"Publier mon besoin":"Publier ma proposition"}</PrimaryButton>
   </form>;

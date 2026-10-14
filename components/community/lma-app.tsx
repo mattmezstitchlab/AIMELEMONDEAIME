@@ -68,7 +68,7 @@ function PersonCard({ p, highlighted }: { p: Person; highlighted: boolean }) {
         {p.transmitText && <li><strong>Transmet :</strong> {p.transmitText}</li>}
         {p.availabilityNote && <li><strong>Disponible :</strong> {p.availabilityNote}</li>}
       </ul>
-      <Link href={`/le-monde-aime/personnes/${p.id}`} className="mt-3 inline-block rounded-lg bg-ink px-3 py-2 text-xs font-bold text-white hover:bg-ink-2">Voir la fiche</Link>
+      <Link href={`/le-monde-aime/personnes/${p.id}`} className="mt-3 inline-block rounded-control bg-ink px-3 py-2 text-xs font-bold text-white hover:bg-ink-2">Voir la fiche</Link>
     </article>
   );
 }
@@ -82,7 +82,7 @@ function ProjectCard({ p, highlighted }: { p: ProjectPin; highlighted: boolean }
       <p className="mt-2 text-xs text-slate-500"><Icon name="pin" className="mr-1 inline h-3.5 w-3.5" />{p.city} · position approximative · {dateText(p.startsAt)}</p>
       <p className="text-xs text-slate-500">Organisé par {p.organizerName} · {p.participants} participant(s) · {p.needsConfirmed}/{p.needsTotal} besoin(s) confirmé(s)</p>
       <div className="mt-2 flex flex-wrap gap-1.5">{p.universes.map((u) => <span key={u} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">{UNIVERSE_LABEL[u]}</span>)}</div>
-      <Link href={`/le-monde-aime/projets/${p.id}`} className="mt-3 inline-block rounded-lg bg-ink px-3 py-2 text-xs font-bold text-white hover:bg-ink-2">Voir le projet</Link>
+      <Link href={`/le-monde-aime/projets/${p.id}`} className="mt-3 inline-block rounded-control bg-ink px-3 py-2 text-xs font-bold text-white hover:bg-ink-2">Voir le projet</Link>
     </article>
   );
 }
@@ -229,7 +229,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
   const hasFilters = Boolean(center || city || keyword || dateFilter || freeOnly || type !== "tout" || universe !== "tout");
   function resetFilters() { setCenter(null); setCity(""); setKeyword(""); setDateFilter(""); setFreeOnly(false); setType("tout"); setUniverse("tout"); setClusterSelection([]); setSelection(null); }
 
-  const selectCls = "mt-1 w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2 text-sm";
+  const selectCls = "mt-1 w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2 text-sm";
   const publishPins = useMemo<MapPin[]>(() => [pubCoords && { id: "me", kind: "offre" as const, name: "Départ / lieu", subtitle: "", lat: pubCoords.lat, lng: pubCoords.lng }, tripEnd && pubSub === "trajet" && { id: "end", kind: "lieu" as const, name: "Destination", subtitle: "", lat: tripEnd.lat, lng: tripEnd.lng }].filter(Boolean) as MapPin[], [pubCoords, tripEnd, pubSub]);
 
   return (
@@ -243,10 +243,10 @@ export function CommunityApp({ data }: { data: LmaData }) {
           </div>
           <nav aria-label="Sections Le Monde Aime" className="inline-flex gap-1 rounded-card bg-slate-100 p-1">
             {([["explorer", "Explorer", "search"], ["publier", "Publier", "filePlus"]] as const).map(([key, text, icon]) => (
-              <button key={key} type="button" onClick={() => goTab(key)} aria-current={tab === key ? "page" : undefined} className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition ${tab === key ? "bg-white text-ink shadow-rested" : "text-slate-600 hover:text-slate-900"}`}><Icon name={icon} className="h-4 w-4" />{text}</button>
+              <button key={key} type="button" onClick={() => goTab(key)} aria-current={tab === key ? "page" : undefined} className={`flex items-center gap-2 rounded-control px-4 py-2 text-sm font-bold transition ${tab === key ? "bg-white text-ink shadow-rested" : "text-slate-600 hover:text-slate-900"}`}><Icon name={icon} className="h-4 w-4" />{text}</button>
             ))}
             {/* Mes échanges & projets vivent désormais dans l'espace membre (une seule porte). */}
-            <Link href="/espace/echanges" className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-slate-600 transition hover:text-slate-900"><Icon name="heart" className="h-4 w-4" />Mes échanges &amp; projets</Link>
+            <Link href="/espace/echanges" className="flex items-center gap-2 rounded-control px-4 py-2 text-sm font-bold text-slate-600 transition hover:text-slate-900"><Icon name="heart" className="h-4 w-4" />Mes échanges &amp; projets</Link>
           </nav>
         </div>
       </div>
@@ -300,7 +300,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
                       <input id="f-radius" type="range" min={5} max={200} step={5} value={radius} onChange={(e) => setRadius(Number(e.target.value))} className="mt-2 w-full accent-orange-600" />
                     </div>
                     <div className="flex items-center justify-between gap-2">
-                      <button type="button" onClick={() => locate(setCenter)} className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">Me localiser</button>
+                      <button type="button" onClick={() => locate(setCenter)} className="rounded-control bg-slate-900 px-3 py-2 text-xs font-bold text-white">Me localiser</button>
                       {hasFilters && <button type="button" onClick={resetFilters} className="text-xs font-bold text-ink-2 underline">Réinitialiser</button>}
                     </div>
                     <div className="grid grid-cols-2 gap-x-2 gap-y-1 border-t border-slate-200 pt-3 text-[11px] text-slate-600" aria-label="Légende">
@@ -316,7 +316,7 @@ export function CommunityApp({ data }: { data: LmaData }) {
                       <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
                         {selectedItem ? selectedItem.subtitle : `${clusterItems.length} élément(s) dans ce secteur`}
                       </p>
-                      <button type="button" onClick={() => { setSelection(null); setClusterSelection([]); }} className="rounded-lg px-3 py-1.5 text-sm font-bold text-slate-500 hover:bg-slate-100">Fermer ✕</button>
+                      <button type="button" onClick={() => { setSelection(null); setClusterSelection([]); }} className="rounded-control px-3 py-1.5 text-sm font-bold text-slate-500 hover:bg-slate-100">Fermer ✕</button>
                     </div>
                     {selectedItem ? selectedItem.render(true) : (
                       <ul className="space-y-2">

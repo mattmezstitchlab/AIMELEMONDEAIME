@@ -11,8 +11,8 @@ type SharedGuest = { id: number; name: string; persons: number; status: string; 
 type SharedTable = { id: number; name: string; capacity: number | null };
 
 type Feedback = { ok: boolean; text: string } | null;
-const button = "rounded-lg px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
-const input = "w-full rounded-lg ring-1 ring-slate-300 bg-white px-3 py-2 text-sm text-slate-900";
+const button = "rounded-control px-3 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50";
+const input = "w-full rounded-control ring-1 ring-slate-300 bg-white px-3 py-2 text-sm text-slate-900";
 
 function fmtDate(value: string) {
   if (!value) return "Date à confirmer";
@@ -97,7 +97,7 @@ export function WeddingSharedWorkspace({
           {program.length === 0 && <p className="mt-4 text-sm text-slate-500">Aucune étape ajoutée pour le moment.</p>}
           <ol className="mt-3 space-y-2">
             {program.map((item, index) => (
-              <li key={index} className="grid gap-2 rounded-lg bg-slate-50 p-3 sm:grid-cols-[130px_1fr_auto]">
+              <li key={index} className="grid gap-2 rounded-control bg-slate-50 p-3 sm:grid-cols-[130px_1fr_auto]">
                 {isCoordinator && canEdit ? (
                   <>
                     <label className="sr-only" htmlFor={`shared-time-${index}`}>Heure de l&apos;étape {index + 1}</label>
@@ -134,7 +134,7 @@ export function WeddingSharedWorkspace({
                     <span className="text-sm font-semibold text-slate-800">{guest.name} <span className="font-normal text-slate-500">· {guest.persons} personne(s)</span></span>
                     {canEdit ? (
                       <label className="text-xs font-semibold text-slate-600">Réponse
-                        <select value={guest.status} disabled={pending} onChange={(event) => updateGuest(guest.id, event.target.value)} className="ml-2 rounded-lg ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800">
+                        <select value={guest.status} disabled={pending} onChange={(event) => updateGuest(guest.id, event.target.value)} className="ml-2 rounded-control ring-1 ring-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800">
                           {guest.status === "a_inviter" && <option value="a_inviter" disabled>À inviter</option>}
                           {GUEST_STATUSES.filter((status) => status.value !== "a_inviter").map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
                         </select>
@@ -166,7 +166,7 @@ export function WeddingSharedWorkspace({
           </section>
         )}
 
-        {feedback && <p role={feedback.ok ? "status" : "alert"} className={`rounded-lg px-3 py-2 text-sm ${feedback.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{feedback.text}</p>}
+        {feedback && <p role={feedback.ok ? "status" : "alert"} className={`rounded-control px-3 py-2 text-sm ${feedback.ok ? "bg-muted text-ink" : "bg-rose-50 text-rose-800"}`}>{feedback.text}</p>}
         <p className="text-center text-xs text-slate-500">Un accès révocable et limité — sans compte AIME®.</p>
       </div>
     </main>
