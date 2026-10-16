@@ -1,5 +1,6 @@
 "use server";
 
+import { validateGuestReplyDetails } from "@/lib/wedding-portal";
 import { randomBytes } from "node:crypto";
 import { SignJWT } from "jose";
 import { and, eq, gt, isNull } from "drizzle-orm";
@@ -191,8 +192,11 @@ export async function submitWeddingRsvp(_previous: RsvpActionState, formData: Fo
       return { ok: false, message: "Le nombre de personnes doit être compris entre 1 et 20." };
     }
 
+    const detailed = formData.get("detailed") === "1";
+    const details = detailed && status !== "decline" ? validateGuestReplyDetails({ adults: formData.get("adults"), children: formData.get("children"), ceremony: formData.get("ceremony") === "on", meal: formData.get("meal") === "on", nextDay: formData.get("nextDay") === "on" }, persons) : null;
+    if (detailed && status !== "decline" && !details) return { ok: false, message: "Le total adultes + enfants doit correspondre au nombre de personnes de votre foyer." };
     await db.update(weddingGuests)
-      .set({ status: status as (typeof weddingGuests.$inferInsert)["status"], ...(status === "decline" ? {} : { persons }), ...(status === "confirme" ? {} : { tableId: null }), updatedAt: new Date() })
+      .set({ replyDetails: details, status: status as (typeof weddingGuests.$inferInsert)["status"], ...(status === "decline" ? {} : { persons }), ...(status === "confirme" ? {} : { tableId: null }), updatedAt: new Date() })
       .where(and(eq(weddingGuests.id, guest.id), eq(weddingGuests.projectId, guest.projectId), eq(weddingGuests.rsvpTokenHash, tokenHash)));
     await logAudit({ actorId: null, action: "mariage_rsvp_reponse", entityType: "project", entityId: String(guest.projectId), metadata: { op: "reponse" } });
     revalidatePath("/rsvp/[token]", "page");

@@ -41,6 +41,7 @@ export default async function Accompagnement({ searchParams }: { searchParams: P
   return (
     <PublicPage>
       <Hero
+        image="/images/hero-mariage.jpg"
         size={isWedding ? "lg" : "md"}
         eyebrow={isWedding ? "AIME® · Mariage" : selected ? `AIME® · ${selected.short}` : "AIME® · Accompagnement"}
         title={isWedding ? "Préparer votre mariage et tout ce qui l’entoure." : selected?.label ?? "Vous expliquez votre situation."}

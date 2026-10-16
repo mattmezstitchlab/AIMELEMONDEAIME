@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { CASE_STATUS_LABELS, CASE_STATUS_STYLES } from "@/lib/constants";
@@ -101,6 +102,7 @@ export function Hero({
   subtitle,
   actions,
   media,
+  image,
   size = "lg",
   children,
 }: {
@@ -109,10 +111,11 @@ export function Hero({
   subtitle?: ReactNode;
   actions?: ReactNode;
   media?: ReactNode;
+  image?: string;
   size?: "xl" | "lg" | "md";
   children?: ReactNode;
 }) {
-  const padding = size === "xl" ? "pt-8 pb-10 sm:pt-12" : size === "lg" ? "pt-6 pb-9 sm:pt-8" : "pt-5 pb-7";
+  const padding = size === "xl" ? "py-12 sm:py-20" : size === "lg" ? "py-10 sm:py-16" : "py-10 sm:py-14";
   const titleSize =
     size === "xl"
       ? "text-[2.5rem] leading-[1.0] sm:text-[3.25rem]"
@@ -122,7 +125,8 @@ export function Hero({
 
   return (
     <section className="bg-canvas">
-      <Container className={`animate-fade-up ${padding}`} wide>
+      {image && <div className="relative h-[32svh] min-h-52 max-h-[30rem] sm:h-[45svh]"><Image src={image} alt="" fill sizes="100vw" priority className="object-cover grayscale" /></div>}
+      <Container className={`animate-fade-up !max-w-[80rem] lg:px-12 ${padding}`} wide>
         <div className={media ? "grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:gap-12" : ""}>
           <div className="max-w-2xl">
             {eyebrow && <p className="nav-tiny text-ink-3">{eyebrow}</p>}
