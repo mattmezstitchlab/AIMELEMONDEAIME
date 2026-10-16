@@ -144,8 +144,8 @@ export function LinkRow({
   const content = (
     <>
       <span className="min-w-0">
-        <span className="block truncate text-[15px] text-ink">{title}</span>
-        {meta && <span className="mt-0.5 block truncate text-xs text-ink-3">{meta}</span>}
+        <span className="block text-[15px] text-ink">{title}</span>
+        {meta && <span className="mt-0.5 block text-xs text-ink-3">{meta}</span>}
       </span>
       <Icon
         name={external ? "external" : "arrow"}
