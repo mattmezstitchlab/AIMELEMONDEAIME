@@ -52,6 +52,9 @@ export function PublicHeader() {
         </div>
 
         <div className="flex items-center gap-4">
+          <Link href="/carte-des-liens" aria-label="Ouvrir la carte des liens" title="Carte des liens" className="grid h-11 w-11 shrink-0 place-items-center rounded-full ring-1 ring-line hover:bg-muted">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M7 7h10M7 17h10M7 7v10M17 7v10M7 7l10 10" />{[[7,7],[17,7],[7,17],[17,17]].map(([x,y]) => <rect key={`${x}-${y}`} x={x-2.5} y={y-2.5} width="5" height="5" rx="1" fill="var(--color-canvas)" />)}</svg>
+          </Link>
           <Link href={spaceHref} className="nav-tiny hidden text-ink-3 transition hover:text-ink md:block">
             {spaceLabel}
           </Link>
@@ -82,6 +85,7 @@ export function PublicHeader() {
 }
 
 const FOOTER_LINKS: Array<{ href: string; label: string }> = [
+  { href: "/carte-des-liens", label: "Carte des liens" },
   { href: "/accompagnement", label: "Accompagnement" },
   { href: "/le-tour", label: "Le tour du site" },
   { href: "/circuits", label: "Les sept circuits" },
