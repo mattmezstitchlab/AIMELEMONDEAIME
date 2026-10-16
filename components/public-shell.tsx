@@ -85,6 +85,7 @@ export function PublicHeader() {
 }
 
 const FOOTER_LINKS: Array<{ href: string; label: string }> = [
+  { href: "/territoire", label: "Autour du Mont Noir" },
   { href: "/carte-des-liens", label: "Carte des liens" },
   { href: "/accompagnement", label: "Accompagnement" },
   { href: "/le-tour", label: "Le tour du site" },

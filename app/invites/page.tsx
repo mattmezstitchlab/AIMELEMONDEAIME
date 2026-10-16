@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Invités et proches — AIME®", des
 
 export default function InvitesPage() {
   return <PublicPage>
-    <Hero image="/images/hero-famille.jpg" eyebrow="Invités et proches" title="Vous faites partie de l’histoire." subtitle="Pour répondre à une invitation ou aider à l’organisation, utilisez le lien personnel transmis par les personnes qui organisent le mariage. Aucun compte n’est nécessaire pour ces accès par lien." />
+    <Hero image="/images/hero-famille.jpg" eyebrow="Invités et proches" title="Il est des jours que l’on fait ensemble." subtitle="Pour répondre à une invitation ou aider à l’organisation, utilisez le lien personnel transmis par les personnes qui organisent le mariage. Aucun compte n’est nécessaire pour ces accès par lien." />
     <PageColumn className="grid gap-8 py-12 md:grid-cols-2 lg:gap-16 lg:py-20">
       <section className="rounded-card bg-subtle p-6 sm:p-10">
         <p className="eyebrow">Je suis invité</p><h2 className="mt-4 text-3xl">Répondre à mon invitation.</h2>
