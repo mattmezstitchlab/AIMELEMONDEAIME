@@ -188,3 +188,25 @@ Après toute modification de `db/schema.ts` : `npm run db:generate`, relire le S
 - Toute fonction exportée d'un fichier `"use server"` est un **endpoint public** : elle doit vérifier une session utilisateur (`requireUser`/`requireRole`) ou un droit d'accès explicite par capacité (jeton RSVP haché, session magique signée et vérifiée en base). Les helpers internes vivent hors de ces fichiers (ex. `lib/case-events.ts`).
 - Les rôles sont toujours revérifiés en base, jamais lus depuis le jeton de session.
 - Voir `AUDIT.md` pour l'audit de sécurité complet et l'historique des correctifs.
+
+### Assistant de navigation — conversation
+
+Le widget reste local et déterministe, **sans IA générative** ni service tiers.
+Une salutation peut précéder un besoin (« Bonjour, je voudrais organiser mon
+mariage »). Les commandes « suivant », « précédent », « je suis perdu », « stop »
+et « reprendre » aident à continuer un guide ou retrouver les brouillons.
+Elles ne confirment jamais une transmission : les cartes explicites restent
+obligatoires. Lorsqu'il y a plusieurs parcours, le membre choisit le suivi
+concerné avant de demander un rappel ou une transmission.
+
+Les circuits publics sont accessibles depuis la conversation. L'assistant ne
+contourne ni les rôles ni la fermeture des comptes. La fin d'un guide signifie
+que les explications ont été parcourues, **pas** qu'un formulaire a été envoyé.
+La conversation n'est pas stockée dans le navigateur : un rechargement l'efface ;
+les réponses déjà sauvegardées restent dans les brouillons du membre.
+
+Vérification manuelle avant ouverture : sur mobile et ordinateur, essayer une
+salutation suivie d'un besoin, une demande ambiguë, le passage entre deux pages,
+« je suis perdu », et la reprise d'un brouillon ; vérifier aussi qu'un visiteur
+n'accède pas aux actions privées et qu'une transmission demande toujours sa
+confirmation sur la carte. Ne pas activer les comptes pour tester le guide.

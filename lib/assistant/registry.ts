@@ -135,7 +135,7 @@ export const SCENARIOS: AssistantScenario[] = [
       { text: "Je vous emmène dans vos documents.", navigate: "/espace/documents" },
       { text: "En haut de page, deux attestations de démonstration sont proposées au téléchargement.", highlight: "documents-specimens", action: "Cliquez sur « Attestation de situation » ou « Synthèse de démonstration »." },
       { text: "Le fichier porte la mention SPÉCIMEN : il est fictif et n'a aucune valeur officielle.", action: "Enregistrez-le sur votre appareil si vous voulez le conserver." },
-      { text: "Vous avez terminé ce parcours. Vos autres justificatifs déposés dans vos dossiers sont listés juste en dessous.", highlight: "documents-specimens" },
+      { text: "Le guide s’arrête ici. Vos autres justificatifs déposés dans vos dossiers sont listés juste en dessous.", highlight: "documents-specimens" },
     ],
   },
   {
@@ -503,7 +503,7 @@ const PAGE_SPECIFIC: Record<string, Suggestion[]> = {
   "/": [
     { label: "Je déménage", kind: "link", href: "/accompagnement?besoin=demenagement" },
     { label: "Un proche est décédé", kind: "link", href: "/accompagnement?besoin=deces_proche" },
-    { label: "Explorer la carte", kind: "link", href: "/le-monde-aime" },
+    { label: "Explorer les échanges", kind: "link", href: "/le-monde-aime" },
   ],
   "/accompagnement": [
     { label: "Je déménage", kind: "link", href: "/accompagnement?besoin=demenagement" },

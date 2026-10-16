@@ -1,3 +1,4 @@
+import { AUTH_ENABLED } from "@/lib/auth-mode";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
@@ -60,7 +61,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           Aller au contenu principal
         </a>
         {children}
-        <AssistantWidget role={role} userName={user?.fullName ?? null} summary={summary} canAct={canAct} yearEvents={yearEvents} />
+        <AssistantWidget accountsEnabled={AUTH_ENABLED} role={role} userName={user?.fullName ?? null} summary={summary} canAct={canAct} yearEvents={yearEvents} />
       </body>
     </html>
   );
