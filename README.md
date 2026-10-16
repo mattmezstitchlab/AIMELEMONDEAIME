@@ -279,3 +279,19 @@ aucune affiliation ni causalité automatique n’est déduite. Les liens de tran
 les relations institutionnelles et les relations personnelles réelles ne sont
 pas représentés dans ce premier lot. « Ma situation » est un choix manuel, pas
 une personnalisation sur la base des droits ou du régime de l’utilisateur.
+
+### Voix éditoriale et ancrage Mont Noir
+
+Les textes de découverte privilégient une voix originale : sobriété, mémoire des
+lieux, attention aux gestes transmis et aux liens humains. Ils ne sont ni un
+pastiche ni des citations de Marguerite Yourcenar. Les formulaires, confirmations,
+permissions et textes réglementaires conservent leur langage fonctionnel.
+
+`/territoire` situe l’intention autour de Bailleul, Saint-Jans-Cappel et du Mont
+Noir, avec une source officielle sur la résidence d’écriture et un lien CLEISS
+sur les soins des frontaliers. Aucun partenariat n’est annoncé. Aucune photo
+existante n’est présentée comme une photographie locale du Mont Noir.
+
+Ce lot est éditorial : il n’ajoute ni géocodage belge, ni règles transfrontalières,
+ni réseau professionnel local, ni droits calculés selon résidence/travail. Les
+limitations sont affichées sur la page et dans le bandeau territorial d’accueil.

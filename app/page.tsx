@@ -15,7 +15,7 @@ const ENTRIES = [
 export default function HomePage() {
   return (
     <PublicPage>
-      <ImmersiveHero priority image="/images/hero-mariage.jpg" eyebrow="AIME® — Le Monde Aime" title="Un mariage pour se réunir. Des liens pour la suite." text="Préparer votre mariage, trouver les savoir-faire du territoire et donner une place à vos proches. AIME® relie l’événement à ce qui peut continuer après.">
+      <ImmersiveHero priority image="/images/hero-mariage.jpg" eyebrow="AIME® — Le Monde Aime" title="Nos vies ne commencent pas à nous." text="Elles viennent de rencontres, de gestes appris, de lieux habités. AIME aide à reconnaître ces liens et à préparer ceux qui suivront. Le mariage est un premier chemin : réunir les proches, préparer les étapes, chercher les savoir-faire autour de soi.">
         <LinkButton href="/accompagnement?besoin=mariage" size="lg">Préparer mon mariage</LinkButton>
         <LinkButton href="#explorer" variant="secondary" size="lg">Explorer le site ↓</LinkButton>
       </ImmersiveHero>
@@ -44,6 +44,8 @@ export default function HomePage() {
         </PageColumn>
       </section>
 
+      <section className="border-y border-line bg-subtle py-16 sm:py-24"><PageColumn className="grid gap-10 lg:grid-cols-2"><div className="section-lead"><p className="eyebrow">Bailleul · Saint-Jans-Cappel · Mont Noir</p><h2>Une frontière traverse le pays.<br />La vie passe de part et d’autre.</h2></div><div className="self-center"><p className="max-w-xl text-base leading-relaxed text-ink-3">Des proches ici, un métier ailleurs, des lieux qui nous retiennent ou nous accueillent. Partir d’un territoire, c’est apprendre à reconnaître les passages qui le font vivre.</p><LinkButton href="/territoire" variant="secondary" className="mt-7">Découvrir notre point de départ</LinkButton><p className="mt-4 text-xs leading-relaxed text-ink-3">Ancrage proposé. Les parcours et adresses belges ne sont pas encore pris en charge.</p></div></PageColumn></section>
+
       <LandscapeSection image="/images/hero-famille.jpg" number="01 / Les moments de vie" title="Le mariage, et tout ce qu’il relie." text="Le dossier civil d’abord. La fête, si vous en voulez une. Les proches et le jour J ensuite. Un parcours pour préparer, sans remplacer votre mairie." href="/accompagnement?besoin=mariage" label="Découvrir le parcours mariage" />
 
       <section className="py-16 sm:py-24 lg:py-32">
@@ -56,7 +58,7 @@ export default function HomePage() {
         </PageColumn>
       </section>
 
-      <LandscapeSection image="/images/univers-savoirs.jpg" number="03 / Ce qui se transmet" title="Un geste, une histoire, un savoir-faire." text="Ce qui mérite d’être appris ne devrait pas se perdre. Explorez les personnes, les projets et les propositions du Monde Aime." href="/le-monde-aime" label="Explorer l’entraide et les transmissions" />
+      <LandscapeSection image="/images/univers-savoirs.jpg" number="03 / Ce qui se transmet" title="Ce qu’une main sait, une autre peut l’apprendre." text="Un geste se conserve en se partageant. Une histoire demeure parce que quelqu’un l’écoute. Le Monde Aime propose de retrouver les personnes, les projets et les savoir-faire auxquels donner une suite." href="/le-monde-aime" label="Explorer l’entraide et les transmissions" />
 
       <section className="bg-subtle py-16 sm:py-24 lg:py-32">
         <PageColumn className="grid gap-12 lg:grid-cols-2 lg:gap-24">

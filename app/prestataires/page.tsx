@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Prestataires — AIME®", descriptio
 
 export default function PrestatairesPage() {
   return <PublicPage>
-    <Hero image="/images/univers-arts.jpg" eyebrow="Les personnes qui font le jour J" title="Prestataires, vous avez votre place." subtitle="Vous cherchez un savoir-faire pour votre mariage, ou vous souhaitez proposer le vôtre ? Choisissez votre point de départ." />
+    <Hero image="/images/univers-arts.jpg" eyebrow="Les personnes qui font le jour J" title="Un métier. Un geste. Une rencontre." subtitle="Derrière une fête, il y a des mains qui préparent, réparent, cuisinent et créent. Trouvez un savoir-faire pour votre mariage, ou découvrez comment proposer le vôtre." />
     <PageColumn className="grid gap-8 py-12 md:grid-cols-2 lg:gap-16 lg:py-20">
       <section className="rounded-card bg-subtle p-6 sm:p-10">
         <p className="eyebrow">J’organise</p><h2 className="mt-4 text-3xl">Trouver les bonnes personnes.</h2>
