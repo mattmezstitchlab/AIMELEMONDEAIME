@@ -260,3 +260,22 @@ salutation suivie d'un besoin, une demande ambiguë, le passage entre deux pages
 « je suis perdu », et la reprise d'un brouillon ; vérifier aussi qu'un visiteur
 n'accède pas aux actions privées et qu'une transmission demande toujours sa
 confirmation sur la carte. Ne pas activer les comptes pour tester le guide.
+
+### Carte des liens — premier périmètre
+
+`/carte-des-liens` est accessible depuis le pictogramme réseau du header et le
+pied de page. Catalogue sans compte et sans base, construit à partir de
+`SITUATIONS` et `ORGANISMS_SEED` : pas de nouvelle promesse institutionnelle.
+Les relations sont des exemples d’orientation issus de variantes des questions
+existantes (valeurs par défaut puis une réponse modifiée à la fois). Ce n’est
+ni une évaluation personnelle ni une couverture exhaustive des combinaisons.
+Chaque lien affiche ses tâches justificatives et la version des règles internes ;
+le contenu du catalogue reste à vérifier auprès des sources de référence.
+
+Le graphe centré se parcourt de proche en proche, avec filtre par nature du lien,
+recherche, choix manuel du moment de vie et liste HTML équivalente. Les choix
+restent en mémoire, sans profil enregistré. Aucune donnée personnelle n’est lue,
+aucune affiliation ni causalité automatique n’est déduite. Les liens de transfert,
+les relations institutionnelles et les relations personnelles réelles ne sont
+pas représentés dans ce premier lot. « Ma situation » est un choix manuel, pas
+une personnalisation sur la base des droits ou du régime de l’utilisateur.
