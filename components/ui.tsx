@@ -59,7 +59,7 @@ export function Logo({ light = false, size = "md", withMark = false }: { light?:
  * denses (organismes, annuaire).
  */
 export function Container({ children, className = "", wide = false }: { children: ReactNode; className?: string; wide?: boolean }) {
-  return <div className={`mx-auto w-full ${wide ? "max-w-[56rem]" : "max-w-[46rem]"} px-5 sm:px-6 ${className}`}>{children}</div>;
+  return <div className={`layout-container ${wide ? "layout-container-wide" : "layout-container-reading"} ${className}`}>{children}</div>;
 }
 
 /** Titre de section : étiquette, titre display, chapô. */
@@ -126,7 +126,7 @@ export function Hero({
   return (
     <section className="bg-canvas">
       {image && <div className="relative h-[32svh] min-h-52 max-h-[30rem] sm:h-[45svh]"><Image src={image} alt="" fill sizes="100vw" priority className="object-cover grayscale" /></div>}
-      <Container className={`animate-fade-up !max-w-[80rem] lg:px-12 ${padding}`} wide>
+      <Container className={`animate-fade-up layout-hero-container ${padding}`} wide>
         <div className={media ? "grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:gap-12" : ""}>
           <div className="max-w-2xl">
             {eyebrow && <p className="nav-tiny text-ink-3">{eyebrow}</p>}

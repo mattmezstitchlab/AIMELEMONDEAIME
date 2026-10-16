@@ -435,10 +435,44 @@ html[data-motion="reduit"] *::after {
   }
 }
 
+/* Grille commune : les conteneurs gèrent la largeur, les rangées les colonnes.
+ * Les formulaires conservent une largeur de lecture indépendante. */
+:root {
+  --layout-max: 80rem;
+  --layout-reading: 46rem;
+  --layout-work: 56rem;
+  --layout-margin: 1.25rem;
+  --layout-gap: 1rem;
+  --layout-columns: 4;
+  --layout-section: 4rem;
+}
+@media (min-width: 48rem) {
+  :root { --layout-margin: 2rem; --layout-gap: 1.5rem; --layout-columns: 8; --layout-section: 6rem; }
+}
+@media (min-width: 64rem) {
+  :root { --layout-margin: 3rem; --layout-gap: 2rem; --layout-columns: 12; --layout-section: 8rem; }
+}
+.layout-container { width: 100%; max-width: var(--layout-max); margin-inline: auto; padding-inline: var(--layout-margin); min-width: 0; }
+.layout-container-reading { max-width: var(--layout-reading); }
+.layout-container-wide { max-width: var(--layout-work); }
+.layout-hero-container { max-width: var(--layout-max); }
+.layout-grid { display: grid; grid-template-columns: repeat(var(--layout-columns), minmax(0, 1fr)); gap: var(--layout-gap); }
+.layout-grid > * { grid-column: 1 / -1; min-width: 0; }
+.layout-section { padding-block: var(--layout-section); }
+@media (min-width: 48rem) {
+  .layout-halves > * { grid-column: span 4; }
+  .layout-quarters > * { grid-column: span 2; }
+}
+@media (min-width: 64rem) {
+  .layout-halves > * { grid-column: span 6; }
+  .layout-thirds > * { grid-column: span 4; }
+  .layout-quarters > * { grid-column: span 3; }
+}
+
 /* Public : grands paysages et architecture lisible, sans largeur en vw qui déborde. */
 .immersive-hero { position: relative; isolation: isolate; background: var(--color-subtle); }
 .immersive-photo { object-fit: cover; object-position: center; filter: grayscale(1); z-index: -1; }
-.immersive-inner { max-width: 90rem; margin-inline: auto; padding: clamp(2rem, 8vw, 8rem) clamp(1.25rem, 5vw, 5rem); min-height: min(52rem, 85svh); display: flex; align-items: center; }
+.immersive-inner { max-width: var(--layout-max); margin-inline: auto; padding: var(--layout-section) var(--layout-margin); min-height: min(52rem, 85svh); display: flex; align-items: center; }
 .immersive-copy { max-width: 43rem; background: var(--color-canvas); padding: clamp(1.5rem, 4vw, 3.5rem); }
 .immersive-copy h1 { font-size: clamp(2.5rem, 5.3vw, 5rem); line-height: 1.02; letter-spacing: -.04em; margin-top: 1.5rem; text-wrap: balance; }
 .immersive-description { max-width: 34rem; font-size: clamp(1rem, 1.3vw, 1.15rem); line-height: 1.7; margin-top: 1.5rem; color: var(--color-ink-2); }
@@ -449,9 +483,9 @@ html[data-motion="reduit"] *::after {
 .editorial-card { display: block; min-width: 0; }
 .landscape-section { display: grid; background: var(--color-subtle); }
 .landscape-image { position: relative; min-height: clamp(18rem, 50vw, 34rem); }
-.landscape-copy { padding: clamp(2rem, 6vw, 6rem) clamp(1.25rem, 5vw, 5rem); align-self: center; }
+.landscape-copy { padding: var(--layout-section) var(--layout-margin); align-self: center; }
 .circuit-index { display: flex; align-items: center; gap: 1.25rem; border-bottom: 1px solid var(--color-line); padding-block: 1.75rem; min-width: 0; }
 .circuit-index:hover { background: var(--color-subtle); }
-@media (min-width: 64rem) { .landscape-section { grid-template-columns: 1.2fr 1fr; } .landscape-image { min-height: 40rem; } }
+@media (min-width: 64rem) { .landscape-section { grid-template-columns: repeat(12, minmax(0, 1fr)); } .landscape-image { grid-column: span 6; } .landscape-copy { grid-column: span 6; } .landscape-image { min-height: 40rem; } }
 @media (max-width: 39.99rem) { .immersive-inner { min-height: auto; padding-top: 12rem; padding-bottom: 1.25rem; } .immersive-copy { width: 100%; } .immersive-photo { object-position: 65% top; } .action-row { align-items: flex-start; flex-direction: column; } }
 @media (prefers-reduced-motion: reduce) { .editorial-card img { transition: none; } }

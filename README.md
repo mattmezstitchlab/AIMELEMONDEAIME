@@ -295,3 +295,21 @@ existante n’est présentée comme une photographie locale du Mont Noir.
 Ce lot est éditorial : il n’ajoute ni géocodage belge, ni règles transfrontalières,
 ni réseau professionnel local, ni droits calculés selon résidence/travail. Les
 limitations sont affichées sur la page et dans le bandeau territorial d’accueil.
+
+### Grille responsive partagée
+
+Les primitives `.layout-container`, `.layout-grid` et `.layout-section` centralisent
+largeurs, marges, gouttières et rythme vertical. La grille utilise 4 colonnes sous
+768 px, 8 à partir de 768 px et 12 à partir de 1024 px, avec `minmax(0, 1fr)`.
+Les rangées `.layout-halves`, `.layout-thirds` et `.layout-quarters` répartissent
+les blocs de l’accueil ; les enfants occupent toute la rangée sur petit écran.
+
+`PageColumn`, l’en-tête, le pied de page, les héros et `Container` partagent les
+mêmes marges. Les variantes lecture (46 rem) et travail (56 rem) restent étroites.
+Les fonds et images pleine largeur restent hors du conteneur. Le graphe et les
+formulaires conservent leurs dispositions métier ; toutes les grilles internes
+historiques ne sont pas migrées vers les nouvelles primitives dans ce lot.
+
+À vérifier visuellement avant fusion : 320/375/768/1024/1440 px, zoom 200 %, header,
+retours à la ligne, colonnes de cartes et formulaires. Aucun changement métier,
+base, permission ou production dans ce lot.
