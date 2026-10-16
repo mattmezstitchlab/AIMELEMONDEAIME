@@ -19,8 +19,8 @@ test("les portes d’entrée et les sept circuits restent accessibles", () => {
   assert.ok(home.includes('id="explorer"'));
 });
 test("le cadre élargi reste public et les médias ont des tailles responsive", () => {
-  assert.ok(read("components/public-shell.tsx").includes("max-w-[80rem]"));
-  assert.ok(read("components/ui.tsx").includes('wide ? "max-w-[56rem]" : "max-w-[46rem]"'));
+  assert.ok(read("components/public-shell.tsx").includes("layout-container"));
+  assert.ok(read("components/ui.tsx").includes('wide ? "layout-container-wide" : "layout-container-reading"'));
   const media = read("components/marketing/immersive.tsx");
   assert.ok(media.includes('sizes="100vw"'));
   assert.ok(media.includes('alt=""'));
