@@ -11,6 +11,7 @@ import {
   type AssistantRole,
   type Suggestion,
 } from "@/lib/assistant/registry";
+import { conversationCommand, requestText, navigationChoices, suggestedChoice, GUIDE_FINISHED } from "@/lib/assistant/conversation";
 import { findScenario } from "@/lib/assistant/engine";
 import { matchSituation, normalizeOrientation } from "@/lib/assistant/orientation";
 import { SITUATION_BY_KEY, type Question } from "@/lib/situations";
@@ -47,15 +48,14 @@ type Interview = {
 
 type PendingInterview = { journeyId: number; situation: string; title: string; answers: Record<string, string> };
 
-const OPEN_KEY = "assistant-open";
-
-export function AssistantWidget({ role, userName, summary, canAct = false, yearEvents = null }: { role: AssistantRole; userName: string | null; summary?: AssistantSummary | null; canAct?: boolean; yearEvents?: YearEventLite[] | null }) {
+export function AssistantWidget({ role, userName, summary, canAct = false, yearEvents = null, accountsEnabled = false }: { accountsEnabled?: boolean; role: AssistantRole; userName: string | null; summary?: AssistantSummary | null; canAct?: boolean; yearEvents?: YearEventLite[] | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [guide, setGuide] = useState<Guide | null>(null);
   const [input, setInput] = useState("");
+  const [highlightTarget, setHighlightTarget] = useState<string | null>(null);
   const [highlightLabel, setHighlightLabel] = useState<string | null>(null);
   const [actionState, setActionState] = useState<Record<string, ActionState>>({});
   const [interview, setInterview] = useState<Interview | null>(null);
@@ -70,7 +70,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
   useEffect(() => {
     const openFromSearch = (event: Event) => {
       const question = (event as CustomEvent<{ question?: string }>).detail?.question;
-      if (question) setInput(question.slice(0, 120));
+      if (question) setInput(question.slice(0, 600));
       setOpen(true);
     };
     window.addEventListener("aime:assistant:open", openFromSearch);
@@ -197,6 +197,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       element.removeAttribute("data-assistant-highlight");
     });
     setHighlightLabel(null);
+    setHighlightTarget(null);
   }, []);
 
   const highlight = useCallback((targetId: string) => {
@@ -217,6 +218,23 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     }, 400);
   }, []);
 
+  useEffect(() => {
+    if (!highlightTarget) return;
+    const apply = () => {
+      if (!document.querySelector(`[data-assistant-id="${highlightTarget}"]`)) return false;
+      highlight(highlightTarget);
+      return true;
+    };
+    if (apply()) return;
+    const observer = new MutationObserver(() => { if (apply()) observer.disconnect(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+    const timeout = window.setTimeout(() => {
+      observer.disconnect();
+      if (!apply()) setHighlightLabel("Je ne retrouve pas ce bouton. Utilisez le menu de la page, ou dites-moi où vous êtes bloqué.");
+    }, 8000);
+    return () => { observer.disconnect(); window.clearTimeout(timeout); };
+  }, [highlightTarget, pathname, highlight, guide?.stepIndex]);
+
   // Message d’accueil : dérivé de l’état (aucun setState dans un effet).
   // Il s’affiche tant qu’aucun échange n’a commencé, puis disparaît du fil.
   const greetingTurn: Turn | null = open && turns.length === 0
@@ -225,7 +243,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
         from: "assistant",
         text: route
           ? `Bonjour${userName ? ` ${userName.split(" ")[0]}` : ""}. Vous êtes sur « ${route.label} ». ${route.purpose}`
-          : "Bonjour. Je peux vous guider dans le site.",
+          : "Bonjour. Dites-moi ce que vous voulez faire. Je vous aide à trouver la prochaine étape.",
         chips: suggestions,
       }
     : null;
@@ -258,6 +276,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if (!scenario) return;
     if (question) pushTurn({ from: "user", text: question });
     pushTurn({ from: "assistant", text: scenario.answer, scenarioId: scenario.id });
+    clearHighlight();
     setGuide({ scenarioId: scenario.id, stepIndex: 0 });
     runStep(scenario.id, 0);
   }
@@ -267,9 +286,20 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if (!scenario) return;
     const step = scenario.steps[stepIndex];
     if (!step) { setGuide(null); clearHighlight(); return; }
+    const destination = step.navigate ? routeForPath(step.navigate) : null;
+    if (destination && !destination.roles.includes(role)) {
+      pushTurn({ from: "assistant", text: accountsEnabled
+        ? "La suite se passe dans votre espace personnel. Connectez-vous pour continuer ; aucune action n’a été effectuée."
+        : "La suite demande un compte. Les comptes sont fermés pour le moment ; vous pouvez continuer à consulter les informations publiques. Aucune action n’a été effectuée.",
+        chips: [{ label: accountsEnabled ? "Se connecter" : "Comprendre l’accès à Mon espace", kind: "link", href: accountsEnabled ? "/connexion" : "/mon-espace" }] });
+      setGuide(null);
+      clearHighlight();
+      return;
+    }
     if (step.navigate && routeForPath(pathname)?.path !== step.navigate) router.push(step.navigate);
     if (step.highlight) {
-      window.setTimeout(() => highlight(step.highlight!), 450);
+      document.querySelectorAll("[data-assistant-highlight]").forEach((element) => element.removeAttribute("data-assistant-highlight"));
+      setHighlightTarget(step.highlight);
     } else {
       clearHighlight();
     }
@@ -286,7 +316,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if (!scenario) return;
     const nextIndex = guide.stepIndex + 1;
     if (nextIndex >= scenario.steps.length) {
-      pushTurn({ from: "assistant", text: "Parcours terminé. Souhaitez-vous autre chose ?", chips: suggestions });
+      pushTurn({ from: "assistant", text: GUIDE_FINISHED, chips: suggestions });
       setGuide(null);
       clearHighlight();
       return;
@@ -486,26 +516,55 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const value = input.trim();
-    if (!value) return;
+    const original = input.trim();
+    const value = requestText(original);
+    if (!original || interviewBusy.current) return;
     setInput("");
-    pushTurn({ from: "user", text: value });
+    pushTurn({ from: "user", text: original });
 
     // Questionnaire conversationnel en cours : la saisie vaut réponse
     // (quelques mots d’arrêt permettent d’en sortir proprement).
     if (interview) {
-      const normalized = normalizeOrientation(value);
+      const normalized = normalizeOrientation(original);
       if (["stop", "arreter", "annuler", "plus tard", "pause", "j arrete", "on arrete"].includes(normalized)) stopInterview();
-      else void answerQuestion(value, true);
+      else void answerQuestion(original, true);
       return;
     }
 
-    // Intentions transverses
-    const lowered = value.toLowerCase();
-    if (lowered.includes("bonjour") || lowered.includes("salut")) {
-      pushTurn({ from: "assistant", text: "Bonjour ! Dites-moi ce que vous cherchez, ou choisissez une suggestion ci-dessous.", chips: suggestions });
+    const command = conversationCommand(value);
+    if (command === "next" && guide) { nextStep(); return; }
+    if (command === "previous" && guide) { previousStep(); return; }
+    if (command === "stop") {
+      if (guide) quitGuide();
+      else pushTurn({ from: "assistant", text: "D’accord, on s’arrête là. Aucune nouvelle action n’est lancée. Les propositions déjà affichées restent à confirmer ou à annuler sur leur carte." });
       return;
     }
+    if (command === "resume" && summary?.drafts.length) {
+      pushTurn({ from: "assistant", text: "Quel brouillon souhaitez-vous reprendre ?", chips: summary.drafts.map((draft) => ({ label: draft.title, kind: "link", href: `/espace/demarches/nouvelle?reprendre=${draft.id}` })) });
+      return;
+    }
+    if (command === "hello" || command === "thanks" || command === "help" || command === "resume" || command === "next" || command === "previous") {
+      const step = guide ? scenarios.find((s) => s.id === guide.scenarioId)?.steps[guide.stepIndex] : null;
+      pushTurn({ from: "assistant", text: command === "thanks"
+        ? "Avec plaisir. Je reste là si vous avez besoin d’un autre coup de main."
+        : step ? `On reprend tranquillement. ${step.text}${step.action ? ` ${step.action}` : ""} Dites « suivant » pour continuer, ou « stop » pour quitter le guide.`
+        : "Dites-moi ce que vous voulez faire, avec vos mots : préparer un mariage, trouver un producteur, consulter un document… Je vous proposerai la prochaine étape. Pour une action engageante, vous gardez toujours la main.", chips: suggestions });
+      return;
+    }
+    // Un « oui » ne vaut jamais confirmation d'une action engageante.
+    if (/^(oui|oui merci|d accord|ok)$/.test(normalizeOrientation(value))) {
+      const previous = turns[turns.length - 1];
+      pushTurn({ from: "assistant", text: previous?.action
+        ? "Pour valider cette action, utilisez le bouton de confirmation sur sa carte. Je ne lance rien sur un simple « oui »."
+        : "D’accord. Choisissez l’une des propositions, ou précisez ce que vous voulez faire.", chips: previous?.chips ?? suggestions });
+      return;
+    }
+    // Une réponse courte peut sélectionner une proposition précédente, jamais confirmer une écriture.
+    const previousChips = turns[turns.length - 1]?.chips ?? [];
+    const chosen = suggestedChoice(value, previousChips);
+    if (chosen) { handleSuggestion(chosen); return; }
+
+    if (guide) { setGuide(null); clearHighlight(); }
 
     // Assistant personnalisé (niveau 1, lecture seule) : référence citée et
     // questions sur les démarches du membre, répondues depuis ses données.
@@ -524,6 +583,11 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
     if (summary && canAct) {
       const wIntent = writeIntent(value);
       if (wIntent === "transmettre") {
+        const available = summary.journeys.filter((j) => !j.transmitted);
+        if (!focusJourney && available.length > 1) {
+          pushTurn({ from: "assistant", text: "Vous avez plusieurs parcours. Ouvrez celui que vous souhaitez transmettre, puis redemandez-moi : je vous présenterai la confirmation pour ce parcours précis.", chips: available.map((j) => ({ label: j.title, kind: "link", href: `/espace/demarches/suivi/${j.id}` })) });
+          return;
+        }
         const candidate = focusJourney ?? summary.journeys.find((j) => !j.transmitted) ?? null;
         if (!candidate) {
           const deja = summary.journeys.find((j) => j.transmitted);
@@ -546,6 +610,11 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
         return;
       }
       if (wIntent === "rappel") {
+        const available = summary.journeys.filter((j) => j.nextTask && j.nextTask.dueKind !== "officielle");
+        if (!focusJourney && available.length > 1) {
+          pushTurn({ from: "assistant", text: "Pour quel parcours souhaitez-vous un rappel ? Ouvrez son suivi, puis redemandez-moi de poser le rappel.", chips: available.map((j) => ({ label: j.title, kind: "link", href: `/espace/demarches/suivi/${j.id}` })) });
+          return;
+        }
         const focused = focusJourney?.nextTask && focusJourney.nextTask.dueKind !== "officielle" ? focusJourney : null;
         const candidate = focused ?? summary.journeys.find((j) => j.nextTask && j.nextTask.dueKind !== "officielle") ?? null;
         if (!candidate?.nextTask) {
@@ -610,7 +679,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
         text: `Votre formulation semble concerner « ${situation.label} ». ${situation.explanation} Je ne transmets aucune donnée à un organisme.`,
         chips: [
           { label: "Comprendre ce parcours", kind: "link", href: `/accompagnement?besoin=${encodeURIComponent(situation.key)}` },
-          { label: "Le préparer dans Mon espace", kind: "link", href: `/espace/demarches/nouvelle?situation=${encodeURIComponent(situation.key)}` },
+          { label: accountsEnabled || role === "membre" ? "Le préparer dans Mon espace" : "Les comptes sont-ils disponibles ?", kind: "link", href: accountsEnabled || role === "membre" ? `/espace/demarches/nouvelle?situation=${encodeURIComponent(situation.key)}` : "/mon-espace" },
         ],
       });
       return;
@@ -637,9 +706,14 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
       });
       return;
     }
+    const destinations = navigationChoices(value, role, accountsEnabled);
+    if (destinations.length) {
+      pushTurn({ from: "assistant", text: destinations.length === 1 ? "Voici où commencer. Ouvrez cette page ; je reste disponible pour la suite." : "Ces pages peuvent répondre à votre besoin. Laquelle souhaitez-vous ouvrir ?", chips: destinations });
+      return;
+    }
     pushTurn({
       from: "assistant",
-      text: "Je n’ai pas de réponse préparée à cette question. Je ne veux pas inventer d’information réglementaire. Vous pouvez :",
+      text: "Je ne suis pas sûr d’avoir compris. Quel résultat souhaitez-vous obtenir ? Vous pouvez aussi chercher une information ou trouver un interlocuteur :",
       chips: role === "gestionnaire" || role === "administrateur" ? [
         { label: "Ouvrir la messagerie de l’équipe", kind: "link", href: "/back-office/messages" },
         { label: "Lire les guides", kind: "link", href: `/informations?q=${encodeURIComponent(value)}` },
@@ -829,7 +903,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-ink">Assistant de navigation</p>
               <p className="truncate text-xs text-ink-3">
-                Aide contextuelle, sans IA générative · {role === "visiteur" ? "visiteur" : role}
+                Guide du site, sans IA générative · {role === "visiteur" ? "visiteur" : role}
               </p>
             </div>
             <button type="button" onClick={() => { setOpen(false); triggerRef.current?.focus(); }} className="grid h-10 w-10 place-items-center rounded-control text-ink-3 hover:bg-muted" aria-label="Fermer l’assistant">
@@ -849,7 +923,7 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                 Précédent
               </button>
               <button type="button" onClick={nextStep} className="rounded-md bg-ink px-2.5 py-1 text-xs font-semibold text-canvas">
-                {guide.stepIndex + 1 === totalSteps ? "Terminer" : "Suivant"}
+                {guide.stepIndex + 1 === totalSteps ? "Fin du guide" : "Suivant"}
               </button>
               <button type="button" onClick={quitGuide} className="rounded-md border ring-line px-2 py-1 text-xs font-semibold text-ink">
                 Quitter le guide
@@ -914,13 +988,16 @@ export function AssistantWidget({ role, userName, summary, canAct = false, yearE
                 ref={inputRef}
                 id="assistant-input"
                 value={input}
-                maxLength={120}
+                maxLength={600}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Ex. je déménage, je cherche mon attestation"
+                placeholder="Décrivez ce que vous voulez faire…"
                 className="min-w-0 flex-1 rounded-control ring-1 ring-line px-3 py-2 text-sm outline-none focus:ring-ink"
               />
               <PrimaryButton type="submit" className="!px-3 !py-2 text-xs">Envoyer</PrimaryButton>
             </form>
+            <p className="mt-2 text-[11px] leading-relaxed text-ink-4">
+              La conversation s’efface au rechargement. Les réponses déjà enregistrées dans un brouillon restent disponibles dans Mes démarches.
+            </p>
             <p className="mt-2 text-[11px] leading-relaxed text-ink-4">
               {canAct
                 ? "Avec votre confirmation explicite, je peux créer un brouillon, poser un rappel ou transmettre un parcours à votre bureau d’accompagnement. Je ne décide jamais d’un droit, ne calcule aucun montant et n’envoie rien à un organisme extérieur."
