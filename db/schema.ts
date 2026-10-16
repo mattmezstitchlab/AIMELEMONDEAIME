@@ -1,3 +1,4 @@
+import type { GuestInformation, GuestReplyDetails } from "@/lib/wedding-portal";
 import { sql } from "drizzle-orm";
 import {
   pgTable,
@@ -586,6 +587,7 @@ export const projectDocuments = pgTable("project_documents", {
 
 /** Espace de travail du mariage, adossé au projet partagé créé par le parcours « Nous nous marions ». */
 export const weddingSettings = pgTable("wedding_settings", {
+  guestInformation: jsonb("guest_information").$type<GuestInformation>(),
   projectId: integer("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
   envelopeCents: integer("envelope_cents"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -595,6 +597,7 @@ export const weddingGuestStatusEnum = ["a_inviter", "invite", "confirme", "peut_
 export type WeddingGuestStatus = (typeof weddingGuestStatusEnum)[number];
 
 export const weddingGuests = pgTable("wedding_guests", {
+  replyDetails: jsonb("reply_details").$type<GuestReplyDetails>(),
   id: serial("id").primaryKey(),
   projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 120 }).notNull(),

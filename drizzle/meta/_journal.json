@@ -43,6 +43,13 @@
       "when": 1791925893255,
       "tag": "0005_wedding_access_links",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792165271233,
+      "tag": "0006_guest_portal",
+      "breakpoints": true
     }
   ]
 }
