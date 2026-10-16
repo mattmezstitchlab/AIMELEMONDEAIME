@@ -26,3 +26,17 @@ test("le cadre élargi reste public et les médias ont des tailles responsive", 
   assert.ok(media.includes('alt=""'));
   assert.ok(read("components/bottom-tabs.tsx").includes("grid-cols-5"));
 });
+
+test("prestataires et invités ont une entrée sur accueil, menu et plan du site", () => {
+  for (const href of ["/prestataires", "/invites"]) {
+    for (const file of ["app/page.tsx", "components/public-shell.tsx", "app/sitemap.ts"]) assert.ok(read(file).includes(`"${href}"`), `${file}: ${href}`);
+    assert.ok(existsSync(`app${href}/page.tsx`));
+  }
+});
+test("l’entrée invités ne publie ni annuaire ni saisie de lien privé", () => {
+  const guests = read("app/invites/page.tsx");
+  assert.ok(guests.includes("aucun mariage n’est recherché publiquement"));
+  assert.ok(!guests.includes("<input"));
+  assert.ok(!guests.includes("@/db"));
+  assert.ok(read("app/prestataires/page.tsx").includes("AUTH_ENABLED"));
+});

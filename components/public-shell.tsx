@@ -22,6 +22,8 @@ const PRIMARY = [
   { href: "/circuits", label: "Circuits" },
   { href: "/informations", label: "Guides" },
   { href: "/le-monde-aime", label: "Entraide" },
+  { href: "/prestataires", label: "Prestataires" },
+  { href: "/invites", label: "Invités" },
 ];
 
 /** Colonne principale du site public : largeur fluide plafonnée, centrée. */
@@ -40,7 +42,7 @@ export function PublicHeader() {
           <Link href="/" aria-label="AIME® — accueil" className="shrink-0">
             <Logo />
           </Link>
-          <nav aria-label="Navigation principale" className="hidden items-center gap-6 md:flex">
+          <nav aria-label="Navigation principale" className="hidden items-center gap-5 xl:flex">
             {PRIMARY.map((item) => (
               <Link key={item.href} href={item.href} className="nav-tiny text-ink-3 transition hover:text-ink">
                 {item.label}
@@ -53,7 +55,7 @@ export function PublicHeader() {
           <Link href={spaceHref} className="nav-tiny hidden text-ink-3 transition hover:text-ink md:block">
             {spaceLabel}
           </Link>
-          <details className="group relative md:hidden">
+          <details className="group relative xl:hidden">
             <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full text-ink-2 ring-1 ring-line transition hover:bg-muted [&::-webkit-details-marker]:hidden">
               <span className="sr-only">Ouvrir le menu</span>
               <Icon name="menu" className="h-4 w-4" />
@@ -85,6 +87,8 @@ const FOOTER_LINKS: Array<{ href: string; label: string }> = [
   { href: "/circuits", label: "Les sept circuits" },
   { href: "/informations", label: "Guides et sujets" },
   { href: "/le-monde-aime", label: "Entraide et transmission" },
+  { href: "/prestataires", label: "Prestataires" },
+  { href: "/invites", label: "Invités et proches" },
   { href: "/annuaire", label: "Points d’accueil" },
   { href: "/vision", label: "Notre méthode" },
   { href: "/mon-espace", label: "Mon espace" },

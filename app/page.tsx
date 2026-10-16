@@ -19,6 +19,11 @@ export default function HomePage() {
         <LinkButton href="#explorer" variant="secondary" size="lg">Explorer le site ↓</LinkButton>
       </ImmersiveHero>
 
+      <PageColumn className="grid gap-4 py-8 sm:grid-cols-2 lg:py-12">
+        <Link href="/prestataires" className="action-row justify-between"><span><span className="block text-xl font-semibold">Je suis prestataire</span><span className="mt-2 block text-sm text-ink-3">Présenter mon activité ou explorer les services disponibles</span></span><span aria-hidden="true">↗</span></Link>
+        <Link href="/invites" className="action-row justify-between"><span><span className="block text-xl font-semibold">Je suis invité ou proche</span><span className="mt-2 block text-sm text-ink-3">Répondre à une invitation ou rejoindre l’organisation</span></span><span aria-hidden="true">↗</span></Link>
+      </PageColumn>
+
       <nav aria-label="Les grandes rubriques du site" className="architecture-nav">
         <PageColumn className="grid grid-cols-2 gap-1 py-5 md:grid-cols-4">
           {[ ["01 · Les parcours", "/accompagnement"], ["02 · Les circuits", "/circuits"], ["03 · Les guides", "/informations"], ["04 · L’entraide", "/le-monde-aime"] ].map(([label, href]) => <Link key={href} href={href} className="flex min-h-12 items-center px-3 text-sm font-semibold transition hover:bg-muted">{label} <span className="ml-auto" aria-hidden="true">↗</span></Link>)}

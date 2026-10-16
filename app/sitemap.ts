@@ -22,6 +22,8 @@ const CIRCUIT_PATHS = [
 
 const PAGES: Array<{ path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }> = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
+  { path: "/prestataires", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/invites", priority: 0.7, changeFrequency: "monthly" },
   { path: "/accompagnement", priority: 0.9, changeFrequency: "weekly" },
   { path: "/le-monde-aime", priority: 0.9, changeFrequency: "daily" },
   { path: "/informations", priority: 0.8, changeFrequency: "weekly" },
