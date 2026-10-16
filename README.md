@@ -205,3 +205,37 @@ navigation mobile expose accueil, parcours, circuits, guides et espace.
 Avant fusion, vérifier à 320, 375, 768 et 1440 px : absence de débordement,
 retour à la ligne des titres, menu mobile, liens du sommaire, navigation basse,
 clavier et zoom 200 %. Les modifications de l’assistant restent dans la PR séparée.
+
+### Portails prestataires et invités — lot initial
+
+- `/prestataires/espace` : tableau de bord membre filtré sur ses prestations et
+  les demandes reçues dont il est propriétaire. Les réponses réutilisent les
+  contrôles serveur existants ; les engagements artistiques restent séparés.
+- `/prestataires` : brouillon de demande structuré, uniquement en mémoire dans
+  la page, à copier après relecture ; aucun envoi automatique.
+- Projet mariage, organisateurs : rubrique d’informations pratiques distincte
+  du programme interne. Publication explicite vers les seuls liens RSVP valides,
+  révocable en décochant et enregistrant. Ne pas y recopier des notes privées.
+- RSVP : export calendrier local, informations pratiques publiées, précisions
+  facultatives adultes/enfants et présence par moment. Les précisions sont
+  déclaratives, pas une invitation supplémentaire. Aucun champ de santé ajouté.
+
+**Avant de fusionner/déployer les fonctions connectées :** sauvegarder la base,
+valider puis appliquer `npm run db:migrate` sur la base de Preview, et seulement
+après tests sur la base de Production selon votre procédure. La migration
+`0006_guest_portal.sql` ajoute deux colonnes JSONB nullables ; elle ne supprime
+aucune donnée. Elle n’est pas exécutée par le build. Les anciens RSVP conservent
+leur fonctionnement sans détails renseignés. Ne pas utiliser `db:seed` sur une
+base réelle. Ne pas activer les comptes pour simplement consulter l’aperçu.
+
+L’historique utilise des migrations SQL personnalisées à partir de 0002 : les
+snapshots Drizzle ne représentent pas toutes les tables déjà créées. Continuer
+avec une migration personnalisée contrôlée plutôt qu’appliquer aveuglément un
+`db:generate` qui proposerait de recréer les tables mariage existantes.
+
+À valider sur une base de test migrée : organisateur autorisé/refus non-membre,
+publication puis retrait des informations, lien RSVP valide/expiré/révoqué,
+totaux adultes/enfants, réponse négative, modification et retrait des précisions,
+export calendrier sans jeton, et isolation des demandes de deux prestataires.
+Le suivi multiservice des devis, les signatures, paiements, portfolios et
+calendriers de disponibilité restent des lots ultérieurs.

@@ -1,3 +1,4 @@
+import { GuestInformationEditor } from "@/components/community/guest-information-editor";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -68,6 +69,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               </div>
               <Link href={`/le-monde-aime/projets/${id}/jour-j`} className="rounded-control bg-ink px-4 py-2.5 text-sm font-bold text-canvas hover:bg-ink">Ouvrir la page du jour J</Link>
             </div>
+          )}
+
+          {wedding && viewer.isOrganizer && (
+            <Section title="Informations pratiques pour les invités" hint="Un partage explicite, indépendant du programme de travail.">
+              <GuestInformationEditor projectId={id} information={wedding.guestInformation} editable={project.status === "ouvert"} />
+            </Section>
           )}
 
           {wedding && viewer.isOrganizer && user && (

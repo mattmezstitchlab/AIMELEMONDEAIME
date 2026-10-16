@@ -1,3 +1,5 @@
+import { GUEST_INFORMATION_FIELDS } from "@/lib/wedding-portal";
+import { InvitationCalendar } from "@/components/community/invitation-calendar";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicPage } from "@/components/public-shell";
@@ -39,8 +41,14 @@ export default async function WeddingRsvpPage({ params }: { params: Promise<{ to
             documents ne sont pas visibles ici.
           </p>
 
+          <div className="mt-6"><InvitationCalendar title={invite.projectTitle} date={invite.weddingDate} city={invite.city} /></div>
+          {invite.guestInformation && <section className="mt-8 space-y-5 rounded-card bg-subtle p-6 ring-1 ring-line">
+            <h2 className="text-2xl">Les informations pour votre venue</h2>
+            {GUEST_INFORMATION_FIELDS.map(([key, label]) => invite.guestInformation?.[key] ? <div key={key}><h3 className="text-sm font-semibold">{label}</h3><p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-ink-3">{invite.guestInformation[key]}</p></div> : null)}
+          </section>}
+          {!invite.guestInformation && <p className="mt-6 text-sm text-ink-3">Les organisateurs n’ont pas encore partagé d’informations pratiques ici. Consultez votre invitation ou contactez-les directement.</p>}
           <div className="mt-8 rounded-card bg-canvas p-6 shadow-rested ring-1 ring-line sm:p-7">
-            <WeddingRsvpForm token={token} status={invite.status} persons={invite.persons} />
+            <WeddingRsvpForm token={token} status={invite.status} persons={invite.persons} details={invite.replyDetails} />
           </div>
 
           <p className="mt-5 text-center text-xs leading-relaxed text-ink-4">
