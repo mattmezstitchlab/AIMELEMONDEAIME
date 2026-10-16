@@ -1,5 +1,6 @@
 "use server";
 
+import { validateGuestInformation } from "@/lib/wedding-portal";
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
@@ -80,7 +81,7 @@ export async function updateWeddingGuest(guestId: number, name: string, persons:
     if (!guard.ok) return { ok: false, error: guard.error };
     const v = validateGuestInput({ name, persons, groupe, note });
     if (!v.ok) return v;
-    await db.update(weddingGuests).set({ name: v.name, persons: v.persons, groupe: v.groupe, note: v.note, updatedAt: new Date() }).where(eq(weddingGuests.id, guestId));
+    await db.update(weddingGuests).set({ ...(guest.persons !== v.persons ? { replyDetails: null } : {}), name: v.name, persons: v.persons, groupe: v.groupe, note: v.note, updatedAt: new Date() }).where(eq(weddingGuests.id, guestId));
     refresh(guest.projectId);
     return { ok: true, message: "Foyer mis à jour." };
   } catch (error) {
@@ -283,4 +284,24 @@ export async function setWeddingGuestThanked(guestId: number, thanked: boolean):
   } catch (error) {
     return fail(error, "Mise à jour impossible.");
   }
+}
+
+
+/** Seuls les organisateurs choisissent ce qui sera partagé avec les liens RSVP. */
+export async function saveGuestInformation(projectId: number, raw: Record<string, unknown>): Promise<WeddingResult> {
+  try {
+    const user = await requireRole(["membre"]);
+    const guard = await editableProject(projectId, user.id);
+    if (!guard.ok) return { ok: false, error: guard.error };
+    const information = validateGuestInformation(raw);
+    if (!information) return { ok: false, error: "Informations invalides (1 200 caractères maximum par rubrique)." };
+    const [journey] = await db.select({ answers: journeys.answers }).from(journeys)
+      .where(and(eq(journeys.projectId, projectId), eq(journeys.situation, "mariage"))).limit(1);
+    await db.insert(weddingSettings).values({ projectId, guestInformation: information, envelopeCents: parseEuroToCents(journey?.answers.budget ?? "") })
+      .onConflictDoUpdate({ target: weddingSettings.projectId, set: { guestInformation: information, updatedAt: new Date() } });
+    await logAudit({ actorId: user.id, action: "mariage_informations_invites", entityType: "project", entityId: String(projectId), metadata: { publie: information.published ? "oui" : "non" } });
+    refresh(projectId);
+    revalidatePath("/rsvp/[token]", "page");
+    return { ok: true, message: information.published ? "Informations partagées avec les liens RSVP valides. Aucun message envoyé." : "Informations enregistrées en brouillon, non partagées." };
+  } catch (error) { return fail(error, "Enregistrement impossible."); }
 }

@@ -9,9 +9,8 @@ Stack : Next.js 16 (App Router, Server Actions) · React 19 · TypeScript · Pos
 
 ## Design — encre et papier, une seule surface
 
-Le site est **monochrome** : aucune couleur décorative. Fond blanc, une seule colonne centrée
-sur le site public, cartes blanches cerclées d'un filet, boutons noirs en pilule, capitales
-minuscules pour la navigation. Le rythme vient des surfaces (`canvas`, `subtle`, `muted`) et
+Le site est **monochrome** : aucune couleur décorative. Fond blanc, sections publiques fluides jusqu’à 80 rem, grands paysages monochromes
+pleine largeur, boutons noirs en pilule et navigation structurée par rubrique. Le rythme vient des surfaces (`canvas`, `subtle`, `muted`) et
 des contours (`line`, `line-soft`), jamais de la teinte. Cette règle vaut pour tout le site,
 y compris les espaces de travail (Mon espace, back-office, administration).
 
@@ -188,3 +187,76 @@ Après toute modification de `db/schema.ts` : `npm run db:generate`, relire le S
 - Toute fonction exportée d'un fichier `"use server"` est un **endpoint public** : elle doit vérifier une session utilisateur (`requireUser`/`requireRole`) ou un droit d'accès explicite par capacité (jeton RSVP haché, session magique signée et vérifiée en base). Les helpers internes vivent hors de ces fichiers (ex. `lib/case-events.ts`).
 - Les rôles sont toujours revérifiés en base, jamais lus depuis le jeton de session.
 - Voir `AUDIT.md` pour l'audit de sécurité complet et l'historique des correctifs.
+
+
+### Architecture publique responsive
+
+L’accueil présente trois portes d’entrée (parcours, circuits, guides), puis les
+sept circuits et les accès complémentaires. Les photographies existantes sont
+servies localement via `next/image`, en niveaux de gris ; aucun service média
+externe n’est ajouté. Le visuel d’ouverture est prioritaire, les autres différés.
+Les titres et actions restent du HTML sur surface opaque, pas du texte dans les images.
+
+Les bandeaux des parcours, circuits et guides sont panoramiques. Le cadre public
+s’étend jusqu’à 80 rem ; les formulaires et conteneurs des espaces de travail
+conservent leurs largeurs. Les liens longs peuvent revenir à la ligne. La
+navigation mobile expose accueil, parcours, circuits, guides et espace.
+
+Avant fusion, vérifier à 320, 375, 768 et 1440 px : absence de débordement,
+retour à la ligne des titres, menu mobile, liens du sommaire, navigation basse,
+clavier et zoom 200 %. Les modifications de l’assistant restent dans la PR séparée.
+
+### Portails prestataires et invités — lot initial
+
+- `/prestataires/espace` : tableau de bord membre filtré sur ses prestations et
+  les demandes reçues dont il est propriétaire. Les réponses réutilisent les
+  contrôles serveur existants ; les engagements artistiques restent séparés.
+- `/prestataires` : brouillon de demande structuré, uniquement en mémoire dans
+  la page, à copier après relecture ; aucun envoi automatique.
+- Projet mariage, organisateurs : rubrique d’informations pratiques distincte
+  du programme interne. Publication explicite vers les seuls liens RSVP valides,
+  révocable en décochant et enregistrant. Ne pas y recopier des notes privées.
+- RSVP : export calendrier local, informations pratiques publiées, précisions
+  facultatives adultes/enfants et présence par moment. Les précisions sont
+  déclaratives, pas une invitation supplémentaire. Aucun champ de santé ajouté.
+
+**Avant de fusionner/déployer les fonctions connectées :** sauvegarder la base,
+valider puis appliquer `npm run db:migrate` sur la base de Preview, et seulement
+après tests sur la base de Production selon votre procédure. La migration
+`0006_guest_portal.sql` ajoute deux colonnes JSONB nullables ; elle ne supprime
+aucune donnée. Elle n’est pas exécutée par le build. Les anciens RSVP conservent
+leur fonctionnement sans détails renseignés. Ne pas utiliser `db:seed` sur une
+base réelle. Ne pas activer les comptes pour simplement consulter l’aperçu.
+
+L’historique utilise des migrations SQL personnalisées à partir de 0002 : les
+snapshots Drizzle ne représentent pas toutes les tables déjà créées. Continuer
+avec une migration personnalisée contrôlée plutôt qu’appliquer aveuglément un
+`db:generate` qui proposerait de recréer les tables mariage existantes.
+
+À valider sur une base de test migrée : organisateur autorisé/refus non-membre,
+publication puis retrait des informations, lien RSVP valide/expiré/révoqué,
+totaux adultes/enfants, réponse négative, modification et retrait des précisions,
+export calendrier sans jeton, et isolation des demandes de deux prestataires.
+Le suivi multiservice des devis, les signatures, paiements, portfolios et
+calendriers de disponibilité restent des lots ultérieurs.
+### Assistant de navigation — conversation
+
+Le widget reste local et déterministe, **sans IA générative** ni service tiers.
+Une salutation peut précéder un besoin (« Bonjour, je voudrais organiser mon
+mariage »). Les commandes « suivant », « précédent », « je suis perdu », « stop »
+et « reprendre » aident à continuer un guide ou retrouver les brouillons.
+Elles ne confirment jamais une transmission : les cartes explicites restent
+obligatoires. Lorsqu'il y a plusieurs parcours, le membre choisit le suivi
+concerné avant de demander un rappel ou une transmission.
+
+Les circuits publics sont accessibles depuis la conversation. L'assistant ne
+contourne ni les rôles ni la fermeture des comptes. La fin d'un guide signifie
+que les explications ont été parcourues, **pas** qu'un formulaire a été envoyé.
+La conversation n'est pas stockée dans le navigateur : un rechargement l'efface ;
+les réponses déjà sauvegardées restent dans les brouillons du membre.
+
+Vérification manuelle avant ouverture : sur mobile et ordinateur, essayer une
+salutation suivie d'un besoin, une demande ambiguë, le passage entre deux pages,
+« je suis perdu », et la reprise d'un brouillon ; vérifier aussi qu'un visiteur
+n'accède pas aux actions privées et qu'une transmission demande toujours sa
+confirmation sur la carte. Ne pas activer les comptes pour tester le guide.

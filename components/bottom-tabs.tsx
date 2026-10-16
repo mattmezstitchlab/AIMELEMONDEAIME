@@ -4,16 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "@/components/icon";
 
-/** Navigation mobile du site public, centrée sur les étapes du mariage. */
+/** Navigation mobile du site public, alignée sur les grandes rubriques. */
 const TABS: Array<{ key: string; label: string; href: string; icon: IconName }> = [
   { key: "accueil", label: "Accueil", href: "/", icon: "home" },
-  { key: "parcours", label: "Parcours", href: "/accompagnement?besoin=mariage", icon: "demarches" },
-  { key: "guides", label: "Guides", href: "/informations/mariage", icon: "book" },
+  { key: "parcours", label: "Parcours", href: "/accompagnement", icon: "demarches" },
+  { key: "circuits", label: "Circuits", href: "/circuits", icon: "users" },
+  { key: "guides", label: "Guides", href: "/informations", icon: "book" },
   { key: "espace", label: "Mon espace", href: "/mon-espace", icon: "user" },
 ];
 
 function activeKey(pathname: string): string {
   if (pathname === "/") return "accueil";
+  if (pathname.startsWith("/circuits") || pathname.startsWith("/le-monde-aime")) return "circuits";
+  if (pathname === "/mon-espace") return "espace";
   if (pathname.startsWith("/accompagnement")) return "parcours";
   if (pathname.startsWith("/informations") || pathname.startsWith("/guides")) return "guides";
   if (pathname.startsWith("/espace") || pathname.startsWith("/connexion") || pathname.startsWith("/inscription")) return "espace";
@@ -28,7 +31,7 @@ export function BottomTabs() {
       aria-label="Navigation principale mobile"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
-      <div className="mx-auto grid max-w-md grid-cols-4">
+      <div className="mx-auto grid max-w-md grid-cols-5">
         {TABS.map((tab) => {
           const isActive = tab.key === active;
           return (

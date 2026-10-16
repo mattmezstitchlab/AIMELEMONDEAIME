@@ -1,4 +1,5 @@
 "use client";
+import type { GuestReplyDetails } from "@/lib/wedding-portal";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -92,7 +93,7 @@ function CopyText({ text, filename }: { text: string; filename: string }) {
   );
 }
 
-type GuestView = { id: number; name: string; persons: number; groupe: string; status: string; note: string; thanked?: boolean; tableId?: number | null; rsvpExpiresAt?: Date | null; rsvpLinkActive?: boolean };
+type GuestView = { replyDetails?: GuestReplyDetails | null; id: number; name: string; persons: number; groupe: string; status: string; note: string; thanked?: boolean; tableId?: number | null; rsvpExpiresAt?: Date | null; rsvpLinkActive?: boolean };
 
 const STATUS_STYLE: Record<string, string> = {
   a_inviter: "bg-muted text-ink-2",
@@ -155,6 +156,7 @@ export function WeddingGuestsPanel({ projectId, guests, stats, invitesEstimes, w
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="font-semibold text-ink">{g.name} <span className="text-xs font-normal text-ink-3">· {g.persons} personne(s) · {guestGroupLabel(g.groupe)}</span></p>
+                {g.replyDetails && <p className="mt-2 text-xs text-ink-3">Réponse du foyer : {g.replyDetails.adults} adulte(s), {g.replyDetails.children} enfant(s) · Présence prévue : {[g.replyDetails.ceremony && "cérémonie", g.replyDetails.meal && "repas", g.replyDetails.nextDay && "lendemain"].filter(Boolean).join(", ") || "non précisée"}</p>}
                 {g.note && <p className="text-xs text-ink-3">{g.note}</p>}
               </div>
               <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_STYLE[g.status] ?? STATUS_STYLE.a_inviter}`}>{guestStatusLabel(g.status)}</span>

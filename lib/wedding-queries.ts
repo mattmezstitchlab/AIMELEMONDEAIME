@@ -1,16 +1,18 @@
+import type { GuestInformation, GuestReplyDetails } from "@/lib/wedding-portal";
 import { and, desc, eq, gt, isNotNull, isNull, lte, or } from "drizzle-orm";
 import { db } from "@/db";
 import { artistEngagements, journeys, projectMembers, users, weddingAccessLinks, weddingBudgetItems, weddingGuests, weddingSettings, weddingTables, type WeddingAccessRole } from "@/db/schema";
 import { computeBudgetStats, computeGuestStats, computeTableStats, parseEuroToCents, type BudgetStats, type GuestStats, type TableStats } from "@/lib/wedding";
 
 export type WeddingWorkspace = {
+  guestInformation: GuestInformation | null;
   journeyId: number;
   invitesEstimes: number;
   weddingDate: string;
   weddingLieu: string;
   envelopeCents: number | null;
   envelopeFromJourney: boolean;
-  guests: Array<{ id: number; name: string; persons: number; groupe: string; status: string; note: string; thanked: boolean; tableId: number | null; rsvpExpiresAt: Date | null; rsvpLinkActive: boolean }>;
+  guests: Array<{ replyDetails: GuestReplyDetails | null; id: number; name: string; persons: number; groupe: string; status: string; note: string; thanked: boolean; tableId: number | null; rsvpExpiresAt: Date | null; rsvpLinkActive: boolean }>;
   tables: Array<{ id: number; name: string; capacity: number | null }>;
   budgetItems: Array<{ id: number; label: string; category: string; estimatedCents: number; actualCents: number | null; settled: boolean; note: string }>;
   guestStats: GuestStats;
@@ -30,6 +32,7 @@ export async function getWeddingWorkspace(projectId: number): Promise<WeddingWor
 
   const [settings] = await db.select().from(weddingSettings).where(eq(weddingSettings.projectId, projectId)).limit(1);
   const guestRows = await db.select({
+    replyDetails: weddingGuests.replyDetails,
     id: weddingGuests.id,
     name: weddingGuests.name,
     persons: weddingGuests.persons,
@@ -46,6 +49,7 @@ export async function getWeddingWorkspace(projectId: number): Promise<WeddingWor
   const fromJourney = parseEuroToCents(mj.answers.budget ?? "");
   const envelopeCents = settings ? settings.envelopeCents : fromJourney;
   const guests = guestRows.map((g) => ({
+    replyDetails: g.replyDetails,
     id: g.id,
     name: g.name,
     persons: g.persons,
@@ -60,6 +64,7 @@ export async function getWeddingWorkspace(projectId: number): Promise<WeddingWor
   const tables = tableRows.map((t) => ({ id: t.id, name: t.name, capacity: t.capacity }));
   const budgetItems = itemRows.map((i) => ({ id: i.id, label: i.label, category: i.category, estimatedCents: i.estimatedCents, actualCents: i.actualCents, settled: i.settled, note: i.note }));
   return {
+    guestInformation: settings?.guestInformation ?? null,
     journeyId: mj.id,
     invitesEstimes: Number(mj.answers.invites ?? 0) || 0,
     weddingDate: mj.answers.date ?? "",

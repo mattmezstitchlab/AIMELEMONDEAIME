@@ -29,6 +29,7 @@ export default async function InformationsHub({ searchParams }: { searchParams: 
   return (
     <PublicPage>
       <Hero
+        image="/images/univers-savoirs.jpg"
         size="md"
         eyebrow="Informations"
         title={guidesOnly ? "Guides pratiques" : "Tout ce qu’il faut savoir, au même endroit"}

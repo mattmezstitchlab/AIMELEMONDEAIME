@@ -1,11 +1,12 @@
 import "server-only";
+import type { GuestInformation, GuestReplyDetails } from "@/lib/wedding-portal";
 
 import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { and, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { journeys, projects, weddingAccessLinks, weddingGuests, type WeddingAccessRole } from "@/db/schema";
+import { db, isDatabaseConfigured } from "@/db";
+import { journeys, projects, weddingAccessLinks, weddingGuests, weddingSettings, type WeddingAccessRole } from "@/db/schema";
 import { getAuthSecret } from "@/lib/secret";
 
 export const WEDDING_ACCESS_COOKIE = "aime_wedding_access";
@@ -20,6 +21,8 @@ export function isWeddingToken(token: string) {
 }
 
 export type RsvpInvite = {
+  guestInformation: GuestInformation | null;
+  replyDetails: GuestReplyDetails | null;
   guestId: number;
   guestName: string;
   persons: number;
@@ -32,13 +35,14 @@ export type RsvpInvite = {
 
 /** Deliberately returns only the one household's RSVP fields and public event basics. */
 export async function getWeddingRsvpInvite(token: string): Promise<RsvpInvite | null> {
-  if (!isWeddingToken(token)) return null;
+  if (!isDatabaseConfigured || !isWeddingToken(token)) return null;
   const tokenHash = hashWeddingToken(token);
   const [guest] = await db
     .select({
       id: weddingGuests.id,
       projectId: weddingGuests.projectId,
       name: weddingGuests.name,
+      replyDetails: weddingGuests.replyDetails,
       persons: weddingGuests.persons,
       status: weddingGuests.status,
       expiresAt: weddingGuests.rsvpExpiresAt,
@@ -62,7 +66,11 @@ export async function getWeddingRsvpInvite(token: string): Promise<RsvpInvite | 
     .limit(1);
   if (!journey) return null;
 
+  const [settings] = await db.select({ information: weddingSettings.guestInformation }).from(weddingSettings).where(eq(weddingSettings.projectId, guest.projectId)).limit(1);
+
   return {
+    guestInformation: settings?.information?.published ? settings.information : null,
+    replyDetails: guest.replyDetails,
     guestId: guest.id,
     guestName: guest.name,
     persons: guest.persons,
@@ -87,7 +95,7 @@ export type WeddingAccessInvite = {
 
 /** Invitation preview only; no project workspace data is returned before accepting. */
 export async function getWeddingAccessInvite(token: string): Promise<WeddingAccessInvite | null> {
-  if (!isWeddingToken(token)) return null;
+  if (!isDatabaseConfigured || !isWeddingToken(token)) return null;
   const [link] = await db
     .select({
       id: weddingAccessLinks.id,
