@@ -9,9 +9,8 @@ Stack : Next.js 16 (App Router, Server Actions) · React 19 · TypeScript · Pos
 
 ## Design — encre et papier, une seule surface
 
-Le site est **monochrome** : aucune couleur décorative. Fond blanc, une seule colonne centrée
-sur le site public, cartes blanches cerclées d'un filet, boutons noirs en pilule, capitales
-minuscules pour la navigation. Le rythme vient des surfaces (`canvas`, `subtle`, `muted`) et
+Le site est **monochrome** : aucune couleur décorative. Fond blanc, sections publiques fluides jusqu’à 80 rem, grands paysages monochromes
+pleine largeur, boutons noirs en pilule et navigation structurée par rubrique. Le rythme vient des surfaces (`canvas`, `subtle`, `muted`) et
 des contours (`line`, `line-soft`), jamais de la teinte. Cette règle vaut pour tout le site,
 y compris les espaces de travail (Mon espace, back-office, administration).
 
@@ -188,3 +187,21 @@ Après toute modification de `db/schema.ts` : `npm run db:generate`, relire le S
 - Toute fonction exportée d'un fichier `"use server"` est un **endpoint public** : elle doit vérifier une session utilisateur (`requireUser`/`requireRole`) ou un droit d'accès explicite par capacité (jeton RSVP haché, session magique signée et vérifiée en base). Les helpers internes vivent hors de ces fichiers (ex. `lib/case-events.ts`).
 - Les rôles sont toujours revérifiés en base, jamais lus depuis le jeton de session.
 - Voir `AUDIT.md` pour l'audit de sécurité complet et l'historique des correctifs.
+
+
+### Architecture publique responsive
+
+L’accueil présente trois portes d’entrée (parcours, circuits, guides), puis les
+sept circuits et les accès complémentaires. Les photographies existantes sont
+servies localement via `next/image`, en niveaux de gris ; aucun service média
+externe n’est ajouté. Le visuel d’ouverture est prioritaire, les autres différés.
+Les titres et actions restent du HTML sur surface opaque, pas du texte dans les images.
+
+Les bandeaux des parcours, circuits et guides sont panoramiques. Le cadre public
+s’étend jusqu’à 80 rem ; les formulaires et conteneurs des espaces de travail
+conservent leurs largeurs. Les liens longs peuvent revenir à la ligne. La
+navigation mobile expose accueil, parcours, circuits, guides et espace.
+
+Avant fusion, vérifier à 320, 375, 768 et 1440 px : absence de débordement,
+retour à la ligne des titres, menu mobile, liens du sommaire, navigation basse,
+clavier et zoom 200 %. Les modifications de l’assistant restent dans la PR séparée.

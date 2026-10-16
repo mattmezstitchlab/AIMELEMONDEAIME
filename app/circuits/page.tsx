@@ -26,6 +26,7 @@ export default function CircuitsPage() {
   return (
     <PublicPage>
       <Hero
+        image="/images/univers-terre.jpg"
         eyebrow="Les circuits · prototype indépendant"
         title="Un circuit, c'est une règle du jeu simple : on se situe par sa commune, on dit ce qu'on propose, et l'accord se fait entre les personnes."
         subtitle="Chaque circuit partage la même mécanique : une fiche, une commune et un code postal, un point approximatif, aucune adresse exacte demandée. Ce qui change d'un circuit à l'autre, ce sont les mots et ce qu'on y dépose."

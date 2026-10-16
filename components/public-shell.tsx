@@ -9,7 +9,7 @@ import { AUTH_ENABLED } from "@/lib/auth-mode";
 /*
  * Coquille du site public.
  *
- * Langage visuel : encre et papier. Fond blanc, une colonne étroite et centrée,
+ * Langage visuel : encre et papier. Fond blanc, des sections larges et une lecture aérée,
  * navigation en capitales minuscules, cartes blanches cerclées d’un filet,
  * boutons noirs. Aucune couleur décorative : le rythme vient des surfaces et
  * des contours. Les espaces de travail (Mon espace, back-office, administration)
@@ -18,15 +18,15 @@ import { AUTH_ENABLED } from "@/lib/auth-mode";
 
 /** Navigation courte du haut : quatre entrées, rien de plus. */
 const PRIMARY = [
-  { href: "/accompagnement?besoin=mariage", label: "Parcours" },
+  { href: "/accompagnement", label: "Parcours" },
   { href: "/circuits", label: "Circuits" },
   { href: "/informations", label: "Guides" },
   { href: "/le-monde-aime", label: "Entraide" },
 ];
 
-/** Colonne principale du site public : une seule largeur, centrée. */
+/** Colonne principale du site public : largeur fluide plafonnée, centrée. */
 export function PageColumn({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`mx-auto w-full max-w-[46rem] px-5 sm:px-6 ${className}`}>{children}</div>;
+  return <div className={`mx-auto w-full max-w-[80rem] px-5 sm:px-8 lg:px-12 ${className}`}>{children}</div>;
 }
 
 export function PublicHeader() {
@@ -35,12 +35,12 @@ export function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-40 bg-canvas/80 backdrop-blur-xl">
-      <PageColumn className="flex h-16 items-center justify-between gap-4">
+      <PageColumn className="flex min-h-20 items-center justify-between gap-4">
         <div className="flex items-center gap-7">
           <Link href="/" aria-label="AIME® — accueil" className="shrink-0">
             <Logo />
           </Link>
-          <nav aria-label="Navigation principale" className="hidden items-center gap-6 sm:flex">
+          <nav aria-label="Navigation principale" className="hidden items-center gap-6 md:flex">
             {PRIMARY.map((item) => (
               <Link key={item.href} href={item.href} className="nav-tiny text-ink-3 transition hover:text-ink">
                 {item.label}
@@ -50,10 +50,10 @@ export function PublicHeader() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link href="/mon-espace" className="nav-tiny hidden text-ink-3 transition hover:text-ink sm:block">
+          <Link href={spaceHref} className="nav-tiny hidden text-ink-3 transition hover:text-ink md:block">
             {spaceLabel}
           </Link>
-          <details className="group relative sm:hidden">
+          <details className="group relative md:hidden">
             <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full text-ink-2 ring-1 ring-line transition hover:bg-muted [&::-webkit-details-marker]:hidden">
               <span className="sr-only">Ouvrir le menu</span>
               <Icon name="menu" className="h-4 w-4" />
